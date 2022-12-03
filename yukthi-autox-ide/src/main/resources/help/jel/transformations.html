@@ -1,0 +1,49 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="[[URL] /help/jel/jel-style.css]">
+</head>
+
+<body>
+	<h3>Transformation</h3>
+
+	<p>
+		Following special conversions are supported when standard json representation is not enough <span class="simple-blue">@transform</span> can be used to transform
+		the data into other format using any replacement expressions. In general this is used in conjunction with <span class="blue-highlight">@value</span> and
+		<span class="blue-highlight">falseValue</span> (in conditions).
+	</p>
+	
+	<p>
+		In these expressions current-value being transformed can be accessed as <span class="blue-highlight">thisValue</span>.
+	</p> 
+		
+	<div class="example-box">
+		<div class="example-heading">
+			Using to convert result into json string.
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"result": {
+				"<span class="simple-blue">@transform</span>": "@expr: toJson(<span class="simple-blue">thisValue</span>)",
+				
+				"<span class="simple-blue">@value</span>": {
+					"someVal": 1,
+					"containers": "@fmarker: containers"
+				}
+			}
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				The result will be something like below:
+				<pre>
+		{
+			"result": "{\"someVal\":1,\"containers\":[\"bank\",\"card\",\"insurance\"]}"
+		}
+				</pre>
+			</p>
+		</div>
+	</div>
+</body>
+</html>

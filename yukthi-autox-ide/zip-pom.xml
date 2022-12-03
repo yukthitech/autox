@@ -1,0 +1,25 @@
+<assembly>
+	<id>bin</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+			<outputDirectory>lib</outputDirectory>
+		</dependencySet>
+	</dependencySets>
+	<fileSets>
+		<fileSet>
+			<directory>src/main/scripts</directory>
+			<outputDirectory>bin</outputDirectory>
+			<includes>
+				<include>*.sh</include>
+				<include>*.bat</include>
+				<include>*.properties</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>

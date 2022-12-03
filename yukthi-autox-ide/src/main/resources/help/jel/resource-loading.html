@@ -1,0 +1,34 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="[[URL] /help/jel/jel-style.css]">
+</head>
+
+<body>
+	<h3>Resource Loading</h3>
+
+	<p>
+		When complex content, like multi-line or double-quotes etc, needs to be added in json, the content can be placed in an external resource file and can be loaded
+		using <span class="blue-highlight">@resource</span>.
+	</p>
+	<p>
+		<span class="blue-highlight">@transform</span> can be applied to transform loaded content into other format.
+	</p>
+
+	<div class="example-box">
+		<div class="example-heading">
+			In Conjunction with @value
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+		  "DOC_TYPE": "TAX",
+		  "CONTAINER_SUPRT_EN":  {
+		     "<span class="simple-blue">@resource</span>": "/doc-tax.xml",
+		     "<span class="simple-blue">@transform</span>": "@fmarker: normalizeXml(thisValue)"
+		  }
+		}
+		</pre>
+		</div>
+	</div>
+</body>
+</html>

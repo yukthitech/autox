@@ -1,0 +1,550 @@
+{
+    "name" : "testTemplate",
+    "description" : "testTemplate",
+    "version" : "1.0.0",
+    "versionLong" : 1000000,
+    "environment" : "qa",
+    "keys" : [ 
+        {
+            "feature" : "Security",
+            "product" : "Common",
+            "keyType" : "SPS_KEY",
+            "name" : "THRESHOLD_LIMIT_FOR_BLOCKING",
+            "description" : "Key is used to suspend the site  if the invalid attempts is reached to the limit in 24 hours",
+            "virtualKey" : false,
+            "inputType" : "CLIENT",
+            "dataType" : "ENUM",
+            "enumOptions" : [ 
+                {
+                    "label" : "1,000 invalid attempts",
+                    "value" : "1000",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "2,000 invalid attempts",
+                    "value" : "2000",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "3,000 invalid attempts",
+                    "value" : "3000",
+                    "disabled" : false
+                }
+            ],
+            "defaultValueNewCustomer" : [ 
+                "1000"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : true
+        }, 
+        {
+            "feature" : "Security",
+            "product" : "Common",
+            "keyType" : "SPS_KEY",
+            "name" : "PERCENTAGE_FAILURE_FOR_BLOCKING",
+            "description" : "Key is used to suspend the site if the request failures is reached to specified percentage in 24 hours",
+            "virtualKey" : false,
+            "inputType" : "CLIENT",
+            "dataType" : "ENUM",
+            "enumOptions" : [ 
+                {
+                    "label" : "60% of all requests to a site failed",
+                    "value" : "60",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "70% of all requests to a site failed",
+                    "value" : "70",
+                    "disabled" : false
+                }
+            ],
+            "defaultValueNewCustomer" : [ 
+                "60"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : true
+        }, 
+        {
+            "feature" : "Security",
+            "product" : "Common",
+            "keyType" : "SPS_KEY",
+            "name" : "USER_THRESHOLD_LIMIT",
+            "description" : "Key is used to supend the user from linking the account for 24 hours after the site login attempts failures is reached to specified limit",
+            "virtualKey" : false,
+            "inputType" : "CLIENT",
+            "dataType" : "ENUM",
+            "enumOptions" : [ 
+                {
+                    "label" : "3 failed logins to one site",
+                    "value" : "3",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "4 failed logins to one site",
+                    "value" : "4",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "5 failed logins to one site",
+                    "value" : "5",
+                    "disabled" : false
+                }
+            ],
+            "defaultValueNewCustomer" : [ 
+                "5"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : true
+        }, 
+        {
+            "feature" : "Security",
+            "product" : "Common",
+            "keyType" : "SPS_KEY",
+            "name" : "TOTAL_USER_THRESHOLD_LIMIT",
+            "description" : "Key is used to supend the user from linking the account for 24 hours after the accounts added count is reached to specified limit",
+            "virtualKey" : false,
+            "inputType" : "CLIENT",
+            "dataType" : "ENUM",
+            "enumOptions" : [ 
+                {
+                    "label" : "50 accounts",
+                    "value" : "50",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "75 accounts",
+                    "value" : "75",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "100 accounts",
+                    "value" : "100",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "200 accounts",
+                    "value" : "200",
+                    "disabled" : false
+                }, 
+                {
+                    "label" : "500 accounts",
+                    "value" : "500",
+                    "disabled" : false
+                }
+            ],
+            "defaultValueNewCustomer" : [ 
+                "50"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : true
+        }, 
+        {
+            "feature" : "Webhooks",
+            "product" : "Common",
+            "keyType" : "WEBHOOK",
+            "name" : "REFRESH",
+            "description" : "Key to define WEBHOOK URLS for data refresh event subscriptions (instant refresh)",
+            "virtualKey" : false,
+            "inputType" : "CLIENT",
+            "dataType" : "STRING",
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.REFRESH",
+                "customerPropertyLevel" : "STACK"
+            },
+            "groupNames" : [ 
+                "REFRESH-group"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : true,
+            "disableExpression" : "isMatching(customer.properties.webhookNotificationEnabled,'false')"
+        }, 
+        {
+            "feature" : "Webhooks",
+            "product" : "Common",
+            "keyType" : "WEBHOOK",
+            "name" : "AUTO_REFRESH_UPDATES",
+            "description" : "Key to define WEBHOOK URLS for data auto refresh updates event subscriptions (instant refresh)",
+            "virtualKey" : false,
+            "inputType" : "CLIENT",
+            "dataType" : "STRING",
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "groupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : true,
+            "disableExpression" : "isMatching(customer.properties.webhookNotificationEnabled,'false')"
+        }, 
+        {
+            "feature" : "Webhooks",
+            "product" : "Common",
+            "keyType" : "WEBHOOK",
+            "name" : "DATA_UPDATES",
+            "description" : "Key to define WEBHOOK URLS for data updates event subscriptions (instant refresh)",
+            "virtualKey" : false,
+            "inputType" : "CLIENT",
+            "dataType" : "STRING",
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "groupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : true,
+            "disableExpression" : "isMatching(customer.properties.webhookNotificationEnabled,'false')"
+        }, 
+        {
+            "feature" : "Data Extract Api Synchronization",
+            "product" : "AGGREGATION",
+            "keyType" : "PARAM_ACL",
+            "name" : "COM.TEST.CORE.DATA_EXTRACTS.SUPPORTED_HELD_HELDAWAY_COLLECTIONS",
+            "description" : "This Acl restricts the Data Extracts response depending on the combination configure (HELDPREPOP,HELDNONPREPOP,HELDAWAY) using SumInfo's SumInfoPrepopModeId configured for a Cobrand.This is used in DataExtractController.java (YSL Component) and WebHookDa...",
+            "virtualKey" : false,
+            "inputType" : "ADMIN",
+            "dataType" : "STRING",
+            "defaultValueNewCustomer" : [ 
+                "HELDPREPOP,HELDNONPREPOP,HELDAWAY"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/values",
+                "processExpr" : "splitString(thisKey.values[0])",
+                "customerPropertyLevel" : "STACK"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false,
+             "disableExpression" : "isMatching(customer.properties.webhookNotificationEnabled,'false') || isMatching(customer.properties.dataModificationEnabled,'false')"
+        }, 
+        {
+            "feature" : "Data Extract Api Synchronization",
+            "product" : "AGGREGATION",
+            "keyType" : "PARAM_ACL",
+            "name" : "GENERAL_DATA_EXTRACTS.DAYS_COUNT_VALUE",
+            "description" : "Cobrand can fetch the data up to this value in past",
+            "virtualKey" : false,
+            "inputType" : "ADMIN",
+            "dataType" : "INT",
+            "defaultValueNewCustomer" : [ 
+                "7"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false,
+            "disableExpression" : "isMatching(customer.properties.webhookNotificationEnabled,'false') || isMatching(customer.properties.dataModificationEnabled,'false')"
+        }, 
+        {
+            "feature" : "Data Extract Api Synchronization",
+            "product" : "AGGREGATION",
+            "keyType" : "PARAM_ACL",
+            "name" : "GENERAL_DATA_EXTRACTS.EVENTS_NOTIFICATION_BATCH_SIZE",
+            "description" : "To indicate the notification split size for ysl api pagination for Data extract events feature",
+            "virtualKey" : false,
+            "inputType" : "ADMIN",
+            "dataType" : "INT",
+            "defaultValueNewCustomer" : [ 
+                "2000"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/stacks[name='${curStack}']/config/inputs[key='${thisKey.key}']/value",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "STACK"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false,
+             "disableExpression" : "isMatching(customer.properties.webhookNotificationEnabled,'false') || isMatching(customer.properties.dataModificationEnabled,'false')"
+        }, 
+        {
+            "feature" : "Customer Onboarding",
+            "product" : "Common",
+            "keyType" : "PARAM_ACL",
+            "name" : "GENERAL.REFRESH.SDG.MATCHING_SERVICE",
+            "description" : "Specifies access Control for SDG Matching Service. If not enabled client will not be able to make a verification API call.",
+            "virtualKey" : false,
+            "inputType" : "ADMIN",
+            "dataType" : "BOOLEAN",
+            "defaultValueNewCustomer" : [ 
+                "FALSE"
+            ],
+            "cobMapProperty" : {
+                "xpathToSet" : "/environments[environment='${curEnv}']/matchingServiceEnabled",
+                "processExpr" : "isMatching(thisKey.values[0], 'true', 'on')",
+                "customerPropertyLevel" : "ENVIRONMENT"
+            },
+            "groupNames" : [ 
+                "UNUSED"
+            ],
+            "readOnlyGroupNames" : [ 
+                "UNUSED"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false
+        },
+        {
+            "feature" : "Customer Onboarding",
+            "product" : "Common",
+            "keyType" : "PARAM_ACL",
+            "name" : "COM.TEST.CORE.WEBHOOKS.NOTIFICATION.ENABLED",
+            "description" : "Specifies access Control for Webhook service.",
+            "virtualKey" : true,
+            "inputType" : "ADMIN",
+            "dataType" : "BOOLEAN",
+            "defaultValueExpression" : "customer.properties.webhookNotificationEnabled??&&isMatching(customer.properties.webhookNotificationEnabled,'true')",
+            "cobMapProperty" : {
+                "xpathToSet" : "/environments[environment='${curEnv}']/properties/webhookNotificationEnabled",
+                "processExpr" : "nvl(thisKey.values[0], false)",
+                "customerPropertyLevel" : "ENVIRONMENT"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false
+        },
+        {
+            "feature" : "Customer Onboarding",
+            "product" : "Common",
+            "keyType" : "PARAM_KEY",
+            "name" : "com.TEST.core.containers.disabled",
+            "description" : "To get disabled containers",
+            "virtualKey" : true,
+            "inputType" : "CLIENT",
+            "dataType" : "STRING",
+            "cobMapProperty" : {
+                "xpathToSet" : "/environments[environment='${curEnv}']/disabledContainers",
+                "processExpr" : "limitColWithCol(splitString(thisKey.values[0]),currentContainers)",
+                "customerPropertyLevel" : "ENVIRONMENT"
+            },
+            "groupNames" : [ 
+                "UNUSED"
+            ],
+            "readOnlyGroupNames" : [ 
+                "UNUSED"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false
+        }, 
+        {
+            "feature" : "Customer Onboarding",
+            "product" : "Common",
+            "keyType" : "PARAM_KEY",
+            "name" : "COM.TEST.COBRAND.LOCALE.SUPPORTED",
+            "description" : "To get supported locales",
+            "virtualKey" : true,
+            "inputType" : "CLIENT",
+            "dataType" : "STRING",
+            "cobMapProperty" : {
+                "xpathToSet" : "/environments[environment='${curEnv}']/supportedLocales",
+                "processExpr" : "splitString(thisKey.values[0])",
+                "customerPropertyLevel" : "ENVIRONMENT"
+            },
+            "groupNames" : [ 
+                "UNUSED"
+            ],
+            "readOnlyGroupNames" : [ 
+                "UNUSED"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false
+        }, 
+        {
+            "feature" : "Customer Onboarding",
+            "product" : "Common",
+            "keyType" : "PARAM_KEY",
+            "name" : "COM.TEST.COBRAND.LOCALE.DEFAULT",
+            "description" : "To get default  locale",
+            "virtualKey" : true,
+            "inputType" : "CLIENT",
+            "dataType" : "STRING",
+            "cobMapProperty" : {
+                "xpathToSet" : "/environments[environment='${curEnv}']/defaultLocale",
+                "processExpr" : "thisKey.values[0]",
+                "customerPropertyLevel" : "ENVIRONMENT"
+            },
+            "groupNames" : [ 
+                "UNUSED"
+            ],
+            "readOnlyGroupNames" : [ 
+                "UNUSED"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false
+        }, 
+        {
+            "feature" : "Customer Onboarding",
+            "product" : "Common",
+            "keyType" : "PARAM_KEY",
+            "name" : "COM.TEST.CORE.DBFILER.VALIDATE_ITEM_SUMMARY_DATA_MODIFICATION.ENABLED",
+            "description" : "Access control for data extracts",
+            "virtualKey" : true,
+            "inputType" : "CLIENT",
+            "dataType" : "BOOLEAN",
+            "defaultValueExpression" : "customer.properties.dataModificationEnabled??&&isMatching(customer.properties.dataModificationEnabled,'true')",
+            "cobMapProperty" : {
+                "xpathToSet" : "/environments[environment='${curEnv}']/properties/dataModificationEnabled",
+                "processExpr" : "nvl(thisKey.values[0],false)",
+                "customerPropertyLevel" : "ENVIRONMENT"
+            },
+            "readOnlyGroupNames" : [ 
+                "Customer Settings"
+            ],
+            "editable" : false,
+            "featureSwitchKey" : false,
+            "optional" : false
+        }
+    ],
+    "system" : {
+        "containers" : [ 
+            {
+                "name" : "insurance",
+                "label" : "Insurance"
+            }, 
+            {
+                "name" : "reward",
+                "label" : "Rewards"
+            }, 
+            {
+                "name" : "bank",
+                "label" : "Bank",
+                "accountTypes" : [ 
+                    "checking", 
+                    "savings", 
+                    "moneyMarket"
+                ]
+            }, 
+            {
+                "name" : "loan",
+                "label" : "Loan/mortgage"
+            }, 
+            {
+                "name" : "investment",
+                "label" : "Investment",
+                "accountTypes" : [ 
+                    "CMA", 
+                    "brokerageMargin"
+                ]
+            },
+            {
+                "name" : "realEstate",
+                "label" : "Real estate"
+            }, 
+            {
+                "name" : "creditCard",
+                "label" : "Credit card"
+            }, 
+            {
+                "name" : "manual",
+                "label" : "Manual"
+            }
+        ],
+        "products" : [ 
+            {
+                "name" : "AGGREGATION",
+                "supportedContainers" : [ 
+                    "bank", 
+                    "investment", 
+                    "creditCard", 
+                    "loan", 
+                    "realEstate", 
+                    "insurance",
+                    "reward", 
+                    "manual"
+                ],
+                "supportedDatasetAttribs" : [ 
+                    "ACCOUNT_DETAILS", 
+                    "HOLDINGS", 
+                    "STATEMENTS", 
+                    "TRANSACTIONS"
+                ]
+            }, 
+            {
+                "name" : "VERIFICATION",
+                "supportedContainers" : [ 
+                    "bank", 
+                    "investment"
+                ],
+                "supportedDatasetAttribs" : [ 
+                    "FULL_ACCT_NUMBER", 
+                    "BANK_TRANSFER_CODE", 
+                    "HOLDER_NAME", 
+                    "HOLDER_DETAILS", 
+                    "PAYMENT_PROFILE"
+                ]
+            }, 
+            {
+                "name" : "Common"
+            }
+        ]
+    },
+    
+    "audit": {
+	    "createdBy" : "svcjenkins",
+	    "updatedBy" : "svcupdate"
+	}
+}

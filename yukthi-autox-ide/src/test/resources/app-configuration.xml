@@ -1,0 +1,61 @@
+<app xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<report-name>Automation Test</report-name>
+	
+	<dateFomat>dd-MMM-yyyy</dateFomat>
+
+	<!-- 
+		Folder where test suite xmls can be found 
+	-->
+	<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
+	
+	<!--
+		Specifies base packages to be scanned for steps and validators.
+		
+		Note: By default com.yukthitech is scanned.
+	-->
+	<!--   
+		<wrap:basePackages>
+			<basePackage>com.yukthitech</basePackage>
+		</wrap:basePackages>
+	-->
+	
+	<!--
+		Different plugins can be specified here. These plugin in turn
+		will be used by steps and validators. 
+	 -->
+	<wrap:plugins>
+	
+		<!-- Selenium plugin for web based automation -->	
+		<selenium-plugin>
+			<base-url>#{base.url}</base-url>
+			
+			<wrap:drivers>
+				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
+				</driver>
+				<driver name="remoteWebDriver" class-name="org.openqa.selenium.remote.RemoteWebDriver">
+				</driver>
+				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
+					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
+				</driver>
+			</wrap:drivers>
+		</selenium-plugin>
+	
+		<!-- Db plugin for sql base steps -->
+		<db-plugin>
+			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>org.apache.derby.jdbc.EmbeddedDriver</driverClassName>
+				<url>jdbc:derby:#{derby.folder};create=true</url>
+			</dataSource>
+		</db-plugin>
+		
+		<rest-plugin>
+			<baseUrl>http://localhost:8080/app/api</baseUrl>
+		</rest-plugin>
+			
+	</wrap:plugins>
+
+	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kranthi@mail">
+		<toAddressList>akranthikiran@gmail.com</toAddressList>
+		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
+	</summaryNotificationConfig>
+</app>

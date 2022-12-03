@@ -1,0 +1,74 @@
+20/7/22
+=========
+when source folder is renamed, it should get auto update in project json also.
+
+11/10
+=====
+After delete / paste, in proj explorer file list is not getting refreshed
+Big xml is taking lot of time to parse.
+
+For interaction steps, namespace for step-holder-template.xml should be picked from the current xml
+
+22/07
+=====
+While starting ide, classes should be scanned only if jar are changed or on some other basis. This will start the ide quicker. Is this possible??
+	Prev loaded classes should be persisted somwhere and should be reused in next start
+	
+	one approach might be, get all jar files in classpath and store with their timestamp. Next time if there is no change in timestamps
+		simply load the data from the cache. 
+
+
+===========================
+Process should have its own file and should be openable from console tab using button
+
+
+Run menu for recently executed programs
+	
+Finalize general documentation
+
+new project creation is not working
+	the folder and file paths displayed should be relative
+	even brose dialog should be limited to project folder
+
+==============================
+use nio to sync error and output stream
+
+Others
+	
+	maven based class path and packaging
+
+Beautify icons
+
+
+Performance support
+	Ability to execute with load - step or test case level
+	Ability to execute for durability - for specified time
+	
+Run actions
+	like eclipse currently executed programs should come in icons
+
+Ability to reexecute only failed test cases
+
+tool tip documentations
+	Should not parse file for each tool tip
+
+ability to debug
+
+highlighting search strings
+
+parse text to support free marker auto completed and syntax check
+	tool tip docs for free market functions
+	highlighting text based on content type (Expression type, etc)
+
+
+Ability to hide/display views
+		state should be persisted in ide state
+
+Find and replace
+		among the file tree
+
+		
+Find dialog
+	when displayed search string should be focused
+	on focus the current value should be selected
+	on display take current selected string as search string

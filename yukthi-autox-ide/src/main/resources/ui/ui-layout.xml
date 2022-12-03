@@ -1,0 +1,264 @@
+<layout xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<wrap:console-line-patterns>
+		<console-line-pattern pattern="^\s*ERROR" color="#FF0080"/>
+		<console-line-pattern pattern=".*Exception.*" color="#FF0080"/>
+		<console-line-pattern pattern="^\s*at [\w\.\$]+\(" color="#FF0080"/>
+		
+		<console-line-pattern pattern="^\s*WARN" color="#B5E61D"/>
+		
+		<console-line-pattern pattern="^\s*TRACE" color="#B4B4B4"/>
+	</wrap:console-line-patterns>
+
+	<menuBar>
+		<menu label="File" mnemonic="F">
+			<item label="New Project" mnemonic="N" icon="/ui/icons/new.svg"
+				action="newProject">
+				<short-key ctrl="true" key="N" />
+			</item>
+			<item label="Open Project" mnemonic="O" icon="/ui/icons/open.svg"
+				action="openProject">
+				<short-key ctrl="true" key="O" />
+			</item>
+
+			<item label="-" />
+
+			<item label="Open Resource" mnemonic="F" action="openResource">
+				<short-key ctrl="true" shift="true" key="R"/>
+			</item>
+			<item label="Save" mnemonic="S" icon="/ui/icons/save.svg"
+				action="saveFile">
+				<short-key ctrl="true" key="S" />
+			</item>
+
+			<item label="-" />
+
+			<item label="Exit" mnemonic="x" action="closeIde">
+			</item>
+
+		</menu>
+
+		<menu label="Edit" mnemonic="E">
+			<item label="Copy" mnemonic="C" action="copyFile">
+				<short-key ctrl="true" key="C"/>
+			</item>
+			<item label="Paste" mnemonic="P" action="pasteFile">
+				<short-key ctrl="true" key="V"/>
+			</item>
+			<item label="Rename" mnemonic="R" action="renameFile">
+				<short-key key="F2"/>
+			</item>
+			<item label="Delete" mnemonic="D" action="deleteFile">
+				<short-key key="DELETE"/>
+			</item>
+
+			<item label="-" />
+			
+			<item label="Format Code" mnemonic="F" action="formatCode">
+				<short-key ctrl="true" shift="true" key="F"/>
+			</item>
+
+			<item label="To Upper Case..." mnemonic="U" action="toUpperCase">
+				<short-key ctrl="true" shift="true" key="U"/>
+			</item>
+
+			<item label="To Lower Case..." mnemonic="L" action="toLowerCase">
+				<short-key ctrl="true" shift="true" key="L"/>
+			</item>
+
+			<item label="-" />
+
+			<item label="Find And Replace" mnemonic="n" action="findAndReplace">
+				<short-key ctrl="true" key="F"/>
+			</item>
+
+			<item label="Goto Line" action="gotoLine">
+				<short-key ctrl="true" key="L"/>
+			</item>
+
+			<item label="-" />
+
+			<item label="Change Editor Font..." action="changeEditorFont">
+			</item>
+		</menu>
+
+		<menu label="Run / Debug" mnemonic="R">
+			<item label="Run Test Suite" mnemonic="S" action="runTestSuite">
+				<short-key ctrl="true" key="F9" />
+			</item>
+			<item label="Run Test Case" mnemonic="C" action="runTestCase">
+				<short-key ctrl="true" shift="true" key="F9" />
+			</item>
+			
+			<!--  
+			<item label="-" />
+			
+			<item label="Debug Test Suite" mnemonic="S" action="debugTestSuite">
+				<short-key alt="true" key="F9" />
+			</item>
+			<item label="Debug Test Case" mnemonic="C" action="debugTestCase">
+				<short-key alt="true" shift="true" key="F9" />
+			</item>
+
+			<item label="Run Selected Steps..." action="runSelectedSteps">
+				<short-key ctrl="true" key="ENTER" />
+			</item>
+			<item label="Run To Current Step" action="runToCurrentStep">
+				<short-key ctrl="true" shift="true" key="ENTER" />
+			</item>
+			-->
+		</menu>
+
+		<menu label="Window" mnemonic="W">
+			<item label="Maximize/Minimize Window" mnemonic="M" action="flipMaximization">
+				<short-key ctrl="true" key="M" />
+			</item>
+		</menu>
+
+		<menu label="Tools" mnemonic="T">
+			<item label="JXPath Sandbox" mnemonic="J" action="displayXpathSandbox" icon="/ui/icons/xpath-sandbox.svg">
+			</item>
+		</menu>
+
+		<menu label="Help" mnemonic="H">
+			<item label="Help" mnemonic="F" icon="/ui/icons/help.svg" action="help">
+				<short-key key="F1" />
+			</item>
+
+			<item label="Context Help" mnemonic="C" icon="/ui/icons/help.svg" action="contextHelp">
+				<short-key key="F1" shift="true"/>
+			</item>
+			
+			<item label="-" />
+			
+			<item label="About Autox..." action="aboutAutoxIde">
+			</item>
+		</menu>
+	</menuBar>
+
+	<toolBar>
+		<item icon="/ui/icons/new.svg" tooltip="New Project" action="newProject" />
+		<item icon="/ui/icons/open.svg" tooltip="Open Project" action="openProject" />
+		<item icon="/ui/icons/save.svg" tooltip="Save File" action="saveFile" />
+		
+		<item icon="-" />
+		
+		<item icon="/ui/icons/xpath-sandbox.svg" tooltip="JXPath Sandbox" action="displayXpathSandbox" />
+		
+		<item icon="-" />
+		
+		<drop-down-item id="runList" icon="/ui/icons/run.svg" tooltip="Run..."/>
+		<!--  
+		<drop-down-item id="debugList" icon="/ui/icons/debug.svg" tooltip="Debug..."/>
+		-->
+		<item icon="-" />
+
+		<toggle-item id="ideSettings_enableTextWrapping" icon="/ui/icons/word-wrap.svg" tooltip="Word Wrap" action="toogleWordWrap"/>
+	</toolBar>
+
+	<popup-menu label="folderPopup">
+		<menu label="New">
+			<item label="Folder" action="newFolder" />
+			<item label="File" action="newFile" />
+		</menu>
+
+		<item label="Refresh" action="refreshFolder" />
+
+		<item label="-" />
+		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
+	</popup-menu>
+
+	<popup-menu label="filePopup">
+		<item label="Open" action="openFile" />
+		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
+	</popup-menu>
+
+	<popup-menu label="projectExplorerPopup">
+		<item icon="/ui/icons/new.svg" label="New Project" action="newProject" />
+		<item icon="/ui/icons/open.svg" label="Open Project" action="openProject" />
+		
+		<item label="-" />
+		
+		<item label="Execute" action="executeProject" />
+	</popup-menu>
+
+	<popup-menu label="projectPopup">
+		<item label="Delete Project" action="deleteProject" />
+		<item label="Refresh" action="refreshProject" />
+		<item label="Execute" action="executeProject" />
+
+		<item label="-" />
+		<item label="Copy Path" action="copyPath" />		
+		<item label="Properties" action="projectProperties"></item>
+	</popup-menu>
+
+	<popup-menu label="fileTabPopup">
+		<item label="Close" action="closeFile" />
+		<item label="Close All" action="closeAllFiles" />
+		<item label="Close All But This" action="closeAllButThis" />
+
+		<item label="-" />
+
+		<item label="Copy File Path" action="copyFilePath" />
+		<item label="Copy File Name" action="copyFileName" />
+		<item label="Copy Dir Path" action="copyDirPath" />
+
+	</popup-menu>
+
+	<popup-menu label="testStuitePopup">
+		<menu label="New">
+			<item label="Folder" action="newFolder" />
+			<item label="Test File" action="newTestFile" />
+			<item label="File" action="newFile" />
+		</menu>
+
+		<item label="Refresh" action="refreshFolder"/>
+
+		<item label="-" />
+		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
+		
+		<item label="-" />
+		
+		<item label="Execute" action="executeTestSuiteFolder" />
+	</popup-menu>
+
+	<popup-menu label="testFolderPopup">
+		<menu label="New">
+			<item label="Folder" action="newFolder" />
+			<item label="Test File" action="newTestFile" />
+			<item label="File" action="newFile" />
+		</menu>
+
+		<item label="Refresh" action="refreshFolder"/>
+
+		<item label="-" />
+		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
+		
+		<item label="-" />
+		
+		<item label="Execute" action="executeTestSuiteFolder" />
+	</popup-menu>
+
+	<popup-menu label="restResponsePopup">
+		<item label="assert" action="assertValue" />
+		<item label="extract" action="extract" />
+	</popup-menu>
+	<popup-menu label="contextAttributePopup">
+		<item label="assert" action="assertValue" />
+	</popup-menu>
+</layout>

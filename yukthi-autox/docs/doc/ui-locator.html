@@ -1,0 +1,109 @@
+<h2>UI Locator Param Type</h2>
+
+UI locators are based on selenium and are useful in locating elements in various ways. Locator values should be of following format: 
+
+<BR/>&nbsp;&nbsp;&nbsp;&nbsp;
+	<B>&lt;locatorType&gt;:&lt;locatorValue&gt;</B>
+<BR/><BR/>&nbsp;&nbsp;&nbsp;&nbsp;
+	<B>Examples: </B>
+		<BR/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		id: button
+		<BR/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		xpath: //input[@name='statusFld']
+<BR/><BR/>
+		
+Following are different types of locators supported:
+
+<table class="doc_table stripped">
+	<tr>
+		<th class="doc_mainHeading bordered">Locator Type</th>
+		<th class="doc_mainHeading bordered">Example</th>
+		<th class="doc_mainHeading bordered">Description</th>
+	</tr>
+	
+	<tr>
+		<td>
+			id
+		</td>
+		<td>
+			id: button
+		</td>
+		<td>
+			Locates the elements by using locator-value as element id.
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			class
+		</td>
+		<td>
+			class: errElem
+		</td>
+		<td>
+			Locates the elements by using locator-value as CSS class name.
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			tag
+		</td>
+		<td>
+			tag: button
+		</td>
+		<td>
+			Locates the elements by using locator-value as tag name.
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			name
+		</td>
+		<td>
+			name: saveButton
+		</td>
+		<td>
+			Locates the elements by using locator-value as element name.
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			css
+		</td>
+		<td>
+			css: div>a
+		</td>
+		<td>
+			Locates the elements by using locator-value as css expression.
+		</td>
+	</tr>
+	
+
+	<tr>
+		<td>
+			xpath
+		</td>
+		<td>
+			xpath: //input[@name='statusFld']
+		</td>
+		<td>
+			Locates the elements by using locator-value as xpath expression.
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			js
+		</td>
+		<td>
+			js: div.red
+		</td>
+		<td>
+			Locates the elements by using locator-value as jquery expression (can be used in webapplications which has jquery library).
+		</td>
+	</tr>
+	
+</table>

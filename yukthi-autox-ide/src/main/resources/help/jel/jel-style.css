@@ -1,0 +1,36 @@
+.blue-highlight
+{
+	font-weight: bold;
+	color: blue;
+}
+
+.simple-blue
+{
+	color: blue;
+}
+
+.example-box
+{
+	margin: 20px;
+	border: 1px solid gray;
+	width: 75%;
+}
+
+.example-heading
+{
+	padding: 5px;
+	padding-left: 10px;
+	font-weight: bold;
+	background-color: rgb(200, 200, 200);			
+}
+
+.example-body
+{
+	padding: 5px;
+}
+
+.example-desc
+{
+	padding: 5px;
+}
+

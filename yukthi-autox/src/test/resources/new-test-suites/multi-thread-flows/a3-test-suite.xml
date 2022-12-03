@@ -1,0 +1,157 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="a3-test-suites" parallelExecutionEnabled="true">
+		<description>
+			Ensures the order of setups and cleanups.
+		</description>
+		
+		<setup>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+			<s:set expression="a3TestSuiteSetup" value="1"/>
+			<s:sleep time="500"/>
+		</setup>
+		
+		<before-test-case>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+			<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+
+			<s:set expression="a3BeforeTestCase" value="1"/>
+			<s:sleep time="500"/>
+		</before-test-case>
+
+		<after-test-case>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+			<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+
+			<s:set expression="a3AfterTestCase" value="1"/>
+			<s:sleep time="500"/>
+		</after-test-case>
+
+		<testCase name="a3SuccessTestCase">
+			<description>
+				Ensures setups and cleanups are called in proper order with proper access.
+			</description>
+			
+			<setup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3BeforeTestCase" expected="1"/>
+	
+				<s:set expression="a3SuccessTestCaseSetup" value="1"/>
+				<s:sleep time="500"/>
+			</setup>
+		
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3BeforeTestCase" expected="1"/>
+				<s:assert-equals actual="attr: a3SuccessTestCaseSetup" expected="1"/>
+	
+				<s:set expression="a3SuccessTestCase" value="1"/>
+				<s:sleep time="500"/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3BeforeTestCase" expected="1"/>
+				<s:assert-equals actual="attr: a3SuccessTestCaseSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3SuccessTestCase" expected="1"/>
+	
+				<s:set expression="a3SuccessTestCaseCleanup" value="1"/>
+				<s:sleep time="500"/>
+			</cleanup>
+		</testCase>
+	
+		<testCase name="a3SuccessTestCase2">
+			<description>
+				Ensures other test case attributes are not accessible.
+			</description>
+			
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3BeforeTestCase" expected="1"/>
+				
+				<s:assert-null value="attr: a3SuccessTestCaseSetup"/>
+				<s:assert-null value="attr: a3SuccessTestCase"/>
+				<s:assert-null value="attr: a3SuccessTestCaseCleanup"/>
+	
+				<s:set expression="a3SuccessTestCase2" value="1"/>
+				<s:sleep time="500"/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:set expression="a3SuccessTestCase2Cleanup" value="1"/>
+			</cleanup>
+		</testCase>
+		
+		<testCase name="a3DepTestCase" dependencies="a3SuccessTestCase, a3SuccessTestCase2">
+			<description>
+				Ensures dependencies attributes are accessible.
+			</description>
+			
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3BeforeTestCase" expected="1"/>
+				
+				<s:assert-equals actual="attr: a3SuccessTestCaseSetup" expected="1"/>
+				<s:assert-equals actual="attr: a3SuccessTestCase" expected="1"/>
+				<s:assert-equals actual="attr: a3SuccessTestCaseCleanup" expected="1"/>
+
+				<s:assert-equals actual="attr: a3SuccessTestCase2" expected="1"/>
+				<s:assert-equals actual="attr: a3SuccessTestCase2Cleanup" expected="1"/>
+
+				<s:set expression="a3DepTestCase" value="1"/>
+				<s:sleep time="500"/>
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="a3TestCaseError">
+			<description>
+				Ensures cleanup of testcase is called in case of error.
+			</description>
+			
+			<setup>
+				<s:set expression="a3TestCaseErrorSetup" value="1"/>
+			</setup>
+		
+			<wrap:steps>
+				<s:sleep time="500"/>
+				<s:fail/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:assert-equals actual="attr: a3TestCaseErrorSetup" expected="1"/>
+			</cleanup>
+		</testCase>
+
+
+		<testCase name="a3TestSetupError">
+			<description>
+				Ensures cleanup of testcase is NOT called in case of setup error.
+			</description>
+			
+			<setup>
+				<s:set expression="a3TestSetupErrorSetup" value="1"/>
+				<s:sleep time="500"/>
+				<s:fail/>
+			</setup>
+		
+			<wrap:steps>
+				<s:sleep time="500"/>
+			</wrap:steps>
+		</testCase>
+
+		<cleanup>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+			<s:assert-equals actual="attr: a3TestSuiteSetup" expected="1"/>
+			
+			<s:assert-null value="attr: a3SuccessTestCase"/>
+			<s:assert-null value="attr: a3SuccessTestCase2"/>
+			<s:assert-null value="attr: a3DepTestCase"/>
+			<s:assert-null value="attr: a3TestCaseErrorSetup"/>
+			<s:sleep time="500"/>
+		</cleanup>
+	</testSuite>
+</testData>

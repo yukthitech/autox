@@ -1,0 +1,63 @@
+tr > th
+{
+	background-color: #484848;
+	font-weight: bold;
+	font-size: 1.1em;
+	text-align: center;
+	color: white;
+}
+  	
+td
+{
+	text-align: center;
+}
+
+.resultBox
+{
+	margin: 1em;
+	margin-bottom: 2em;
+}
+
+.successVal
+{
+	font-weight: bold;
+	color: #6666ff;
+}
+
+.errorVal
+{
+	color: red;
+}
+
+.infoVal
+{
+	color: blue;
+}
+
+.warnVal
+{
+	color: rgb(0, 147, 0);
+	font-style: italic;
+	font-weight: bold;
+}
+
+.defaultVal
+{
+	color: black;
+}
+
+.headingCell
+{
+	font-size: 1em; 
+	color: white; 
+	font-weight: bold; 
+	white-space: nowrap;
+}
+
+.filterField
+{
+	width: 15em;
+	min-width: 10em;
+	padding: 0.5em;
+	border-radius: 8px;	
+}

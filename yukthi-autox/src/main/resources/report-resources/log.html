@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    
+   	    <title>Yukthi - System Log</title>
+	    
+	    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	    <script src="js/jquery-2.2.0.js"></script>
+	    
+	    <script src="js/angular.js"></script>
+	    <script src="js/angular-sanitize.min.js"></script>
+	    <script src="js/angular-app.js"></script>
+	    
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/common.css" rel="stylesheet">
+		
+	    <!-- Include all compiled plugins (below), or include individual files as needed -->
+	    <script src="js/bootstrap.min.js"></script>
+	    
+	    <script id="logScript" src="js/log.js"></script>
+	    
+	    <link href="highlight/styles/agate.css" rel="stylesheet">
+	    <script src="highlight/highlight.pack.js"></script>
+	    
+	</head>
+	
+	<body ng-app="application" ng-controller="testLogAppController" ng-init="fetchJsonObjects()">
+		
+		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: rgb(2,5,14);
+				border-bottom: 2px solid grey;">
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; vertical-align: top; width: 1em; padding-left: 1em;">
+						<span style="font-size: 2em; color: white; font-weight: bold;">Auto</span><span style="font-size: 2.5em; color: red; font-weight: bold;">X</span>
+					</td>
+					
+					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold;">
+						{{testLogs.name}} <sub style="font-size: 0.6em;">({{testLogs.startTimeStr}})</sub>
+					</td>
+					
+					<td style="text-align: right; width: 1em; white-space: nowrap;">
+						<input placeholder="Search by message [Multiple values separated by | ]" ng-model="searchByMessage" class="filterField" 
+							style="width: 30em;"/>
+
+						<div class="btn-group" style="margin-right: 2em;">
+						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em;">
+						    	{{filterLevel}}
+						    </button>
+						    
+						    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						      <span class="caret"></span>
+						    </button>
+						    
+						    <ul class="dropdown-menu" role="menu">
+						      <li ng-repeat="level in levels">
+						      	<a href="#" ng-click="onChangeLevel(level)">{{level}}</a>
+						      </li>
+						    </ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="resultBox" style="margin-top: 5em; border: 2px solid black;">
+			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
+				<tr>
+					<td colspan="5" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: white; font-weight: bold;">
+						<table style="width: 100%;">
+							<tr>
+								<td style="text-align: left; width: 1em;">Test Case: </td>
+								<td style="text-align: left; padding-left: 2em;">{{testLogs.name}}</td>
+								<td style="text-align: left; width: 1em; padding-right: 1em; white-space: nowrap;">
+									Status: {{testLogs.status}}
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: left; width: 1em;">Description: </td>
+								<td style="text-align: left; padding-left: 2em;">{{testLogs.description}}</td>
+								<td style="text-align: left; width: 1em; padding-right: 1em;; white-space: nowrap;">
+									Time Taken: {{testLogs.timeTaken}}
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<th style="width: 1em;">#</th>
+					<th style="width: 1em;">Level</th>
+					<th style="width: 1em;">Source</th>
+					<th style="">Message</th>
+					<th style="width: 1em;">Time</th>
+				</tr>
+				<tr ng-repeat="message in messages | filter:filterLogs() | filter:highlightFilter()" ng-show="message.display">
+					<th style="padding: 0px; font-size: 1.2rem; text-align: right; padding-right: 0.5rem; padding-left: 0.5rem; cursor: pointer;" onclick="goToLine(event)" data-line-no="{{message.lineNo}}">
+						<a style="color: white;" data-line-no="{{message.lineNo}}">{{message.lineNo}}</a>
+					</th>
+					<td ng-class="getLogClass(message.logLevel)">
+						{{message.logLevel}}
+					</td>
+					<td ng-class="getLogClass(message.logLevel)">
+						{{message.source}}
+						<br/><span style="color: rgb(128,128,128)">[{{message.javaSource}}]</span>
+					</td>
+					<td style="text-align: left; word-break: break-word;" ng-class="getLogClass(message.logLevel)">
+						<div ng-bind-html="replaceMessage(message.message) | unsafe">
+						</div>
+							
+						<a ng-if="message.imageFileName" href="./logs/{{message.imageFileName}}">
+					       <img alt="{{message.imageFileName}}" src="./logs/{{message.imageFileName}}" 
+					       	style="width: 50em; border: 1px solid black;"/>
+					    </a>
+						<a ng-if="message.fileName" href="./logs/{{message.fileName}}">
+					       <img ng-if="message.fileName.endsWith('.mp4')" alt="Log" src="./img/mp4-file.png" 
+					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
+					       <img ng-if="!message.fileName.endsWith('.mp4')" alt="Log" src="./img/log-file.png" 
+					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
+					    </a>
+					</td>
+					<td style="white-space: nowrap;" ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
+						{{message.timeStr}}
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>

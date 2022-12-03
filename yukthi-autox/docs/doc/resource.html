@@ -1,0 +1,77 @@
+<h2>Resource Param Type</h2>
+
+Resource parameters are capable of getting input from various sources. The value for resource parameter indicates the source of content and type of source. For example in below code, 
+the resource parameter is referring to a "file" at path ".\src\test\resources\test-suites\test.properties".
+<BR/><BR/>
+		
+<pre><code class="xml">
+&lt;ccg:loadProperties contextAttribute="propFile"&gt;
+	&lt;resource&gt;
+		file:.\src\test\resources\test-suites\test.properties
+	&lt;/resource&gt;
+&lt;/ccg:loadProperties&gt;
+</code></pre>
+		
+<BR/>
+Following are the list of different type of resources that can be specified for resource properties. 
+<BR/><BR/>
+Note: If the resource type starts with "raw-", expressions will not be parsed within the resource content. This will take higher preference over external preference. Example: <B>raw-file, raw-res</B>
+
+<table class="doc_table stripped">
+	<tr>
+		<th class="doc_mainHeading bordered">Resource Type</th>
+		<th class="doc_mainHeading bordered">Example</th>
+		<th class="doc_mainHeading bordered">Description</th>
+	</tr>
+	
+	<tr>
+		<td>
+			file
+		</td>
+		<td>
+			file:.\src\test\resources\test-suites\test.properties
+		</td>
+		<td>
+			Loads the specified file path.
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			res
+		</td>
+		<td>
+			res:/test.properties
+		</td>
+		<td>
+			Loads the specified path as a classpath resource.
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			string
+		</td>
+		<td>
+			string:{<br/>
+				&nbsp;&nbsp;&nbsp;"name": "someName",<br/>
+				&nbsp;&nbsp;&nbsp;"age": 30<br/>
+			}<br/>
+		</td>
+		<td>
+			Loads the specified string (on right side) as content of resource.
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			string
+		</td>
+		<td>
+			property:attr.response
+		</td>
+		<td>
+			Fetches the specified property (in example, attr.response) and coverts into string. Obtained string is then used as resource content.
+		</td>
+	</tr>
+</table>

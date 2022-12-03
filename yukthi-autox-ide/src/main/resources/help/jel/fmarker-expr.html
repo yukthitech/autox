@@ -1,0 +1,41 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="[[URL] /help/jel/jel-style.css]">
+</head>
+
+<body>
+	<h3>Freemarker Expressions</h3>
+	
+	<p>
+		In json wherever string content is present (both in keys and values) when replacement expression prefixes are not used, they will be considered as 
+		free-marker templates. And freemarker expressions within the strings can be used in freemarker way.
+	</p>
+
+	<p>
+		Using one the prefixes mentioned below, the full value can be replaced with the resultant value. The result can be any of the JSON supported type - String, boolean, int, date, map or list. 
+		For keys, if expression results in non-string, the result will be converted to string and then used as a key.
+	</p>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Example in key:
+		</div>
+		<div class="example-body">
+			<p>
+				{ "devStack-${devStackEnabled}": {  "desc": "This is a dev stack" } }
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Example in value:
+		</div>
+		<div class="example-body">
+			<p>
+				{ "name": "${cont}" }
+			</p>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<test-file xmlns:f="http://autox.yukthitech.com/functions" xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<test-suite name="mockServer">
+		<test-case name="basicWorking">
+			<description>
+				Tests basic working of mock server - starting the server, mocking response, validating request, reset and validating
+				and finally stopping.
+			</description>
+		
+			<s:mock-server-start name="testMockServer" port="9944"/>
+			<s:mock-response method="POST" name="testMockServer" responseStatusCode="200" uri="/test/job">
+				<response-header name="Content-Type">application/json</response-header>
+			
+				<responseBody>
+					{
+						"code" : 0,
+						"message": "some test message from response"
+					}
+				</responseBody>
+			</s:mock-response>
+
+			<s:rest-invoke-post baseUrl="http://localhost:9944" responseContextAttribure="apiResult" uri="/test/job">
+				<body>json:
+					{
+						"content": "Some test body",
+						"reqId": 134
+					}
+				</body>
+			</s:rest-invoke-post>
+
+			<!-- Ensure response is obtained as expected -->
+			<s:assert-equals actual="${attr.apiResult.message}" expected="some test message from response"/>
+			<s:assert-equals actual="expr: attr.apiResult.code" expected="int: 0"/>
+
+			<!-- Fetch the requests received on mock server and validate -->
+			<s:mock-fetch-request name="testMockServer" attributeName="mockRequests" uriFilter="/test/job" methodFilter="POST"/>
+
+			<s:assert-equals actual="expr: (attr.mockRequests)?size" expected="int: 1"/>
+			<s:assert-equals actual="expr: attr.mockRequests[0].body | json: $">
+				<expected>json: 
+					{
+						"content": "Some test body",
+						"reqId": 134
+					}
+				</expected>
+			</s:assert-equals>
+		</test-case>
+	
+		<test-case name="resetWorking" dependencies="basicWorking">
+			<description>
+				After basic working, on reset ensure responses are not mocked any more and there are no requests.
+			</description>
+
+			<!-- Ensure before reset requests are present on mock server -->
+			<s:mock-fetch-request name="testMockServer" attributeName="resetMockRequests" uriFilter="/test/job" methodFilter="POST"/>
+			<s:assert-equals actual="expr: (attr.resetMockRequests)?size" expected="int: 1"/>
+
+			<s:mock-server-reset name="testMockServer"/>
+			
+			<!-- Ensure post reset requests are present on mock server -->
+			<s:mock-fetch-request name="testMockServer" attributeName="resetMockRequests" uriFilter="/test/job" methodFilter="POST"/>
+			<s:assert-equals actual="expr: (attr.resetMockRequests)?size" expected="int: 0"/>
+
+			<!-- Ensure post reset no requests are getting mocked -->
+			<s:rest-invoke-post baseUrl="http://localhost:9944" resultContextAttribute="apiResult" uri="/test/job" >
+				<body>json:
+					{
+						"content": "Some test body",
+						"reqId": 134
+					}
+				</body>
+			</s:rest-invoke-post>
+
+			<!-- Ensure no page found status code -->
+			<s:assert-equals actual="${attr.apiResult.statusCode}" expected="404"/>
+		</test-case>
+	
+		<test-case name="postWithParamWorking" dependencies="resetWorking">
+			<description>
+				Tests mock server working with post params method.
+			</description>
+		
+			<s:mock-server-reset name="testMockServer"/>
+		
+			<s:mock-response method="POST" name="testMockServer" responseStatusCode="200" uri="/test/job">
+				<response-header name="Content-Type">application/json</response-header>
+			
+				<responseBody>
+					{
+						"code" : 0,
+						"message": "some test message from response"
+					}
+				</responseBody>
+			</s:mock-response>
+		
+			<s:rest-invoke-post baseUrl="http://localhost:9944" responseContextAttribure="apiResult" uri="/test/job">
+				<param name="param1">val1</param>
+			</s:rest-invoke-post>
+
+			<!-- Ensure response is obtained as expected -->
+			<s:assert-equals actual="${attr.apiResult.message}" expected="some test message from response"/>
+			<s:assert-equals actual="expr: attr.apiResult.code" expected="int: 0"/>
+
+			<!-- Fetch the requests received on mock server and validate -->
+			<s:mock-fetch-request name="testMockServer" attributeName="mockRequests" uriFilter="/test/job" methodFilter="POST"/>
+
+			<s:assert-equals actual="expr: (attr.mockRequests)?size" expected="int: 1"/>
+			<s:assert-equals actual="expr: attr.mockRequests[0].parameters.param1" expected="list: val1"/>
+		</test-case>
+
+		<test-case name="postResetWorking" dependencies="resetWorking">
+			<description>
+				Ensure post reset mocking is working in normal way.
+			</description>
+
+			<s:mock-server-reset name="testMockServer"/>
+			
+			<s:mock-response method="POST" name="testMockServer" responseStatusCode="200" uri="/test/work">
+				<response-header name="Content-Type">application/json</response-header>
+			
+				<responseBody>
+					{
+						"code": 100
+					}
+				</responseBody>
+			</s:mock-response>
+		
+			<s:rest-invoke-post baseUrl="http://localhost:9944" responseContextAttribure="apiResult" uri="/test/work" >
+				<body>json:
+					{
+						"reqId": 13456
+					}
+				</body>
+			</s:rest-invoke-post>
+
+			<!-- Ensure response is obtained as expected -->
+			<s:assert-equals actual="expr: attr.apiResult.code" expected="int: 100"/>
+
+			<!-- Fetch the requests received on mock server and validate -->
+			<s:mock-fetch-request name="testMockServer" attributeName="mockRequests" uriFilter="/test/work" methodFilter="POST"/>
+
+			<s:assert-equals actual="expr: (attr.mockRequests)?size" expected="int: 1"/>
+			<s:assert-equals actual="expr: attr.mockRequests[0].body | json: $">
+				<expected>json: 
+					{
+						"reqId": 13456
+					}
+				</expected>
+			</s:assert-equals>
+		</test-case>
+
+		<test-case name="getRestWorking" dependencies="resetWorking">
+			<description>
+				Ensure GET reset mocking is working in normal way.
+			</description>
+
+			<s:mock-server-reset name="testMockServer"/>
+			
+			<s:mock-response method="GET" name="testMockServer" responseStatusCode="200" uri="/test/fetchData">
+				<response-header name="Content-Type">application/json</response-header>
+			
+				<responseBody>
+					{
+						"code": 100
+					}
+				</responseBody>
+			</s:mock-response>
+
+			<s:rest-invoke-get baseUrl="http://localhost:9944" uri="/test/fetchData?t=1" responseContextAttribure="apiResult">
+				<header name="Content-Type">application/json</header>
+				<param name="param1">value1</param>
+				<param name="param2">value2</param>
+			</s:rest-invoke-get>
+
+			<!-- Ensure response is obtained as expected -->
+			<s:assert-equals actual="expr: attr.apiResult.code" expected="int: 100"/>
+
+			<!-- Fetch the requests received on mock server and validate -->
+			<s:mock-fetch-request name="testMockServer" attributeName="mockRequests" uriFilter="/test/fetchData" methodFilter="GET"/>
+
+			<s:assert-equals actual="expr: (attr.mockRequests)?size" expected="int: 1"/>
+		</test-case>
+
+		<cleanup>
+			<s:mock-server-stop name="testMockServer"/>
+		</cleanup>
+	</test-suite>
+</test-file>

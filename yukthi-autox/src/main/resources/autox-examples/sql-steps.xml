@@ -1,0 +1,161 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.DdlQueryStep">
+		<example>
+			<description>Executing ddl query</description>
+			
+			<content><![CDATA[
+				<s:sql-ddl-query dataSourceName="dataSource">
+					<query>
+						CREATE TABLE EMPLOYEE
+						(
+							ID		INT,
+							NAME	VARCHAR(100)
+						)
+					</query>
+				</s:sql-ddl-query>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.DmlQueryStep">
+		<example>
+			<description>Executing dml query and validating number of rows affected</description>
+			
+			<content><![CDATA[
+				<s:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
+					<query>
+						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
+					</query>
+				</s:sql-dml-query>
+
+				<s:assert-equals actual="attr: updateCount" expected="int: 1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.FetchValueQueryStep">
+		<example>
+			<description>Executing dml query and validating number of rows affected</description>
+			
+			<content><![CDATA[
+				<s:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
+					<query>
+						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
+					</query>
+				</s:sql-dml-query>
+
+				<s:assert-equals actual="attr: updateCount" expected="int: 1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.FetchValueQueryStep">
+		<example>
+			<description>Fetching value using query and validating it</description>
+			
+			<content><![CDATA[
+				<s:sql-fetch-value-query contextAttribute="empId" dataSourceName="dataSource">
+					<query>
+						SELECT ID
+						FROM EMPLOYEE
+						WHERE NAME = 'employee1'
+					</query>
+				</s:sql-fetch-value-query>
+
+				<s:assert-equals actual="attr: empId" expected="int: 1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.LoadQueryColumnListStep">
+		<example>
+			<description>Fetching single column values as list</description>
+			
+			<content><![CDATA[
+				<s:sql-load-query-column-list contextAttribute="empNames" dataSourceName="dataSource">
+					<query>
+						SELECT NAME
+						FROM EMPLOYEE
+						WHERE NAME IN ('employee1', 'employee2')
+						ORDER BY NAME
+					</query>
+				</s:sql-load-query-column-list>
+
+				<s:assert-equals actual="attr: empNames" expected="list: employee1, employee2"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.MultiDmlQueryStep">
+		<example>
+			<description>Executing multiple dml queries in single transaction</description>
+			
+			<content><![CDATA[
+				<s:sql-multi-dml-query dataSourceName="dataSource">
+					<query>
+						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
+					</query>
+				
+					<query>
+						INSERT INTO EMPLOYEE VALUES (3, 'employee2')
+					</query>
+				</s:sql-multi-dml-query>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.sql.assertion.SqlAssert">
+		<example>
+			<description>
+				Fetching the data and validating the columns. Rows returned by query and expected rows
+				order should match.
+			</description>
+			
+			<content><![CDATA[
+				<s:sql-assert dataSourceName="dataSource">
+					<query>
+						SELECT NAME, AGE 
+						FROM EMPLOYEE 
+						WHERE AGE < 40
+						ORDER BY NAME
+					</query>
+				
+					<expectedRow>
+						<column name="NAME">employee1</column>
+						<column name="AGE">20</column>
+					</expectedRow>
+
+					<expectedRow>
+						<column name="NAME">employee2</column>
+						<column name="AGE">30</column>
+					</expectedRow>
+				</s:sql-assert>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.sql.steps.LoadQueryRowMapStep">
+		<example>
+			<description>
+				Fetchs the rows from the db using SQL. Result will be list of maps, each row will be converted into map.
+				Along with fetch, column transformations can be applied using "column-transformation" using column name as attribute. 
+				And node value will be expression which can do required transformation.
+			</description>
+			
+			<content><![CDATA[
+				<s:sql-load-query-row-map contextAttribute="empNames" dataSourceName="dataSource">
+					<query>
+						SELECT NAME
+						FROM EMPLOYEE
+						WHERE NAME IN ('employee1', 'employee2')
+						ORDER BY NAME
+					</query>
+					
+					<column-transformation column="NAME">expr: parseJson(attr.result.columnValue)</column-transformation>
+				</s:sql-load-query-row-map>
+			]]></content>
+		</example>
+	</collection>
+</examples>

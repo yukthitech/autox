@@ -1,0 +1,47 @@
+/**
+ * Copyright (c) 2022 "Yukthi Techsoft Pvt. Ltd." (http://yukthitech.com)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.yukthitech.autox.test;
+
+import java.util.List;
+
+/**
+ * Abstraction of data provider.
+ * @author akiran
+ */
+public interface IDataProvider
+{
+	/**
+	 * Name of the data provider, which in turn will be used to set data on context
+	 * at time of test case execution.
+	 * @return Name of the data provider.
+	 */
+	public String getName();
+	
+	/**
+	 * Provides the list of step data using which test case needs to be repeated.
+	 * @return list of step data.
+	 */
+	public List<TestCaseData> getStepData();
+	
+	/**
+	 * If enabled, expressions will be parsed before test-case/step execution at data level.
+	 * @return true if parsing should be avoided.
+	 */
+	public default boolean isParsingEnabled()
+	{
+		return false;
+	}
+}

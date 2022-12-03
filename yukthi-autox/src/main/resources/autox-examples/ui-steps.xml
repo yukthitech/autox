@@ -1,0 +1,138 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.ClickAndDownloadStep">
+		<example>
+			<description>Clicks a link in ui to download file</description>
+			
+			<content><![CDATA[
+				<s:ui-click-and-download locator="id: downloadLink" pathName="filePath"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.ClickStep">
+		<example>
+			<description>Click the element using locator</description>
+			
+			<content><![CDATA[
+				<s:ui-click locator="id: button"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.CloseWindowStep">
+		<example>
+			<description>Click the element using locator</description>
+			
+			<content><![CDATA[
+				<s:ui-open-window url="/index.html" name="Index"/>
+				<s:ui-switch-window locator="Index"/>
+				<s:ui-is-visible locator="id: button" name="visibFlag1"/>
+				<s:ui-close-window />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.GotoPageStep">
+		<example>
+			<description>Filling html form</description>
+			
+			<content><![CDATA[
+				<s:ui-goto-page uri="/index.html" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.IsVisibleStep">
+		<example>
+			<description>Checking for visibility of element</description>
+			
+			<content><![CDATA[
+				<s:ui-is-visible locator="id: testLayer" name="visibFlag1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.LogScreenShotStep">
+		<example>
+			<description>Taking screen shot of the screen</description>
+			
+			<content><![CDATA[
+				<s:ui-log-screen-shot name="test.png" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.OpenWindowStep">
+		<example>
+			<description>Opening a new window</description>
+			
+			<content><![CDATA[
+				<s:ui-open-window url="/index.html" name="Index"/>
+				<s:ui-switch-window locator="Index"/>
+				<s:ui-is-visible locator="id: button" name="visibFlag1"/>
+				<s:ui-close-window />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.UiGetElementsStep">
+		<example>
+			<description>Getting elements using locator</description>
+			
+			<content><![CDATA[
+				<s:ui-get-elements locator="xpath: //input[@type='checkbox']" name="checkBoxes"/>
+
+				<s:forEach expression="attr.checkBoxes" loopVar="cbox">
+					<s:set expression="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
+				</s:forEach>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.UiGetValueStep">
+		<example>
+			<description>Getting value of specified locator</description>
+			
+			<content><![CDATA[
+				<s:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.UiSetValueStep">
+		<example>
+			<description>Setting value of element with specified locator</description>
+			
+			<content><![CDATA[
+				<s:ui-set-value locator="xpath: //input[@name='statusFld']" value="OPEN"/>
+			]]></content>
+		</example>
+	</collection>
+
+
+	<collection name="com.yukthitech.autox.test.ui.assertion.AssertVisibility">
+		<example>
+			<description>Asserts the visibility of ui element</description>
+			
+			<content><![CDATA[
+				<s:ui-assert-visibility locator="id: downloadLink"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.UiExecuteJsStep">
+		<example>
+			<description>Clicking an ui element using javascript</description>
+			
+			<content><![CDATA[
+				<s:ui-execute-js>
+					<script>
+						document.getElementById("changeByJs").click()
+					</script>
+				</s:ui-execute-js>
+			]]></content>
+		</example>
+	</collection>
+</examples>

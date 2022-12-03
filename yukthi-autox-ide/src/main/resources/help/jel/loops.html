@@ -1,0 +1,148 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="[[URL] /help/jel/jel-style.css]">
+</head>
+
+<body>
+	<h3>Loops</h3>
+
+	<p>
+		When elements has to be repeated dynamically based on data from context, then loops play major role.
+		
+		<ul>
+			<li>
+				<b>List values</b>: Loops for List elements: A map element of a list can be repeated using @for-each attribute in the map. 
+				Which defines the loop variable and list of elements to loop through. The value of this key will be treated as 
+				free-marker value expression by default.
+			</li>
+			<li>
+				<b>Map Entries</b>: Just like list elements, we can use loops in map-entries also. And in general, in such cases, the key 
+				of entry which is getting repeated will also be an expression. And will have access to the current loop variable.
+			</li>
+		</ul>
+	</p>
+
+	<div class="example-box">
+		<div class="example-heading">
+			List Example
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"containers": [
+				{
+					"<span class="simple-blue">@for-each(cont)</span>": "containers",
+					"name": "<span class="simple-blue">${cont}</span>",
+					"desc": "This is container <span class="simple-blue">${cont}</span>"
+				}
+			]
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, a loop variable "cont" is used and within current object it can be accessed as a context variable. 
+				And it loops through the context value returned by "containers".
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			List Elements Example
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"containers": [
+				{
+					"<span class="simple-blue">@for-each(cont)</span>": "containers",
+					"name": "<span class="simple-blue">${cont}</span>",
+					"desc": "This is container <span class="simple-blue">${cont}</span>"
+				}
+			]
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, a loop variable "cont" is used and within current object it can be accessed as a context variable. 
+				And it loops through the context value returned by "containers".
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Map Entries Example
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"fullContainers": {
+				"@fmarker: <span class="simple-blue">cont</span>": {
+					"<span class="simple-blue">@for-each(cont)</span>": "containers",
+					"days": "100"
+				}
+			}
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, the element will generate key-value pair for every element returned by "cotainers" 
+				expression. And the key of generated entry, uses container name itself. So if "containers" returns 3 elements, 
+				then in final json "fullContainers" will have 3 entries with container name as key and "days=100" as the map entry.
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Using static list for loop
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"containers": {
+				"@fmarker: <span class="simple-blue">cont</span>": {
+					"<span class="simple-blue">@for-each(cont)</span>": [ "bank", "investment", "card" ],
+					"days": "100"
+				}
+			}
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In this case a simple json list can be specified as shown below for looping.
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Inclusion/exclusion within loop
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"containers": {
+				"@fmarker: <span class="simple-blue">cont</span>": {
+					"<span class="simple-blue">@for-each(cont)</span>": [ "bank", "investment", "card" ],
+					"<span class="simple-blue">@for-each-condition</span>": "isEnabled(cont)",
+					"days": "100"
+				}
+			}
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				Within the loop the object inclusion and exclusion can be done using 
+				<span class="simple-blue">@for-each-condition</span> which will be evaluated for each iteration.
+			</p>
+		</div>
+	</div>
+</body>
+</html>

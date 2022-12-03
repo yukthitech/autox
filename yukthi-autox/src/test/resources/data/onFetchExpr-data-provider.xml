@@ -1,0 +1,26 @@
+<test-data-list>
+	<test-case-data name="case1" onFetchEval="true">
+		<dynamic-value>
+			<expression>${attr.counterVal?c}</expression>
+			<expectedVal>1</expectedVal>
+		</dynamic-value>
+	</test-case-data>
+	<test-case-data name="case2" onFetchEval="true">
+		<dynamic-value>
+			<expression>${attr.counterVal?c}</expression>
+			<expectedVal>2</expectedVal>
+		</dynamic-value>
+	</test-case-data>
+	<test-case-data name="case3" onFetchEval="true">
+		<dynamic-value>
+			<expression>${attr.counterVal?c}</expression>
+			<expectedVal>3</expectedVal>
+		</dynamic-value>
+	</test-case-data>
+	<test-case-data name="case4">
+		<dynamic-value>
+			<expression>${attr.counterVal?c}</expression>
+			<expectedVal>${attr.counterVal?c}</expectedVal>
+		</dynamic-value>
+	</test-case-data>
+</test-data-list>

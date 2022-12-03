@@ -1,0 +1,51 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
+	<testSuite name="debug-flow">
+		<description>
+			Used to testing debug functionality.
+		</description>
+		
+		<setup>
+			<s:log message="Setup- Line 1"/>
+			<s:log message="Setup- Line 2"/>
+		</setup>
+		
+		<function name="function1">
+			<s:log message="function1- Line 1"/>
+			<s:log message="function1- Line 2"/>
+		</function>
+		
+		<function name="function2">
+			<s:log message="function2- Line 1"/>
+			<s:log message="function2- Line 2"/>
+			
+			<f:function1/>
+		</function>
+
+		<testCase name="debugTest1">
+			<description>
+				First test case.
+			</description>
+			
+			<s:log message="TC1- Line 1"/>
+			<s:log message="TC1- Line 2"/>
+			
+			<f:function2/>
+		</testCase>
+	
+		<testCase name="debugExprTest">
+			<description>
+				First test case.
+			</description>
+			
+			<s:set expression="someAttr" value="int: 10"/>
+			<s:log message="This is line where using debug attr value is expected to be changed.."/>
+			
+			<s:assert-equals actual="attr: someAttr" expected="int: 100"/>
+		</testCase>
+
+		<cleanup>
+			<s:log message="Cleanup- Line 1"/>
+			<s:log message="Cleanup- Line 2"/>
+		</cleanup>
+	</testSuite>
+</testData>

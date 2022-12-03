@@ -1,0 +1,9 @@
+/target/
+/test-output/
+/output/
+/work/
+/derby.log
+/data/
+/ide-state.dat
+/autox-ide.state
+/autox-work/

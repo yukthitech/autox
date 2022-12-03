@@ -1,0 +1,71 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="$fmethod.attr">
+		<example>
+			<description>Using attr with type while setting attribute value. Below example sets value 10 (integer) on context with name intAttr1</description>
+			
+			<content><![CDATA[
+				<s:set expression="attr(int): intAttr1" value="10"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Using attr to access context attribute value</description>
+			
+			<content><![CDATA[
+				<s:assert-not-null value="attr: intAttr" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$fmethod.regexParse">
+		<example>
+			<description>
+				Extracing values using standard regex groups. In below example, an attribute with name "dataMap" will be set as a map with structure 
+				{name=abc, age=12}
+			</description>
+			
+			<content><![CDATA[
+				<s:set expression="dataMap">
+					<value><![CDATA[
+						expr: regexParse("some text NAME=abc AGE=12 end", 'NAME\\=(?<name>\w+)\\s+AGE\\=(?<age>\w+)')
+					</value>
+				]]>]]&gt;<![CDATA[</s:set>
+			]]></content>
+		</example>
+
+		<example>
+			<description>When using as part of attribute or direct text the &lt; and &gt; symbols should be escaped properly.</description>
+			
+			<content><![CDATA[
+				<s:set expression="jobIdMap" value="expr: regexParse(toText(attr.result.headers.JUGGLER_LOG_URL[0]), 'jobId\\=(?&lt;jobId&gt;.*)')"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$fmethod.regexParseMatch">
+		<example>
+			<description>
+				Extracing values using standard regex groups. In below example, an attribute with name "dataMap" will be set as a map with structure 
+				{name=abc, age=12}
+			</description>
+			
+			<content><![CDATA[
+				<s:set expression="dataMap">
+					<value><![CDATA[
+						expr: regexParseMatch("NAME=abc AGE=12", 'NAME\\=(?<name>\w+)\\s+AGE\\=(?<age>\w+)')
+					</value>
+				]]>]]&gt;<![CDATA[</s:set>
+			]]></content>
+		</example>
+
+		<example>
+			<description>When using as part of attribute or direct text the &lt; and &gt; symbols should be escaped properly.</description>
+			
+			<content><![CDATA[
+				<s:set expression="jobIdMap" value="expr: regexParseMatch(toText(attr.result.headers.JUGGLER_LOG_URL[0]), 'jobId\\=(?&lt;jobId&gt;.*)')"/>
+			]]></content>
+		</example>
+	</collection>
+</examples>

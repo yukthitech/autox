@@ -1,0 +1,16 @@
+In google chrome create a new profile and set download-directory and other required settings. 
+
+Type chrome://version/ in address bar. Which will have ur profile info along with "Profile Path"
+	On windows it would be something like C:\Users\akranthikiran\AppData\Local\Google\Chrome\User Data\Profile 1
+	
+Copy the full user-data-dir (C:\Users\akranthikiran\AppData\Local\Google\Chrome\User Data) to ur desired location.
+
+In autox configure chrome driver something like below
+	<driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
+		<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
+		<profile-option name="enable.console.logs">true</profile-option>
+		<downloadFolder>E:\auto-config\downloads</downloadFolder>
+
+		<userDataDir>E:\auto-config\User Data</userDataDir>
+		<profileFolder>Profile 1</profileFolder>
+	</driver>

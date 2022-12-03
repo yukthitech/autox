@@ -1,0 +1,114 @@
+<rest-step-templates xmlns:ccg="/fw/ccg/XMLBeanParser"
+	xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<ccg:exprPattern enabled="false" />
+
+	<step-template name="invokePostWithraw"><![CDATA[
+		<ccg:invokePost uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<body><![CDATA[
+					${rawBody}
+			>>]]</body>
+		</ccg:invokePost>
+	]]></step-template>
+	
+	<step-template name="invokePostWithparams"><![CDATA[
+		<ccg:invokePost uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<#list paramList as param>
+				<param name="${param.name}">${param.value}</param>
+			</#list>
+		</ccg:invokePost>
+	]]></step-template>
+	
+	<step-template name="invokePostWithmultiPart"><![CDATA[
+		<ccg:invokePost uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<#list multiPartlist as multipart>
+				<#if multipart.type='raw'>
+					<part name="${multipart.name}">
+						<value>${multipart.value}</value>
+					</part>
+				</#if>
+				<#if multipart.type='file'>
+					<attachment file="${multipart.value}" name="file"/>
+				</#if>
+				<#if multipart.type='template'>
+					<attachment file="${multipart.value}" name="file" template="true"/>
+				</#if>				
+			</#list>
+		</ccg:invokePost>
+	]]></step-template>
+	
+	<step-template name="invokePutWithparams"><![CDATA[
+		<ccg:invokePost uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<#list paramList as param>
+				<param name="${param.name}">${param.value}</param>
+			</#list>
+		</ccg:invokePost>
+	]]></step-template>
+	
+	<step-template name="invokePutWithmultiPart"><![CDATA[
+		<ccg:invokePut uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<#list multiPartlist as multipart>
+				<#if multipart.type='raw'>
+					<part name="${multipart.name}">
+						<value>${multipart.value}</value>
+					</part>
+				</#if>
+				<#if multipart.type='file'>
+					<attachment file="${multipart.value}" name="file"/>
+				</#if>
+				<#if multipart.type='template'>
+					<attachment file="${multipart.value}" name="file" template="true"/>
+				</#if>				
+			</#list>
+		</ccg:invokePut>
+	]]></step-template>
+	
+	<step-template name="invokePutWithraw"><![CDATA[
+		<ccg:invokePut uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<body><![CDATA[
+					${rawBody}
+			>>]]</body>
+		</ccg:invokePut>
+	]]></step-template>
+	
+	<step-template name="invokeDelete"><![CDATA[
+		<ccg:invokeDelete uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<#list pathVariables as path>
+				<path-variable name="${path.name}">${path.value}</path-variable>
+			</#list>
+		</ccg:invokeDelete>
+	]]></step-template>
+	
+	<step-template name="invokeGet"><![CDATA[
+		<ccg:invokeGet uri="${uri}">
+			<#list headers as header>
+				<header name="${header.name}">${header.value}</header>
+			</#list>
+			<#list pathVariables as path>
+				<path-variable name="${path.name}">${path.value}</path-variable>
+			</#list>
+		</ccg:invokeGet>
+	]]></step-template>
+
+
+</rest-step-templates>

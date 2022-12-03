@@ -1,0 +1,18 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="">
+		<test-case name="">
+			<description></description>
+
+			<wrap:steps>
+			</wrap:steps>
+
+			<wrap:validations>
+			</wrap:validations>
+		</test-case>
+	</test-suite>
+
+</test-file>

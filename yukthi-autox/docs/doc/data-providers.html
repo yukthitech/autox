@@ -1,0 +1,104 @@
+<h2>Data Providers</h2>
+
+Test cases can be configured to be executed for different configurations using data providers. Data providers providers list of object, for each object 
+the target test case will be executed. The current object can be accessed using using data-provider name. 
+<BR/><BR/>
+Custom data providers can be created by implementing <b><i>com.yukthitech.autox.test.IDataProvider</i></b> interface directly or indirectly.
+<BR/><BR/>
+The most commonly used data-provider is list data-provider which can be used to provide embedded objects or externalized data as shown in examples below:
+
+<Br/><Br/>
+<B>Example for embedded Data</B>
+<pre><code class="xml">
+&lt;testCase name="invoke_Method_With_Data_Provder"&gt;
+	&lt;description&gt;
+		Invokes simple method on bean with data provider and
+		ensures data-provider working.
+	&lt;/description&gt;
+
+	&lt;list-data-provider name="dataString"&gt;
+		&lt;data&gt;abc&lt;/data&gt;
+		&lt;data&gt;def&lt;/data&gt;
+		&lt;data&gt;ghi&lt;/data&gt;
+	&lt;/list-data-provider&gt;
+
+	&lt;wrap:steps&gt;
+		&lt;ccg:invokeMethod method="toText"
+			paramTypes="com.yukthitech.test.beans.NameBean" deepCloneParams="true"&gt;
+			&lt;object ccg:beanRef="beanFromTestSuite" /&gt;
+
+			&lt;parameter ccg:beanType="com.yukthitech.test.beans.NameBean"
+				name="${attr.dataString}"&gt;
+			&lt;/parameter&gt;
+		&lt;/ccg:invokeMethod&gt;
+	&lt;/wrap:steps&gt;
+
+	&lt;wrap:validations&gt;
+		&lt;ccg:validateContextParam expression="attr.returnValue"
+			value="beanFromTestSuite=&gt;${attr.dataString}" /&gt;
+	&lt;/wrap:validations&gt;
+&lt;/testCase&gt;
+</code></pre>
+<BR/><BR/>
+
+<B>Example for externalized Data</B>
+<pre><code class="xml">
+&lt;testCase name="invoke_Method_With_Ext_Data_Provder"&gt;
+	&lt;description&gt;
+		Invokes simple method on bean with externalized data provider and
+		ensures data-provider working.
+	&lt;/description&gt;
+
+	&lt;list-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.json" /&gt;
+
+	&lt;wrap:steps&gt;
+		&lt;ccg:invokeMethod method="halfOf" paramTypes="int" deepCloneParams="true"&gt;
+			&lt;object ccg:beanRef="testUtils" /&gt;
+
+			&lt;parameter&gt;${attr.extDataProvider.paramValue}&lt;/parameter&gt;
+		&lt;/ccg:invokeMethod&gt;
+	&lt;/wrap:steps&gt;
+
+	&lt;wrap:validations&gt;
+		&lt;ccg:validateContextParam expression="attr.returnValue"
+			value="${attr.extDataProvider.result}" /&gt;
+	&lt;/wrap:validations&gt;
+
+	&lt;expectedException enabled="${attr.extDataProvider.exception?c}"	type="com.yukthitech.utils.exceptions.InvalidStateException"&gt;
+		&lt;property name="message" value="Value can not be less than zero: ${attr.extDataProvider.paramValue}" /&gt;
+	&lt;/expectedException&gt;
+&lt;/testCase&gt;
+</code></pre>
+<B>/data/ext-data-provider.json</B>
+<pre><code class="json">
+[
+	{
+		"name": "case1",
+		"value" : {
+			"paramValue": 10,
+			"result": 5,
+			"exception": false
+		}
+	},
+	
+	{
+		"name": "case2",
+		"value" : {
+			"paramValue": 2,
+			"result": 1,
+			"exception": false
+		}
+	},
+
+	{
+		"name": "case3",
+		"value" : {
+			"paramValue": -10,
+			"exception": true
+		}
+	}
+	
+]
+</code></pre>
+<BR/><BR/>
+

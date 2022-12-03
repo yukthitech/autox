@@ -1,0 +1,11 @@
+<test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<test-suite name="spreadTestSuite">
+		<setup>
+			<s:log message="Setup is getting executed..."/>
+			<s:set expression="varVal" value="int: 10"/>
+		</setup>
+		<cleanup>
+			<s:log message="Cleanup is getting executed"/>
+		</cleanup>
+	</test-suite>
+</test-file>

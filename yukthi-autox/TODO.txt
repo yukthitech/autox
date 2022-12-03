@@ -1,0 +1,263 @@
+24/7
+-----
+else-if, else as separate steps
+
+Proj tree node optimization
+	when nodes are added or inserted right events has to be fired.
+	
+search within console
+
+deep equals should give all differences in log
+	path should be constructed for error path (id, name, key)
+		extra keys should be accepted as attr
+
+
+
+==================================================
+Data provider change - jsonContext in clone and other places support "json:" prefix. Better to support all standard prefixes
+
+classpath should come from maven not from lib folder
+
+Though mssg "As this is interactive environment, skipping the report generation" comes in console (TestSuiteExecutor.java # 788)
+	interactive in-progress dialog is not going off
+
+
+For all steps where enum field is involved, the doc should include possible values (Eg: log level)
+
+find or filter in console
+
+if-else should be separate and sequential steps
+
+console content should get auto cleaned once threshold is reached
+
+
+06/04/21
+-=========
+Delete project
+	not removing from state file. So it reopens in next start
+	index is not getting corrected, becos of which files are accessible from old location
+	
+Open Project
+	should update state file and index immediately
+	
+
+06-8
+====
+
+Extra closing bracket is not showing error:
+	<f:addJwt env="stage" statusCode="200">>
+	
+Sometimes in interactive env console logs are not coming
+
+
+19/11
+-====
+	Warnings to be shown in ide
+		when "." is used in "attr:" expression indicate it might be mistake
+		when ${} expressions are used within freemarker context
+		
+		>, <, &gt; &lt; should not be used in <s:if> step as it will result in problems
+			in s:if itself we can replace, that is one way
+
+06/11
+	Data-setup and cleanup logs are added as part of first and last steps resp.
+	Instead it should be handled separately. 
+
+11/10
+	STATS
+	=====
+		Steps to 
+			store stats data (date wise)
+			generate graph image - store generated path to context
+			send mail (with fmarker template) with support of embedding images
+			
+	SEARCH
+	=====
+		ability to search multiple files in proj explorer
+
+	DEBUG
+	=======
+		In interactive environment 
+			we should be able to set debug points
+			on F8 control should go to next debug point
+			on F5 control should get into method if any
+			F6 execute current step and move to next step
+			
+		Ability to start debug from scratch with above features
+			on change of current file and saving, current file should load and should take affect
+				if needed drop to start of function / test case
+				
+	RUN
+	===
+		Recently executions should come under run drop down
+		Run configuration dialog
+			to customize command line args
+			jvm args
+			class path etc
+			
+		upto date running report should be generated
+		
+	Ability to do performance related testing
+	
+	In progress dialog is not that good looking
+	
+
+26/07
+	fix search in reports
+	
+	Externalize a value to app properties
+		should have ability to find this value in all test cases externalize it
+
+
+19/07/2019
+
+Making <set> specific to function/test cases (stack wise)
+Multi threaded execution.
+On going report generation
+	should append data to text or some struct file
+	Html should be able to read from this file
+	should reload the file every few secs... till the status is completed or errored
+May have to display the log page wise
+Fix the filter problem in log files
+
+In  IDE
+	JX path play area (ability to evaluate jx path on input json, add, get and remove)
+		with docs (from online? )
+	Recently executed menu
+		
+
+Click step - 
+	Wait time should be configurable
+	
+All ui files should 
+
+
+==================================
+step to execute substeps in parallel
+	step to simply group the steps. So that multiple groups can be executed in parallel
+	
+To store analytics data in a execution or across the execution
+	generate graphs using this analytics data
+	
+Ability to include graphs within summary mails and reports
+
+======================
+Collection/map steps
+	create new collection/map
+	add/put an entry
+	remove an entry
+	filter entries
+		filter based on free marker expression
+		result as different attr or same (defaults to same)
+	find an entry (similar to filter but results in single entry)
+	compare 2 collections for equality
+	contains all functionality
+
+Remove raw resource types and ccg:skipExpressions for skipping expression parsing
+	this should set flag on context which should be referrd in automation utils
+	
+In SetStep and others wherever object is expected we should be able to inject value using ccg:attrRef
+
+===================
+	Default data source should be possible
+	
+	
+
+	Ability to specify load order
+
+	Step to comparare collections (ordered and unordered)
+
+	
+	rest steps to use different base urls
+	
+	Test cases for ui steps/validators
+	
+	customizations doc
+	
+	Step group doc
+
+	screen shot on error
+	
+	
+	
+	Step to fail test case
+	
+	not equals validation
+
+	renmote log
+		fetch only on error
+		enabled/disabled
+		
+	logger should be enabled on demand, or may want to enabled only on error
+
+Exection plan
+	executing dependency test cases
+
+In final report skip test suites which are not executed
+
+artifacts/Doc upload to yukthitech.com
+
+========================
+Doc
+============
+Examples for each
+other documents
+
+command line arguments doc
+resource and references
+data beans and load time references
+
+expected exception doc
+
+step groups and references
+
+==============
+
+Extra params in final report
+	like build, environment, date, custom params
+	
+	
+time taken by test cases and steps
+
+Line number in xml based errors
+
+================================================
+Reports
+	Simple overview report without external dependencies
+		as pdf??
+		logo??
+	
+==========================
+
+
+
+why first driver is not being used?
+
+=======================================
+
+Test Cases
+	Expected Exception
+		Successful
+		never occurred
+		mismatched
+	
+	Basic
+		step results in error
+		validation result in error
+		validation failed
+		
+	Data provider
+		provides empty list
+		one object results in error
+		one object results in failure
+		
+		
+	test cases to validate cmd args
+
+	file upload and download
+		resources
+		
+	test case to ensure skip and failure
+========================================
+Listener and ui
+	

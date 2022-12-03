@@ -1,0 +1,51 @@
+globalSetup
+	aTestSuiteSetup
+		aBeforeTestCase
+			aSuccessTestCaseSetup
+			aSuccessTestCase
+			aSuccessTestCaseCleanup
+		aAfterTestCase
+		
+		aBeforeTestCase
+			aSuccessTestCase2
+			aSuccessTestCase2Cleanup
+		aAfterTestCase
+		
+		aBeforeTestCase
+			aDepTestCase
+		aAfterTestCase
+		
+		aBeforeTestCase
+			aTestCaseErrorSetup
+			aTestCaseError
+			aTestCaseErrorSetupCleanup
+		aAfterTestCase
+		
+		aBeforeTestCase
+			aTestSetupErrorSetup
+		aAfterTestCase
+	
+	aTestSuiteCleanup
+	
+	bTestSuiteSetup
+		bBeforeTestCase
+			bDataProviderTestCaseDataSetup
+				bDataProviderTestCaseSetup_case1
+					bDataProviderTestCase_case1
+				bDataProviderTestCaseCleanup_case1
+
+				bDataProviderTestCaseSetup_case2
+					bDataProviderTestCase_case2
+				bDataProviderTestCaseCleanup_case2
+
+				bDataProviderTestCaseSetup_case3
+					bDataProviderTestCase_case3
+				bDataProviderTestCaseCleanup_case3
+
+				bDataProviderTestCaseSetup_case4
+					bDataProviderTestCase_case4
+				bDataProviderTestCaseCleanup_case4
+			bDataProviderTestCaseDataCleanup
+		bAfterTestCase
+	bTestSuiteCleanup
+globalCleanup

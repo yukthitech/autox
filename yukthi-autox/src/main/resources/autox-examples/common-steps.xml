@@ -1,0 +1,188 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.common.steps.LogStep">
+		<example>
+			<description>Logging simple message at default level (DEBUG)</description>
+			
+			<content><![CDATA[
+				<s:log message="This message is from step group"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Logging multiple messages and by using expressions</description>
+			
+			<content><![CDATA[
+				<s:log>
+					<message>Invoking method using object from app config: </message>
+					<message>prop: data.beanFromApp</message>
+				</s:log>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Logging at specific level</description>
+			
+			<content><![CDATA[
+				<s:log level="SUMMARY" message="Time taken during test was: 100"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.MkDirStep">
+		<example>
+			<description>Creating dir in work folder</description>
+			
+			<content><![CDATA[
+				<s:mkdir path="tmp/test1" name="tmpDir"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.RemoveStep">
+		<example>
+			<description>Removing context attribute</description>
+			
+			<content><![CDATA[
+				<s:remove name="tmpDir"/>
+			]]></content>
+		</example>
+		<example>
+			<description>
+				Removing using xpath expression - key in a map.
+			</description>
+			<content><![CDATA[
+				<s:set expression="bean">
+					<value>
+						json:
+						{
+							"key1" : "value1",
+							"key2" : "value2",
+							"arr": [1, 2, 3, 4, 5],
+							"strArr": ["one", "two", "three"]
+						}
+					</value>
+				</s:set>
+
+				<s:remove expression="xpath: /attr/bean/key2"/>
+			]]></content>
+		</example>
+		<example>
+			<description>
+				Removing using xpath expression - to remove element in a list using index. Note: In xpath idex starts with 1 (not zero). 
+			</description>
+			<content><![CDATA[
+				<s:remove expression="xpath: /attr/bean/arr[2]"/>
+			]]></content>
+		</example>
+		<example>
+			<description>
+				Removing using xpath expression - to remove element in a list using value. 
+			</description>
+			<content><![CDATA[
+				<s:remove expression="xpath: /attr/bean/strArr[contains(., 'two')]"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.SetStep">
+		<example>
+			<description>Setting context attribute with type</description>
+			
+			<content><![CDATA[
+				<s:set expression="intAttr" value="int: 10" />
+				<s:set expression="attr(int): intAttr1" value="10"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Using piped expressions for setting the value</description>
+			
+			<content><![CDATA[
+				<s:set expression="propAttr1" value="file:./src/test/resources/data/data1.json | prop: bean1.prop1"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Setting property (instead of default context attribute)</description>
+			
+			<content><![CDATA[
+				<s:set expression="prop: attr.beanForTest.key1" value="newValue1" />
+			]]></content>
+		</example>
+
+		<example>
+			<description>Setting property using json</description>
+			
+			<content><![CDATA[
+				<s:set expression="beanForTest">
+					<value>json:
+						{
+							"key1" : "value1",
+							"key2" : "value2"
+						}
+					</value>
+				</s:set>
+			]]></content>
+		</example>
+	</collection>
+
+
+	<collection name="com.yukthitech.autox.test.common.steps.SleepStep">
+		<example>
+			<description>Sleep for specified number of millis (default time units)</description>
+			
+			<content><![CDATA[
+				<s:sleep time="5000"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Sleep using non-default time units</description>
+			
+			<content><![CDATA[
+				<s:sleep time="10" timeUnit="SECONDS"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.StartTimerStep">
+		<example>
+			<description>Starting/stopped timer with specified name</description>
+			
+			<content><![CDATA[
+				<s:start-timer name="timeTaken"/>
+				<s:sleep time="10" timeUnit="SECONDS"/>
+				<s:stop-timer name="timeTaken"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.StopTimerStep">
+		<example>
+			<description>Starting/stopped timer with specified name</description>
+			
+			<content><![CDATA[
+				<s:start-timer name="timeTaken"/>
+				<s:sleep time="10" timeUnit="SECONDS"/>
+				<s:stop-timer name="timeTaken"/>
+			]]></content>
+		</example>
+	</collection>
+
+
+	<collection name="com.yukthitech.autox.test.common.steps.InvokeMethodStep">
+		<example>
+			<description>Invoking java object method</description>
+			
+			<content><![CDATA[
+				<s:invoke-method method="toText">
+					<object s:beanRef="beanFromApp" />
+
+					<parameter s:beanType="com.yukthitech.test.beans.SimpleBean" name="someName"/>
+				</s:invoke-method>
+			]]></content>
+		</example>
+	</collection>
+</examples>

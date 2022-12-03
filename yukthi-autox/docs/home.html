@@ -1,0 +1,165 @@
+<div style="width: 80%; margin-left: 10%; margin-right: 10%; border: 4px ridge rgb(190, 190, 190); padding: 2em; border-radius: 1em;">
+	<p>AutoX is pluggable testing framework where test suites and test cases are written in XML format.</p>
+	
+	Following are the advantages of this framework over other test frameworks:
+	<BR/><BR/>
+	<ul>
+		<li>
+			<B>Template Like Language: </B>
+			Template like language. So that both developers can work together on test cases without need of lot of programming expertise.
+			QA can validate the test cases written by DEV and enhance them and vice versa.
+			<br/><br/>
+			
+			<pre><code class="xml">
+&lt;testCase name="testForWithBreanAndContinue"&gt;
+	&lt;description&gt;Tests if for loop is working properly with break and continue&lt;/description&gt;
+
+	&lt;wrap:steps&gt;
+		&lt;ccg:set name="res" value=""/&gt;
+		
+		&lt;ccg:for start="1" end="20"&gt;
+			&lt;ccg:if condition="attr.loopVar % 2 != 0"&gt;
+				&lt;ccg:continue/&gt;
+			&lt;/ccg:if&gt;
+			
+			&lt;ccg:set name="res" value="${attr.res}|${attr.loopVar}"/&gt;
+			
+			&lt;ccg:if condition="attr.loopVar gte 10"&gt;
+				&lt;ccg:break/&gt;
+			&lt;/ccg:if&gt;
+		&lt;/ccg:for&gt;
+		
+		&lt;ccg:validateContextParam expression="attr.res" value="|2|4|6|8|10" /&gt;
+	&lt;/wrap:steps&gt;				
+&lt;/testCase&gt;
+			</code></pre>
+			<br/>
+		</li>
+
+
+
+
+
+
+
+		
+		<li>
+			<B>Embedded Templated Input: </B>
+			Input payloads, queries and other attributes are templated. They are supported with <a href="http://freemarker.org/">free-marker</a> templates.
+
+			<br/><br/>
+			<pre><code class="xml">
+&lt;ccg:invokeMultipartPost uri="/emp/saveWithFile"&gt;
+	&lt;part name="details"&gt;
+		&lt;value&gt;
+			{
+				"name" : "${user.name}",
+				"address": "some address"
+			}
+		&lt;/value&gt;
+	&lt;/part&gt;
+
+	&lt;attachment name="file"&gt;file:./src/test/resources/testFile.txt&lt;/attachment&gt;				
+&lt;/ccg:invokeMultipartPost&gt;
+
+&lt;ccg:dmlQuery dataSourceName="dataSource" countAttribute="updateCount"&gt;
+	&lt;query&gt;
+		UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
+	&lt;/query&gt;
+&lt;/ccg:dmlQuery&gt;
+
+			</code></pre>
+			<br/>
+
+		</li>
+
+
+
+
+
+
+		<li>
+			<B>Log Reports: </B>
+			High information log reports will be generated. Each step in the test case will result in detailed log information. These logs are searchable.
+			
+			<br/><br/>
+			<a href="img/sys-log-screenshot.png"><img src="img/sys-log-screenshot.png" style="width: 30em;"/></a>
+			<br/>  <br/>
+		</li>
+
+
+		<li>
+			<B>Log Monitors: </B>
+			Log monitor are fetch log content during test case execution.
+			Custom monitors are supported to monitor local and remote log files. The fetched log data is searchable.
+			
+			<br/><br/>
+			<pre><code class="xml">
+&lt;wrap:logMonitors&gt;
+	&lt;file-log-monitor name="client-output" path="c:\automation.log"/&gt;
+	&lt;remote-log-monitor name="sdp-server-log" host="192.168.226.126" user="centos" privateKeyPath="./src/test/resources/qa.ppk" remoteFilePath="/var/log/jboss_instance-1/startup.log"/&gt;
+&lt;/wrap:logMonitors&gt;
+			</code></pre>
+			
+			<br/>
+			<a href="img/monitor-log-screenshot.png"><img src="img/monitor-log-screenshot.png" style="width: 30em;"/></a>
+			<br/>  <br/>
+			  
+		</li>
+
+
+		<li>
+			<B>Pluggable: </B>
+			Framework is fully pluggable and can be used to test anything. Custom steps and validators can be added to use existing or custom plugins.
+			Currently supported: REST API testing, UI Automation, SQL Scripts.
+			
+			Plugins for steps/validators can be defined in application confiugration xml as shown below
+			
+			<br/><br/>
+			<pre><code class="xml">
+&lt;wrap:plugins&gt;
+
+	&lt;!-- Selenium plugin for web based automation --&gt;	
+	&lt;selenium-plugin&gt;
+		&lt;base-url&gt;#{base.url}&lt;/base-url&gt;
+		
+		&lt;wrap:drivers&gt;
+			&lt;driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver"&gt;
+				&lt;system-property name="webdriver.gecko.driver"&gt;./drivers/geckodriver.exe&lt;/system-property&gt;
+			&lt;/driver&gt;
+			&lt;driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver"&gt;
+				&lt;system-property name="webdriver.chrome.driver"&gt;./drivers/chromedriver.exe&lt;/system-property&gt;
+			&lt;/driver&gt;
+		&lt;/wrap:drivers&gt;
+	&lt;/selenium-plugin&gt;
+
+	&lt;!-- Db plugin for sql base steps --&gt;
+	&lt;db-plugin&gt;
+		&lt;dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource"&gt;
+			&lt;driverClassName&gt;org.apache.derby.jdbc.EmbeddedDriver&lt;/driverClassName&gt;
+			&lt;url&gt;jdbc:derby:#{derby.folder};create=true&lt;/url&gt;
+		&lt;/dataSource&gt;
+	&lt;/db-plugin&gt;
+	
+	&lt;rest-plugin&gt;
+		&lt;baseUrl&gt;http://localhost:8080/app/api&lt;/baseUrl&gt;
+	&lt;/rest-plugin&gt;
+		
+&lt;/wrap:plugins&gt;
+			</code></pre>
+			 
+		</li>
+
+		<li>
+			<B>UI Automation: </B>
+			Framework supports ui automation steps and validators, in which elements can be located very easily with simple string. And also
+			screen shots of the current browser state can be taken, which would be part of the log as shown below:
+			
+			<BR/><BR/>			
+			
+			<a href="img/screen-shot-log-example.png"><img src="img/screen-shot-log-example.png" style="width: 30em;"/></a>
+			<a href="img/screen-shot-img-example.png"><img src="img/screen-shot-img-example.png" style="width: 30em;"/></a>
+		</li>
+	</ul>
+
+</div>

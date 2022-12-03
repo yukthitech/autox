@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%5p %d [%t] (%F:%L) (%X{xmlLoc}) - %m%n" />
+		</Console>
+
+		<RollingFile name="logFile" fileName="c:\logs\autox-out.log"
+			 filePattern="${sys:weaver.log.path}-%d{yyyy-MM-dd}-%i.log.gz" append="false">
+			 
+			 <PatternLayout pattern="%5p %d [%t] (%F:%L) (%X{xmlLoc}) - %m%n" />
+             <Policies>
+				<SizeBasedTriggeringPolicy size="100 MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="3"/>
+			
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.yukthitech" level="trace" />
+		<Logger name="com.yukthitech.utils.rest.RestClient" level="trace" />
+		
+		<Root level="error">
+			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="logFile" />
+		</Root>
+	</Loggers>
+</Configuration>

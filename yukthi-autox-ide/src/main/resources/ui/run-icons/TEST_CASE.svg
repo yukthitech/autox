@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="83.954369mm"
+   height="92.047012mm"
+   viewBox="0 0 83.954369 92.047012"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="test_case.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.65388608"
+     inkscape:cx="396.85812"
+     inkscape:cy="315.80425"
+     inkscape:window-width="1440"
+     inkscape:window-height="837"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient21611">
+      <stop
+         style="stop-color:#ddfbfb;stop-opacity:1;"
+         offset="0"
+         id="stop21607" />
+      <stop
+         style="stop-color:#ddfbfb;stop-opacity:0;"
+         offset="1"
+         id="stop21609" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient21611"
+       id="linearGradient21613"
+       x1="6.1740394"
+       y1="53.411442"
+       x2="90.12841"
+       y2="53.411442"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-6.1740397,-7.387936)" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="mix-blend-mode:normal;fill:url(#linearGradient21613);fill-opacity:1;stroke:#4d979e;stroke-width:6.265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect952"
+       width="77.689369"
+       height="85.782013"
+       x="3.1324999"
+       y="3.1324999" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:73.1208px;line-height:1.25;font-family:sans-serif;fill:#35a7ac;fill-opacity:1;stroke:none;stroke-width:0.380837"
+       x="11.899292"
+       y="67.929634"
+       id="text6459"
+       transform="scale(1.012902,0.98726235)"><tspan
+         sodipodi:role="line"
+         id="tspan6457"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:73.1208px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#35a7ac;fill-opacity:1;stroke-width:0.380837"
+         x="11.899292"
+         y="67.929634">T</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:54.1593px;line-height:1.25;font-family:sans-serif;fill:#ff5555;fill-opacity:1;stroke:none;stroke-width:0.282079"
+       x="38.051815"
+       y="68.733337"
+       id="text6459-5"
+       transform="scale(1.0125417,0.98761366)"><tspan
+         sodipodi:role="line"
+         id="tspan6457-6"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:54.1593px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#ff5555;fill-opacity:1;stroke-width:0.282079"
+         x="38.051815"
+         y="68.733337">C</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="65.550407"
+       y="112.08311"
+       id="text39301"><tspan
+         sodipodi:role="line"
+         id="tspan39299"
+         style="stroke-width:0.264583"
+         x="65.550407"
+         y="112.08311"></tspan></text>
+  </g>
+</svg>

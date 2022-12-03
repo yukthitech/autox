@@ -1,0 +1,21 @@
+<html>
+	<body>
+		<div style="padding-bottom: 5px;">
+			<B>${node.name}</B> - ${node.description}
+		</div>
+		
+		<#assign i = node.params?size>
+		<#if i gt 0>
+			<div>
+				<span style="font-weight: bold; text-decoration: underline;">Parameters</span>
+				<ul>
+					<#list node.params as param>
+						<li>
+							<B>${param.name}</B>: ${param.description}
+						</li>
+					</#list>
+				</ul>
+			</div>	
+		</#if>
+	</body>
+</html>

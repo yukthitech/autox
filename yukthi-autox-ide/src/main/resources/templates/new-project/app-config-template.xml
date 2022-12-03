@@ -1,0 +1,106 @@
+<app xmlns:ccg="http://xmlbeanparser.yukthitech.com/reserved" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<report-name>Automation Test</report-name>
+	
+	<dateFomat>dd-MMM-yyyy</dateFomat>
+
+	<!-- 
+		Folder where test suite xmls can be found 
+	-->
+	<testSuiteFolder>./${testSuitesFolder}</testSuiteFolder>
+	
+	<!-- 
+		Persistence related configuration
+		Used by autox to persist data across executions (including stats) 
+	-->
+	<storage-repository-factory createTables="true">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="java.lang.String" ccg:params="h2">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource" driverClassName="org.h2.Driver">
+				<url>jdbc:h2:.\h2-data;AUTO_SERVER=TRUE</url>
+			</dataSource>
+		</dataStore>
+	</storage-repository-factory>
+
+	<!--
+		Specifies base packages to be scanned for steps and validators.
+		Note: By default com.yukthitech is scanned.
+	-->
+	<!--   
+		<wrap:basePackages>
+			<basePackage>com.yukthitech</basePackage>
+		</wrap:basePackages>
+	-->
+	
+	<wrap:plugins>
+	
+		<!-- 
+			Selenium plugin for web based automation
+			Should be enabled for ui based automation. 
+		-->
+		<!--  
+		<selenium-plugin>
+			<base-url>${'#'}{base.url}</base-url>
+			
+			<wrap:drivers>
+				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
+					<system-property name="webdriver.gecko.driver">./drivers/geckodriver.exe</system-property>
+				</driver>
+				
+				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
+					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
+				</driver>
+			</wrap:drivers>
+		</selenium-plugin>
+		-->
+		
+		<!-- 
+			This configuration is needed to execute SQL based steps 
+		-->
+		<!--  
+		<db-plugin>
+			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>org.apache.derby.jdbc.EmbeddedDriver</driverClassName>
+				<url>jdbc:derby:${"#"}{derby.folder};create=true</url>
+			</dataSource>
+		</db-plugin>
+		-->
+		
+		<!--
+			This configuration is required to execute rest based steps
+			Main configuration is base url of the target application 
+		 -->
+		 <!--  
+		<rest-plugin>
+			<baseUrl>http://localhost:8080/app/api</baseUrl>
+		</rest-plugin>
+		-->
+	</wrap:plugins>
+
+	<!-- 
+		Specify log monitors
+		This will help to extract logs per test case. The logs can be local or remote logs. 
+	-->
+	<!--  
+	<wrap:logMonitors>
+		<file-log-monitor name="client-output" path="c:\app.log"/>
+		<remote-log-monitor name="app-log" host="192.168.226.126" user="xyz" privateKeyPath="./src/test/resources/xyz.ppk" remoteFilePath="/var/log/jboss/server.log"/>
+	</wrap:logMonitors>
+	-->
+
+	<!--
+		After execution of test suites, the results can be mailed to targeted group using below
+		information. Header and footer templates can be used to include custom information in autox report mail. 
+	 -->
+	<!-- 
+	<summaryNotificationConfig smptpHost="smtp.company.com" userName="from@company.com" password="password">
+		<toAddressList>target1@company.com target2@company.com</toAddressList>
+		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
+		<headerTemplateFile>../config/summary-header.html</headerTemplateFile>
+		<footerTemplateFile>../config/summary-footer.html</footerTemplateFile>
+	</summaryNotificationConfig>
+	 -->
+	
+	<!-- Test case groups to be excluded. Multiple groups can be specified using , -->
+	<!--  
+	<excludedGroups>download</excludedGroups>
+	-->
+</app>

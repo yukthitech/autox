@@ -1,0 +1,4 @@
+<step-holder xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap" xmlns:s="http://autox.yukthitech.com/steps" 
+	xmlns:f="http://autox.yukthitech.com/functions" xmlns:w	="/fw/ccg/XMLBeanParser/wrap">
+	${steps}
+</step-holder>

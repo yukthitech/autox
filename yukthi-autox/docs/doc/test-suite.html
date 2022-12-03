@@ -1,0 +1,89 @@
+<h2>Test Suite</h2>
+
+A test suite can contain following:
+<BR/><BR/>
+<ol>
+
+
+	<li>
+		<B>Setup (optional)</B>: Steps to be executed before executing any test case. Setup is sequence of steps that needs to be executed 
+		before starting af any test cases within current test suite. Example:
+		<BR/><BR/>  
+<pre><code class="xml">
+&lt;setup&gt;
+	&lt;ccg:log message="Message from global setup."/&gt;
+	
+	&lt;ccg:ddlQuery dataSourceName="dataSource"&gt;
+		&lt;query&gt;
+			CREATE TABLE EMPLOYEE
+			(
+				ID		INT,
+				NAME	VARCHAR(100)
+			)
+		&lt;/query&gt;
+	&lt;/ccg:ddlQuery&gt;
+	
+&lt;/setup&gt;
+</code></pre>
+		<BR/><BR/>
+
+	</li>
+	
+	
+	<li>
+		<B>Test Cases</B>: One or more test cases to be executed as part of test suite. A test case is group of steps or validations to be executed. A test case will have description
+		which would used in output report. A test case should always end with a validation.
+		
+		<BR/><BR/>
+<pre><code class="xml">
+&lt;testCase name="testMultiPart" dependencies="testPost"&gt;
+	&lt;description&gt;Tests multi part post request&lt;/description&gt;
+
+	&lt;ccg:invokeMultipartPost uri="/emp/saveWithFile"&gt;
+		&lt;part name="details"&gt;
+			&lt;value&gt;
+				{
+					"name" : "Emp3",
+					"address": "some address"
+				}
+			&lt;/value&gt;
+		&lt;/part&gt;
+
+		&lt;attachment name="file" file="file:./src/test/resources/testFile.txt"/&gt;				
+	&lt;/ccg:invokeMultipartPost&gt;
+	
+	&lt;ccg:validateContextParam expression="attr.result.statusCode" value="200" /&gt;
+	
+	&lt;ccg:setXpath valueExpression="//id" name="emp3_id"&gt;
+		&lt;source&gt;${attr.response}&lt;/source&gt;
+	&lt;/ccg:setXpath&gt;
+	
+	&lt;ccg:invokeGetFile uri="/emp/getFile/{id}"&gt;
+		&lt;pathVariable name="id"&gt;${attr.emp3_id}&lt;/pathVariable&gt;
+	&lt;/ccg:invokeGetFile&gt;
+	
+	&lt;ccg:loadText resource="file:${attr.response}" contextAttribute="outputContent"/&gt;
+	
+	&lt;ccg:validateContextParam expression="attr.outputContent" value="This is simple test file for upload." /&gt;
+&lt;/testCase&gt;
+</code></pre>
+		<BR/><BR/>
+		  
+	</li>
+
+
+
+	<li>
+		<B>Cleanup (optional)</B>: Steps to be executed after executing all test cases.
+		<BR/><BR/>  
+<pre><code class="xml">
+&lt;cleanup&gt;
+	&lt;ccg:log message="Message from global cleanup."/&gt;
+&lt;/cleanup&gt;
+</code></pre>
+		<BR/><BR/>
+	</li>
+
+
+
+</ol>

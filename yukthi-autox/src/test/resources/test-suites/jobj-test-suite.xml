@@ -1,0 +1,536 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
+	<function name="simpleGroup">
+		<s:log message="This message is from step group"/>
+	
+		<s:set expression="simpleGroupOutput" value="true"/>
+	
+		<s:assert-true value="attr: simpleGroupInput"/>
+	</function>
+
+	<testSuite name="jobj-test-suites" author="kranthi, kiran">
+		<wrap:data-beans>
+			<data-bean s:beanType="com.yukthitech.test.beans.TestObject" id="beanFromTestSuite">
+				<name>beanFromTestSuite</name>
+			</data-bean>
+		
+			<data-bean s:beanType="com.yukthitech.test.beans.TestUtils" id="testUtils"/>
+		</wrap:data-beans>
+	
+		<testCase name="invokeMethodOnAppBean">
+			<description>
+				Invokes simple method on bean declared in app-config
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="attr(global=true): someGlobalAttr" value="int: 100"/>
+				
+				<s:log>
+					<message>
+						Invoking method using object from app config:
+					</message>
+				
+					<message>prop: data.beanFromApp</message>
+				</s:log>
+			
+				<s:invokeMethod method="toText">
+					<object s:beanRef="beanFromApp"/>
+				
+					<parameter s:beanType="com.yukthitech.test.beans.SimpleBean" name="someName"/>
+				</s:invokeMethod>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: returnValue" expected="string: beanFromApp:someName"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="invoke_method_On_Bean_Copy">
+			<description>
+				Invokes simple method on bean copy declared in test
+				suite.
+			</description>
+		
+			<wrap:steps>
+				<s:invokeMethod method="toText" paramTypes="com.yukthitech.test.beans.NameBean">
+					<object s:beanCopy="beanFromTestSuite">
+						<name>beanCopy</name>
+					</object>
+				
+					<parameter s:beanType="com.yukthitech.test.beans.NameBean" name="someName1"/>
+				</s:invokeMethod>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: returnValue" expected="beanCopy=&gt;someName1"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="invoke_Method_On_Suite_Bean">
+			<description>
+				Invokes simple method on bean declared in test suite.
+			</description>
+		
+			<wrap:steps>
+				<s:invokeMethod method="toText" paramTypes="com.yukthitech.test.beans.NameBean">
+					<object s:beanRef="beanFromTestSuite"/>
+				
+					<parameter s:beanType="com.yukthitech.test.beans.NameBean" name="someName1"/>
+				</s:invokeMethod>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: returnValue" expected="beanFromTestSuite=&gt;someName1"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="invoke_Method_On_Suite_Bean1">
+			<description>
+				Invokes method where an exception is expected.
+			</description>
+		
+			<wrap:steps>
+				<s:invokeMethod method="throwError">
+					<object s:beanRef="beanFromTestSuite"/>
+				</s:invokeMethod>
+			</wrap:steps>
+		
+			<expectedException type="com.yukthitech.utils.exceptions.InvalidArgumentException">
+				<property name="message" value="MESSAGE"/>
+			</expectedException>
+		</testCase>
+	
+		<testCase name="invoke_Method_With_Data_Provder">
+			<description>
+				Invokes simple method on bean with data provider and
+				ensures data-provider working.
+				
+				And also test data-setup working.
+			</description>
+		
+			<list-data-provider name="dataString">
+				<data>abc</data>
+			
+				<data>def</data>
+			
+				<data>ghi</data>
+			</list-data-provider>
+			
+			<data-setup>
+				<s:set expression="dataSetupAttr" value="data-setup-val"/>
+			</data-setup>
+		
+			<wrap:steps>
+				<s:invokeMethod deepCloneParams="true" method="toText" paramTypes="com.yukthitech.test.beans.NameBean">
+					<object s:beanRef="beanFromTestSuite"/>
+				
+					<parameter s:beanType="com.yukthitech.test.beans.NameBean" name="${attr.dataString}"/>
+				</s:invokeMethod>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: returnValue" expected="beanFromTestSuite=&gt;${attr.dataString}"/>
+				<s:assert-equals actual="attr: dataSetupAttr" expected="data-setup-val"/>
+			</wrap:validations>
+			
+			<data-cleanup>
+				<s:log message="This message is from data-cleanup"/>
+			</data-cleanup>
+		</testCase>
+	
+		<testCase name="testDefDataProviderWithClone">
+			<description>
+				Ensures the bean registration and clone functionality are working as expected
+				in default data provider.
+			</description>
+		
+			<default-data-provider name="dataProvider">
+				<stepDataList>
+					res: /data/def-data-provider-clone.xml
+				</stepDataList>
+			</default-data-provider>
+			
+			<s:assert-deep-equals actual="prop: attr.dataProvider.payload" expected="json: ${attr.dataProvider.expectedResult}"/>
+		</testCase>
+
+		<testCase name="invoke_Method_With_Ext_Data_Provder">
+			<description>
+				Invokes simple method on bean with externalized data provider and
+				ensures data-provider working.
+			</description>
+		
+			<list-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.json"/>
+		
+			<wrap:steps>
+				<s:invokeMethod deepCloneParams="true" method="halfOf" paramTypes="int">
+					<object s:beanRef="testUtils"/>
+				
+					<parameter>
+						${attr.extDataProvider.paramValue}
+					</parameter>
+				</s:invokeMethod>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: returnValue" expected="int: ${attr.extDataProvider.result}"/>
+			</wrap:validations>
+		
+			<expectedException enabled="${attr.extDataProvider.exception?c}" type="com.yukthitech.utils.exceptions.InvalidStateException">
+				<property name="message" value="Value can not be less than zero: ${attr.extDataProvider.paramValue}"/>
+			</expectedException>
+		</testCase>
+	
+		<testCase name="invoke_Method_With_Ext_Bean_Data_Provder_With_xml">
+			<description>
+				Invokes simple method on bean with externalized data provider beans in xml format and
+				ensures data-provider working.
+			</description>
+		
+			<list-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.xml"/>
+		
+			<wrap:steps>
+				<s:invokeMethod deepCloneParams="true" method="halfOf" paramTypes="int">
+					<object s:beanRef="testUtils"/>
+				
+					<parameter>
+						${attr.extDataProvider.paramValue}
+					</parameter>
+				</s:invokeMethod>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: returnValue" expected="int: ${attr.extDataProvider.result}"/>
+			</wrap:validations>
+		
+			<expectedException enabled="${attr.extDataProvider.exception}" type="com.yukthitech.utils.exceptions.InvalidStateException">
+				<property name="message" value="Value can not be less than zero: ${attr.extDataProvider.paramValue}"/>
+			</expectedException>
+		</testCase>
+
+		<testCase name="dataProviderOnFetchSharedCtx" sharedContext="true">
+			<description>
+				Tests on fetch expression functionality of data provider.
+				And ensure context is shared between all data provider test cases.
+			</description>
+			
+			<data-setup>
+				<s:set expression="counterVal" value="int: 0"/>
+				<s:log message="Message as part of data setup..."/>
+			</data-setup>
+		
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/onFetchExpr-data-provider.xml"/>
+		
+			<wrap:steps>
+				<s:set expression="counterVal" value="int: ${(attr.counterVal + 1)?c}"/>
+				
+				<s:assert-equals actual="prop: attr.extDataProvider.expression" expected="prop: attr.extDataProvider.expectedVal"/>				
+			</wrap:steps>
+			
+			<data-cleanup>
+				<s:log message="Message as part of data cleaup..."/>
+			</data-cleanup>
+		</testCase>
+
+		<testCase name="dataProviderOnFetchIndependentCtx">
+			<description>
+				Ensure context attributes are independent when context is not shared (without setting sharedContext for testcase).
+			</description>
+			
+			<data-setup>
+				<s:set expression="counterVal" value="int: 0"/>
+				<s:log message="Message as part of data setup..."/>
+			</data-setup>
+		
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/onFetchExpr-data-provider.xml"/>
+		
+			<wrap:steps>
+				<s:set expression="counterVal" value="int: ${(attr.counterVal + 1)?c}"/>
+				
+				<s:assert-equals actual="prop: attr.counterVal" expected="int: 1"/>				
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="xpath_test">
+			<description>
+				Ensures xpath steps and validations works as expected.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="xpathAttr1" value="file:./src/test/resources/data/data1.json | xpath: //bean1/prop1"/>
+			
+				<s:set expression="xpathAttr2" value="res:/data/data1.json | xpath: //bean1/subbean1/sprop1"/>
+			
+				<s:set expression="xpathObj" value="res:/data/data1.json"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: xpathAttr1" expected="value1"/>
+			
+				<s:assert-equals actual="res:/data/data1.json | xpath: //bean1/subbean1/sprop2" expected="value3"/>
+			
+				<s:assert-equals actual="attr: xpathObj | xpath: //bean1/subbean1/sprop2" expected="value3"/>
+			
+				<s:assert-equals actual="res:/data/data1.json | xpath: //bean1/arrProp[1]/key1" expected="val1-1"/>
+				
+				<s:assert-equals actual="res:/data/data1.json | xpath(multi=true): //bean1/arrProp//key1" expected="list: val1-1, val2-1"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="setProp_test">
+			<description>
+				Ensures set-property step works as expected.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="propAttr1" value="file:./src/test/resources/data/data1.json | prop: bean1.prop1"/>
+			
+				<s:set expression="propAttr2" value="file(com.yukthitech.test.beans.SimpleComplexBean):./src/test/resources/data/data1.xml | prop: name"/>
+			
+				<s:set expression="propAttr3" value="file:./src/test/resources/data/data2.xml | prop: size"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: propAttr1" expected="value1"/>
+			
+				<s:assert-equals actual="attr: propAttr2" expected="Test123"/>
+			
+				<s:assert-equals actual="attr: propAttr3" expected="234"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="stepsFromGroup">
+			<description>
+				Ensures steps and validations from specified group are added properly.
+			</description>
+		
+			<s:set expression="simpleGroupInput" value="true"/>
+
+			<f:simpleGroup />
+		
+			<s:assert-true value="attr: simpleGroupOutput"/>
+		</testCase>
+	
+		<data-bean s:beanType="java.util.ArrayList" id="listForFuncTest">
+			<s:element>a</s:element>
+			<s:element>b</s:element>
+			<s:element>c</s:element>
+		</data-bean>
+	
+		<data-bean s:beanType="java.util.HashMap" id="dataMap">
+			<s:entry key="key1">Value1</s:entry>
+			<s:entry key="key2">Value2</s:entry>
+			<s:entry key="key3">Value3</s:entry>
+		</data-bean>
+	
+		<testCase name="testFreeMarkerMethod">
+			<description>
+				Tests the ability to invoke dynamic free marker expressions.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="listStr" value="${collectionToString(data.listForFuncTest, '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
+			
+				<s:set expression="mapStr" value="${mapToString(data.dataMap, '#key=#value', '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: listStr" expected="&quot;a&quot;,&quot;b&quot;,&quot;c&quot;"/>
+			
+				<s:assert-equals actual="attr: mapStr" expected="&quot;key1=Value1&quot;,&quot;key2=Value2&quot;,&quot;key3=Value3&quot;"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="testStorage">
+			<description>
+				Tests the ability to store and retrieve values.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="store: testStoreKey" value="value1"/>
+				<s:set expression="store: testStoreIntKey" value="int: 120"/>
+			
+				<s:set expression="ctxAttrKey" value="store: testStoreKey"/>
+			
+				<s:set expression="ctxAttrKey1" value="Value is ${storeValue('testStoreKey')}"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: ctxAttrKey" expected="value1"/>
+				<s:assert-equals actual="attr: ctxAttrKey1" expected="Value is value1"/>
+				<s:assert-equals actual="store: testStoreIntKey" expected="int: 120"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="testSetBeanProperty">
+			<description>
+				Tests the ability to change bean property value.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="beanForTest">
+					<value>
+						json:
+						{
+							"key1" : "value1",
+							"key2" : "value2"
+						}
+					</value>
+				</s:set>
+			
+				<s:assert-equals actual="prop: attr.beanForTest.key1" expected="value1"/>
+			
+				<s:set expression="prop: attr.beanForTest.key1" value="newValue1"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="prop: attr.beanForTest.key1" expected="newValue1"/>
+			
+				<s:assert-null value="prop: attr.beanForTest.key3"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="testToJson">
+			<description>
+				Tests the ability to covert object into json to build complex objects
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="bean1">
+					<value>
+						json:
+						{
+							"key1" : "value1",
+							"key2" : "value2"
+						}
+					</value>
+				</s:set>
+			
+				<s:set expression="bean2">
+					<value>
+						json:
+						{
+							"key" : ${toJson(attr.bean1)}
+						}
+					</value>
+				</s:set>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="prop: attr.bean2.key.key1" expected="value1"/>
+			</wrap:validations>
+		</testCase>
+	
+		<testCase name="testAttrReferences">
+			<description>
+				Tests the reserver attribute related to references
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="bean">
+					<value>
+						json:
+						{
+							"key1" : "value1",
+							"key2" : "value2",
+							"key3" : {
+								"skey1": "svalue1",
+								"skey2": "svalue2"
+							}
+						}
+					</value>
+				</s:set>
+			
+				<s:set expression="attr1" value="prop: attr.bean.key3.skey1"/>
+			
+				<s:set expression="attr2" value="xpath: /attr/bean//skey2"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="attr: attr1" expected="svalue1"/>
+			
+				<s:assert-equals actual="attr: attr2" expected="svalue2"/>
+			</wrap:validations>
+		</testCase>
+
+		<testCase name="testRemoveWithExpressions">
+			<description>
+				Tests the remove operations with different expression is working as expected.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="bean">
+					<value>
+						json:
+						{
+							"key1" : "value1",
+							"key2" : "value2",
+							"key3" : {
+								"skey1": "svalue1",
+								"skey2": "svalue2"
+							},
+							"arr": [1, 2, 3, 4, 5],
+							"strArr": ["one", "two", "three"]
+						}
+					</value>
+				</s:set>
+
+				<!-- Test removal of key from map -->				
+				<!-- Ensure before removal path is accessible -->
+				<s:assert-equals actual="xpath: /attr/bean/key2" expected="value2"/>
+				
+				<s:remove expression="xpath: /attr/bean/key2"/>
+				<s:assert-null value="xpath: /attr/bean/key2"/>
+			
+				<!-- Test removal of value from list -->				
+				<s:assert-equals actual="xpath: /attr/bean/arr[2]" expected="int: 2"/>
+				
+				<s:remove expression="xpath: /attr/bean/arr[2]"/>
+				<s:assert-equals actual="xpath: /attr/bean/arr[2]" expected="int: 3"/>
+				
+				<!--  Test removal by value -->
+				<s:remove expression="xpath: /attr/bean/strArr[contains(., 'two')]"/>
+				<s:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, three"/>
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="testCollectionAndRemove">
+			<description>
+				Tests collection add and remove steps.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="bean">
+					<value>
+						json:
+						{
+							"arr": [1, 2, 3, 4, 5],
+							"strArr": ["one", "two", "three"],
+							"mapAttr": {
+								"key1": "val1",
+								"key2": "val2"
+							}
+						}
+					</value>
+				</s:set>
+				
+				<s:collection-add collection="xpath: /attr/bean/arr" value="int: 6"/>
+				<s:collection-add collection="xpath: /attr/bean/strArr" value="four"/>
+				<s:map-put map="xpath: /attr/bean/mapAttr" key="key3" value="val3"/>
+				
+				<s:assert-equals actual="xpath: /attr/bean/arr" expected="list(int): 1, 2, 3, 4, 5, 6"/>
+				<s:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, two, three, four"/>
+				<s:assert-equals actual="xpath: /attr/bean/mapAttr" expected="map: key1=val1, key2=val2, key3=val3"/>
+
+				<s:collection-remove collection="xpath: /attr/bean/arr" value="int: 3"/>
+				<s:collection-remove collection="xpath: /attr/bean/strArr" value="two"/>
+				<s:collection-remove collection="xpath: /attr/bean/mapAttr" value="key1"/>
+				
+				<s:assert-equals actual="xpath: /attr/bean/arr" expected="list(int): 1, 2, 4, 5, 6"/>
+				<s:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, three, four"/>
+				<s:assert-equals actual="xpath: /attr/bean/mapAttr" expected="map: key2=val2, key3=val3"/>
+				
+				<!-- Ensure global attr set in prev test case is accesible here -->
+				<s:assert-equals actual="attr: someGlobalAttr" expected="int: 100"/>
+			</wrap:steps>
+		</testCase>
+	</testSuite>
+</testData>

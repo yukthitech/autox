@@ -1,0 +1,197 @@
+<html>
+	<head>
+		<style>
+			.doc_heading
+			{
+				font-weight: bold;
+				background: #DCDCDC;
+				text-align: center !important;
+			}
+			
+			.doc_mainHeading
+			{
+				font-weight: bold;
+				background: #8585ad;
+				color: white;
+				text-align: center !important;
+			}
+			
+			.doc_sideHeading
+			{
+				font-weight: bold;
+				background: #DCDCDC;
+				text-align: left;
+			}
+			
+			.tdMandatory
+			{
+				font-weight: bold;
+				color:red;
+			}
+			
+			.tdMandatory::before
+			{
+				content: "*"
+			}
+			
+			.docTable
+			{
+				width: 100%;
+				margin: 10px;
+				border: 1px solid black;
+				border-collapse: collapse;
+				border-spacing: 0px;
+			}
+			
+			.docTable td
+			{
+				padding: 5px;
+				text-align: left;
+				border: 1px solid black;
+			}
+			
+			.stripped td::even
+			{
+				background: red;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div>
+			<div style="position: absolute; bottom: 0px; left: 25em; right: 0px; top: 0px; overflow: auto;">
+				
+				<div style="width: 95%;">
+					<table class="docTable">
+						<tr>
+							<td colspan="2" class="doc_mainHeading">
+								Basic Information of ${type}
+							</td>
+						</tr>
+						<tr>
+							<td class="doc_sideHeading">Name </td>
+							<td>${node.name}</td>
+						</tr>
+						<tr>
+							<td class="doc_sideHeading">Description </td>
+							<td>${node.description}</td>
+						</tr>
+						<tr>
+							<td class="doc_sideHeading">Java Type </td>
+							<td>${node.javaType}</td>
+						</tr>
+						<#if type=='step'>
+						<tr>
+							<td class="doc_sideHeading">Required Plugins</td>
+							<td>
+								<#list node.requiredPlugins as requiredPlugins >
+								<div style="display: inline;">
+									${requiredPlugins} &nbsp; &nbsp;<span ng-if="!$last"> </span> 
+								</div>
+								</#list>
+							</td>
+						</tr>
+						</#if>
+					</table>
+		
+					<table class="docTable">
+						<tr>
+							<td colspan="3"  class="doc_mainHeading">
+								Parameters
+							</td>
+						</tr>
+						<tr>
+							<td class="doc_heading"> Name </td>
+							<td class="doc_heading"> Type </td>
+							<td class="doc_heading"> Description </td>
+						</tr>
+						<#list node.params as param>
+							<tr>
+							<td>${param.name}</td>
+							<td>${param.type}</td>
+							<td>
+								<#if param.sourceType == "RESOURCE">
+									<b><i>This is a <a href="#apiIndex$general_resourceParamType">Resource Param.</a><BR/></i></b>
+								</#if>
+								<#if param.sourceType == "OBJECT">
+									<b><i>This is a <a href="#apiIndex$general_objectParamType">Object Param.</a></i></b>
+								</#if>
+								<#if param.sourceType == "UI_LOCATOR">
+									<b><i>This is a <a href="#apiIndex$general_uiLocators">UI locator param.</a></i></b>
+								</#if>						
+								
+								${param.description}
+							</td>
+						</tr>
+						</#list>
+						
+						<#assign i = node.params?size>
+						<#if i==0>
+							<tr>
+								<td colspan="3" style="font-weight: bold; ">
+									<i>No parameters available.</i>
+								</td>
+							</tr>
+						</#if>
+					</table>
+
+					<#if type="plugin">
+					<table class="docTable">
+						<tr>
+							<td colspan="4"  class="doc_mainHeading">
+								Plugin Command Line Arguments
+							</td>
+						</tr>
+						<tr>
+							<td class="doc_heading"> Short Name </td>
+							<td class="doc_heading"> Long Name </td>
+							<td class="doc_heading"> Type </td>
+							<td class="doc_heading"> Description </td>
+						</tr>
+						<#list node.cliArguments as clia>
+						<tr>
+							<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">${clia.shortName}</td>
+							<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">${clia.longName}</td>
+							<td>${clia.type}</td>
+							<td>${clia.description}</td>
+						</tr>
+						</#list>
+						<tr>
+							<#assign i = node.cliArguments?size>
+							<#if i==0>
+							<td colspan="4" style="font-weight: bold; ">
+								<i>No plugin specific command-line-arguments available.</i>
+							</td>
+							</#if>
+						</tr>
+					</table>
+					</#if>
+
+					<#if node.hasExamples()>
+						<table class="docTable">
+							<tr>
+								<td colspan="2"  class="doc_mainHeading">
+									Examples
+								</td>
+							</tr>
+							<#list node.examples as ex>
+								<tr>
+									<td class="doc_heading" style="width: 30px;"> ${ex?index + 1} </td>
+									<td>
+										<B>Description: </B> ${ex.description}<br/>
+										<B>content: </B> <br/>
+										<div style="display: inline; margin-left: 20px;">
+											${ex.escapedContent}
+										</div>
+										
+									</td>
+								</tr>
+							</#list>
+						</table>
+					</#if>
+
+				</div>
+			</div>		
+		</div>
+	</body>
+</html>

@@ -1,0 +1,11 @@
+<test-data-list>
+	<test-case-data name="case1">
+		<dynamic-value paramValue="10" result="5" exception="false"/>
+	</test-case-data>
+	<test-case-data name="case2">
+		<dynamic-value paramValue="2" result="1" exception="false"/>
+	</test-case-data>
+	<test-case-data name="case3">
+		<dynamic-value paramValue="-10" exception="true"/>
+	</test-case-data>
+</test-data-list>

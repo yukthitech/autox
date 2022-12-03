@@ -1,0 +1,20 @@
+<list>
+	<file path="index.html"/>
+	<file path="log.html"/>
+	<file path="css/bootstrap.min.css"/>
+	<file path="css/common.css"/>
+	<file path="highlight/highlight.pack.js"/>
+	<file path="highlight/LICENSE"/>
+	<file path="highlight/styles/agate.css"/>
+	<file path="img/logo.png"/>
+	<file path="img/log-file.png"/>
+	<file path="img/mp4-file.png"/>
+	<file path="js/angular-app.js"/>
+	<file path="js/angular-sanitize.min.js"/>
+	<file path="js/angular.js"/>
+	<file path="js/bootstrap.min.js"/>
+	<file path="js/index.js"/>
+	<file path="js/jquery-2.2.0.js"/>
+	<file path="js/log.js"/>
+	<file path="js/monitor-log.js"/>
+</list>

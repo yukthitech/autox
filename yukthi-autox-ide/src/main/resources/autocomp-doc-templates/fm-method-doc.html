@@ -1,0 +1,38 @@
+<html>
+	<body>
+		<div>
+			<table>
+				<tr>
+					<td style="vertical-align: top;" valign="top">
+						<B>${node.name}</B>: 
+					</td>
+					<td>
+						${node.description}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: top;" valign="top">
+						<B>Return(s)</B>: 
+					</td>
+					<td>
+						<b><i>${node.returnType}</i></b>.<br/>
+						${node.returnDescription}
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<#if node.hasParameters()>
+			<div>
+				<span style="font-weight: bold; text-decoration: underline;">Parameters</span>
+				<ul>
+					<#list node.parameters as param>
+						<li>
+							<B>${param.name}</B>: ${param.type}. ${param.description}
+						</li>
+					</#list>
+				</ul>
+			</div>	
+		</#if>
+	</body>
+</html>

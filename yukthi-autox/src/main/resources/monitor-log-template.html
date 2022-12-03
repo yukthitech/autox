@@ -1,0 +1,106 @@
+<html>
+	<head>
+		<title>Monitor Log</title>
+		
+		<script src="../js/jquery-2.2.0.js"></script>
+
+		<script src="../js/angular.js"></script>
+	    <script src="../js/angular-sanitize.min.js"></script>
+	    <script src="../js/angular-app.js"></script>
+		
+		<script src="../js/bootstrap.min.js"></script>
+		<link href="../css/bootstrap.min.css" rel="stylesheet">
+
+		<link href="../css/common.css" rel="stylesheet">
+		
+		<script src="../js/monitor-log.js"></script>
+		
+	    <link href="../highlight/styles/agate.css" rel="stylesheet">
+	    <script src="../highlight/highlight.pack.js"></script>
+	</head>
+	
+	<body ng-app="application" ng-controller="monitorController" ng-init="initContent()">
+	
+		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: rgb(2,5,14);
+				border-bottom: 2px solid grey;">
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; vertical-align: top; width: 1em; padding-left: 1em;">
+						<span style="font-size: 2em; color: white; font-weight: bold;">Auto</span><span style="font-size: 2.5em; color: red; font-weight: bold;">X</span>
+					</td>
+					
+					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold;">
+						${monitorName} <sub style="font-size: 0.5em;">(${testCaseName} - ${executionDateStr})</sub>
+					</td>
+					
+					<td style="text-align: right; width: 1em; white-space: nowrap;">
+						<input placeholder="Search by message [Multiple values separated by | ]" ng-model="searchByMessage" class="filterField" style="margin: 0; margin-right: 1em; width: 30em;"/>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<pre id="logContentContainer" style="display: none;">
+			${content}
+		</pre>
+
+		<div class="resultBox" style="border: 2px solid black; margin-top: 5em;">
+			<table class="table table-hover table-bordered table-striped" style="width: 100%; table-layout: fixed; overflow-wrap: break-word; word-wrap: break-word;">
+				<colgroup>
+					<col style="width: 3em;"/>
+					<col style=""/>
+				</colgroup>
+
+				<tr>
+					<td colspan="2" style="background-color: #8585ad;">
+						<table style="width: 100%;">
+							<tr>
+								<td style="text-align: left; width: 1em;" class="headingCell">
+									Test Case: 
+								</td>
+								<td style="text-align: left; padding-left: 2em;" class="headingCell">
+									${testCaseName}
+								</td>
+								<td style="text-align:  right; padding-right: 2em;"  class="headingCell">
+									Status: ${status}
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: left; width: 1em;" class="headingCell">
+									Monitor Name: 
+								</td>
+								<td style="text-align: left; padding-left: 2em;" class="headingCell">
+									${monitorName}
+								</td>
+								<td style="text-align:  right; padding-right: 2em;">
+									&nbsp;
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: left;" class="headingCell">
+									Description: 
+								</td>
+								<td colspan="2" style="text-align: left; padding-left: 2em; " class="headingCell">
+									${description!''}
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr style="font-size: 1.2rem;">
+					<th style="width: 1em;">#</th>
+					<th style="width: 1em;">Message</th>
+				</tr>
+				<tr ng-repeat="message in messages | filter:filterLogs() | filter:highlightFilter()" style="font-size: 1.5rem;">
+					<th style="padding: 0px; font-size: 1.2rem; text-align: right; padding-right: 0.5rem; padding-left: 0.5rem; cursor: pointer;" onclick="goToLine(event)" data-line-no="{{message.lineNo}}">
+						<a style="color: white;" data-line-no="{{message.lineNo}}">{{message.lineNo}}</a>
+					</th>
+					<td id="line_{{message.lineNo}}" style="text-align: left; padding: 0px; padding-left: 1em; padding-right: 1em; border-width: 0px;">
+						<span ng-bind-html="message.line">
+						</span>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>

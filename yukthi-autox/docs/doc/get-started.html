@@ -1,0 +1,164 @@
+<h2>Getting Started</h2>
+
+AutoX is a generic testing-tool developed in java but can be used for any platform testing.
+<BR/><BR/>
+
+<B>Instructions for Java Maven Project</B>
+<BR/><BR/>
+
+<ol>
+	<li>
+		<B>Setting up Maven Project</B>: Create a Maven project with following repository and dependency:<BR/><BR/>
+<pre><code class="xml">
+&lt;repository&gt;
+	&lt;id&gt;yukthitech&lt;/id&gt;
+	&lt;name&gt;yukthitech&lt;/name&gt;
+	&lt;url&gt;https://oss.sonatype.org/content/groups/public &lt;/url&gt;
+	&lt;snapshots&gt;
+		&lt;enabled&gt;true&lt;/enabled&gt;
+	&lt;/snapshots&gt;
+&lt;/repository&gt;
+
+&lt;dependency&gt;
+	&lt;groupId&gt;com.yukthitech&lt;/groupId&gt;
+	&lt;artifactId&gt;yukthi-automation&lt;/artifactId&gt;
+	&lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<BR/>
+	</li>
+
+	<li>
+		<B>Application Properties</B>: Within the project create properties file "<b><i>src\test\resources\app.properties</i></b>". This file would contain all the environment specific properties
+		required for automation. For example, db related configuration, base url for automation, authentication details, etc.
+		<BR/><BR/>
+	</li>
+	
+	<li>
+		<B>Application Configuration Xml</B>: Create an xml file "<b><i>src\test\resources\app-configuration.xml</i></b>". This file would contain all the configurations required for automation of current project. 
+		Below is the list of configurations that can be specified in this xml. A sample application configuration xml can be found <b><a href="doc/app-configuration.xml">here</a></b>.
+		
+		<ul>
+			<li>
+				<b>report-name</b>: The name that will be used as the title in the generated reports.
+			</li>
+			<li>
+				<b>dateFomat</b>: Date format to be used for dates in report.
+			</li>
+			<li>
+				<b>basePackage</b>: Packages which needs to be scanned for steps/validators/plugins etc. Note: by default all steps/validators/plugins are
+				included from <b><i>com.yukthitech</i></b> package.
+			</li>
+			<li>
+				<b>testSuiteFolder</b>: Folder in which test suite xmls can be found.
+			</li>
+			<li>
+				<b>plugins</b>: Plugins that can will be used for test suites.
+			</li>
+			<li>
+				<b>logMonitors</b>: Log monitors to be used in this application.
+			</li>
+		</ul>
+		
+		<BR/><BR/>
+		The properties specified in "Application Properties" (mentioned above) can be accessed in this file using #{} expression. Below is an example of using #{} expression:
+		<BR/><BR/>
+<pre><code class="xml">
+&lt;rest-plugin&gt;
+	&lt;base-url&gt;#{base.url}&lt;/base-url&gt;
+&lt;/rest-plugin&gt;
+
+&lt;db-plugin&gt;
+	&lt;dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource"&gt;
+		&lt;driverClassName&gt;com.mysql.jdbc.Driver&lt;/driverClassName&gt;
+		&lt;url&gt;#{db.url}&lt;/url&gt;
+		&lt;username&gt;#{db.user}&lt;/username&gt;
+		&lt;password&gt;#{db.password}&lt;/password&gt;
+	&lt;/dataSource&gt;
+&lt;/db-plugin&gt;
+</code></pre>
+		
+		The #{} expressions can also be used to access system properties (passed using -D jvm arguments) and environment variables. To access system properties use "<b>system.</b>" prefix
+		and to access environment variables "<b>env.</b>". If the ${} expression is found without this prefix, then the property value would be fetched from "Application Properties". Examples:
+		<BR/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		#{system.PROP_NAME}<BR/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		#{env.ENV_VAR}
+		<BR/><BR/>
+	</li>
+	
+	<li>
+		<B>Test Suites</B>: Create a test-suite folder "<b><i>src\test\resources\test-suites</i></b>" (which should have configured in application configuration xml mentioned above),
+		which will be scanned for xml files recursively (subfolders are scanned recursively). All xml files in this folder are expected to contain test-suites or related information.
+		Instructions on writing test cases is mentioned below.
+		<BR/><BR/>
+		#{} expressions (mentioned as part of "Application Configuration Xml") can be used in test suite xml also. String content of "Test suites" can contain free-marker expressions. This 
+		is explained in detailed in "Writing Test Suites".
+		
+		<BR/><BR/> 
+	</li>
+	
+	<li>
+		<B>Executing Test suites: </B> The test suites can be executed using below basic command:
+			<BR/><BR/>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			<B>java com.yukthitech.autox.AutomationLauncher ./src/test/resources/app-configuration.xml  -rf ./test-reports -prop ./src/test/resources/app.properties</B>
+			<BR/><BR/>
+		Below is the syntax and list of default command line options that can be used with above command
+		<BR/><BR/>
+		
+		<table>
+			<tr>
+				<td colspan="2">
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					<b>java com.yukthitech.autox.AutomationLauncher &lt;app-config-file&gt; extended-args...</b>
+					
+					<br/><br/>Extended Arguments:
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="padding-left: 2em; padding-right: 2em;">
+					-prop,--property-file &lt;propertiesFile&gt;
+				</td>
+				<td>
+					Used to specify application properties which can then be injected into config files using #{} expressions
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="padding-left: 2em; padding-right: 2em;">
+					-rf,--reports-folder &lt;reportsFolder&gt;
+				</td>
+				<td>
+					<b><i>[Mandatory] Folder in which reports should be generated.</i></b>
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="padding-left: 2em; padding-right: 2em;">
+					-ts,--test-suites &lt;testSuites&gt;
+				</td>
+				<td>
+					Test suites to be executed (comma separated)	
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="padding-left: 2em; padding-right: 2em;">
+					-tc,--test-cases &lt;testCases&gt;
+				</td>
+				<td>
+					Test cases to be executed (comma separated). All dependency test cases also should be included.
+				</td>
+			</tr>
+		</table>
+	</li>
+	
+</ol>
+
+
+
+ 
+ 

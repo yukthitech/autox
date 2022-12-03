@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%5p %d [%t] (%F:%L) (%X{xmlLoc}) - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.yukthitech" level="all" />
+		
+			<!-- <logger name="org.springframework" additivity="false"> <level value="all" 
+		/> <appender-ref ref="console" /> </logger> -->
+		
+		
+		<Root level="error">
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+</Configuration>

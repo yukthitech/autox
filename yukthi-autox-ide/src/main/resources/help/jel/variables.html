@@ -1,0 +1,40 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="[[URL] /help/jel/jel-style.css]">
+</head>
+
+<body>
+	<h3>Variables</h3>
+	
+	<p>
+		In cases, where a complex expressions has to be used repeatedly or to minimize complexity of an expression, single expression 
+		may needs to be divided, a dynamic variable will come handy. 
+	</p>
+
+	<p>
+		Using <span class="blue-highlight">@Set</span> new variables can be declared which in turn can be accessed directly as standard context attributes.
+	</p>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Example
+		</div>
+		<div class="example-body">
+		{
+		    "<span class="simple-blue">@set</span>(prodMap)": {
+		          "productNames": "@xpathMulti: /products//name"
+		    },
+		
+		   "key2": "@fmarker: prodMap.productNames[0]"
+		
+		}
+		</div>
+		<div class="example-desc">
+			<p>
+				In the above example, a variable “prodMap” is created with value as a map (defined on right side). 
+				And then this variable is used in next line as a normal context attribute.
+			</p>
+		</div>
+	</div>
+</body>
+</html>

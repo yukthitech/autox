@@ -1,0 +1,264 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="$parsers.attr">
+		<example>
+			<description>Using attr with type while setting attribute value. Below example sets value 10 (integer) on context with name intAttr1</description>
+			
+			<content><![CDATA[
+				<s:set expression="attr(int): intAttr1" value="10"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Using attr to access context attribute value</description>
+			
+			<content><![CDATA[
+				<s:assert-not-null value="attr: intAttr" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.boolean">
+		<example>
+			<description>Using to convert string into boolean and set Boolean object on context</description>
+			
+			<content><![CDATA[
+				<s:set expression="booleanAttr" value="boolean: true"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.condition">
+		<example>
+			<description>Using condition in assertion to check simple conditions</description>
+			
+			<content><![CDATA[
+				<s:assert-true value="condition: attr.intAttr1 gt 5" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.file">
+		<example>
+			<description>Using file to load file as object and extracting xpath value out of it</description>
+			
+			<content><![CDATA[
+				<s:set expression="xpathAttr1" value="file:./src/test/resources/data/data1.json | xpath: //bean1/prop1"/>
+			]]></content>
+		</example>
+		
+		<example>
+			<description>Loading file as simple text (instead of loading as object)</description>
+			
+			<content><![CDATA[
+				<s:set expression="outputContent" value="file(text=true): ${attr.response}"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.json">
+		<example>
+			<description>Converting json into object and setting it on context</description>
+			
+			<content><![CDATA[
+				<s:set expression="beanForTest">
+					<value>json:
+						{
+							"key1" : "value1",
+							"key2" : "value2"
+						}
+					</value>
+				</s:set>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.jsonWithType">
+		<example>
+			<description>Converting json with type definitions into object (of specified type)</description>
+			
+			<content><![CDATA[
+				<s:set expression="attrJson">
+					<value>[
+						"java.util.HashSet",
+						[
+							"value1",
+							"value2"
+						]
+					]</value>
+				</s:set>
+	
+				<s:assert-equals expected="jsonWithType: ${attr.attrJson}" actual="set: value1, value2">
+				</s:assert-equals>
+	
+				<s:assert-equals expected="attr: attrJson | jsonWithType: $" actual="set: value1, value2">
+				</s:assert-equals>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.list">
+		<example>
+			<description>Converting delimited string of values into list and asserting them</description>
+			
+			<content><![CDATA[
+				<s:assert-equals actual="attr: empNames" expected="list: employee1, employee2"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Converting delimited string of values into list of particular data type.
+				Note: Generic types are not supported here. 
+			</description>
+			
+			<content><![CDATA[
+				<s:assert-equals actual="attr: ids" expected="list(int): 1, 2"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.prop">
+		<example>
+			<description>Accessing nested properties</description>
+			
+			<content><![CDATA[
+				<s:set expression="propAttr1" value="prop: bean1.prop1"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Accessing properties by key (same as nested properties). Added to be compatible with Apache Property Utils (which was used earlier).</description>
+			
+			<content><![CDATA[
+				<s:set expression="propAttr1" value="prop: bean1(prop1)"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Accessing list elements based on index.</description>
+			
+			<content><![CDATA[
+				<s:set expression="propAttr1" value="prop: system.containers[0].name"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Accessing list elements based on conditions.</description>
+			
+			<content><![CDATA[
+				<s:set expression="propAttr1" value="prop: keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Accessing list elements based on conditions with sub properties in condition.</description>
+			
+			<content><![CDATA[
+				<s:set expression="propAttr1" value="prop: keys[cobMapProperty.processExpr = someVal].name"/><br/>
+				<s:set expression="propAttr1" value="prop: keys[groupNames[0] = REFRESH-group].name"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Using @this to access value of current element. Below example shows means to access "containers" element which has account-types list and has a value 'CMA'</description>
+			
+			<content><![CDATA[
+				<s:set expression="propAttr1" value="system.containers[accountTypes[@this = CMA] = CMA].name"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Using @this to remove an element with value 'HOLDER_DETAILS' from sublist with name 'supportedDatasetAttribs'</description>
+			
+			<content><![CDATA[
+				<s:remove expression="system.products[1].supportedDatasetAttribs[@this = HOLDER_DETAILS]"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.res">
+		<example>
+			<description>Using res to load resource as object and extracting xpath value out of it</description>
+			
+			<content><![CDATA[
+				<s:set expression="xpathAttr2" value="res:/data/data1.json | xpath: //bean1/subbean1/sprop1"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Parsing resource as template file and then converting result into object</description>
+			
+			<content><![CDATA[
+				<s:set expression="jsonObj" value="res(template=true):/data/data.json"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.store">
+		<example>
+			<description>Using store to set the value into the store</description>
+			
+			<content><![CDATA[
+				<s:set expression="store: testStoreKey" value="value1"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Using store to fetch the value of the specified key from store</description>
+			
+			<content><![CDATA[
+				<s:set expression="ctxAttrKey" value="store: testStoreKey"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.string">
+		<example>
+			<description>Using string to escape expression formats</description>
+			
+			<content><![CDATA[
+				<s:assert-equals actual="attr: returnValue" expected="string: beanFromApp:someName"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.xpath">
+		<example>
+			<description>Using xpath to access single property value</description>
+			
+			<content><![CDATA[
+				<s:set expression="xpathAttr1" value="file:./src/test/resources/data/data1.json | xpath: //bean1/prop1"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Using xpath to access multiple values matching specified path</description>
+			
+			<content><![CDATA[
+				<s:set expression="xpathAttr1" value="xpath(multi=true): /attr/bean1//prop1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.sort">
+		<example>
+			<description>Sorting by natural order</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="list: abc, bcd, def, fgh" actual="set: def, fgh, abc, bcd | sort: $"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Sorting in natural order in descending order</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="list: fgh, def, bcd, abc" actual="set: def, fgh, abc, bcd | sort(desc=true): $"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Sorting the objects using property expression</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}): $"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Sorting the objects using complex property expression and in descending order</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}-@{val}, desc=true): $"/>
+			]]></content>
+		</example>
+	</collection>
+</examples>

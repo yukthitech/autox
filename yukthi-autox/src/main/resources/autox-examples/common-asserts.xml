@@ -1,0 +1,102 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertEqualsStep">
+		<example>
+			<description>Any object reference can be used both for expected and actual</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="string:value" actual="string:value" />
+				<s:assert-equals expected="int:10" actual="prop: attr.intAttr" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertFalseStep">
+		<example>
+			<description>Using free marker condition in the value</description>
+			
+			<content><![CDATA[
+				<s:assert-false value="condition: attr.intAttr1 gt 5" />
+			]]></content>
+		</example>
+
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-false value="prop: attr.flag" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertNotEqualStep">
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-not-equals expected="int:11" actual="prop:attr.intAttr" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertNotNullStep">
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-not-null value="attr: intAttr" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertNotNullStep">
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-not-null value="attr: intAttr" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertNotSameStep">
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-not-same expected="prop:attr.intAttr" actual="prop:attr.intAttr1" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertNullStep">
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-null value="prop:attr.intAttrXyz" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertSameStep">
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-same expected="prop:attr.intAttr" actual="prop:attr.intAttr" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.assertion.AssertTrueStep">
+		<example>
+			<description>Any object reference expression can be used</description>
+			
+			<content><![CDATA[
+				<s:assert-true value="condition: attr.intAttr1 gt 5" />
+			]]></content>
+		</example>
+	</collection>
+</examples>

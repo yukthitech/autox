@@ -1,0 +1,190 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>yukthi-autox-ide</artifactId>
+	<packaging>jar</packaging>
+
+	<name>yukthi-autox-ide</name>
+	<version>2.0-SNAPSHOT</version>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<autox.version>2.0.8-SNAPSHOT</autox.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+		<timestamp>${maven.build.timestamp}</timestamp>
+	</properties>
+
+	<dependencies>
+		<!-- For selenium based steps and validations -->
+		<dependency>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-automation</artifactId>
+			<version>${autox.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-webmvc</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-swing</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea -->
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>rsyntaxtextarea</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.fifesoft/autocomplete -->
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>autocomplete</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>5.1.6.RELEASE</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>5.1.6.RELEASE</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-beans -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>5.1.6.RELEASE</version>
+		</dependency>
+
+
+		<!-- Lucene related dependencies for help indexing -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>7.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<version>7.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-common</artifactId>
+			<version>7.6.0</version>
+		</dependency>
+
+		<!-- Used to load svg images -->
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-transcoder</artifactId>
+			<version>1.14</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-codec</artifactId>
+			<version>1.14</version>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.9.10</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/version.txt</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/version.txt</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>zip-pom.xml</descriptor>
+					</descriptors>
+					<finalName>yukthi-autox-ide</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<copy
+									file="${project.build.outputDirectory}/version/version.txt"
+									toFile="${basedir}/target/version.txt" overwrite="true" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<parent>
+		<groupId>com.yukthitech</groupId>
+		<artifactId>yukthi-commons-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../yukthi-commons-parent</relativePath>
+	</parent>
+</project>

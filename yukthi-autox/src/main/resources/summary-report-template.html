@@ -1,0 +1,205 @@
+<html>
+	<head>
+		<title>AutoX Summary Report</title>
+		
+		<#assign titleStyle = "background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: white; text-align: center;">
+		<#assign tableHeader = "background-color: #484848; font-weight: bold; color: white; text-align: center; padding: 3px 10px; border: 1px solid #ddd; white-space: nowrap;">
+		<#assign tableCell = "font-weight: bold; text-align: center; border: 1px solid #ddd; white-space: nowrap;">
+		<#assign tableStyle = "width: 100%; border-spacing: 0px; margin: 0px; border-collapse: collapse; margin: 0px;">
+		<#assign errorStyle = "color: red;">
+		<#assign successStyle = "color: green;">
+		<#assign resultBox = "margin: 1em; margin-bottom: 2em;">
+	</head>
+	<body>
+		<table style="width: 100%; border-collapse: collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; width: 1em; padding-left: 1em; background-color: #02050E;">
+					<span style="font-size: 2em; color: white; font-weight: bold;">Auto</span><span style="font-size: 2.5em; color: red; font-weight: bold;">X</span>
+				</td>
+				
+				<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold; background-color: #02050E;">
+					${report.reportName} <sub style="font-size: 0.6em;">(${report.executionDateStr})</sub>
+				</td>
+			</tr>
+		</table>
+		<Br/>
+		
+		<div style="width: 100%;">
+			${headerContent!''}
+		</div>
+		
+		<table style="margin-bottom: 0px; width: 100%; border: 2px solid black; padding: 0px;">
+			<tr>
+				<td style="border-width: 0px">
+					<table style="${tableStyle}">
+						<tr>
+							<td colspan="4" style="${titleStyle}">
+								Test Suites
+							</td>
+						</tr>
+						<tr>
+							<th style="${tableHeader}">Total Test Suites</th>
+							<th style="${tableHeader}">Success Count</th>
+							<th style="${tableHeader}">Failure Count</th>
+							<th style="${tableHeader}">Skip Count</th>
+						</tr>
+						<tr>
+							<td style="${tableCell}">${report.testSuiteCount}</td>
+							<td style="${tableCell}">${report.testSuiteSuccessCount}</td>
+							<td style="${tableCell} <#if report.testSuiteFailureCount gt 0>${errorStyle}</#if>">${report.testSuiteFailureCount}</td>
+							<td style="${tableCell} <#if report.testSuiteFailureCount gt 0>${errorStyle}</#if>">${report.testSuiteSkippedCount}</td>
+						</tr>
+					</table>
+				</td>
+				<td style="border-width: 0px">
+					<table style="${tableStyle}">
+						<tr>
+							<td colspan="5" style="${titleStyle}">
+								Test Cases
+							</td>
+						</tr>
+						<tr>
+							<th style="${tableHeader}">Total Test Cases</th>
+							<th style="${tableHeader}">Success Count</th>
+							<th style="${tableHeader}">Failure Count</th>
+							<th style="${tableHeader}">Error Count</th>
+							<th style="${tableHeader}">Skip Count</th>
+						</tr>
+						<tr>
+							<td style="${tableCell}">${report.testCaseCount}</td>
+							<td style="${tableCell}">${report.testCaseSuccessCount}</td>
+							<td style="${tableCell} <#if report.testCaseFailureCount gt 0>${errorStyle}</#if>">${report.testCaseFailureCount}</td>
+							<td style="${tableCell} <#if report.testCaseErroredCount gt 0>${errorStyle}</#if>">${report.testCaseErroredCount}</td>
+							<td style="${tableCell} <#if report.testCaseSkippedCount gt 0>${errorStyle}</#if>">${report.testCaseSkippedCount}</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<Br/>		
+		
+		<#if (report.summaryMessages)??>
+			<table style="margin-bottom: 0px; width: 100%; border: 2px solid black; padding: 0px;">
+				<tr>
+					<td style="border-width: 0px">
+						<table style="${tableStyle}">
+							<tr>
+								<td style="${titleStyle}">
+									Summary
+								</td>
+							</tr>
+							<tr>
+								<td style="padding-left: 5em; font-weight: bold;">
+									<#list report.summaryMessages as mssg>
+										${mssg}<BR/>
+									</#list>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</#if>
+		<Br/>
+		
+		<table style="margin-bottom: 0px; width: 100%; border: 2px solid black; padding: 0px;"><tr><td style="border-width: 0px">
+			<table  style="${tableStyle}">
+				<tr>
+					<th  style="${tableHeader}">Test Suite</th>
+					<th  style="${tableHeader}">Status</th>
+					<th  style="${tableHeader}">Total Count</th>
+					<th  style="${tableHeader}">Success Count</th>
+					<th  style="${tableHeader}">Failure Count</th>
+					<th  style="${tableHeader}">Error Count</th>
+					<th  style="${tableHeader}">Skip Count</th>
+					<th  style="${tableHeader}">Message</th>
+				</tr>
+				<#list report.testSuiteResults as result>
+					<#if result.totalCount gt 0>
+						<tr style="<#if result_index % 2 == 0>background-color: #eee</#if>">
+							<td style="${tableCell}">
+								${result.report.name}<br/>
+								<#if result.author??><span style="font-size: 10px;">[${result.report.author}]</span></#if>
+							</td>
+							<td style="${tableCell}  <#if result.report.mainExecutionDetails.statusStr == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
+								${result.report.mainExecutionDetails.statusStr}	
+							</td>
+							<td style="${tableCell}">
+								${result.totalCount}	
+							</td>
+							<td style="${tableCell}">
+								${result.successCount}	
+							</td>
+							<td style="${tableCell} <#if result.failureCount gt 0>${errorStyle}</#if>">
+								${result.failureCount}	
+							</td>
+							<td style="${tableCell} <#if result.errorCount gt 0>${errorStyle}</#if>">
+								${result.errorCount}	
+							</td>
+							<td style="${tableCell} <#if result.skipCount gt 0>${errorStyle}</#if>">
+								${result.skipCount}
+							</td>
+							<td style="${tableCell}">
+								${result.report.mainExecutionDetails.statusMessage!' '}
+							</td>
+						</tr>
+					</#if>
+				</#list>
+			</table>
+		</td></tr></table>
+		
+		<#list report.testSuiteResults as result>
+			<#if result.totalCount gt 0>
+				<Br/>
+				<table style="margin-bottom: 0px; width: 100%; border: 2px solid black; padding: 0px;"><tr><td style="border-width: 0px">
+					<table  style="${tableStyle}">
+						<tr>
+							<td colspan="3" style="${titleStyle}">
+									${result.report.name}
+							</td>
+						</tr>
+						<tr>
+							<th style="${tableHeader}">Test Case</th>
+							<th style="${tableHeader}">Status</th>
+							<th style="${tableHeader}">Message</th>
+						</tr>
+						<#list result.testCaseResults as tcResult>
+							<#if !(tcResult.mainExecutionDetails??)>
+								<#continue>
+							</#if>
+							
+							<tr style="<#if tcResult_index % 2 == 0>background-color: #eee</#if>">
+								<td  style="${tableCell} color: #3973ac;width: 20%;">
+									${tcResult.name}<br/>
+									<#if tcResult.author??><span style="font-size: 10px;">[${tcResult.author}]</span></#if>
+								</td>
+								<td style="${tableCell} width: 20%; <#if tcResult.mainExecutionDetails.statusStr == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
+									${tcResult.mainExecutionDetails.statusStr}
+								</td>
+								<td style="${tableCell} text-align: left; padding-left: 1em;">
+									${tcResult.message!''}
+								</td>
+							</tr>
+						</#list>
+					</table>
+					<table  style="${tableStyle}">
+						<tr>
+							<th colspan="3" style="text-align: right; font-weight: bold; font-size: 0.9em; padding: 0.4em; color: white; background-color: #8585ad; ">
+								Total: ${result.totalCount} &nbsp;&nbsp;
+								Success: ${result.successCount} &nbsp;&nbsp;
+								Failure: ${result.failureCount} &nbsp;&nbsp;
+								Error: ${result.errorCount} &nbsp;&nbsp;
+								Skip: ${result.skipCount} &nbsp;&nbsp;
+							</th>
+						</tr>
+					</table>
+				</td></tr></table>
+			</#if>
+		</#list>
+
+
+		<div style="width: 100%;">
+			${footerContent!''}
+		</div>
+	</body>
+</html>

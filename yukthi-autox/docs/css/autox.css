@@ -1,0 +1,22 @@
+.headerLink
+{
+	font-weight: bold;
+	padding-left: 1em;
+	padding-right: 1em;
+	font-size: 1.2em;
+	color: white;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.headerLink:HOVER 
+{
+	text-decoration: none;
+	cursor: pointer;
+	color: red;
+}
+
+.activeHeaderLink
+{
+	border-bottom: 2px solid red;
+}

@@ -1,0 +1,22 @@
+<table style="" border="1">
+	<tr>
+		<th>
+			Source
+		</th>
+		<th>
+			Message
+		</th>
+	</tr>
+	
+	<#list messages as mssg>
+		<tr>
+			<td style="text-align: center; font-weight: bold;">
+				${mssg.source}<br/>
+				(${mssg.javaSource})
+			</td>
+			<td>
+				${mssg.message}
+			</td>
+		</tr>
+	</#list>
+</table>

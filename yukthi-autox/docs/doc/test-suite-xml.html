@@ -1,0 +1,48 @@
+<h2>Test Suite XML File</h2>
+
+A test suite xml can contain one more test suites and can optionally contain a <b>&lt;setup&gt;</b> or <b>&lt;cleanup&gt;</b> elements. 
+Elements <b>&lt;setup&gt;</b> or <b>&lt;cleanup&gt;</b> which are defined directly in xml are called global setup/cleanup. 
+Maximum there can be only one global setup or cleanup across the xml files. 
+
+<br/><br/>
+<pre><code class="xml">
+&lt;testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap"&gt;
+	&lt;setup&gt;
+		&lt;ccg:log message="Message from global setup."/&gt;
+		
+		&lt;ccg:ddlQuery dataSourceName="dataSource"&gt;
+			&lt;query&gt;
+				CREATE TABLE EMPLOYEE
+				(
+					ID		INT,
+					NAME	VARCHAR(100)
+				)
+			&lt;/query&gt;
+		&lt;/ccg:ddlQuery&gt;
+		
+	&lt;/setup&gt;
+	
+	&lt;cleanup&gt;
+		&lt;ccg:log message="Message from global cleanup."/&gt;
+	&lt;/cleanup&gt;
+&lt;/testData&gt;
+</code></pre>
+<br/>
+
+From the specified test-suite folder all xmls are parsed and are executed in following order:
+<br/><br/>
+<ol>
+	<li>
+		<B>Setup</B>: Steps specified in <b>&lt;setup&gt;</b> are executed first. And are expected to contain steps to do basic setup required for test-suites.
+	</li>
+	<li>
+		<B>Test Suites</B>: Test suites are generally executed in alphabetical order. Only when a test-suite is found to be dependent on test-suite, that dependency test-suite will be
+		executed first. A test suite xml can have one or more test-suites.
+	</li>
+	<li>
+		<B>Cleanup</B>: Steps specified in <b>&lt;cleanup&gt;</b> are executed at end (after test suites execution). And are expected to contain steps to do cleanup of done by test-suites.
+	</li>
+</ol>
+<br/><br/>
+
+

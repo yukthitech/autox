@@ -1,0 +1,182 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="[[URL] /help/jel/jel-style.css]">
+</head>
+
+<body style="tab-size: 4px;">
+	<h3>Conditions</h3>
+	
+	<p>
+		Different parts of a json can be declared to be included conditionally. That is, the target section 
+		will be included only when specified condition is true. This can be done using <span class="blue-highlight">@condition</span>. 
+		But usage of <span class="blue-highlight">@condition</span> different from the element to element. 
+	</p>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Maps - To include or exclude Map objects, Map objects should have an entry with key as @condition
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"devStack": {
+				"<span class="simple-blue">@condition</span>": "devStackEnabled == 1",
+				"desc": "This is a dev stack"
+			}
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, "devStack" (whose value is map) will be included in the output json, 
+				only if the condition specified by key <span class="simple-blue">@condition</span> in this map results in true.
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Lists: To include or exclude List objects, the first element of list should be string and should be prefix "@condition:" 
+			followed by condition. With this the current list will be included in output json only when 
+			this condition evaluates to true.
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"listWithPositiveCond": ["<span class="simple-blue">@condition</span>: devStackEnabled == 1", 1000, {"a": "b"}],
+			"listWithNegativeCond": ["<span class="simple-blue">@condition</span>: prodStackEnabled == 1", 1000, {"a": "b"}]
+		}
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, listWithPositiveCond / listWithNegativeCond will be included in final 
+				json only if corresponding conditions are true.
+			</p>
+		</div>
+	</div>
+	
+	<h4>Simple Values</h4>
+	<p>
+		Cases when simple values has to be included/excluded based on conditions, Instead of simple value a map will be included with 2 or 3 keys
+		as described below.
+		
+		<ul>
+			<li>
+				<span class="blue-highlight">@condition</span>: tells when to include or exclude. Or when to use main 
+				<span class="simple-blue">@value</span> or when to use <span class="simple-blue">@falseValue</span>.
+			</li>
+			<li>
+				<span class="blue-highlight">@value</span>: defines the final value (by replacing the current map) when condition evaluates to <b>true</b>.<br/> 
+				<b>When <span class="simple-blue">@value</span> is defined along with condition, other keys in this map will be ignored.</b>
+			</li>
+			<li>
+				<span class="blue-highlight">@falseValue</span>: defines the final value (by replacing the current map) when condition evaluates to <b>false</b>. 
+				<b>If <span class="simple-blue">@falseValue</span> is NOT defined and condition evaluates to false, the current map will be completly excluded.</b>
+			</li>
+		</ul>
+	</p>
+	
+	<div class="example-box">
+		<div class="example-heading">
+			Example for inclusion/exclusion key-value of a Map
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"enabled": {
+			     "<span class="simple-blue">@condition</span>": "devStackEnabled == 1",
+			     "<span class="simple-blue">@value</span>": "Enabled"
+			},
+			"otherKey": "otherValue"
+		} 
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, if condition evaluates to true, the result would be:
+				<pre>
+		{
+			"enabled": "Enabled",
+			"otherKey": "otherValue"
+		} 
+				</pre>
+				
+				if condition evaluates to false, "enable" atttribute would be excluded and the result would be:
+				<pre>
+		{
+			"otherKey": "otherValue"
+		} 
+				</pre>
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Example for inclusion/exclusion with false-value
+		</div>
+		<div class="example-body">
+		<pre>
+		{
+			"enabled": {
+			     "<span class="simple-blue">@condition</span>": "devStackEnabled == 1",
+			     "<span class="simple-blue">@value</span>": "Enabled",
+			     "<span class="simple-blue">@falseValue</span>": "Disabled",
+			     "extraKey": "some value"
+			},
+			"otherKey": "otherValue"
+		} 
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, if condition evaluates to true, the result would be:
+				<pre>
+	{
+		"enabled": "Enabled",
+		"otherKey": "otherValue"
+	} 
+				</pre>
+				
+				if condition evaluates to false, the result would be:
+				<pre>
+	{
+		"enabled": "Disabled",
+		"otherKey": "otherValue"
+	} 
+				</pre>
+				
+				<b>Note in both cases, "extraKey" is completely ignored.</b>
+			</p>
+		</div>
+	</div>
+
+	<div class="example-box">
+		<div class="example-heading">
+			Example for inclusion/exclusion of an element of a list
+		</div>
+		<div class="example-body">
+		<pre>
+		[
+			{
+				"<span class="simple-blue">@condition</span>": "devStackEnabled == 1",
+				"<span class="simple-blue">@value</span>": "@fmarker: devStackValue"
+			},
+			100
+		]
+		</pre>
+		</div>
+		<div class="example-desc">
+			<p>
+				In above example, if condition evaluates to true, assuming "devStackValue" value is 1000 the result would be:<br/>
+				
+				"list": [1000,100]<br/><br/>
+				
+				if condition evaluates to false, the result would be:<br/>
+				"list": [100]
+			</p>
+		</div>
+	</div>
+</body>
+</html>

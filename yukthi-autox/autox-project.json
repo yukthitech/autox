@@ -1,0 +1,7 @@
+{
+  "name" : "Autox",
+  "appConfigFilePath" : "src/test/resources/app-configuration.xml",
+  "appPropertyFilePath" : "src/test/resources/app.properties",
+  "testSuitesFoldersList" : [ "src\\test\\resources\\neg-test-suites", "src\\test\\resources\\global-cleanup-err", "src\\test\\resources\\global-setup-err", "src\\test\\resources\\test-suites" ],
+  "classPathEntries" : [ "E:\\Kranthi\\github\\utils\\yukthi-autox\\target\\test-classes", "E:\\Kranthi\\github\\utils\\yukthi-autox\\src\\test\\resources" ]
+}

@@ -1,0 +1,123 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="rest-test-suites">
+		<testCase name="testPost">
+			<description>Test post api invocation</description>
+		
+			<wrap:steps>
+				<s:rest-invoke-post uri="/emp/save">
+					<body><![CDATA[
+						{
+							"name" : "Emp1",
+							"address": "some address"
+						}
+					]]></body>
+				</s:rest-invoke-post>
+			
+				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
+			
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+
+				<s:rest-invoke-post uri="/emp/save">
+					<body><![CDATA[
+						{
+							"name" : "Emp2",
+							"address": "some address"
+						}
+					]]></body>
+				</s:rest-invoke-post>
+			
+				<s:set expression="emp2_id" value="attr: response | xpath: //id"/>
+			
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			</wrap:steps>
+		</testCase>
+	
+		<testCase name="testPostForm">
+			<description>Test post Form api invocation</description>
+		
+			<wrap:steps>
+				<s:rest-invoke-post uri="/emp/saveForm">
+					<form-field name="name">Emp1</form-field>
+					<form-field name="address">some address</form-field>
+				</s:rest-invoke-post>
+			
+				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
+			
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="testPostEncodedForm">
+			<description>Test post Form url-encoded api invocation</description>
+		
+			<wrap:steps>
+				<s:rest-invoke-post uri="/emp/saveEncodedForm">
+					<form-field name="name">Emp1</form-field>
+					<form-field name="address">some address</form-field>
+				</s:rest-invoke-post>
+			
+				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
+			
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			</wrap:steps>
+		</testCase>
+
+		<testCase dependencies="testPost" name="testGet">
+			<description>Tests get api invocation</description>
+		
+			<s:rest-invoke-get uri="/emp/get/{id}">
+				<pathVariable name="id">${attr.emp2_id}</pathVariable>
+			</s:rest-invoke-get>
+		
+			<s:assert-equals actual="xpath: /attr/response//name" expected="Emp2"/>
+		</testCase>
+	
+		<testCase dependencies="testPost" name="testDelete">
+			<description>Tests delete api invocation</description>
+		
+			<s:rest-invoke-delete uri="/emp/delete/{id}">
+				<pathVariable name="id">${attr.emp2_id}</pathVariable>
+			</s:rest-invoke-delete>
+		
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+		
+			<s:rest-invoke-get uri="/emp/get/{id}">
+				<pathVariable name="id">${attr.emp2_id}</pathVariable>
+			</s:rest-invoke-get>
+		
+			<!--
+				As emp2 is deleted, get should result in 400 error
+			-->
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 400"/>
+		</testCase>
+	
+		<testCase dependencies="testPost" name="testMultiPart">
+			<description>Tests multi part post request</description>
+		
+			<s:rest-invoke-multipart-post uri="/emp/saveWithFile">
+				<part name="details">
+					<value>
+						{
+							"name" : "Emp3",
+							"address": "some address"
+						}
+					</value>
+				</part>
+			
+				<attachment file="file:./src/test/resources/testFile.txt" name="file"/>
+			</s:rest-invoke-multipart-post>
+		
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+		
+			<s:set expression="emp3_id" value="attr: response | xpath: //id"/>
+		
+			<s:rest-invoke-get-file uri="/emp/getFile/{id}">
+				<pathVariable name="id">${attr.emp3_id}</pathVariable>
+			</s:rest-invoke-get-file>
+		
+			<s:set expression="outputContent" value="file(text=true): ${attr.response}"/>
+		
+			<s:assert-equals actual="attr: outputContent" expected="This is simple test file for upload."/>
+		</testCase>
+	</testSuite>
+</testData>

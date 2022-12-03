@@ -1,0 +1,178 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+	
+	<collection name="com.yukthitech.autox.test.lang.steps.BreakStep">
+		<example>
+			<description>Breaking the loop</description>
+			
+			<content><![CDATA[
+				<s:for start="1" end="20">
+					<s:if condition="attr.loopVar % 2 != 0">
+						<s:continue/>
+					</s:if>
+					
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+					
+					<s:if condition="attr.loopVar gte 10">
+						<s:break/>
+					</s:if>
+				</s:for>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ExecuteStep">
+		<example>
+			<description>Executing the expression</description>
+			
+			<content><![CDATA[
+				<s:execute expression="${attr.val + 1}"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.FailStep">
+		<example>
+			<description>Failing the test case</description>
+			
+			<content><![CDATA[
+				<s:if condition="attr.loopVar % 2 != 0">
+					<s:fail/>
+				</s:if>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ForEachLoopStep">
+		<example>
+			<description>Looping through list elements</description>
+			
+			<content><![CDATA[
+				<s:for-each expression="attr: checkBoxes" loopVar="cbox">
+					<s:set expression="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
+				</s:for-each>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Looping through string tokens using delimter</description>
+			
+			<content><![CDATA[
+				<s:for-each expression="string: a,b,c,d, e,f" delimiter="\s*\,\s*">
+					<s:if condition="attr.loopVar == 'b'">
+						<s:continue/>
+					</s:if>
+					
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for-each>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Looping through map. Each iteration using loop variable, key and value can be accessed as shown in this example.</description>
+			
+			<content><![CDATA[
+				<s:forEach expression="prop: data.dataMap">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar.key}=${attr.loopVar.value}"/>
+				</s:forEach>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ForLoopStep">
+		<example>
+			<description>Looping through range of numbers</description>
+			
+			<content><![CDATA[
+				<s:for start="1" end="20">
+					<s:if condition="attr.loopVar % 2 != 0">
+						<s:continue/>
+					</s:if>
+					
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.IfConditionStep">
+		<example>
+			<description>If to check condition and execute steps</description>
+			
+			<content><![CDATA[
+				<s:if condition="attr.loopVar % 2 != 0">
+					<s:continue/>
+				</s:if>
+			]]></content>
+		</example>
+		<example>
+			<description>If with else block</description>
+			
+			<content><![CDATA[
+				<s:if condition="attr.flag == 1">
+					<then>
+						<s:set expression="ifExec" value="if-then"/>
+					</then>
+					<else>
+						<s:set expression="ifExec" value="if-else"/>
+					</else>
+				</s:if>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ReturnStep">
+		<example>
+			<description>Returning from a step group</description>
+			
+			<content><![CDATA[
+				<step-group name="condSimpleGroup">
+					<s:if condition="attr.returnFlag??">
+						<s:set expression="ifExec">
+							<value>string: returnFlag: ${attr.returnFlag}</value>
+						</s:set>
+						
+						<s:return/>
+					</s:if>
+				</step-group>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.PollAndCheckStep">
+		<example>
+			<description>Polling and checking for condition</description>
+			
+			<content><![CDATA[
+				<s:pollAndCheck checkCondition="attr.checkVar gte 5" timeOut="20" timeOutUnit="SECONDS" pollingInterval="500">
+					<poll>
+						<s:set expression="checkVar" value="int: ${attr.checkVar + 1}"/>
+					</poll>
+				</s:pollAndCheck>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.WhileLoopStep">
+		<example>
+			<description>Looping till condition is meeting</description>
+			
+			<content><![CDATA[
+				<s:while condition="attr.i lt 5">
+					<s:set expression="res" value="${attr.res}|${attr.i}"/>
+					<s:set expression="i" value="int: ${attr.i + 1}"/>
+				</s:while>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.AssertFileExists">
+		<example>
+			<description>Assert specified file exists</description>
+			
+			<content><![CDATA[
+				<s:assert-file-exists path="test.txt"/>
+			]]></content>
+		</example>
+	</collection>
+</examples>

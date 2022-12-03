@@ -1,0 +1,14 @@
+<configuration>
+	<script name="elementToString"><![CDATA[
+		var element = arguments[0];
+		var res = "<" + element.tagName + " ";
+		
+		for(var i = 0; i < element.attributes.length; i++)
+		{
+			res += element.attributes[i].nodeName + '="' + element.attributes[i].nodeValue + '" ';
+		}
+		
+		res += ">";
+		return res;
+	]]></script>
+</configuration>

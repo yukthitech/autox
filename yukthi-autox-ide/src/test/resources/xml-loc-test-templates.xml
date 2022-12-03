@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="testNewNodeLocation"><![CDATA[
+		<parent>
+			<child>
+				${pos}
+			</child>
+		</parent>
+	]]></entry>
+
+	<entry key="testNewNodeLocation1"><![CDATA[
+		<parent>
+			<child>
+				${pos}
+	]]></entry>
+
+	<entry key="testNewNodeLocation2"><![CDATA[
+		<parent>
+			<child>
+			</child>${pos}
+		</parent>
+	]]></entry>
+
+	<entry key="testNewNodeLocationWithToken"><![CDATA[
+		<parent>
+			<child>
+				<ccg:rest-${pos}
+	]]></entry>
+
+	<entry key="testNewNodeLocationWithToken1"><![CDATA[
+		<parent>
+			<child>
+				<ccg:rest-${pos}
+			</child>
+		</parent>
+	]]></entry>
+
+	<entry key="testNewTextNodeLocation"><![CDATA[
+		<parent>
+			<child>
+				Some text prefix_${pos}
+			</child>
+		</parent>
+	]]></entry>
+
+	<entry key="testNewAttrLocation"><![CDATA[
+		<parent>
+			<child>
+				<ccg:rest-get ${pos}
+			</child>
+		</parent>
+	]]></entry>
+
+	<entry key="testNewAttrLocation1"><![CDATA[
+		<parent>
+			<child>
+				<ccg:rest-get attr1="val1" attr2="val2" ${pos} attr3="val3">
+			</child>
+		</parent>
+	]]></entry>
+
+	<entry key="testAttrValLoc"><![CDATA[
+		<parent xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+			<child>
+				<ccg:rest-get attr1="val1" attr2="val2" ccg:new-attr="${pos}
+			</child>
+		</parent>
+	]]></entry>
+
+	<entry key="testAttrValLoc1"><![CDATA[
+		<parent  xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+			<child>
+				<ccg:rest-get attr1="val1" attr2="val2" ccg:new-attr="some val ${val_${pos}_abc}
+			</child>
+		</parent>
+	]]></entry>
+</properties>

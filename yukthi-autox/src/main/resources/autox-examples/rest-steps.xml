@@ -1,0 +1,131 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.InvokeDeleteStep">
+		<example>
+			<description>Invoking delete api</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-delete uri="/emp/delete/{id}">
+					<pathVariable name="id">${attr.emp2_id}</pathVariable>
+				</s:rest-invoke-delete>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.InvokeGetFileStep">
+		<example>
+			<description>Invoking get api to download file</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-get-file uri="/emp/getFile/{id}">
+					<pathVariable name="id">${attr.emp3_id}</pathVariable>
+				</s:rest-invoke-get-file>
+				
+				<s:set expression="outputContent" value="file(text=true): ${attr.response}"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.InvokeGetStep">
+		<example>
+			<description>Invoking get api</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-get uri="/emp/get/{id}">
+					<pathVariable name="id">${attr.emp2_id}</pathVariable>
+				</s:rest-invoke-get>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.InvokePostStep">
+		<example>
+			<description>Invoking post api</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-post uri="/emp/save">
+					<body>
+						{
+							"name" : "Emp2",
+							"address": "some address"
+						}
+					</body>
+				</s:rest-invoke-post>
+				
+				<s:set expression="emp2_id" value="attr: response | xpath: //id"/>
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Invoking post api as a Form</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-post uri="/emp/saveForm">
+					<param name="name">Emp1</param>
+					<param name="address">some address</param>
+				</s:rest-invoke-post>
+			]]></content>
+		</example>
+	</collection>
+	
+	<collection name="com.yukthitech.autox.test.rest.steps.InvokePostWithAttachmentStep">
+		<example>
+			<description>Invoking post api with attachment</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-multipart-post uri="/emp/saveWithFile">
+					<part name="details">
+						<value>
+							{
+								"name" : "Emp3",
+								"address": "some address"
+							}
+						</value>
+					</part>
+	
+					<attachment name="file" file="file:./src/test/resources/testFile.txt"/>				
+				</s:rest-invoke-multipart-post>
+			]]></content>
+		</example>
+	</collection>
+	
+	<collection name="com.yukthitech.autox.test.rest.steps.InvokePutStep">
+		<example>
+			<description>Invoking put api</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-put uri="/emp/update">
+					<body>
+						{
+							"name" : "Emp2",
+							"address": "some address"
+						}
+					</body>
+				</s:rest-invoke-put>
+			]]></content>
+		</example>
+	</collection>
+	
+	<collection name="com.yukthitech.autox.test.rest.steps.InvokePutWithAttachmentStep">
+		<example>
+			<description>Invoking put api with attachment</description>
+			
+			<content><![CDATA[
+				<s:rest-invoke-multipart-put uri="/emp/updateWithFile">
+					<part name="details">
+						<value>
+							{
+								"name" : "Emp3",
+								"address": "some address"
+							}
+						</value>
+					</part>
+	
+					<attachment name="file" file="file:./src/test/resources/testFile.txt"/>				
+				</s:rest-invoke-multipart-put>
+			]]></content>
+		</example>
+	</collection>
+
+</examples>

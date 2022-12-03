@@ -1,0 +1,50 @@
+.doc_heading
+{
+	font-weight: bold;
+	background: rgb(220, 220, 220);
+	text-align: center !important;
+}
+
+.doc_mainHeading
+{
+	font-weight: bold;
+	background: #8585ad;
+	color: white;
+	text-align: center !important;
+}
+
+.doc_sideHeading
+{
+	font-weight: bold;
+	background: rgb(220, 220, 220);
+	text-align: left;
+}
+
+.tdMandatory
+{
+	font-weight: bold;
+	color:red;
+}
+
+.tdMandatory::before
+{
+	content: "*"
+}
+
+.doc_table
+{
+	width: 100%;
+	margin: 1em;
+}
+
+.doc_table td
+{
+	padding: 0.5em;
+	text-align: left;
+	border: 1px solid black;
+}
+
+.stripped td::even
+{
+	background: red;
+}

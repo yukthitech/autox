@@ -1,0 +1,140 @@
+<html>
+	<head>
+		<style>
+			.doc_heading
+			{
+				font-weight: bold;
+				background: #DCDCDC;
+				text-align: center !important;
+			}
+			
+			.doc_mainHeading
+			{
+				font-weight: bold;
+				background: #8585ad;
+				color: white;
+				text-align: center !important;
+			}
+			
+			.doc_sideHeading
+			{
+				font-weight: bold;
+				background: #DCDCDC;
+				text-align: left;
+			}
+			
+			.tdMandatory
+			{
+				font-weight: bold;
+				color:red;
+			}
+			
+			.tdMandatory::before
+			{
+				content: "*"
+			}
+			
+			.docTable
+			{
+				width: 100%;
+				margin: 10px;
+				border: 1px solid black;
+				border-collapse: collapse;
+				border-spacing: 0px;
+			}
+			
+			.docTable td
+			{
+				padding: 5px;
+				text-align: left;
+				border: 1px solid black;
+			}
+			
+			.stripped td::even
+			{
+				background: red;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div>
+			<div style="position: absolute; bottom: 0px; left: 25em; right: 0px; top: 0px; overflow: auto;">
+				
+				<div style="width: 95%;">
+					<table class="docTable">
+						<tr>
+							<td colspan="2" class="doc_mainHeading">
+								Basic Information of Method
+							</td>
+						</tr>
+						<tr>
+							<td class="doc_sideHeading">Name </td>
+							<td>${node.name}</td>
+						</tr>
+						<tr>
+							<td class="doc_sideHeading">Description </td>
+							<td>${node.description}</td>
+						</tr>
+						<tr>
+							<td class="doc_sideHeading">Return Type </td>
+							<td>${node.returnType}</td>
+						</tr>
+						<tr>
+							<td class="doc_sideHeading">Return Description </td>
+							<td>${node.returnDescription}</td>
+						</tr>
+					</table>
+		
+					<table class="docTable">
+						<tr>
+							<td colspan="3"  class="doc_mainHeading">
+								Parameters
+							</td>
+						</tr>
+						<tr>
+							<td class="doc_heading"> Name </td>
+							<td class="doc_heading"> Type </td>
+							<td class="doc_heading"> Description </td>
+						</tr>
+						<#if node.hasParameters()>
+							<#list node.parameters as param>
+								<tr>
+									<td>${param.name}</td>
+									<td>${param.type}</td>
+									<td>${param.description}</td>
+								</tr>
+							</#list>
+						<#else>
+							<tr>
+								<td colspan="3" style="font-weight: bold; ">
+									<i>No parameters available.</i>
+								</td>
+							</tr>
+						</#if>
+					</table>
+					
+					<#if node.hasExamples()>
+						<table class="docTable">
+							<tr>
+								<td colspan="2"  class="doc_mainHeading">
+									Examples
+								</td>
+							</tr>
+							<#list node.examples as ex>
+								<tr>
+									<td class="doc_heading" style="width: 30px;"> ${ex?index + 1} </td>
+									<td>
+										<B>Description: </B> ${ex.description}<br/>
+										<B>Example: </B> <br/>
+											${ex.escapedContent}
+									</td>
+								</tr>
+							</#list>
+						</table>
+					</#if>
+				</div>
+			</div>		
+		</div>
+	</body>
+</html>

@@ -1,0 +1,101 @@
+<div ng-controller="docController" ng-init="load()">
+	<div id="dataTree" style="position: absolute; bottom: 0px; left: 0px; top: 0px; width: 25em; overflow: auto; background: rgb(250, 250, 100); padding: 0.5em;">
+	</div>		
+	
+	<div style="position: absolute; bottom: 0px; left: 25em; right: 0px; top: 0px; overflow: auto;">
+		<div ng-if="selectedPage" ng-include="selectedPage.doc" style="padding: 1em; width: 95%; padding-top: 0px;">
+		</div>
+		
+		<div style="width: 95%;" ng-if="selectedItem">
+			<table class="doc_table">
+				<tr>
+					<td colspan="2" class="doc_mainHeading">
+						Basic Information of {{selectedItem.type}}
+					</td>
+				</tr>
+				<tr>
+					<td class="doc_sideHeading">Name </td>
+					<td>{{selectedItem.data.name}}</td>
+				</tr>
+				<tr>
+					<td class="doc_sideHeading">Description </td>
+					<td>{{selectedItem.data.description}}</td>
+				</tr>
+				<tr>
+					<td class="doc_sideHeading">Java Type </td>
+					<td>{{selectedItem.data.javaType}}</td>
+				</tr>
+				<tr ng-if="selectedItem.type != 'plugin'">
+					<td class="doc_sideHeading">Required Plugins</td>
+					<td>
+						<div ng-repeat="plugin in selectedItem.data.requiredPlugins" style="display: inline;">
+							{{plugin}} <span ng-if="!$last">, </span> 
+						</div>
+					</td>
+				</tr>
+			</table>
+
+			<table class="doc_table stripped">
+				<tr>
+					<td colspan="3"  class="doc_mainHeading">
+						Parameters
+					</td>
+				</tr>
+				<tr>
+					<td class="doc_heading"> Name </td>
+					<td class="doc_heading"> Type </td>
+					<td class="doc_heading"> Description </td>
+				</tr>
+				<tr ng-repeat="param in selectedItem.data.params">
+					<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">{{param.name}}</td>
+					<td>{{param.type}}</td>
+					<td>
+						<B ng-if="param.sourceType == 'RESOURCE'"><I>
+							This is a <a href="#apiIndex$general_resourceParamType">Resource Param.</a> <BR/>
+						</I></B>
+						
+						<B ng-if="param.sourceType == 'OBJECT'"><I>
+							This is a <a href="#apiIndex$general_objectParamType">Object Param.</a> <BR/>
+						</I></B>
+						
+						<B ng-if="param.sourceType == 'UI_LOCATOR'"><I>
+							This is a <a href="#apiIndex$general_uiLocators">UI locator param.</a> <BR/>
+						</I></B>
+
+						{{param.description}}
+					</td>
+				</tr>
+				<tr>
+					<td ng-if="!selectedItem.data.params || selectedItem.data.params.length == 0" colspan="3" style="font-weight: bold; ">
+						<i>No parameters available.</i>
+					</td>
+				</tr>
+			</table>
+			
+			<table ng-if="selectedItem.type == 'plugin'" class="doc_table stripped">
+				<tr>
+					<td colspan="4"  class="doc_mainHeading">
+						Plugin Command Line Arguments
+					</td>
+				</tr>
+				<tr>
+					<td class="doc_heading"> Short Name </td>
+					<td class="doc_heading"> Long Name </td>
+					<td class="doc_heading"> Type </td>
+					<td class="doc_heading"> Description </td>
+				</tr>
+				<tr ng-repeat="param in selectedItem.data.cliArguments">
+					<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">-{{param.shortName}}</td>
+					<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">--{{param.longName}}</td>
+					<td>{{param.type}}</td>
+					<td>{{param.description}}</td>
+				</tr>
+				<tr>
+					<td ng-if="!selectedItem.data.cliArguments || selectedItem.data.cliArguments.length == 0" colspan="4" style="font-weight: bold; ">
+						<i>No plugin specific command-line-arguments available.</i>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>		
+</div>

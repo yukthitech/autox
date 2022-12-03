@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    
+		<title>Test Results</title>
+		
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	    <script src="js/jquery-2.2.0.js"></script>
+	    
+	    <!-- Include all compiled plugins (below), or include individual files as needed -->
+	    <script src="js/bootstrap.min.js"></script>
+		<link href="css/common.css" rel="stylesheet">
+	    
+		<script src="js/angular.js"></script>
+	    <script src="js/angular-sanitize.min.js"></script>
+	    <script src="js/angular-app.js"></script>
+		
+		<script type="text/javascript" src="test-results.js"></script>
+		<script src="js/index.js"></script>
+
+		<style>
+			table
+			{
+				width: 100%; 
+				height: 100%;
+			}
+			
+			td
+			{
+				text-align: center;
+			}
+			
+			.errorVal
+			{
+				font-weight: bold;
+				color: red;
+			}
+			
+			.defaultVal
+			{
+				font-weight: bold;
+				color: black;
+			}
+
+			.timeDisplay
+			{
+				font-weight: bold;
+				color: black;
+
+				font-size: 0.8em;
+				white-space: nowrap;
+			}
+			
+			.dataProviderDiv
+			{
+				display: inline-block;
+				background: #484848;
+				color: white;
+				font-size: 0.9em;
+				width: 100%;
+				padding: 5px;
+				text-align: left;
+				border-radius: 5px;
+			}
+			
+			.dataProviderDiv a
+			{
+				color: white;
+				font-size: 0.85em;
+			}
+		</style>
+	</head>
+	
+	<body ng-app="application" ng-controller="testAutomationAppController" ng-init="fetchObjects()">
+		
+		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: rgb(2,5,14);
+				border-bottom: 2px solid grey;">
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; vertical-align: top; width: 1em; padding-left: 1em;">
+						<span style="font-size: 2em; color: white; font-weight: bold;">Auto</span><span style="font-size: 2.5em; color: red; font-weight: bold;">X</span>
+					</td>
+					
+					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold;">
+						{{testResults.reportName}} <sub style="font-size: 0.6em;">({{testResults.executionDateStr}})</sub>
+					</td>
+					
+					<td style="text-align: right; width: 1em; white-space: nowrap;">
+						<input type="text" ng-model="searchTestSuiteName" placeholder="Test Suite Name" class="filterField"
+						ng-keyup="filterTestSuite($event)"/>
+						
+						<input type="text" ng-model="searchTestCaseName" placeholder="Test Case Name"  class="filterField"
+						ng-keyup="filterTestCase($event)"/>
+
+						<div class="btn-group" style="margin-right: 2em;">
+						
+						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em; cursor: default;">
+						    	{{status}}
+						    </button>
+						    
+						    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						      <span class="caret"></span>
+						    </button>
+						    <ul class="dropdown-menu" role="menu">
+						       <li><a href="#" ng-click="onChangeStatus('All')">All</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Success')">Success</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Error')">Error</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Failed')">Failed</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Skipped')">Skipped</a></li>
+						    </ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="resultBox" style="margin-top: 5em; border: 2px solid black;">
+		
+			<table style="margin-bottom: 0px;">
+				<tr>
+					<td>
+						<table class="table table-hover table-striped table-bordered"  style="margin-bottom: 0px;">
+							<tr>
+								<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: white;">
+									Test Suites
+								</td>
+							</tr>
+							<tr>
+								<th>Total Test Suites</th>
+								<th>Success Count</th>
+								<th>Failure Count</th>
+								<th>Error Count</th>
+								<th>Skip Count</th>
+							</tr>
+							<tr>
+								<td class="defaultVal">{{testResults.testSuiteCount}}</td>
+								<td class="successVal">{{testResults.testSuiteSuccessCount}}</td>
+								<td class="{{testResults.testSuiteFailureCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testSuiteFailureCount}}</td>
+								<td class="{{testResults.testSuiteErrorCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testSuiteErrorCount}}</td>
+								<td class="{{testResults.testSuiteSkippedCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testSuiteSkippedCount}}</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<table class="table table-hover table-striped table-bordered"  style="margin-bottom: 0px;">
+							<tr>
+								<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: white;">
+									Test Cases
+								</td>
+							</tr>
+							<tr>
+								<th>Total Test Cases</th>
+								<th>Success Count</th>
+								<th>Failure Count</th>
+								<th>Error Count</th>
+								<th>Skip Count</th>
+							</tr>
+							<tr>
+								<td class="defaultVal">{{testResults.testCaseCount}}</td>
+								<td class="successVal">{{testResults.testCaseSuccessCount}}</td>
+								<td class="{{testResults.testCaseFailureCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testCaseFailureCount}}</td>
+								<td class="{{testResults.testCaseErroredCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testCaseErroredCount}}</td>
+								<td class="{{testResults.testCaseSkippedCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testCaseSkippedCount}}</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em; 
+						width: 2px; white-space: nowrap; color: white;">
+						<div style="display: inline; margin: 2px; padding: 2px 5px; background-color: white; color: black;">
+							Total Time Taken: {{testResults.mainExecutionDetails.timeTaken}}
+						</div>
+					</td>
+					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?_global-setup" 
+							ng-show="testResults.setupExecutionDetails"
+							style="color: white; padding: 3px; background-color: {{(testResults.setupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Common Setup Log</a>
+					</td>
+					<td style="text-align: right; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?_global-cleanup"
+							ng-show="testResults.cleanupExecutionDetails" 
+							style="color: white; padding: 3px; background-color: {{(testResults.cleanupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Common Cleanup Log</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<hr/>
+		
+		<div class="resultBox"  style="border: 2px solid black;">
+			<table class="table table-hover table-striped table-bordered">
+				<tr>
+					<th style="width: 1em; white-space: nowrap;">Test Suite</th>
+					<th style="width: 1em;">Status</th>
+					<th style="width: 1em; white-space: nowrap;">Time Taken</th>
+					<th style="width: 1em; white-space: nowrap;">Total Count</th>
+					<th style="width: 1em; white-space: nowrap;">Success Count</th>
+					<th style="width: 1em; white-space: nowrap;">Failure Count</th>
+					<th style="width: 1em; white-space: nowrap;">Error Count</th>
+					<th style="width: 1em; white-space: nowrap;">Skip Count</th>
+					<th style="">Message</th>
+				</tr>
+				<tr ng-repeat="result in testSuiteResults" ng-show="result.display">
+					<td class="defaultVal" style=" white-space: nowrap;">
+						<a href="#{{result.report.name}}">{{result.report.name}}</a>
+					</td>
+					<td ng-class="result.report.mainExecutionDetails.statusStr == 'SUCCESSFUL' ? 'successVal' : 'errorVal'">
+						{{result.report.mainExecutionDetails.statusStr}}	
+					</td>
+					<td class="timeDisplay">
+						{{result.report.mainExecutionDetails.timeTaken}}	
+					</td>
+					<td class="defaultVal">
+						{{result.totalCount}}	
+					</td>
+					<td class="successVal">
+						{{result.successCount}}	
+					</td>
+					<td class="{{result.failureCount == 0? 'defaultVal' : 'errorVal'}}">
+						{{result.failureCount}}	
+					</td>
+					<td class="{{result.errorCount == 0? 'defaultVal' : 'errorVal'}}">
+						{{result.errorCount}}	
+					</td>
+					<td class="{{result.skipCount == 0? 'defaultVal' : 'errorVal'}}">
+						{{result.skipCount}}
+					</td>
+					<td style="text-align: left; padding-left: 1em;">
+						{{replaceMessage(result.report.mainExecutionDetails.statusMessage)}}
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<hr/>
+		
+		<div id="{{result.report.name}}" class="resultBox" ng-repeat="result in testSuiteResults" ng-show="result.display" style="border: 2px solid black;">
+			<table class="table table-hover table-striped table-bordered" style="width: 100%; margin-bottom: 0px;">
+				<tr>
+					<td colspan="5" style="background-color: #8585ad; font-weight: bold; color: white; font-size: 1.2em;">
+							{{result.report.name}}
+					</td>
+				</tr>
+				<tr>
+					<th>Test Case</th>
+					<th>Status</th>
+					<th style="white-space: nowrap;">Time Taken</th>
+					<th>Message</th>
+					<th>Log</th>
+				</tr>
+				<tr ng-repeat="tcResult in result.testCaseResults" ng-show="tcResult.display">
+					<td style="font-weight: bold; padding: 3px;" colspan="5" ng-if="tcResult.type == 'DATA_PROVIDER'">
+						<div class="dataProviderDiv">
+							<table style="width: 100%;">
+								<tr>
+									<td style="text-align: left;">
+										{{tcResult.name}}
+									</td>
+									<td style="text-align: right;">
+										<a href="./log.html?tc_{{result.report.name}}_{{tcResult.name}}" 
+											style="display: block; {{tcResult.mainExecutionDetails.statusStr != 'SUCCESSFUL' ? 'color: red': ''}}">
+												Data Provider Log
+										</a>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+
+					<td style="color: #3973ac; font-weight: bold;" style="width: 20%;" ng-if="tcResult.type != 'DATA_PROVIDER'">
+						{{tcResult.name}}
+					</td>
+					<td ng-class="tcResult.mainExecutionDetails.statusStr != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 15%;"  ng-if="tcResult.type != 'DATA_PROVIDER'">
+						{{tcResult.mainExecutionDetails.statusStr}}
+					</td>
+					<td style="width: 5%; text-align: left; padding-left: 1em; white-space: nowrap;" class="timeDisplay"  ng-if="tcResult.type != 'DATA_PROVIDER'"> 
+						{{tcResult.mainExecutionDetails.timeTaken}}
+					</td>
+					<td style="width: 50%; text-align: left; padding-left: 1em; word-break: break-word;"  ng-if="tcResult.type != 'DATA_PROVIDER'">
+						{{tcResult.mainExecutionDetails.statusMessage}}
+					</td>
+					<td style="width: 10%; text-align: left; padding-left: 1em;"  ng-if="tcResult.type != 'DATA_PROVIDER'">
+						<a href="./log.html?tc_{{result.report.name}}_{{tcResult.name}}" style="display: block;">System Log</a>
+						<a  ng-repeat="(key,val) in tcResult.monitorLogs" href="logs/{{val}}" style="color: brown; display: block;">
+							{{key}}
+						</a>
+					</td>
+				</tr>
+			</table>
+			<table style="width: 100%; margin-bottom: 0px;">
+				<tr>
+					<th style="text-align: right; font-weight: bold; font-size: 0.9em; padding: 0.4em; color: white;">
+						Total: <span ng-bind="result.totalCount" style="margin-right: 2em;"></span>
+						Success: <span ng-bind="result.successCount" style="margin-right: 2em;"></span>
+						Failure: <span ng-bind="result.failureCount" style="margin-right: 2em;"></span>
+						Error: <span ng-bind="result.errorCount" style="margin-right: 2em;"></span>
+						Skip: <span ng-bind="result.skipCount" style="margin-right: 2em;"></span>
+					</th>
+				</tr>
+			</table>
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em; 
+						width: 2px; white-space: nowrap; color: white;">
+						<div style="display: inline; margin: 2px; padding: 2px 5px; background-color: white; color: black;">
+							Time Taken: {{result.report.mainExecutionDetails.timeTaken}}
+						</div>
+					</td>
+					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?ts_{{result.report.name}}-setup" 
+							ng-show="result.report.setupExecutionDetails"
+							style="color: white; padding: 3px; background-color: {{(result.report.setupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Setup Log</a>
+					</td>
+					<td style="text-align: right; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?ts_{{result.report.name}}-cleanup"
+							ng-show="result.report.cleanupExecutionDetails" 
+							style="color: white; padding: 3px; background-color: {{(result.report.cleanupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Cleanup Log</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+	</body>
+</html>
