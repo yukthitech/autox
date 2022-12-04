@@ -103,21 +103,24 @@ public class EventHandler extends AbstractLocationBased implements IStepContaine
 	{
 		AutomationContext context = AutomationContext.getInstance();
 		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+		IExecutionLogger logger = AutomationContext.getInstance().getExecutionLogger();
 		
 		context.pushParameters(params);
 		executionStack.push(this);
 		
 		try
 		{
-			IExecutionLogger logger = AutomationContext.getInstance().getExecutionLogger();
-			logger.debug("Executing event handler: {}", name);
+			logger.info("Executing event handler: {}", name);
 
 			StepsExecutor.execute(steps, null);
+			
+			logger.info("Successfully completed executing event handler: {}", name);
 		} catch(Exception ex)
 		{
 			//occurs during return statement execution
 			if(ex instanceof ReturnException)
 			{
+				logger.info("Successfully completed executing event handler: {}", name);
 				return ((ReturnException) ex).getValue();
 			}
 			

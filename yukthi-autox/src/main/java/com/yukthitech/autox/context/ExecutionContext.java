@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -70,7 +71,7 @@ public class ExecutionContext
 	 * handler execution and represent current session for which
 	 * event handling is being done.
 	 */
-	private IPluginSession activePlugin;
+	private Stack<IPluginSession> activePluginStack = new Stack<>();
 	
 	public ExecutionContext(ExecutionContextManager parent, Executor executor)
 	{
@@ -163,29 +164,29 @@ public class ExecutionContext
 		return nameToAttr;
 	}
 	
-	public void setActivePlugin(IPluginSession activePlugin)
+	public synchronized void pushActivePlugin(IPluginSession activePlugin)
 	{
-		this.activePlugin = activePlugin;
+		this.activePluginStack.push(activePlugin);
 	}
 	
-	public void clearActivePlugin()
+	public synchronized void popActivePlugin()
 	{
-		this.activePlugin = null;
+		this.activePluginStack.pop();
 	}
 	
-	public IPluginSession getActivePlugin()
+	public synchronized IPluginSession getActivePlugin()
 	{
-		return activePlugin;
+		return activePluginStack.peek();
 	}
 	
-	public Map<String, Object> getPluginAttr()
+	public synchronized Map<String, Object> getPluginAttr(String name)
 	{
-		if(activePlugin == null)
+		if(activePluginStack.isEmpty())
 		{
 			throw new InvalidStateException("No active plugin session found on context");
 		}
 		
-		return activePlugin.getAttributes();
+		return activePluginStack.peek().getAttributes(name);
 	}
 
 	public Function getFunction(String name)

@@ -84,6 +84,11 @@
 		
 		<rest-plugin>
 			<baseUrl>http://localhost:8080/app/api</baseUrl>
+			
+			<connection name="sessionBased">
+				<baseUrl>http://localhost:8080/app/api</baseUrl>
+				<default-header name="Auth-Token">${(getPluginAttr('sessionBased').authToken)!''}</default-header>
+			</connection>
 		</rest-plugin>
 			
 	</wrap:plugins>

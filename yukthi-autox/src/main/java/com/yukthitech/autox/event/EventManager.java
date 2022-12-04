@@ -101,7 +101,7 @@ public class EventManager
 		}
 		
 		ExecutionContext context = ExecutionContextManager.getExecutionContext();
-		context.setActivePlugin(pluginSession);
+		context.pushActivePlugin(pluginSession);
 		
 		try
 		{
@@ -111,7 +111,7 @@ public class EventManager
 			throw new InvalidStateException("An error occurred while invoking plugin event-handler: {}", fullName, ex);
 		}finally
 		{
-			context.setActivePlugin(null);
+			context.popActivePlugin();
 		}
 	}
 }

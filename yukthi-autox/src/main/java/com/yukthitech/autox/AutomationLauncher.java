@@ -99,6 +99,10 @@ public class AutomationLauncher
 			{
 				mainError = xmlLoadException.getCause().getMessage();
 			}
+			else if(xmlLoadException.getCause() == null)
+			{
+				mainError = xmlLoadException.getMessage();
+			}
 			else
 			{
 				mainError = CommonUtils.getRootCauseMessages(ex.getCause());

@@ -13,35 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.plugin;
+package com.yukthitech.test.controller;
 
-import java.util.Map;
-
-public abstract class AbstractPluginSession<S extends IPluginSession, P extends IPlugin<?, S>> implements IPluginSession
+public class LoginRequest
 {
-	protected P parentPlugin;
+	private String userName;
 	
-	public AbstractPluginSession(P parentPlugin)
+	private String password;
+
+	public String getUserName()
 	{
-		this.parentPlugin = parentPlugin;
+		return userName;
 	}
-	
-	@Override
-	public P getParentPlugin()
+
+	public void setUserName(String userName)
 	{
-		return parentPlugin;
+		this.userName = userName;
 	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void release()
+
+	public String getPassword()
 	{
-		parentPlugin.releaseSession((S) this);
+		return password;
 	}
-	
-	@Override
-	public Map<String, Object> getAttributes(String name)
+
+	public void setPassword(String password)
 	{
-		throw new UnsupportedOperationException("Attributes are not supported by current plugin");
+		this.password = password;
 	}
 }

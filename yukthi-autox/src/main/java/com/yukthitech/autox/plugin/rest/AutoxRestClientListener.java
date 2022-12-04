@@ -29,10 +29,13 @@ import com.yukthitech.utils.rest.RestResult;
  */
 public class AutoxRestClientListener implements IRestClientListener
 {
+	private String connectionName;
+	
 	private RestPluginSession session;
 	
-	public AutoxRestClientListener(RestPluginSession session)
+	public AutoxRestClientListener(String connectionName, RestPluginSession session)
 	{
+		this.connectionName = connectionName;
 		this.session = session;
 	}
 
@@ -45,7 +48,7 @@ public class AutoxRestClientListener implements IRestClientListener
 		}
 		
 		Object handlerRes = EventManager.getInstance().invokePluginEventHandler(session, IRestPluginEvent.EVENT_UNAUTHORIZED, 
-				CommonUtils.toMap("request", req, "result", res));
+				CommonUtils.toMap("request", req, "result", res, "connectionName", connectionName));
 		
 		if("true".equalsIgnoreCase("" + handlerRes))
 		{

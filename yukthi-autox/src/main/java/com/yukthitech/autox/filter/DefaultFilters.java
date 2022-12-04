@@ -119,7 +119,10 @@ public class DefaultFilters
 
 	@ExpressionFilter(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName", contentType = ParserContentType.ATTRIBUTE,
 			params = {
-					@ParserParam(name = "global", type = "boolean", defaultValue = "false", description = "During set if value is true, the attribute will be set at global level"),
+					@ParserParam(name = "plugin", type = "boolean", defaultValue = "false", description = "If true, plugin session attributes will be accessed"),
+					@ParserParam(name = "pluginName", type = "String", defaultValue = "null", description = "When plugin attributes are being accessed this will be used. This is connection/driver/datasource name based on plugin"),
+					@ParserParam(name = "global", type = "boolean", defaultValue = "false", description = "During set if value is true, the attribute will be set at global level "
+							+ "(get and remove will access local attributes only)"),
 				})
 	public IPropertyPath attrParser(FilterContext parserContext, String expression)
 	{
@@ -128,7 +131,11 @@ public class DefaultFilters
 			@Override
 			public void setValue(Object value) throws Exception
 			{
-				if("true".equalsIgnoreCase(parserContext.getParameter("global")))
+				if("true".equalsIgnoreCase(parserContext.getParameter("plugin")))
+				{
+					parserContext.getAutomationContext().getPluginAttr(parserContext.getParameter("pluginName")).put(expression, value);
+				}
+				else if("true".equalsIgnoreCase(parserContext.getParameter("global")))
 				{
 					parserContext.getAutomationContext().setGlobalAttribute(expression, value);
 				}
@@ -141,12 +148,22 @@ public class DefaultFilters
 			@Override
 			public Object getValue() throws Exception
 			{
+				if("true".equalsIgnoreCase(parserContext.getParameter("plugin")))
+				{
+					parserContext.getAutomationContext().getPluginAttr(parserContext.getParameter("pluginName")).get(expression);
+				}
+
 				return parserContext.getAutomationContext().getAttribute(expression);
 			}
 			
 			@Override
 			public void removeValue() throws Exception
 			{
+				if("true".equalsIgnoreCase(parserContext.getParameter("plugin")))
+				{
+					parserContext.getAutomationContext().getPluginAttr(parserContext.getParameter("pluginName")).remove(expression);
+				}
+
 				parserContext.getAutomationContext().removeAttribute(expression);
 			}
 		};

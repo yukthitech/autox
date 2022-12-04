@@ -261,9 +261,9 @@ public class AutomationContext
 	 * 
 	 * @return
 	 */
-	public Map<String, Object> getPluginAttr()
+	public Map<String, Object> getPluginAttr(String name)
 	{
-		return ExecutionContextManager.getExecutionContext().getPluginAttr();
+		return ExecutionContextManager.getExecutionContext().getPluginAttr(name);
 	}
 
 	/**

@@ -127,4 +127,25 @@ public class TAutomationFlows extends BaseTestCases
 		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 0, "Found wrong number of FAIL test cases");
 		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 0, "Found wrong number of ERROR test cases");
 	}
+
+	@Test
+	public void testSessionEvents() throws Exception
+	{
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
+				"-tsf", "./src/test/resources/new-test-suites/session-events",
+				"-rf", "./output/session-events", 
+				"-prop", "./src/test/resources/app.properties", 
+				//"--report-opening-disabled", "true",
+				//"-ts", "ml-rest-sessions"
+				//"-tc", "dataProviderOnFetchIndependentCtx"
+				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+			});
+		
+		FinalReport exeResult = objectMapper.readValue(new File("./output/session-events/test-results.json"), FinalReport.class);
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 1, "Found wrong number of test suites");
+		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 1, "Found wrong number of SUCCESS test suites");
+		
+		Assert.assertEquals(exeResult.getTestCaseCount(), 1, "Found wrong number of test cases");
+		Assert.assertEquals(exeResult.getTestCaseSuccessCount(), 1, "Found wrong number of SUCCESS test cases");
+	}
 }

@@ -1,0 +1,52 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap"
+	xmlns:f="http://autox.yukthitech.com/functions">
+	
+	<function name="login">
+		<s:rest-invoke-post uri="/empSession/login" connectionName="${param.connectionName}">
+			<body><![CDATA[
+				{
+					"userName" : "user",
+					"password": "password"
+				}
+			]]></body>
+		</s:rest-invoke-post>
+		
+		<s:return value="expr: attr.response.token"/>
+	</function>
+	
+	<event-handler name="restPlugin.initialize">
+		<f:login returnAttr="tokenId" connectionName="${param.connectionName}"/>
+		<s:set expression="attr(plugin=true, pluginName=${param.connectionName}): authToken" value="attr: tokenId"/>
+	</event-handler>
+
+	<event-handler name="restPlugin.unauthorized">
+		<f:login returnAttr="tokenId" connectionName="${param.connectionName}"/>
+		<s:set expression="attr(plugin=true, pluginName=${param.connectionName}): authToken" value="attr: tokenId"/>
+		<s:return value="true"/>
+	</event-handler>
+
+	<testSuite name="rest-session-events">
+		<testCase name="testPostWithSession">
+			<description>Test post api invocation</description>
+		
+			<s:rest-invoke-post uri="/empSession/save" connectionName="sessionBased">
+				<body><![CDATA[
+					{
+						"name" : "Emp1",
+						"address": "some address"
+					}
+				]]></body>
+			</s:rest-invoke-post>
+		
+			<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
+			
+			<!-- Wait for session to expire. As per it expires in 5 sec -->
+			<s:sleep time="6000"/>
+			
+			<s:rest-invoke-get uri="/empSession/get/${attr.emp1_id}" connectionName="sessionBased"/>
+
+			<s:assert-equals actual="expr: attr.response.name" expected="Emp1"/>
+		</testCase>
+	</testSuite>
+</testData>

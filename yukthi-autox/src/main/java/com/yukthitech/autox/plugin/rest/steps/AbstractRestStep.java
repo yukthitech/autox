@@ -98,6 +98,9 @@ public abstract class AbstractRestStep extends AbstractStep
 		}
 	}
 	
+	@Param(description = "Name of connection to be used. Defaults to default connection", required = false)
+	private String connectionName;
+	
 	/**
 	 * Base Url to be used. 
 	 */
@@ -165,6 +168,16 @@ public abstract class AbstractRestStep extends AbstractStep
 	 */
 	@Param(description = "Request content type to be used. default: " + IRestConstants.JSON_CONTENT_TYPE, required = false)
 	protected String contentType = IRestConstants.JSON_CONTENT_TYPE;
+	
+	/**
+	 * Sets the connection name.
+	 *
+	 * @param connectionName the new connection name
+	 */
+	public void setConnectionName(String connectionName)
+	{
+		this.connectionName = connectionName;
+	}
 	
 	/**
 	 * Sets the base Url to be used.
@@ -365,7 +378,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		RestPluginSession restPluginSession = ExecutionContextManager.getInstance().getPluginSession(RestPlugin.class);
 		
-		Map<String, String> defaultHeaders = new HashMap<>( restPluginSession.getDefaultHeaders() );
+		Map<String, String> defaultHeaders = new HashMap<>( restPluginSession.getDefaultHeaders(connectionName) );
 		Map<String, String> headers = toMap(context, "header", this.headers);
 		
 		if(!defaultHeaders.isEmpty())
@@ -440,10 +453,10 @@ public abstract class AbstractRestStep extends AbstractStep
 		else
 		{
 			exeLogger.debug("With [Base url: {}, Proxy: {}, Expected Response Type: {}] invoking request: \n {}", 
-					restPluginSession.getParentPlugin().getBaseUrl(), proxyHostPort, expectedResponseType, request);
+					restPluginSession.getBaseUrl(connectionName), proxyHostPort, expectedResponseType, request);
 		}
 		
-		RestClient client = restPluginSession.getRestClient(baseUrl, proxyHostPort);
+		RestClient client = restPluginSession.getRestClient(connectionName, baseUrl, proxyHostPort);
 		
 		RestResult<Object> result = null;
 		
@@ -481,18 +494,18 @@ public abstract class AbstractRestStep extends AbstractStep
 	{
 		RestPluginSession restPluginSession = ExecutionContextManager.getInstance().getPluginSession(RestPlugin.class);
 		
-		ExecutionContextManager.getExecutionContext().setActivePlugin(restPluginSession);
+		ExecutionContextManager.getExecutionContext().pushActivePlugin(restPluginSession);
 		
 		try
 		{
 			executeRestStep(context, logger);
 		}catch(UnauthorizedRequestException ex)
 		{
-			logger.warn("Previous request resulted in unauthorized response. Post plugin event handler, invoking request one more time");
+			logger.warn("Invoked 'unauthorized' rest-plugin event handler as previous request resulted in unauthorized response. Post plugin event handler, invoking previous request one more time");
 			executeRestStep(context, logger);
 		}finally
 		{
-			ExecutionContextManager.getExecutionContext().clearActivePlugin();
+			ExecutionContextManager.getExecutionContext().popActivePlugin();
 		}
 	}
 	

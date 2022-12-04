@@ -48,7 +48,8 @@ public interface IPluginSession
 	
 	/**
 	 * Fetches plugin attribute map.
+	 * @param name Name of sub-section like connection/sesssion/datasource supported by plugin. 
 	 * @return
 	 */
-	public Map<String, Object> getAttributes();
+	public Map<String, Object> getAttributes(String name);
 }
