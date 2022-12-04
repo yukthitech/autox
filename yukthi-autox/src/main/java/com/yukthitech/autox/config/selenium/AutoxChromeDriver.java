@@ -28,7 +28,7 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 
-import com.yukthitech.autox.config.SeleniumDriverConfig;
+import com.yukthitech.autox.plugin.ui.SeleniumDriverConfig;
 
 public class AutoxChromeDriver extends ChromeDriver
 {

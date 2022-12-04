@@ -22,11 +22,11 @@ import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
-import com.yukthitech.autox.test.ui.steps.WaitForStep;
+import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
+import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
+import com.yukthitech.autox.plugin.ui.steps.WaitForStep;
 
 /**
  * Validates alert box is displayed and closes the dialog.

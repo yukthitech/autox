@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import com.yukthitech.autox.config.IPlugin;
-import com.yukthitech.autox.config.IPluginSession;
-import com.yukthitech.autox.config.PluginManager;
+import com.yukthitech.autox.plugin.IPlugin;
+import com.yukthitech.autox.plugin.IPluginSession;
+import com.yukthitech.autox.plugin.PluginManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

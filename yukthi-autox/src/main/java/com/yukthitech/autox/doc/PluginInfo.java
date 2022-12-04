@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.utils.cli.CliArgument;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 

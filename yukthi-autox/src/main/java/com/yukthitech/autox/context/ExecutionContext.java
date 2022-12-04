@@ -30,6 +30,7 @@ import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitorSession;
 import com.yukthitech.autox.logmon.LogMonitorManager;
+import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -63,6 +64,13 @@ public class ExecutionContext
 	private ExecutionContext parentContext;
 
 	private List<ILogMonitorSession> monitorSessions;
+	
+	/**
+	 * Active plugin session. This will be set during plugin event 
+	 * handler execution and represent current session for which
+	 * event handling is being done.
+	 */
+	private IPluginSession activePlugin;
 	
 	public ExecutionContext(ExecutionContextManager parent, Executor executor)
 	{
@@ -155,6 +163,31 @@ public class ExecutionContext
 		return nameToAttr;
 	}
 	
+	public void setActivePlugin(IPluginSession activePlugin)
+	{
+		this.activePlugin = activePlugin;
+	}
+	
+	public void clearActivePlugin()
+	{
+		this.activePlugin = null;
+	}
+	
+	public IPluginSession getActivePlugin()
+	{
+		return activePlugin;
+	}
+	
+	public Map<String, Object> getPluginAttr()
+	{
+		if(activePlugin == null)
+		{
+			throw new InvalidStateException("No active plugin session found on context");
+		}
+		
+		return activePlugin.getAttributes();
+	}
+
 	public Function getFunction(String name)
 	{
 		if(executor.getExecutable() instanceof TestSuite)

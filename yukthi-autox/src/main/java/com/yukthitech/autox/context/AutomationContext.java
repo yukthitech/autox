@@ -27,10 +27,10 @@ import com.yukthitech.autox.TestSuiteParserHandler;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.ApplicationConfiguration;
-import com.yukthitech.autox.config.IPlugin;
-import com.yukthitech.autox.config.IPluginSession;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
+import com.yukthitech.autox.plugin.IPlugin;
+import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
@@ -255,6 +255,17 @@ public class AutomationContext
 		return ExecutionContextManager.getExecutionContext().getAttr();
 	}
 	
+	/**
+	 * Fetches the currently active plugin attribute map.
+	 * If no plugin is active, this method will throw exception.
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> getPluginAttr()
+	{
+		return ExecutionContextManager.getExecutionContext().getPluginAttr();
+	}
+
 	/**
 	 * Used to push the parameters on stack of the function going to be executed on. Expected to be
 	 * called only before fucntion execution by framework itself.

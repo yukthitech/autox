@@ -22,9 +22,9 @@ import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.config.IPlugin;
-import com.yukthitech.autox.config.IPluginSession;
 import com.yukthitech.autox.exec.Executor;
+import com.yukthitech.autox.plugin.IPlugin;
+import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

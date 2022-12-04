@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.plugin.IPlugin;
 
 /**
  * Used to mark a step/validation as executable, so that they can be found dynamically.

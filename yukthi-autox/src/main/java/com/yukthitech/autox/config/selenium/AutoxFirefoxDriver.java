@@ -23,7 +23,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
-import com.yukthitech.autox.config.SeleniumDriverConfig;
+import com.yukthitech.autox.plugin.ui.SeleniumDriverConfig;
 
 public class AutoxFirefoxDriver extends FirefoxDriver
 {

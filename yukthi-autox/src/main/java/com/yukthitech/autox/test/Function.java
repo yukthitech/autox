@@ -33,7 +33,7 @@ import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;
 
 /**
- * Represents group of steps and/or validations. That can be referenced 
+ * Represents a function that can be invoked as needed. 
  * @author akiran
  */
 public class Function extends AbstractLocationBased implements IStepContainer, Cloneable, IEntryPoint, IParentAware
@@ -77,12 +77,6 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	 */
 	private Map<String, Object> params;
 	
-	/**
-	 * Optional data provider for the step.
-	 */
-	@SkipParsing
-	private IDataProvider dataProvider;
-
 	@SkipParsing
 	private Object parent;
 	
@@ -216,41 +210,5 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		{
 			throw new IllegalStateException(ex);
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#getDataProvider()
-	 */
-	public IDataProvider getDataProvider()
-	{
-		return dataProvider;
-	}
-
-	/**
-	 * Sets the optional data provider for the step.
-	 *
-	 * @param dataProvider the new optional data provider for the step
-	 */
-	public void setDataProvider(IDataProvider dataProvider)
-	{
-		this.dataProvider = dataProvider;
-	}
-
-	/**
-	 * Sets the specified list data provider as data-provider for this test case.
-	 * @param dataProvider data provider to set
-	 */
-	public void setListDataProvider(ListDataProvider dataProvider)
-	{
-		this.setDataProvider(dataProvider);
-	}
-	
-	/**
-	 * Sets the specified range data provider as data-provider for this test case.
-	 * @param dataProvider data provider to set
-	 */
-	public void setRangeDataProvider(RangeDataProvider dataProvider)
-	{
-		this.setDataProvider(dataProvider);
 	}
 }

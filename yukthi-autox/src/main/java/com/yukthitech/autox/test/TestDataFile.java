@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.event.EventHandler;
+import com.yukthitech.autox.event.EventManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -152,6 +154,11 @@ public class TestDataFile
 		context.addFunction(function);
 	}
 	
+	public void addEventHandler(EventHandler handler)
+	{
+		EventManager.getInstance().addEventHandler(handler);
+	}
+
 	public void addCustomUiLocator(CustomUiLocator customUiLocator)
 	{
 		context.addCustomUiLocator(customUiLocator);
