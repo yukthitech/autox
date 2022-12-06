@@ -34,6 +34,7 @@ import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -95,6 +96,11 @@ public class AutomationContext
 	private Map<String, CustomUiLocator> customUiLocators = new HashMap<>();
 	
 	/**
+	 * Test suite group being executed.
+	 */
+	private TestSuiteGroup testSuiteGroup;
+	
+	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
 	 */
@@ -122,6 +128,16 @@ public class AutomationContext
 		this.persistenceStorage = new PersistenceStorage(appConfiguration);
 	}
 	
+	public TestSuiteGroup getTestSuiteGroup()
+	{
+		return testSuiteGroup;
+	}
+
+	public void setTestSuiteGroup(TestSuiteGroup testSuiteGroup)
+	{
+		this.testSuiteGroup = testSuiteGroup;
+	}
+
 	public static void reset() throws Exception
 	{
 		if(instance != null)
@@ -414,22 +430,22 @@ public class AutomationContext
 		nameToFunction.put(function.getName(), function);
 	}
 	
+	public synchronized void addOrReplaceFunction(Function function)
+	{
+		if(StringUtils.isEmpty(function.getName()))
+		{
+			throw new InvalidArgumentException("Function can not be added without name");
+		}
+		
+		nameToFunction.put(function.getName(), function);
+	}
+
 	/**
 	 * Clears step groups.
 	 */
 	public void clearFunctions()
 	{
 		nameToFunction.clear();
-	}
-	
-	/**
-	 * Adds the specified step groups.
-	 *
-	 * @param functions step groups to add
-	 */
-	public void addFunctions(Map<String, Function> functions)
-	{
-		nameToFunction.putAll(functions);
 	}
 	
 	/**

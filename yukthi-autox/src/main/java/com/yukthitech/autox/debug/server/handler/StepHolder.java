@@ -23,7 +23,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
 
-class StepHolder implements IStepContainer
+public class StepHolder implements IStepContainer
 {
 	/**
 	 * Steps added for execution.

@@ -408,6 +408,7 @@ public class AutomationLauncher
 		boolean loadTestSuites = true;
 		// load test suites
 		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig, loadTestSuites);
+		context.setTestSuiteGroup(testSuiteGroup);
 		
 		return testSuiteGroup;
 	}

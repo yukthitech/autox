@@ -140,7 +140,7 @@ public class TDebugFlows extends BaseTestCases
 				"-rf", "./output/debug-flow", 
 				"-prop", "./src/test/resources/app.properties", 
 				"--debug-port", "9876",
-				"--report-opening-disabled", "true",
+				//"--report-opening-disabled", "true",
 				//"-ts", "data-provider-err"
 				"-tc", testCase
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
@@ -173,7 +173,7 @@ public class TDebugFlows extends BaseTestCases
 					13, 14,
 					
 				//cleanup	
-				47, 48
+				65, 66
 			));
 	}
 
@@ -188,7 +188,7 @@ public class TDebugFlows extends BaseTestCases
 				29, 30, 32,
 					
 				//cleanup	
-				47, 48
+				65, 66
 			));
 	}
 	
@@ -211,14 +211,14 @@ public class TDebugFlows extends BaseTestCases
 				13, 14,
 					
 				//cleanup	
-				47, 48
+				65, 66
 			));
 	}
 
 	@Test
 	public void testStepReturnFlow() throws Exception
 	{
-		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(8, 13, 48), null, "debugTest1", Arrays.asList(8, 13, 48));
+		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(8, 13, 65), null, "debugTest1", Arrays.asList(8, 13, 65));
 	}
 
 	@Test
@@ -238,7 +238,7 @@ public class TDebugFlows extends BaseTestCases
 			String steps = "<s:log message=\"This is from dyn step execution..\"/>\n"
 					+ "<s:set expression=\"someAttr\" value=\"int: 100\"/>\n";
 			
-			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps));
+			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps, null));
 			
 			//wait for 5 seconds, so that step execution is completed
 			AutomationUtils.sleep(5000);
@@ -248,4 +248,25 @@ public class TDebugFlows extends BaseTestCases
 		Assert.assertTrue(consumerExectued.getValue());
 	}
 
+	@Test
+	public void testFunctionReload() throws Exception
+	{
+		ObjectWrapper<Boolean> consumerExectued = new ObjectWrapper<>(false);
+		
+		BiConsumer<ServerMssgExecutionPaused, DebugClientHandler> onPause = (mssg, handler) -> 
+		{
+			consumerExectued.setValue(true);
+			
+			//using step evaluation set attr to 100
+			String steps = "<function name=\"testOp\"><s:return value=\"expr: (param.param1 * param.param2)\"/></function>";
+			
+			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps, "debug-flow"));
+			
+			//wait for 5 seconds, so that step execution is completed
+			AutomationUtils.sleep(5000);
+		};
+		
+		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(58), onPause, "functionReload", Arrays.asList(58));
+		Assert.assertTrue(consumerExectued.getValue());
+	}
 }

@@ -31,8 +31,16 @@ public class ClientMssgExecuteSteps extends ClientMessage
 	private String executionId;
 
 	private String stepsToExecute;
+	
+	/**
+	 * In case steps to execute has functions to be reloaded, 
+	 * then this field will be considered. If this field is not null,
+	 * then functions will be loaded into this function, if not will
+	 * be loaded to global context.
+	 */
+	private String targetTestSuite;
 
-	public ClientMssgExecuteSteps(String executionId, String stepsToExecute)
+	public ClientMssgExecuteSteps(String executionId, String stepsToExecute, String targetTestSuite)
 	{
 		super(UUID.randomUUID().toString());
 		
@@ -48,6 +56,7 @@ public class ClientMssgExecuteSteps extends ClientMessage
 		
 		this.executionId = executionId;
 		this.stepsToExecute = stepsToExecute;
+		this.targetTestSuite = targetTestSuite;
 	}
 	
 	public String getExecutionId()
@@ -58,5 +67,10 @@ public class ClientMssgExecuteSteps extends ClientMessage
 	public String getStepsToExecute()
 	{
 		return stepsToExecute;
+	}
+
+	public String getTargetTestSuite()
+	{
+		return targetTestSuite;
 	}
 }

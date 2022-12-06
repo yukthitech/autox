@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,6 +30,10 @@ import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.debug.server.LiveDebugPoint;
+import com.yukthitech.autox.test.CustomUiLocator;
+import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.test.TestSuite;
+import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -68,35 +73,67 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 		}
 		
 		StepHolder stepHolder = parseSteps(steps.getStepsToExecute());
+		AutomationContext automationContext = AutomationContext.getInstance();
+		boolean reloadingDone = false;
 		
-		/*
 		if(CollectionUtils.isNotEmpty(stepHolder.getCustomUiLocators()))
 		{
 			for(CustomUiLocator customUiLocator : stepHolder.getCustomUiLocators())
 			{
 				logger.debug("Reloading custom-ui-locator: {}", customUiLocator.getName());
-				
 				automationContext.addOrReplaceCustomUiLocator(customUiLocator);
 			}
+			
+			reloadingDone = true;
 		}
-		
 		
 		if(CollectionUtils.isNotEmpty(stepHolder.getFunctions()))
 		{
-			TestSuite activeTestSuite = automationContext.getActiveTestSuite();
+			String targetTestSuiteName = steps.getTargetTestSuite();
+			TestSuite targetTestSuite = null;
+			
+			if(StringUtils.isNotBlank(targetTestSuiteName))
+			{
+				TestSuiteGroup group = automationContext.getTestSuiteGroup();
+				targetTestSuite = (group != null) ? group.getTestSuite(targetTestSuiteName) : null;
+				
+				if(targetTestSuite == null)
+				{
+					logger.warn("Invalid test suite name specified for function reload: {}", targetTestSuiteName);
+					DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, 
+							"Invalid test suite name specified for function reload: %s", targetTestSuiteName));
+					return;
+				}
+			}
 
 			for(Function func : stepHolder.getFunctions())
 			{
 				logger.debug("Reloading function: {}", func.getName());
 				
-				activeTestSuite.addOrReplaceFunction(func);
+				if(targetTestSuite != null)
+				{
+					targetTestSuite.addOrReplaceFunction(func);
+				}
+				else
+				{
+					automationContext.addOrReplaceFunction(func);
+				}
 			}
+			
+			reloadingDone = true;
 		}
-		*/
 
 		if(CollectionUtils.isEmpty(stepHolder.getSteps()))
 		{
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "No steps found to execute: %s", steps.getExecutionId()));
+			if(reloadingDone)
+			{
+				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), true, "Reloading completed successfully"));
+			}
+			else
+			{
+				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "No steps found to execute: %s", steps.getExecutionId()));
+			}
+			
 			return;
 		}
 		
