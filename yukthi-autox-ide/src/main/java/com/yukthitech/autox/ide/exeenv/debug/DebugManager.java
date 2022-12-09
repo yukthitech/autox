@@ -39,18 +39,18 @@ public class DebugManager
 {
 	private static final String DEBUG_POINT_ATTR_NAME = DebugManager.class.getName() + ".debugPoints";
 	
-	private Map<File, List<DebugPoint>> debugPoints = new HashMap<>();
+	private Map<File, List<IdeDebugPoint>> debugPoints = new HashMap<>();
 	
-	public synchronized DebugPoint addDebugPoint(String project, File file, int lineNo)
+	public synchronized IdeDebugPoint addDebugPoint(String project, File file, int lineNo)
 	{
-		DebugPoint newPoint = new DebugPoint(project, file, lineNo);
+		IdeDebugPoint newPoint = new IdeDebugPoint(project, file, lineNo);
 		addDebugPoint(newPoint);
 		return newPoint;
 	}
 	
-	private void addDebugPoint(DebugPoint newPoint)
+	private void addDebugPoint(IdeDebugPoint newPoint)
 	{
-		List<DebugPoint> points = debugPoints.get(newPoint.getFile());
+		List<IdeDebugPoint> points = debugPoints.get(newPoint.getFile());
 		
 		if(points == null)
 		{
@@ -70,9 +70,9 @@ public class DebugManager
 		points.add(newPoint);
 	}
 	
-	public synchronized void removeBreakPoint(DebugPoint debugPoint)
+	public synchronized void removeBreakPoint(IdeDebugPoint debugPoint)
 	{
-		List<DebugPoint> points = debugPoints.get(debugPoint.getFile());
+		List<IdeDebugPoint> points = debugPoints.get(debugPoint.getFile());
 		
 		if(points == null)
 		{
@@ -82,9 +82,9 @@ public class DebugManager
 		points.remove(debugPoint);
 	}
 	
-	public synchronized List<DebugPoint> getDebugPoints(File file)
+	public synchronized List<IdeDebugPoint> getDebugPoints(File file)
 	{
-		List<DebugPoint> points = this.debugPoints.get(file);
+		List<IdeDebugPoint> points = this.debugPoints.get(file);
 		
 		if(CollectionUtils.isEmpty(points))
 		{
@@ -94,19 +94,37 @@ public class DebugManager
 		return new ArrayList<>(points);
 	}
 	
+	public synchronized List<IdeDebugPoint> getDebugPoints(String projectName)
+	{
+		List<IdeDebugPoint> finalLst = new ArrayList<>();
+		
+		for(List<IdeDebugPoint> points : this.debugPoints.values())
+		{
+			for(IdeDebugPoint point : points)
+			{
+				if(projectName.equals(point.getProject()))
+				{
+					finalLst.add(point);
+				}
+			}
+		}
+		
+		return finalLst;
+	}
+
 	@SuppressWarnings("unchecked")
 	@IdeEventHandler
 	public void ideOpening(IdePreStateLoadEvent event)
 	{
 		IdeState state = event.getIdeState();
-		List<DebugPoint> points = (List<DebugPoint>) state.getAttribute(DEBUG_POINT_ATTR_NAME);
+		List<IdeDebugPoint> points = (List<IdeDebugPoint>) state.getAttribute(DEBUG_POINT_ATTR_NAME);
 		
 		if(CollectionUtils.isEmpty(points))
 		{
 			return;
 		}
 		
-		for(DebugPoint point : points)
+		for(IdeDebugPoint point : points)
 		{
 			//ignore points which corresponds to deleted file
 			if(!point.getFile().exists())
@@ -127,7 +145,7 @@ public class DebugManager
 	@IdeEventHandler
 	public void ideClosing(IdeClosingEvent event)
 	{
-		List<DebugPoint> points = new ArrayList<>();
+		List<IdeDebugPoint> points = new ArrayList<>();
 		this.debugPoints.values().forEach(pointLst -> points.addAll(pointLst));
 
 		IdeState state = event.getIdeState();

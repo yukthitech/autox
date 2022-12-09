@@ -13,9 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.views.report;
+package com.yukthitech.autox.ide.exeenv;
 
-public interface IReportRow
+import com.yukthitech.autox.ide.services.IIdeEvent;
+
+/**
+ * Raised when an environment is terminated.
+ * @author akranthikiran
+ */
+public class EnvironmentTerminatedEvent implements IIdeEvent
 {
-	public Object getValueAt(int col);
+	private ExecutionEnvironment executionEnvironment;
+	
+	public EnvironmentTerminatedEvent(ExecutionEnvironment executionEnvironment)
+	{
+		this.executionEnvironment = executionEnvironment;
+	}
+
+	public ExecutionEnvironment getExecutionEnvironment()
+	{
+		return executionEnvironment;
+	}
 }

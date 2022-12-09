@@ -23,6 +23,7 @@ import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -201,13 +202,18 @@ public class IdeUtils
 		loadSvg("/ui/icons/new.svg", 10);
 	}
 	
+	public static ImageIcon loadIcon(String resource, int size)
+	{
+		return loadIcon(resource, size, false);
+	}
+	
 	/**
 	 * Loads specified resource as an icon with specified size.
 	 * @param resource
 	 * @param size
 	 * @return
 	 */
-	public static ImageIcon loadIcon(String resource, int size)
+	public static ImageIcon loadIcon(String resource, int size, boolean grayScale)
 	{
 		Image baseImg = null;
 		
@@ -224,7 +230,34 @@ public class IdeUtils
 		BufferedImage img = new BufferedImage(size + BORDER_SIZE, size + BORDER_SIZE, BufferedImage.TYPE_INT_ARGB);
 		img.getGraphics().drawImage(baseImg, HALF_BORDER_SIZE, HALF_BORDER_SIZE, size, size, null);
 		
+		if(grayScale)
+		{
+			convertToGrayScale(img);
+		}
+		
 		return new ImageIcon(img);
+	}
+	
+	private static void convertToGrayScale(BufferedImage img)
+	{
+		int width = img.getWidth();
+		int height = img.getHeight();
+		
+		int pixel[] = new int[4];
+		WritableRaster raster = img.getWritableTile(0, 0);
+
+		for(int i = 0; i < height; i++)
+		{
+			for(int j = 0; j < width; j++)
+			{
+				raster.getPixel(i, j, pixel);
+
+				int grayVal = (int) ((pixel[1] + pixel[2] + pixel[3]) / 3.0);
+				pixel[1] = pixel[2] = pixel[3] = grayVal;
+				
+				raster.setPixel(i, j, pixel);
+			}
+		}
 	}
 	
 	public static ImageIcon loadIconWithoutBorder(String resource, int size)

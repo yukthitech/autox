@@ -18,6 +18,7 @@ package com.yukthitech.autox.ide.services;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +75,10 @@ public class IdeEventManager
 	
 	private Map<Class<?>, List<EventMethod>> typeToMethods = new HashMap<>();
 	
+	private Thread eventProcessor;
+	
+	private LinkedList<IIdeEvent> eventQueue = new LinkedList<>();
+	
 	@PostConstruct
 	private void init()
 	{
@@ -117,14 +122,52 @@ public class IdeEventManager
 				typeToMethods.put(evtType, eventMethodLst);
 			}
 			
+			met.setAccessible(true);
 			eventMethodLst.add(new EventMethod(service, met));
+		}
+		
+		eventProcessor = new Thread(this::processEvents, "Ide Event Processor");
+		eventProcessor.start();
+	}
+	
+	private void processEvents()
+	{
+		List<IIdeEvent> events = new ArrayList<>();
+		
+		while(true)
+		{
+			synchronized(this.eventQueue)
+			{
+				events.addAll(this.eventQueue);
+				this.eventQueue.clear();
+			}
+
+			for(IIdeEvent event : events)
+			{
+				processEvent(event);
+			}
+			
+			events.clear();
+			
+			synchronized(this.eventQueue)
+			{
+				try
+				{
+					if(eventQueue.isEmpty())
+					{
+						//wait for 1 sec to check next set of events
+						eventQueue.wait(1000);
+					}
+				}catch(InterruptedException ex)
+				{
+					//ignore
+				}
+			}
 		}
 	}
 	
-	public void processEvent(IIdeEvent event)
+	private void processEvent(IIdeEvent event)
 	{
-		logger.debug("Processing event: {}", event);
-		
 		List<EventMethod> methods = typeToMethods.get(event.getClass());
 		
 		if(methods == null)
@@ -134,9 +177,25 @@ public class IdeEventManager
 		
 		for(EventMethod met : methods)
 		{
-			logger.debug("Invoking event method {}.{}() for event of type: {}", 
+			logger.trace("Invoking event method {}.{}() for event of type: {}", 
 					met.method.getDeclaringClass().getName(), met.method.getName(), event.getClass().getName());
-			met.invoke(event);
+			
+			try
+			{
+				met.invoke(event);
+			}catch(Exception ex)
+			{
+				logger.debug("An error occurred while process event method", ex);
+			}
+		}
+	}
+	
+	public void raiseAsyncEvent(IIdeEvent event)
+	{
+		synchronized(this.eventQueue)
+		{
+			this.eventQueue.addLast(event);
+			this.eventQueue.notifyAll();
 		}
 	}
 }

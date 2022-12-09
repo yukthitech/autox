@@ -24,11 +24,11 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.65388608"
-     inkscape:cx="396.85812"
-     inkscape:cy="315.80425"
-     inkscape:window-width="1280"
-     inkscape:window-height="961"
+     inkscape:zoom="2.6155443"
+     inkscape:cx="62.510889"
+     inkscape:cy="76.657084"
+     inkscape:window-width="1600"
+     inkscape:window-height="837"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -39,11 +39,11 @@
        inkscape:collect="always"
        id="linearGradient3322">
       <stop
-         style="stop-color:#005f00;stop-opacity:1;"
+         style="stop-color:#00c800;stop-opacity:1"
          offset="0"
          id="stop3318" />
       <stop
-         style="stop-color:#005f00;stop-opacity:0;"
+         style="stop-color:#e0eb1f;stop-opacity:0"
          offset="1"
          id="stop3320" />
     </linearGradient>
@@ -53,8 +53,8 @@
        id="linearGradient3324"
        x1="14.566758"
        y1="29.57119"
-       x2="29.618822"
-       y2="3.5002518"
+       x2="36.194096"
+       y2="-3.1761787"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <g
@@ -62,7 +62,7 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:url(#linearGradient3324);fill-opacity:1;stroke:#00cd00;stroke-width:0.065;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:url(#linearGradient3324);fill-opacity:1;stroke:#13ea00;stroke-width:0.065;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path846"
        sodipodi:type="arc"
        sodipodi:cx="16.015919"
@@ -73,6 +73,7 @@
        sodipodi:end="6.1656374"
        sodipodi:open="true"
        sodipodi:arc-type="arc"
-       d="M 31.998889,17.028006 A 15.98297,16.994549 0 0 1 16.485542,34.015217 15.98297,16.994549 0 0 1 0.06054616,18.026267 15.98297,16.994549 0 0 1 14.60867,0.09945782 15.98297,16.994549 0 0 1 31.888594,15.034929" />
+       d="M 31.998889,17.028006 A 15.98297,16.994549 0 0 1 16.485542,34.015217 15.98297,16.994549 0 0 1 0.06054616,18.026267 15.98297,16.994549 0 0 1 14.60867,0.09945782 15.98297,16.994549 0 0 1 31.888594,15.034929"
+       inkscape:label="path846" />
   </g>
 </svg>

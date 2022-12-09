@@ -27,7 +27,6 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -49,11 +48,11 @@ import org.springframework.stereotype.Component;
 import com.yukthitech.autox.ide.IViewPanel;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.actions.FileActions;
-import com.yukthitech.autox.ide.context.IContextListener;
-import com.yukthitech.autox.ide.context.IdeContext;
-import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
-import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
+import com.yukthitech.autox.ide.exeenv.ConsoleContentAddedEvent;
+import com.yukthitech.autox.ide.exeenv.EnvironmentActivationEvent;
+import com.yukthitech.autox.ide.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.swing.HyperLinkEvent;
 import com.yukthitech.swing.YukthiHtmlPane;
 
@@ -73,9 +72,6 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	private final JButton btnClear = new JButton("");
 	private final YukthiHtmlPane consoleDisplayArea = new YukthiHtmlPane();
 
-	@Autowired
-	private IdeContext ideContext;
-	
 	@Autowired
 	private FileActions fileAction;
 
@@ -141,49 +137,51 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		consoleDisplayArea.addHyperLinkListener(this::onHyperLinkClick);
 	}
 
-	@PostConstruct
-	private void init()
+	@IdeEventHandler
+	private void onEnvironmentActivate(EnvironmentActivationEvent event)
 	{
-		ideContext.addContextListener(new IContextListener()
+		ExecutionEnvironment activeEnvironment = event.getNewActiveEnvironment();
+		
+		if(activeEnvironment != null)
 		{
-			@Override
-			public void activeEnvironmentChanged(ExecutionEnvironment activeEnvironment)
-			{
-				if(activeEnvironment != null)
-				{
-					lblEnvironment.setVisible(true);
-					lblEnvironment.setText("Environment: " + activeEnvironment.getName());
-				}
-				else
-				{
-					lblEnvironment.setVisible(false);
-				}
+			lblEnvironment.setVisible(true);
+			lblEnvironment.setText("Environment: " + activeEnvironment.getName());
+		}
+		else
+		{
+			lblEnvironment.setVisible(false);
+		}
 
-				ConsolePanel.this.activeEnvironment = activeEnvironment;
-				refreshConsoleText();
-			}
+		ConsolePanel.this.activeEnvironment = activeEnvironment;
+		refreshConsoleText();
+	}
+	
+	@IdeEventHandler
+	private void onEnvironmentTerminated(EnvironmentTerminatedEvent event)
+	{
+		ExecutionEnvironment environment = event.getExecutionEnvironment();
+		
+		if(activeEnvironment != environment)
+		{
+			return;
+		}
+		
+		boolean repFile = (environment.isReportFileAvailable());
+		btnOpenReport.setEnabled(repFile);
+	}
+	
+	@IdeEventHandler
+	public void onConsoleContentAdded(ConsoleContentAddedEvent event)
+	{
+		if(activeEnvironment != event.getExecutionEnvironment())
+		{
+			return;
+		}
 
-			@Override
-			public void environmentChanged(EnvironmentEvent event)
-			{
-				if(activeEnvironment != event.getEnvironment() || event.getEventType() != EnvironmentEventType.CONSOLE_CHANGED)
-				{
-					return;
-				}
-
-				appendNewContent(event.getNewMessage());
-				
-				boolean repFile = (event.getEnvironment().isReportFileAvailable());
-				btnOpenReport.setEnabled(repFile);
-			}
-			
-			@Override
-			public void environmentTerminated(ExecutionEnvironment environment)
-			{
-				boolean repFile = (environment.isReportFileAvailable());
-				btnOpenReport.setEnabled(repFile);
-			}
-		});
+		appendNewContent(event.getNewContent());
+		
+		boolean repFile = (event.getExecutionEnvironment().isReportFileAvailable());
+		btnOpenReport.setEnabled(repFile);
 	}
 
 	@Override
@@ -199,8 +197,17 @@ public class ConsolePanel extends JPanel implements IViewPanel
 			consoleDisplayArea.setText("");
 			return;
 		}
+		
+		String code = injectLinks(activeEnvironment.getConsoleHtml());
 
-		consoleDisplayArea.setText("<html><body id=\"body\">" + injectLinks(activeEnvironment.getConsoleHtml()) + "</body></html>");
+		try
+		{
+			consoleDisplayArea.setText("<html><body id=\"body\">" + code + "</body></html>");
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while setting content in console panel. Code:\n{}", code, ex);
+		}
+		
 		moveToEnd();
 	}
 	

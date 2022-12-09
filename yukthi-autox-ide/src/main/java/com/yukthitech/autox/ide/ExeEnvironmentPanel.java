@@ -40,9 +40,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.context.IContextListener;
-import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.exeenv.EnvironmentStartedEvent;
+import com.yukthitech.autox.ide.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
+import com.yukthitech.autox.ide.exeenv.ExecutionEnvironmentManager;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
 
 @Component
 public class ExeEnvironmentPanel extends JPanel
@@ -55,8 +57,10 @@ public class ExeEnvironmentPanel extends JPanel
 	
 	private static Icon INACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/gray-dot.svg", 16);
 	
-	private static Icon INTERACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/interactive.svg", 16);
+	private static Icon DEBUG_ICON = IdeUtils.loadIcon("/ui/icons/debug.svg", 16);
 	
+	private static Icon INACTIVE_DEBUG_ICON = IdeUtils.loadIcon("/ui/icons/debug.svg", 16, true);
+
 	private static class ExeEnvLabel extends DefaultListCellRenderer
 	{
 		private static final long serialVersionUID = 1L;
@@ -75,18 +79,11 @@ public class ExeEnvironmentPanel extends JPanel
 			
 			if(exeEnv.isTerminated())
 			{
-				label.setIcon(INACTIVE_ICON);
+				label.setIcon(exeEnv.isDebugEnv() ? INACTIVE_DEBUG_ICON : INACTIVE_ICON);
 			}
 			else
 			{
-				if(exeEnv.isInteractive())
-				{
-					label.setIcon(INTERACTIVE_ICON);
-				}
-				else
-				{
-					label.setIcon(ACTIVE_ICON);
-				}
+				label.setIcon(exeEnv.isDebugEnv() ? DEBUG_ICON : ACTIVE_ICON);
 			}
 			
 			return label;
@@ -101,7 +98,7 @@ public class ExeEnvironmentPanel extends JPanel
 	private final JLabel lblEnvironments = new JLabel("Environments: ");
 
 	@Autowired
-	private IdeContext ideContext;
+	private ExecutionEnvironmentManager executionEnvironmentManager;
 	
 	/**
 	 * Create the panel.
@@ -168,34 +165,6 @@ public class ExeEnvironmentPanel extends JPanel
 	@PostConstruct
 	private void init()
 	{
-		ideContext.addContextListener(new IContextListener()
-		{
-			@Override
-			public void newEnvironmentStarted(ExecutionEnvironment environment)
-			{
-				newEnvironmentAdded(environment);
-			}
-			
-			@Override
-			public void environmentTerminated(ExecutionEnvironment environment)
-			{
-				IdeUtils.execute(() -> {
-					envComboBox.revalidate();
-					envComboBox.getParent().revalidate();
-					
-					int selIdx = envComboBox.getSelectedIndex();
-					envComboBox.setSelectedItem(null);
-					
-					if(selIdx >= 0)
-					{
-						envComboBox.setSelectedIndex(selIdx);
-					}
-					
-					checkForButtons();
-				}, 200);
-			}
-		});
-		
 		Runtime.getRuntime().addShutdownHook(new Thread()
 		{
 			@Override
@@ -214,6 +183,42 @@ public class ExeEnvironmentPanel extends JPanel
 		});
 		
 		checkForButtons();
+	}
+	
+	@IdeEventHandler
+	private void newEnvironmentAdded(EnvironmentStartedEvent event)
+	{
+		logger.debug("ENV_PANEL: Got Env started event...");
+		ExecutionEnvironment environment = event.getExecutionEnvironment();
+		
+		clearAllEnvironments();
+		
+		envComboBox.addItem(environment);
+		envComboBox.setSelectedItem(environment);
+		
+		checkForButtons();
+		
+		executionEnvironmentManager.setActiveEnvironment(environment);
+	}
+
+	@IdeEventHandler
+	private void onEnviromentTerminate(EnvironmentTerminatedEvent event)
+	{
+		int selIdx = envComboBox.getSelectedIndex();
+		envComboBox.setSelectedItem(null);
+		
+		if(selIdx >= 0)
+		{
+			envComboBox.setSelectedIndex(selIdx);
+		}
+		
+		checkForButtons();
+
+		IdeUtils.executeUiTask(() -> 
+		{
+			envComboBox.revalidate();
+			envComboBox.getParent().revalidate();
+		});
 	}
 
 	private void stopEnvironment()
@@ -240,7 +245,7 @@ public class ExeEnvironmentPanel extends JPanel
 		if(activeEnv.isTerminated())
 		{
 			envComboBox.removeItem(activeEnv);
-			ideContext.getProxy().activeEnvironmentChanged(null);
+			executionEnvironmentManager.setActiveEnvironment(null);
 			
 			checkForButtons();
 		}
@@ -282,7 +287,7 @@ public class ExeEnvironmentPanel extends JPanel
 		
 		if(activeEnvRemoved)
 		{
-			ideContext.getProxy().activeEnvironmentChanged(null);
+			executionEnvironmentManager.setActiveEnvironment(null);
 		}
 		
 		checkForButtons();
@@ -291,10 +296,10 @@ public class ExeEnvironmentPanel extends JPanel
 	private synchronized void changeEnvironment()
 	{
 		ExecutionEnvironment env = (ExecutionEnvironment) envComboBox.getSelectedItem();
-		ideContext.getProxy().activeEnvironmentChanged(env);
+		executionEnvironmentManager.setActiveEnvironment(env);
 	}
 	
-	private void checkForButtons()
+	private synchronized void checkForButtons()
 	{
 		clearAllBut.setEnabled(false);
 		clearBut.setEnabled(false);
@@ -337,17 +342,5 @@ public class ExeEnvironmentPanel extends JPanel
 				break;
 			}
 		}
-	}
-	
-	private synchronized void newEnvironmentAdded(ExecutionEnvironment environment)
-	{
-		clearAllEnvironments();
-		
-		envComboBox.addItem(environment);
-		envComboBox.setSelectedItem(environment);
-		
-		checkForButtons();
-		
-		ideContext.getProxy().activeEnvironmentChanged(environment);
 	}
 }

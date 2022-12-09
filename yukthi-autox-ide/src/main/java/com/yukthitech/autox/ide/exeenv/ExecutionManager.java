@@ -19,8 +19,10 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.annotation.PostConstruct;
@@ -99,24 +101,19 @@ public class ExecutionManager
 		return icon;
 	}
 	
-	public ExecutionEnvironment execute(ExecutionType executionType, Project project, String name)
+	public ExecutionEnvironment execute(ExecutionType executionType, Project project, String name, boolean debug)
 	{
 		RunConfig newConfig = new RunConfig(executionType, project.getName(), name);
 		
 		//RunConfig existingConfig = runConfigurations.get(newConfig.getUniqueId());
 		//TODO: here existing runconfig settings should be used for execution 
-		ExecutionEnvironment env = executionEnvironmentManager.execute(executionType, project, name);
+		ExecutionEnvironment env = executionEnvironmentManager.execute(executionType, project, name, debug);
 		newConfig.setName(env.getName());
 		
 		onNewExecution(newConfig);
 		return env;
 	}
-	
-	public ExecutionEnvironment getInteractiveEnvironment(Project project)
-	{
-		return executionEnvironmentManager.getInteractiveEnvironment(project);
-	}
-	
+
 	private void onNewExecution(RunConfig runConfig)
 	{
 		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
@@ -152,7 +149,7 @@ public class ExecutionManager
 				return;
 			}
 			
-			execute(runConfig.getExecutionType(), project, runConfig.getExecutableName());
+			execute(runConfig.getExecutionType(), project, runConfig.getExecutableName(), false);
 		}, 1);
 	}
 	
@@ -170,7 +167,7 @@ public class ExecutionManager
 				return;
 			}
 			
-			execute(runConfig.getExecutionType(), project, runConfig.getExecutableName());
+			execute(runConfig.getExecutionType(), project, runConfig.getExecutableName(), true);
 		}, 1);
 	}
 
@@ -228,8 +225,18 @@ public class ExecutionManager
 		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
 		DropDownButton debugButton = (DropDownButton) UiIdElementsManager.getElement("debugList");
 		
+		Set<RunConfig> addedConfigs = new HashSet<>();
+		
 		for(RunConfig config : configs)
 		{
+			//avoid duplicates
+			if(addedConfigs.contains(config))
+			{
+				continue;
+			}
+			
+			addedConfigs.add(config);
+			
 			DropDownItem item = new DropDownItem(config.getName(), getIcon(config.getExecutionType()));
 
 			item.setUserData(config);

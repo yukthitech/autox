@@ -89,7 +89,6 @@
 				<short-key ctrl="true" shift="true" key="F9" />
 			</item>
 			
-			<!--  
 			<item label="-" />
 			
 			<item label="Debug Test Suite" mnemonic="S" action="debugTestSuite">
@@ -105,7 +104,6 @@
 			<item label="Run To Current Step" action="runToCurrentStep">
 				<short-key ctrl="true" shift="true" key="ENTER" />
 			</item>
-			-->
 		</menu>
 
 		<menu label="Window" mnemonic="W">
@@ -147,9 +145,8 @@
 		<item icon="-" />
 		
 		<drop-down-item id="runList" icon="/ui/icons/run.svg" tooltip="Run..."/>
-		<!--  
 		<drop-down-item id="debugList" icon="/ui/icons/debug.svg" tooltip="Debug..."/>
-		-->
+
 		<item icon="-" />
 
 		<toggle-item id="ideSettings_enableTextWrapping" icon="/ui/icons/word-wrap.svg" tooltip="Word Wrap" action="toogleWordWrap"/>

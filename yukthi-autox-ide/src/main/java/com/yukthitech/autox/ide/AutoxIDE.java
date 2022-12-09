@@ -55,7 +55,6 @@ import com.yukthitech.autox.ide.services.IdePreStateLoadEvent;
 import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.services.IdeStateManager;
 import com.yukthitech.autox.ide.views.console.ConsolePanel;
-import com.yukthitech.autox.ide.views.report.ReportPanel;
 
 @ActionHolder
 public class AutoxIDE extends JFrame
@@ -96,9 +95,6 @@ public class AutoxIDE extends JFrame
 	
 	@Autowired
 	private ConsolePanel consolePanel;
-	
-	@Autowired
-	private ReportPanel reportPanel;
 	
 	@Autowired
 	private HelpPanel helpPanel;
@@ -167,13 +163,13 @@ public class AutoxIDE extends JFrame
 		IdeState ideState = ideStateManager.getState();
 		
 		//send the pre-state-load event
-		ideEventManager.processEvent(new IdePreStateLoadEvent(ideState));
+		ideEventManager.raiseAsyncEvent(new IdePreStateLoadEvent(ideState));
 
 		//old way of setting loaded distributed state
 		ideContext.getProxy().loadState(ideState);
 		
 		//send the opening event
-		ideEventManager.processEvent(new IdeOpeningEvent(ideState));
+		ideEventManager.raiseAsyncEvent(new IdeOpeningEvent(ideState));
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -191,7 +187,7 @@ public class AutoxIDE extends JFrame
 				//send the started event
 				EventQueue.invokeLater(() -> 
 				{
-					ideEventManager.processEvent(new IdeStartedEvent(ideState));					
+					ideEventManager.raiseAsyncEvent(new IdeStartedEvent(ideState));					
 				});
 			}
 		});
@@ -311,13 +307,9 @@ public class AutoxIDE extends JFrame
 		rightBottomTabbedPane.setParentDetails(maximizeListener, horizontalSplitPane, false);
 		rightBottomTabbedPane.setViewsCloseable(false);
 
-		rightBottomTabbedPane.addTab("Report", null, reportPanel, null);
-		reportPanel.setParent(rightBottomTabbedPane);
-
 		rightBottomTabbedPane.addTab("Console", null, consolePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
-		//rightBottomTabbedPane.addTab("Context Attributes", null, contextAttributePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
 		rightBottomTabbedPane.addTab("Help", null, helpPanel, null);
@@ -354,7 +346,7 @@ public class AutoxIDE extends JFrame
 		IdeState ideState = ideStateManager.getState();
 
 		//send the closing event
-		ideEventManager.processEvent(new IdeClosingEvent(ideState));
+		ideEventManager.raiseAsyncEvent(new IdeClosingEvent(ideState));
 		
 		//old way of getting distributed state
 		ideContext.getProxy().saveState(ideState);

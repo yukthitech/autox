@@ -24,7 +24,7 @@ import com.google.common.base.Objects;
  * Represents a debug point.
  * @author akranthikiran
  */
-public class DebugPoint implements Serializable
+public class IdeDebugPoint implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -43,7 +43,9 @@ public class DebugPoint implements Serializable
 	 */
 	private int lineNo;
 	
-	public DebugPoint(String project, File file, int lineNo)
+	private String condition;
+	
+	public IdeDebugPoint(String project, File file, int lineNo)
 	{
 		this.project = project;
 		this.file = file;
@@ -70,6 +72,16 @@ public class DebugPoint implements Serializable
 		return lineNo;
 	}
 	
+	public String getCondition()
+	{
+		return condition;
+	}
+
+	public void setCondition(String condition)
+	{
+		this.condition = condition;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -81,12 +93,12 @@ public class DebugPoint implements Serializable
 			return true;
 		}
 
-		if(!(obj instanceof DebugPoint))
+		if(!(obj instanceof IdeDebugPoint))
 		{
 			return false;
 		}
 
-		DebugPoint other = (DebugPoint) obj;
+		IdeDebugPoint other = (IdeDebugPoint) obj;
 		return file.equals(other.file) && lineNo == other.lineNo;
 	}
 

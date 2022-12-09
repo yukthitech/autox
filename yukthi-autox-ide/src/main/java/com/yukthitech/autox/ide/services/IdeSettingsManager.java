@@ -140,7 +140,7 @@ public class IdeSettingsManager
 		}
 
 		ideSettings.setEditorFont(newFont);
-		ideEventManager.processEvent(new IdeSettingChangedEvent(ideSettings));
+		ideEventManager.raiseAsyncEvent(new IdeSettingChangedEvent(ideSettings));
 		
 		ideStateManager.saveState(ideState);
 	}
@@ -155,6 +155,6 @@ public class IdeSettingsManager
 		boolean newState = !curState;
 		
 		ideSettings.setEnableTextWrapping(newState);
-		ideEventManager.processEvent(new IdeSettingChangedEvent(ideSettings));
+		ideEventManager.raiseAsyncEvent(new IdeSettingChangedEvent(ideSettings));
 	}
 }

@@ -15,21 +15,31 @@
  */
 package com.yukthitech.autox.ide.exeenv;
 
+import com.yukthitech.autox.ide.services.IIdeEvent;
+
 /**
- * Types of environment event.
- * @author akiran
+ * Raised when new content is added to env console.
+ * @author akranthikiran
  */
-public enum EnvironmentEventType
+public class ConsoleContentAddedEvent implements IIdeEvent
 {
-	/**
-	 * New log entry is added to reports.
-	 */
-	REPORT_LOG_ADDED,
+	private ExecutionEnvironment executionEnvironment;
 	
-	/**
-	 * New context attribute is added to ContextAttributesPanel 
-	 */
-	CONTEXT_ATTRIBUTE_CHANGED
-	
-	;
+	private String newContent;
+
+	public ConsoleContentAddedEvent(ExecutionEnvironment executionEnvironment, String newContent)
+	{
+		this.executionEnvironment = executionEnvironment;
+		this.newContent = newContent;
+	}
+
+	public ExecutionEnvironment getExecutionEnvironment()
+	{
+		return executionEnvironment;
+	}
+
+	public String getNewContent()
+	{
+		return newContent;
+	}
 }

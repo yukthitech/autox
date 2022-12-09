@@ -6,7 +6,7 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger name="com.yukthitech" level="all" />
+		<Logger name="com.yukthitech" level="debug" />
 		
 			<!-- <logger name="org.springframework" additivity="false"> <level value="all" 
 		/> <appender-ref ref="console" /> </logger> -->

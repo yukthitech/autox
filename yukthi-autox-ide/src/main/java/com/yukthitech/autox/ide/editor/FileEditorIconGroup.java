@@ -27,7 +27,7 @@ import javax.swing.ImageIcon;
 
 import org.fife.ui.rtextarea.GutterIconInfo;
 
-import com.yukthitech.autox.ide.exeenv.debug.DebugPoint;
+import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
 
 /**
  * Represents file editor icon on left side - error, warning, debug etc.
@@ -51,7 +51,7 @@ public class FileEditorIconGroup implements Icon
 		
 		private Icon icon;
 		
-		private DebugPoint debugPoint;
+		private IdeDebugPoint debugPoint;
 		
 		private String message;
 
@@ -62,12 +62,12 @@ public class FileEditorIconGroup implements Icon
 			this.message = message;
 		}
 
-		public DebugPoint getDebugPoint()
+		public IdeDebugPoint getDebugPoint()
 		{
 			return debugPoint;
 		}
 
-		public void setDebugPoint(DebugPoint debugPoint)
+		public void setDebugPoint(IdeDebugPoint debugPoint)
 		{
 			this.debugPoint = debugPoint;
 		}

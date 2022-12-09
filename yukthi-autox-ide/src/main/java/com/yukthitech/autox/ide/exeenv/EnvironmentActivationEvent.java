@@ -15,21 +15,23 @@
  */
 package com.yukthitech.autox.ide.exeenv;
 
+import com.yukthitech.autox.ide.services.IIdeEvent;
+
 /**
- * Types of environment event.
- * @author akiran
+ * Raised when an environment activation status changed.
+ * @author akranthikiran
  */
-public enum EnvironmentEventType
+public class EnvironmentActivationEvent implements IIdeEvent
 {
-	/**
-	 * New log entry is added to reports.
-	 */
-	REPORT_LOG_ADDED,
+	private ExecutionEnvironment newActiveEnvironment;
 	
-	/**
-	 * New context attribute is added to ContextAttributesPanel 
-	 */
-	CONTEXT_ATTRIBUTE_CHANGED
-	
-	;
+	public EnvironmentActivationEvent(ExecutionEnvironment executionEnvironment)
+	{
+		this.newActiveEnvironment = executionEnvironment;
+	}
+
+	public ExecutionEnvironment getNewActiveEnvironment()
+	{
+		return newActiveEnvironment;
+	}
 }

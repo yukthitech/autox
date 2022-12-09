@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.utils.event.EventListenerManager;
 
@@ -51,21 +50,8 @@ public class IdeContext
 	 */
 	private List<File> selectedFiles;
 	
-	/**
-	 * Current active environment.
-	 */
-	private ExecutionEnvironment activeEnvironment;
-	
 	public IdeContext()
 	{
-		eventListenerManager.addListener(new IContextListener()
-		{
-			@Override
-			public void activeEnvironmentChanged(ExecutionEnvironment activeEnvironment)
-			{
-				IdeContext.this.activeEnvironment = activeEnvironment;
-			}
-		});
 	}
 	
 	/**
@@ -127,15 +113,5 @@ public class IdeContext
 	public List<File> getSelectedFiles()
 	{
 		return selectedFiles;
-	}
-	
-	/**
-	 * Gets the current active environment.
-	 *
-	 * @return the current active environment
-	 */
-	public ExecutionEnvironment getActiveEnvironment()
-	{
-		return activeEnvironment;
 	}
 }

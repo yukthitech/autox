@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,10 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.AutomationLauncher;
-import com.yukthitech.autox.debug.server.DebugServer;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -49,15 +46,12 @@ public class ExecutionEnvironmentManager
 	private static Logger logger = LogManager.getLogger(ExecutionEnvironmentManager.class);
 	
 	@Autowired
-	private IdeContext ideContext;
+	private IdeEventManager ideEventManager;
 	
 	@Autowired
 	private UiLayout uiLayout;
 	
-	/**
-	 * Mapping from project to execution environment.
-	 */
-	private Map<String, ExecutionEnvironment> interactiveEnvironments = new HashMap<>();
+	private ExecutionEnvironment activeEnvironment;
 	
 	/**
 	 * Fetches next available socket.
@@ -78,14 +72,14 @@ public class ExecutionEnvironmentManager
 		}
 	}
 	
-	private ExecutionEnvironment startAutoxEnvironment(ExecutionType executionType, String envName, Project project, String... extraArgs)
+	private ExecutionEnvironment startAutoxEnvironment(ExecutionType executionType, String envName, Project project, boolean debug, String... extraArgs)
 	{
 		String classpath = project.getProjectClassLoader().toClassPath();
 		String javaCmd = "java";
 		String outputDir = "autox-report";
 		File reportFolder = new File(project.getBaseFolderPath(), outputDir);
 		
-		int monitorPort = fetchNextAvailablePort();
+		int debugPort = -1;
 		//Eg: -Dautox.debug.enabled=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 		String debugArg = System.getProperty("autox.debug.enabled");
 		
@@ -107,6 +101,12 @@ public class ExecutionEnvironmentManager
 			"--report-opening-disabled", "true"
 		) );
 		
+		if(debug)
+		{
+			debugPort = fetchNextAvailablePort();
+			command.addAll(Arrays.asList("--debug-port", "" + debugPort));
+		}
+		
 		command.addAll(Arrays.asList(extraArgs));
 		
 		StringBuilder initMssg = new StringBuilder();
@@ -117,16 +117,14 @@ public class ExecutionEnvironmentManager
 		
 		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.directory( new File(project.getBaseFolderPath()) );
-		
-		//TODO: Temp workaround to avoid swap lines between out and err streams. Need proper fix.
 		builder.redirectErrorStream(true);
 		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(executionType, project, envName, builder.start(), ideContext.getProxy(), monitorPort, 
+			ExecutionEnvironment env = new ExecutionEnvironment(executionType, project, envName, builder.start(), debugPort, 
 					reportFolder, initMssg.toString(), uiLayout, extraArgs);
 			
-			ideContext.getProxy().newEnvironmentStarted(env);
+			ideEventManager.raiseAsyncEvent(new EnvironmentStartedEvent(env));
 			
 			return env;
 		}catch(IOException ex)
@@ -135,99 +133,76 @@ public class ExecutionEnvironmentManager
 		}
 	}
 	
-	private ExecutionEnvironment executeTestSuite(Project project, String testSuite)
+	private ExecutionEnvironment executeTestSuite(Project project, String testSuite, boolean debug)
 	{
-		return startAutoxEnvironment(ExecutionType.TEST_SUITE, "ts-" + testSuite, project, "-ts", testSuite);
+		return startAutoxEnvironment(ExecutionType.TEST_SUITE, "ts-" + testSuite, project, debug, "-ts", testSuite);
 	}
 	
-	private ExecutionEnvironment executeTestCase(Project project, String testCase)
+	private ExecutionEnvironment executeTestCase(Project project, String testCase, boolean debug)
 	{
-		return startAutoxEnvironment(ExecutionType.TEST_CASE, "tc-" + testCase, project, "-tc", testCase);
+		return startAutoxEnvironment(ExecutionType.TEST_CASE, "tc-" + testCase, project, debug, "-tc", testCase);
 	}
 	
-	private ExecutionEnvironment executeFolder(Project project, List<File> testSuiteFolder)
+	private ExecutionEnvironment executeFolder(Project project, List<File> testSuiteFolder, boolean debug)
 	{
 		String foldersPath = testSuiteFolder.stream()
 			.map(file -> file.getPath())
 			.collect(Collectors.joining(","));
 		
 		String firstFolderName = testSuiteFolder.get(0).getName();
-		return startAutoxEnvironment(ExecutionType.FOLDER, "dir-" + firstFolderName, project, "-flmt", foldersPath);
+		return startAutoxEnvironment(ExecutionType.FOLDER, "dir-" + firstFolderName, project, debug, "-flmt", foldersPath);
 	}
 
-	private ExecutionEnvironment executeSourceFolder(Project project, File sourceFolder)
+	private ExecutionEnvironment executeSourceFolder(Project project, File sourceFolder, boolean debug)
 	{
-		return startAutoxEnvironment(ExecutionType.SOURCE_FOLDER, "dir-" + sourceFolder.getName(), project, "-tsf", sourceFolder.getPath());
+		return startAutoxEnvironment(ExecutionType.SOURCE_FOLDER, "dir-" + sourceFolder.getName(), project, debug, "-tsf", sourceFolder.getPath());
 	}
 
-	private ExecutionEnvironment executeProject(Project project)
+	private ExecutionEnvironment executeProject(Project project, boolean debug)
 	{
-		return startAutoxEnvironment(ExecutionType.PROJECT, project.getName(), project);
+		return startAutoxEnvironment(ExecutionType.PROJECT, project.getName(), project, debug);
 	}
 
-	synchronized ExecutionEnvironment getInteractiveEnvironment(Project project)
-	{
-		ExecutionEnvironment env = interactiveEnvironments.get(project.getProjectFilePath());
-		
-		if(env != null && !env.isTerminated())
-		{
-			return env;
-		}
-		
-		return null;
-	}
-
-	private synchronized ExecutionEnvironment startInteractiveEnvironment(Project project, boolean executeGlobalSetup)
-	{
-		ExecutionEnvironment env = interactiveEnvironments.get(project.getProjectFilePath());
-		
-		if(env != null && !env.isTerminated())
-		{
-			throw new InvalidStateException("For project '{}' interactive environment is already running", project.getName());
-		}
-		
-		env = startAutoxEnvironment(ExecutionType.INTERACTIVE, "*Interactive-" + project.getName(), project, 
-				"--interactive-environment", "true", 
-				"--interactive-execution-global", "" + executeGlobalSetup);
-		
-		env.setInteractive(true);
-		interactiveEnvironments.put(project.getProjectFilePath(), env);
-		
-		return env;
-	}
-	
-	ExecutionEnvironment execute(ExecutionType executionType, Project project, String name)
+	ExecutionEnvironment execute(ExecutionType executionType, Project project, String name, boolean debug)
 	{
 		switch (executionType)
 		{
 			case TEST_CASE:
 			{
-				return executeTestCase(project, name);
+				return executeTestCase(project, name, debug);
 			}
 			case TEST_SUITE:
 			{
-				return executeTestSuite(project, name);
+				return executeTestSuite(project, name, debug);
 			}
 			case FOLDER:
 			{
-				return executeFolder(project, Arrays.asList(new File(name)));
+				return executeFolder(project, Arrays.asList(new File(name)), debug);
 			}
 			case SOURCE_FOLDER:
 			{
-				return executeSourceFolder(project, new File(name));
+				return executeSourceFolder(project, new File(name), debug);
 			}
 			case PROJECT:
 			{
-				return executeProject(project);
-			}
-			case INTERACTIVE:
-			{
-				return startInteractiveEnvironment(project, true);
+				return executeProject(project, debug);
 			}
 			default:
 			{
 				throw new InvalidArgumentException("Invalid execution type specified: {}", executionType);
 			}
 		}
+	}
+
+	public ExecutionEnvironment getActiveEnvironment()
+	{
+		return activeEnvironment;
+	}
+
+	public void setActiveEnvironment(ExecutionEnvironment activeEnvironment)
+	{
+		this.activeEnvironment = activeEnvironment;
+		
+		ideEventManager.raiseAsyncEvent(new EnvironmentActivationEvent(activeEnvironment));
 	}
 }

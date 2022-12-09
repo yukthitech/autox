@@ -85,15 +85,21 @@ public class IdeState implements Serializable
 	
 	public void retainProjects(Collection<Project> projects)
 	{
+		Set<ProjectState> openProjects = new LinkedHashSet<>();
+		
 		for(Project project : projects)
 		{
 			ProjectState state = getProjectState(project);
 			
 			if(state == null)
 			{
-				createNewState(project);
+				state = createNewState(project);
 			}
+			
+			openProjects.add(state);
 		}
+		
+		this.openProjects = openProjects;
 	}
 	
 	private ProjectState createNewState(Project project)

@@ -20,21 +20,32 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.debug.client.DebugClient;
 import com.yukthitech.autox.debug.client.IMessageCallback;
-import com.yukthitech.autox.debug.common.MonitorLogServerMssg;
-import com.yukthitech.autox.ide.context.IContextListener;
+import com.yukthitech.autox.debug.common.ClientMessage;
+import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
+import com.yukthitech.autox.debug.common.DebugPoint;
+import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
+import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
+import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionPausedEvent;
+import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionReleasedEvent;
+import com.yukthitech.autox.ide.exeenv.debug.DebugManager;
+import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
 import com.yukthitech.autox.ide.layout.ConsoleLinePattern;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.monitor.InteractiveServerReadyHandler;
-import com.yukthitech.autox.ide.monitor.ReportMessageDataHandler;
+import com.yukthitech.autox.ide.services.IdeEventManager;
+import com.yukthitech.autox.ide.services.SpringServiceProvider;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -52,22 +63,14 @@ public class ExecutionEnvironment
 
 	private StringBuilder consoleHtml = new StringBuilder();
 
-	private IContextListener proxyListener;
-
 	private boolean terminated = false;
 
-	private DebugClient monitorClient;
-
-	private List<MonitorLogServerMssg> reportMessages = new LinkedList<>();
+	private DebugClient debugClient;
+	
+	private boolean debugEnv;
 
 	private File reportFolder;
 
-	private boolean interactive;
-
-	private boolean readyToInteract = false;
-
-	//private LinkedHashMap<String, ContextAttributeDetails> contextAttributes = new LinkedHashMap<>();
-	
 	private File reportFile;
 	
 	private Project project;
@@ -75,47 +78,75 @@ public class ExecutionEnvironment
 	private UiLayout uiLayout;
 	
 	private String extraArgs[];
-
-	ExecutionEnvironment(ExecutionType executionType, Project project, String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, 
+	
+	private IdeEventManager ideEventManager;
+	
+	private Map<String, ServerMssgExecutionPaused> pausedThreads = Collections.synchronizedMap(new HashMap<>());
+	
+	private String activeThreadId; 
+	
+	ExecutionEnvironment(ExecutionType executionType, Project project, String name, Process process, int debugPort, File reportFolder, 
 			String initialMessage, UiLayout uiLayout, String extraArgs[])
 	{
 		this.executionType = executionType;
 		this.project = project;
 		this.name = name;
 		this.process = process;
-		this.proxyListener = proxyListener;
 		this.reportFolder = reportFolder;
 		this.uiLayout = uiLayout;
 		this.extraArgs = extraArgs;
+		this.ideEventManager = SpringServiceProvider.getService(IdeEventManager.class);
+		this.debugEnv = (debugPort > 0);
 		
-		logOnConsole(initialMessage, false);
+		logOnConsole(initialMessage);
 
 		Thread outputThread = new Thread()
 		{
 			public void run()
 			{
-				readConsoleStream(process.getInputStream(), false);
+				readConsoleStream(process.getInputStream());
 			}
 		};
 
 		outputThread.start();
 
-		Thread errThread = new Thread()
+		if(debugPort > 0)
 		{
-			public void run()
+			IdeUtils.execute(() -> 
 			{
-				readConsoleStream(process.getErrorStream(), true);
-			}
-		};
-
-		errThread.start();
-
-		/*
-		IdeUtils.execute(() -> {
-			monitorClient = DebugClient.startClient("localhost", monitoringPort);
-			addListeners();
-		}, 1);
-		*/
+				DebugManager debugManager = SpringServiceProvider.getService(DebugManager.class);
+				List<IdeDebugPoint> ideDebugPoints = debugManager.getDebugPoints(project.getName());
+				List<DebugPoint> debugPoints = ideDebugPoints.stream()
+						.map(idePoint -> new DebugPoint(idePoint.getFile().getPath(), idePoint.getLineNo(), idePoint.getCondition()))
+						.collect(Collectors.toList());
+				
+				ClientMssgDebuggerInit initMssg = new ClientMssgDebuggerInit(debugPoints);
+				
+				debugClient = DebugClient.newClient("localhost", debugPort, initMssg).start();
+				debugClient.addDataHandler(this::onServerMessage);
+			}, 1);
+		}
+	}
+	
+	private void onServerMessage(Serializable data)
+	{
+		if(data instanceof ServerMssgExecutionPaused)
+		{
+			ServerMssgExecutionPaused mssg = (ServerMssgExecutionPaused) data;
+			pausedThreads.put(mssg.getExecutionId(), mssg);
+			
+			ideEventManager.raiseAsyncEvent(new DebugExecutionPausedEvent(this, mssg));
+			return;
+		}
+		
+		if(data instanceof ServerMssgExecutionReleased)
+		{
+			ServerMssgExecutionReleased mssg = (ServerMssgExecutionReleased) data;
+			ServerMssgExecutionPaused pauseMssg = pausedThreads.remove(mssg.getExecutionId());
+			
+			ideEventManager.raiseAsyncEvent(new DebugExecutionReleasedEvent(this, pauseMssg));
+			return;
+		}
 	}
 	
 	public String[] getExtraArgs()
@@ -138,29 +169,15 @@ public class ExecutionEnvironment
 		process.destroyForcibly();
 	}
 
-	private void addListeners()
-	{
-		//monitorClient.addAsyncClientDataHandler(new ContextAttributeEventHandler(this));
-		monitorClient.addDataHandler(new ReportMessageDataHandler(this));
-		monitorClient.addDataHandler(new InteractiveServerReadyHandler(this));
-	}
-
 	private synchronized void appenConsoleHtml(String html)
 	{
 		consoleHtml.append(html);
-		proxyListener.environmentChanged(EnvironmentEvent.newConsoleChangedEvent(this, html));
+		ideEventManager.raiseAsyncEvent(new ConsoleContentAddedEvent(this, html));
 	}
 
-	private void logOnConsole(String lineText, boolean error)
+	private void logOnConsole(String lineText)
 	{
-		if(error)
-		{
-			logger.error(">>[{}] {}", name, lineText);
-		}
-		else
-		{
-			logger.debug(">>[{}] {}", name, lineText);
-		}
+		logger.debug(">>[{}] {}", name, lineText);
 
 		lineText = lineText.replace("&", "&amp;");
 		lineText = lineText.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -170,37 +187,30 @@ public class ExecutionEnvironment
 
 		String lineHtml = null;
 		
-		if(error)
+		String color = null;
+		
+		for(ConsoleLinePattern linePattern : uiLayout.getConsoleLinePatterns())
 		{
-			lineHtml = String.format("<div style=\"color:red;\">%s</div>", lineText);
+			if(linePattern.getPattern().matcher(lineText).find())
+			{
+				color = linePattern.getColor();
+				break;
+			}
+		}
+		
+		if(color == null)
+		{
+			lineHtml = "<div>" + lineText + "</div>";
 		}
 		else
 		{
-			String color = null;
-			
-			for(ConsoleLinePattern linePattern : uiLayout.getConsoleLinePatterns())
-			{
-				if(linePattern.getPattern().matcher(lineText).find())
-				{
-					color = linePattern.getColor();
-					break;
-				}
-			}
-			
-			if(color == null)
-			{
-				lineHtml = "<div>" + lineText + "</div>";
-			}
-			else
-			{
-				lineHtml = String.format("<div style=\"color:%s;\">%s</div>", color, lineText);
-			}
+			lineHtml = String.format("<div style=\"color:%s;\">%s</div>", color, lineText);
 		}
 
 		appenConsoleHtml(lineHtml);
 	}
 	
-	private void readConsoleStream(InputStream input, boolean error)
+	private void readConsoleStream(InputStream input)
 	{
 		//input can be null, when error is redirected to output stream
 		if(input == null)
@@ -217,7 +227,7 @@ public class ExecutionEnvironment
 		{
 			while((line = reader.readLine()) != null)
 			{
-				logOnConsole(line, error);
+				logOnConsole(line);
 			}
 
 			reader.close();
@@ -225,11 +235,12 @@ public class ExecutionEnvironment
 			int code = process.waitFor();
 			
 			//client can be null, if process is exited without proper starting itself
-			if(monitorClient != null)
+			if(debugClient != null)
 			{
-				monitorClient.close();
+				debugClient.close();
 			}
 
+			logger.debug("Sending env termination event...");
 			appenConsoleHtml("<div>Process exited with code: " + code + "</div>");
 
 			synchronized(this)
@@ -245,7 +256,7 @@ public class ExecutionEnvironment
 						this.reportFile = repFile;
 					}
 					
-					proxyListener.environmentTerminated(this);
+					ideEventManager.raiseAsyncEvent(new EnvironmentTerminatedEvent(this));
 				}
 			}
 		} catch(Exception ex)
@@ -253,20 +264,6 @@ public class ExecutionEnvironment
 			throw new InvalidStateException("An error occurred while reading console stream", ex);
 		}
 	}
-
-	public void addReportMessage(MonitorLogServerMssg mssg)
-	{
-		this.reportMessages.add(mssg);
-		proxyListener.environmentChanged(EnvironmentEvent.newReportLogEvent(this, mssg));
-	}
-	
-	/*
-	public void addContextAttribute(ContextAttributeDetails ctx)
-	{
-		this.contextAttributes.put(ctx.getName(), ctx);
-		proxyListener.environmentChanged(EnvironmentEvent.newContextAttributeEvent(this, ctx));
-	}
-	*/
 
 	public String getName()
 	{
@@ -283,61 +280,24 @@ public class ExecutionEnvironment
 		process.destroyForcibly();
 	}
 
-	public boolean isTerminated()
+	public synchronized boolean isTerminated()
 	{
 		return terminated;
 	}
-
-	public List<MonitorLogServerMssg> getReportMessages()
-	{
-		return reportMessages;
-	}
-
-	/*
-	public Collection<ContextAttributeDetails> getContextAttributes()
-	{
-		return contextAttributes.values();
-	}
-	*/
 
 	public File getReportFolder()
 	{
 		return reportFolder;
 	}
 
-	void setInteractive(boolean interactive)
-	{
-		this.interactive = interactive;
-	}
-
-	public boolean isInteractive()
-	{
-		return interactive;
-	}
-
-	public void setReadyToInteract(boolean readyToInteract)
-	{
-		this.readyToInteract = readyToInteract;
-	}
-
-	public boolean isReadyToInteract()
-	{
-		return readyToInteract;
-	}
-	
-	public void sendDataToServer(Serializable data)
+	public void sendDataToServer(ClientMessage data)
 	{
 		this.sendDataToServer(data, null);
 	}
 
-	public void sendDataToServer(Serializable data, IMessageCallback callback)
+	public void sendDataToServer(ClientMessage data, IMessageCallback callback)
 	{
-		if(!readyToInteract)
-		{
-			throw new InvalidStateException("This environment is not an interactive environment or not ready to interact. [Is Interactive: {}]", interactive);
-		}
-
-		monitorClient.sendDataToServer(data, callback);
+		debugClient.sendDataToServer(data, callback);
 	}
 
 	public synchronized void clearConsole()
@@ -360,6 +320,21 @@ public class ExecutionEnvironment
 		return project;
 	}
 	
+	public boolean isDebugEnv()
+	{
+		return debugEnv;
+	}
+	
+	public String getActiveThreadId()
+	{
+		return activeThreadId;
+	}
+
+	public void setActiveThreadId(String activeThreadId)
+	{
+		this.activeThreadId = activeThreadId;
+	}
+
 	@Override
 	public String toString()
 	{

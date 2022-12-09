@@ -20,8 +20,6 @@ import java.util.function.Consumer;
 
 import javax.swing.JOptionPane;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.debug.common.ClientMssgExecuteSteps;
@@ -31,19 +29,16 @@ import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
+import com.yukthitech.autox.ide.exeenv.ExecutionEnvironmentManager;
 import com.yukthitech.autox.ide.exeenv.ExecutionManager;
 import com.yukthitech.autox.ide.exeenv.ExecutionType;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.ui.InProgressDialog;
-import com.yukthitech.utils.ObjectWrapper;
 
 @ActionHolder
 public class RunActions
 {
-	private static Logger logger = LogManager.getLogger(RunActions.class);
-	
 	public static final String NODE_TEST_SUITE = "testsuite";
 	
 	public static final String NODE_TEST_CASE = "testcase";
@@ -52,15 +47,15 @@ public class RunActions
 	private FileEditorTabbedPane fileEditorTabbedPane;
 	
 	@Autowired
-	private ExecutionManager runConfigurationManager;
+	private ExecutionManager executionManager;
+
+	@Autowired
+	private ExecutionEnvironmentManager executionEnvManager;
 
 	@Autowired
 	private IdeContext ideContext;
 	
-	private InProgressDialog inProgressDialog;
-	
-	@Action
-	public void runTestSuite()
+	private void runTestSuite(boolean debug)
 	{
 		FileEditor fileEditor = fileEditorTabbedPane.getCurrentFileEditor();
 		
@@ -79,11 +74,10 @@ public class RunActions
 			return;
 		}
 		
-		runConfigurationManager.execute(ExecutionType.TEST_SUITE, project, testSuite);
+		executionManager.execute(ExecutionType.TEST_SUITE, project, testSuite, debug);
 	}
 	
-	@Action
-	public void runTestCase()
+	private void runTestCase(boolean debug)
 	{
 		FileEditor fileEditor = fileEditorTabbedPane.getCurrentFileEditor();
 		
@@ -102,19 +96,31 @@ public class RunActions
 			return;
 		}
 		
-		runConfigurationManager.execute(ExecutionType.TEST_CASE, project, testCase);
+		executionManager.execute(ExecutionType.TEST_CASE, project, testCase, debug);
+	}
+
+	@Action
+	public void runTestSuite()
+	{
+		runTestSuite(false);
+	}
+	
+	@Action
+	public void runTestCase()
+	{
+		runTestCase(false);
 	}
 	
 	@Action
 	public void debugTestSuite()
 	{
-		runTestSuite();
+		runTestSuite(true);
 	}
 	
 	@Action
 	public void debugTestCase()
 	{
-		runTestCase();
+		runTestCase(true);
 	}
 
 	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback)
@@ -122,11 +128,40 @@ public class RunActions
 		executeStepCode(code, project, envCallback, null);
 	}
 	
-	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback, String callbackMssg)
+	private void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback, String callbackMssg)
 	{
-		ExecutionEnvironment interactiveEnv = runConfigurationManager.getInteractiveEnvironment(project);
+		ExecutionEnvironment activeEnv = executionEnvManager.getActiveEnvironment();
 		
-		if(interactiveEnv == null)
+		if(activeEnv == null)
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "No active enviroment is selected.");
+			return;
+		}
+		
+		if(activeEnv.getProject() != project)
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "Current file is not part of active execution.");
+			return;
+		}
+		
+		if(!activeEnv.isDebugEnv())
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "Active execution is not in debug/interactive mode.");
+			return;
+		}
+
+		String currentTestSuiteName = null;
+		FileEditor fileEditor = fileEditorTabbedPane.getCurrentFileEditor();
+		
+		if(fileEditor != null)
+		{
+			currentTestSuiteName = fileEditor.getCurrentElementName(NODE_TEST_SUITE);
+		}
+		
+		activeEnv.sendDataToServer(new ClientMssgExecuteSteps(activeEnv.getActiveThreadId(), code, currentTestSuiteName));
+		
+		/*
+		if(activeEnv == null)
 		{
 			final String mssg = "Starting interactive environment for project: " + project.getName();
 			inProgressDialog=InProgressDialog.getInstance();
@@ -137,7 +172,7 @@ public class RunActions
 				{
 					logger.debug("Starting interactive environment for project: {}", project.getName());
 					
-					ExecutionEnvironment newInteractiveEnv = runConfigurationManager.execute(ExecutionType.INTERACTIVE, project, null);
+					ExecutionEnvironment newInteractiveEnv = executionManager.execute(ExecutionType.INTERACTIVE, project, null);
 					inProgressDialog.setSubmessage("Waiting for environment to get started...");
 					
 					while(!newInteractiveEnv.isReadyToInteract() && !newInteractiveEnv.isTerminated())
@@ -171,8 +206,9 @@ public class RunActions
 		}
 		else
 		{
-			interactiveEnv.sendDataToServer(new ClientMssgExecuteSteps(code));
+			activeEnv.sendDataToServer(new ClientMssgExecuteSteps(code));
 		}
+		*/
 	}
 	
 	@Action
@@ -206,6 +242,8 @@ public class RunActions
 	@Action
 	public synchronized void runToCurrentStep()
 	{
+		JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "This functionality is not yet available");
+		/*
 		FileEditor fileEditor = fileEditorTabbedPane.getCurrentFileEditor();
 		
 		if(fileEditor == null)
@@ -215,7 +253,7 @@ public class RunActions
 		}
 		
 		Project project = fileEditor.getProject();
-		ExecutionEnvironment interactiveEnv = runConfigurationManager.getInteractiveEnvironment(project);
+		ExecutionEnvironment interactiveEnv = executionManager.getInteractiveEnvironment(project);
 		
 		if(interactiveEnv != null)
 		{
@@ -261,7 +299,7 @@ public class RunActions
 					isTerminated.setValue(true);
 				}
 			});
-			*/
+			* /
 			
 			logger.debug("Interactive environment is started. Waiting for test case execution to completed to come to current point...");
 			
@@ -279,10 +317,10 @@ public class RunActions
 				logger.debug("Test case execution completed. Environment is ready to interact...");
 			}
 		}, String.format("Executing test case '%s' till line number: %s", testCaseName, stepLineNo));
+		*/
 	}
 	
-	@Action
-	public synchronized void executeTestSuiteFolder() 
+	private synchronized void executeTestSuiteFolder(boolean debug) 
 	{
 		File activeFolder = ideContext.getActiveFile();
 		
@@ -294,13 +332,24 @@ public class RunActions
 		Project project = ideContext.getActiveProject();
 		ExecutionType executionType = project.isTestSuiteFolder(activeFolder) ? ExecutionType.SOURCE_FOLDER : ExecutionType.FOLDER;
 
-		runConfigurationManager.execute(executionType, project, activeFolder.getPath());
+		executionManager.execute(executionType, project, activeFolder.getPath(), debug);
+	}
+	
+	private synchronized void executeProject(boolean debug) 
+	{
+		Project project = ideContext.getActiveProject();
+		executionManager.execute(ExecutionType.PROJECT, project, null, debug);
+	}
+
+	@Action
+	public void executeTestSuiteFolder() 
+	{
+		executeTestSuiteFolder(false);
 	}
 	
 	@Action
-	public synchronized void executeProject() 
+	public void executeProject() 
 	{
-		Project project = ideContext.getActiveProject();
-		runConfigurationManager.execute(ExecutionType.PROJECT, project, null);
+		executeProject(false);
 	}
 }

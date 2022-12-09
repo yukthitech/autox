@@ -37,7 +37,7 @@ import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileEditorIconGroup.FileEditorIcon;
 import com.yukthitech.autox.ide.editor.FileEditorIconGroup.IconType;
 import com.yukthitech.autox.ide.exeenv.debug.DebugManager;
-import com.yukthitech.autox.ide.exeenv.debug.DebugPoint;
+import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -92,7 +92,7 @@ public class FileEditorIconManager
 			return;
 		}
 		
-		List<DebugPoint> points = debugManager.getDebugPoints(file);
+		List<IdeDebugPoint> points = debugManager.getDebugPoints(file);
 		
 		if(CollectionUtils.isEmpty(points))
 		{
@@ -120,7 +120,7 @@ public class FileEditorIconManager
 		this.editorIconGroups.removeAll(groupsToRemove);
 	}
 
-	private void addDebugPoint(DebugPoint debugPoint)
+	private void addDebugPoint(IdeDebugPoint debugPoint)
 	{
 		FileEditorIcon iconInfo = addIcon(debugPoint.getLineNo(), DEBUG_POINT_ICON, null, IconType.DEBUG);
 		
@@ -176,7 +176,7 @@ public class FileEditorIconManager
 			
 			if(existingDebugIcon == null)
 			{
-				DebugPoint debugPoint = debugManager.addDebugPoint(project.getName(), file, lineNo);
+				IdeDebugPoint debugPoint = debugManager.addDebugPoint(project.getName(), file, lineNo);
 				addDebugPoint(debugPoint);
 			}
 			else
