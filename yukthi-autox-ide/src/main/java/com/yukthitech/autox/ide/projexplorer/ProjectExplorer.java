@@ -67,9 +67,6 @@ import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.rest.RestRequest;
-import com.yukthitech.autox.ide.services.IdeEventHandler;
-import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
 import com.yukthitech.autox.ide.ui.TestSuiteFolderTreeNode;
@@ -130,9 +127,6 @@ public class ProjectExplorer extends JPanel
 	private ActionCollection actionCollection;
 	
 	private BaseTreeNode activeTreeNode;
-	
-	@Autowired
-	private RestRequest restRequest;
 	
 	private JPanel iconPanel = new JPanel();
 	
@@ -284,11 +278,13 @@ public class ProjectExplorer extends JPanel
 		});
 	}
 	
+	/*
 	@IdeEventHandler
 	public void onStartup(IdeStartedEvent e)
 	{
 		onEditorSync(null);
 	}
+	*/
 	
 	private void onCollapseAll(ActionEvent e)
 	{
@@ -305,7 +301,7 @@ public class ProjectExplorer extends JPanel
 		}, 1);
 	}
 	
-	private void onEditorSync(ActionEvent e)
+	private synchronized void onEditorSync(ActionEvent e)
 	{
 		if(!editorSyncButton.isSelected())
 		{
@@ -329,7 +325,7 @@ public class ProjectExplorer extends JPanel
 		setActiveFile(file);
 	}
 	
-	private void setActiveFile(File file)
+	private synchronized void setActiveFile(File file)
 	{
 		if(!editorSyncButton.isSelected())
 		{
@@ -428,13 +424,12 @@ public class ProjectExplorer extends JPanel
 	 * Called when an existing project object needs to be opened.
 	 * @param project
 	 */
-	public void openProject(Project project)
+	public synchronized void openProject(Project project)
 	{
 		projectTreeModel.addProject(new ProjectTreeNode(project.getName(), this, project));
 		
 		initDocs(project);
 		
-		restRequest.addProject(project);
 		logger.debug("Adding project {} to project tree", project.getName());
 	}
 	
@@ -605,7 +600,7 @@ public class ProjectExplorer extends JPanel
 		}
 	}
 	
-	public void reloadProjectNode(Project project)
+	public synchronized void reloadProjectNode(Project project)
 	{
 		ProjectTreeNode node = projectTreeModel.getProjectNode(project);
 		
@@ -621,7 +616,7 @@ public class ProjectExplorer extends JPanel
 		loadFilesToIndex();
 	}
 	
-	public void reloadFolders(Set<File> folders)
+	public synchronized void reloadFolders(Set<File> folders)
 	{
 		logger.debug("Reloading folder in project tree: {}", folders);
 		

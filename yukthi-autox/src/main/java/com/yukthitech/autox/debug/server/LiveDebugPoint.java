@@ -169,7 +169,11 @@ public class LiveDebugPoint
 		
 		stackTrace = new ArrayList<>(stackTrace);
 		
-		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, lastPauseLocation.getLocation().getPath(), 
+		//add current line on the stack
+		stackTrace.add(new ServerMssgExecutionPaused.StackElement(
+				lastPauseLocation.getLocation().getPath(), lastPauseLocation.getLineNumber()));
+		
+		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, threadOnHold.getName(), lastPauseLocation.getLocation().getPath(), 
 				lastPauseLocation.getLineNumber(), stackTrace, getContextAttr());
 		DebugServer.getInstance().sendClientMessage(pausedMssg);
 	}

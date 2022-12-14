@@ -20,10 +20,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +39,7 @@ import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionPausedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionReleasedEvent;
-import com.yukthitech.autox.ide.exeenv.debug.DebugManager;
+import com.yukthitech.autox.ide.exeenv.debug.DebugPointManager;
 import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
 import com.yukthitech.autox.ide.layout.ConsoleLinePattern;
 import com.yukthitech.autox.ide.layout.UiLayout;
@@ -81,7 +81,7 @@ public class ExecutionEnvironment
 	
 	private IdeEventManager ideEventManager;
 	
-	private Map<String, ServerMssgExecutionPaused> pausedThreads = Collections.synchronizedMap(new HashMap<>());
+	private Map<String, ServerMssgExecutionPaused> pausedThreads = new LinkedHashMap<>();
 	
 	private String activeThreadId; 
 	
@@ -114,10 +114,10 @@ public class ExecutionEnvironment
 		{
 			IdeUtils.execute(() -> 
 			{
-				DebugManager debugManager = SpringServiceProvider.getService(DebugManager.class);
+				DebugPointManager debugManager = SpringServiceProvider.getService(DebugPointManager.class);
 				List<IdeDebugPoint> ideDebugPoints = debugManager.getDebugPoints(project.getName());
 				List<DebugPoint> debugPoints = ideDebugPoints.stream()
-						.map(idePoint -> new DebugPoint(idePoint.getFile().getPath(), idePoint.getLineNo(), idePoint.getCondition()))
+						.map(idePoint -> new DebugPoint(idePoint.getFile().getPath(), idePoint.getLineNo() + 1, idePoint.getCondition()))
 						.collect(Collectors.toList());
 				
 				ClientMssgDebuggerInit initMssg = new ClientMssgDebuggerInit(debugPoints);
@@ -133,7 +133,11 @@ public class ExecutionEnvironment
 		if(data instanceof ServerMssgExecutionPaused)
 		{
 			ServerMssgExecutionPaused mssg = (ServerMssgExecutionPaused) data;
-			pausedThreads.put(mssg.getExecutionId(), mssg);
+			
+			synchronized(pausedThreads)
+			{
+				pausedThreads.put(mssg.getExecutionId(), mssg);	
+			}
 			
 			ideEventManager.raiseAsyncEvent(new DebugExecutionPausedEvent(this, mssg));
 			return;
@@ -142,7 +146,12 @@ public class ExecutionEnvironment
 		if(data instanceof ServerMssgExecutionReleased)
 		{
 			ServerMssgExecutionReleased mssg = (ServerMssgExecutionReleased) data;
-			ServerMssgExecutionPaused pauseMssg = pausedThreads.remove(mssg.getExecutionId());
+			ServerMssgExecutionPaused pauseMssg = null;
+			
+			synchronized(pausedThreads)
+			{
+				pauseMssg = pausedThreads.remove(mssg.getExecutionId());
+			}
 			
 			ideEventManager.raiseAsyncEvent(new DebugExecutionReleasedEvent(this, pauseMssg));
 			return;
@@ -327,12 +336,54 @@ public class ExecutionEnvironment
 	
 	public String getActiveThreadId()
 	{
-		return activeThreadId;
+		synchronized(pausedThreads)
+		{
+			if(activeThreadId != null && !pausedThreads.containsKey(activeThreadId))
+			{
+				activeThreadId = null;
+			}
+			
+			if(activeThreadId == null && !pausedThreads.isEmpty())
+			{
+				activeThreadId = pausedThreads.keySet().iterator().next();
+			}
+			
+			return activeThreadId;
+		}
 	}
 
 	public void setActiveThreadId(String activeThreadId)
 	{
-		this.activeThreadId = activeThreadId;
+		synchronized(pausedThreads)
+		{
+			if(!pausedThreads.containsKey(activeThreadId))
+			{
+				return;
+			}
+			
+			this.activeThreadId = activeThreadId;	
+		}
+	}
+	
+	public ServerMssgExecutionPaused getThreadDetails(String threadId)
+	{
+		synchronized(pausedThreads)
+		{
+			return pausedThreads.get(threadId);
+		}
+	}
+
+	public ServerMssgExecutionPaused getActiveThreadDetails()
+	{
+		return getThreadDetails(activeThreadId);
+	}
+	
+	public void visitPausedThreads(Consumer<ServerMssgExecutionPaused> consumer)
+	{
+		synchronized(pausedThreads)
+		{
+			pausedThreads.values().forEach(mssg -> consumer.accept(mssg));
+		}
 	}
 
 	@Override

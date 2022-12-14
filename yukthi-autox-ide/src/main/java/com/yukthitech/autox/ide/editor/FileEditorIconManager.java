@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileEditorIconGroup.FileEditorIcon;
 import com.yukthitech.autox.ide.editor.FileEditorIconGroup.IconType;
-import com.yukthitech.autox.ide.exeenv.debug.DebugManager;
+import com.yukthitech.autox.ide.exeenv.debug.DebugPointManager;
 import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -50,7 +50,7 @@ public class FileEditorIconManager
 	private static ImageIcon DEBUG_POINT_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug-point.svg", 12);
 
 	@Autowired
-	private DebugManager debugManager;
+	private DebugPointManager debugManager;
 
 	private RSyntaxTextArea syntaxTextArea;
 	

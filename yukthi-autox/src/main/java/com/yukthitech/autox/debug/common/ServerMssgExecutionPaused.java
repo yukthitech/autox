@@ -64,6 +64,11 @@ public class ServerMssgExecutionPaused implements Serializable
 	private String executionId;
 	
 	/**
+	 * Name of this execution.
+	 */
+	private String name;
+	
+	/**
 	 * Path of debug point file, where execution got paused.
 	 */
 	private String debugFilePath;
@@ -80,13 +85,19 @@ public class ServerMssgExecutionPaused implements Serializable
 	
 	private Map<String, byte[]> contextAttr;
 
-	public ServerMssgExecutionPaused(String executionId, String debugFilePath, int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr)
+	public ServerMssgExecutionPaused(String executionId, String name, String debugFilePath, int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr)
 	{
 		this.executionId = executionId;
+		this.name = name;
 		this.debugFilePath = debugFilePath;
 		this.lineNumber = lineNumber;
 		this.stackTrace = new ArrayList<>(stackTrace);
 		this.contextAttr = contextAttr;
+	}
+	
+	public String getName()
+	{
+		return name;
 	}
 
 	public String getExecutionId()

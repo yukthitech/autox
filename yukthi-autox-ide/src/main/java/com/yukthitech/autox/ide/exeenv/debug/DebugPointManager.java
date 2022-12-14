@@ -22,11 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.services.IdeClosingEvent;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
+import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.services.IdePreStateLoadEvent;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -35,20 +37,23 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akranthikiran
  */
 @Service
-public class DebugManager
+public class DebugPointManager
 {
-	private static final String DEBUG_POINT_ATTR_NAME = DebugManager.class.getName() + ".debugPoints";
+	private static final String DEBUG_POINT_ATTR_NAME = DebugPointManager.class.getName() + ".debugPoints";
 	
 	private Map<File, List<IdeDebugPoint>> debugPoints = new HashMap<>();
+	
+	@Autowired
+	private IdeEventManager ideEventManager;
 	
 	public synchronized IdeDebugPoint addDebugPoint(String project, File file, int lineNo)
 	{
 		IdeDebugPoint newPoint = new IdeDebugPoint(project, file, lineNo);
-		addDebugPoint(newPoint);
+		addDebugPoint(newPoint, true);
 		return newPoint;
 	}
 	
-	private void addDebugPoint(IdeDebugPoint newPoint)
+	private void addDebugPoint(IdeDebugPoint newPoint, boolean raiseEvent)
 	{
 		List<IdeDebugPoint> points = debugPoints.get(newPoint.getFile());
 		
@@ -68,6 +73,11 @@ public class DebugManager
 		}
 		
 		points.add(newPoint);
+		
+		if(raiseEvent)
+		{
+			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(newPoint.getProject()));
+		}
 	}
 	
 	public synchronized void removeBreakPoint(IdeDebugPoint debugPoint)
@@ -80,6 +90,19 @@ public class DebugManager
 		}
 		
 		points.remove(debugPoint);
+		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(debugPoint.getProject()));
+	}
+	
+	public synchronized List<IdeDebugPoint> getDebugPoints()
+	{
+		List<IdeDebugPoint> finalLst = new ArrayList<>();
+		
+		for(List<IdeDebugPoint> points : this.debugPoints.values())
+		{
+			finalLst.addAll(points);
+		}
+		
+		return finalLst;
 	}
 	
 	public synchronized List<IdeDebugPoint> getDebugPoints(File file)
@@ -134,7 +157,7 @@ public class DebugManager
 			
 			try
 			{
-				addDebugPoint(point);
+				addDebugPoint(point, false);
 			}catch(Exception ex)
 			{
 				//on error ignore the point

@@ -101,17 +101,19 @@ public class ExecutionManager
 		return icon;
 	}
 	
-	public ExecutionEnvironment execute(ExecutionType executionType, Project project, String name, boolean debug)
+	public void execute(ExecutionType executionType, Project project, String name, boolean debug)
 	{
-		RunConfig newConfig = new RunConfig(executionType, project.getName(), name);
-		
-		//RunConfig existingConfig = runConfigurations.get(newConfig.getUniqueId());
-		//TODO: here existing runconfig settings should be used for execution 
-		ExecutionEnvironment env = executionEnvironmentManager.execute(executionType, project, name, debug);
-		newConfig.setName(env.getName());
-		
-		onNewExecution(newConfig);
-		return env;
+		IdeUtils.execute(() -> 
+		{
+			RunConfig newConfig = new RunConfig(executionType, project.getName(), name);
+			
+			//RunConfig existingConfig = runConfigurations.get(newConfig.getUniqueId());
+			//TODO: here existing runconfig settings should be used for execution 
+			ExecutionEnvironment env = executionEnvironmentManager.execute(executionType, project, name, debug);
+			newConfig.setName(env.getName());
+			
+			onNewExecution(newConfig);
+		}, 1);
 	}
 
 	private void onNewExecution(RunConfig runConfig)

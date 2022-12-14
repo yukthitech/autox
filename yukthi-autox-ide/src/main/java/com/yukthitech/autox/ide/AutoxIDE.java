@@ -55,6 +55,7 @@ import com.yukthitech.autox.ide.services.IdePreStateLoadEvent;
 import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.services.IdeStateManager;
 import com.yukthitech.autox.ide.views.console.ConsolePanel;
+import com.yukthitech.autox.ide.views.debug.DebugPanel;
 
 @ActionHolder
 public class AutoxIDE extends JFrame
@@ -96,6 +97,9 @@ public class AutoxIDE extends JFrame
 	@Autowired
 	private ConsolePanel consolePanel;
 	
+	@Autowired
+	private DebugPanel debugPanel;
+
 	@Autowired
 	private HelpPanel helpPanel;
 	
@@ -310,7 +314,8 @@ public class AutoxIDE extends JFrame
 		rightBottomTabbedPane.addTab("Console", null, consolePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
-		consolePanel.setParent(rightBottomTabbedPane);
+		rightBottomTabbedPane.addTab("Debug", null, debugPanel, null);
+		debugPanel.setParent(rightBottomTabbedPane);
 		
 		rightBottomTabbedPane.addTab("Help", null, helpPanel, null);
 		helpPanel.setParent(rightBottomTabbedPane);

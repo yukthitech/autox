@@ -280,7 +280,7 @@ public class FileEditor extends JPanel
 				ac.setShowDescWindow(true);
 				ac.install(syntaxTextArea);
 				
-				logger.debug("For file {} installing auto-complete from provider: {}", file.getPath(), provider);
+				//logger.debug("For file {} installing auto-complete from provider: {}", file.getPath(), provider);
 			}
 			
 			syntaxTextArea.setHyperlinksEnabled(true);
@@ -311,6 +311,7 @@ public class FileEditor extends JPanel
 	
 	private void onFocusGained(FocusEvent e)
 	{
+		ideContext.setActiveDetails(project, file);
 		ideContext.getProxy().activeFileChanged(file, this);
 	}
 	
