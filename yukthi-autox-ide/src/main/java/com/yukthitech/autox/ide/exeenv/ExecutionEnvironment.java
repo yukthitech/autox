@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import javax.swing.JOptionPane;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,12 +36,15 @@ import com.yukthitech.autox.debug.client.IMessageCallback;
 import com.yukthitech.autox.debug.common.ClientMessage;
 import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
 import com.yukthitech.autox.debug.common.DebugPoint;
+import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
+import com.yukthitech.autox.debug.common.ServerMssgStepExecuted;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionPausedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionReleasedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.DebugPointManager;
+import com.yukthitech.autox.ide.exeenv.debug.DebugStepsExecutedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
 import com.yukthitech.autox.ide.layout.ConsoleLinePattern;
 import com.yukthitech.autox.ide.layout.UiLayout;
@@ -82,6 +87,8 @@ public class ExecutionEnvironment
 	private IdeEventManager ideEventManager;
 	
 	private Map<String, ServerMssgExecutionPaused> pausedThreads = new LinkedHashMap<>();
+	
+	private Map<String, byte[]> contextAttributes;
 	
 	private String activeThreadId; 
 	
@@ -136,7 +143,8 @@ public class ExecutionEnvironment
 			
 			synchronized(pausedThreads)
 			{
-				pausedThreads.put(mssg.getExecutionId(), mssg);	
+				pausedThreads.put(mssg.getExecutionId(), mssg);
+				this.contextAttributes = mssg.getContextAttr();
 			}
 			
 			ideEventManager.raiseAsyncEvent(new DebugExecutionPausedEvent(this, mssg));
@@ -156,6 +164,40 @@ public class ExecutionEnvironment
 			ideEventManager.raiseAsyncEvent(new DebugExecutionReleasedEvent(this, pauseMssg));
 			return;
 		}
+		
+		if(data instanceof ServerMssgStepExecuted)
+		{
+			ServerMssgStepExecuted mssg = (ServerMssgStepExecuted) data;
+
+			synchronized(pausedThreads)
+			{
+				if(mssg.getContextAttr() != null)
+				{
+					this.contextAttributes = mssg.getContextAttr();
+				}
+			}
+			
+			ideEventManager.raiseAsyncEvent(new DebugStepsExecutedEvent(this, mssg));
+			return;
+		}
+
+		if(data instanceof ServerMssgConfirmation)
+		{
+			ServerMssgConfirmation confirmMssg = (ServerMssgConfirmation) data;
+			
+			if(!confirmMssg.isSuccessful())
+			{
+				IdeUtils.execute(() -> 
+				{
+					JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), confirmMssg.getError() + "\n\nPlease check logs for more details.");
+				}, 1);
+			}
+		}
+	}
+	
+	public Map<String, byte[]> getContextAttributes()
+	{
+		return contextAttributes;
 	}
 	
 	public String[] getExtraArgs()

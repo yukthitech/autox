@@ -164,7 +164,7 @@ public class LiveDebugPoint
 				.getInstance().getExecutionStack()
 				.getStackTrace()
 				.stream()
-				.map(se -> new ServerMssgExecutionPaused.StackElement(se.getLocationName(), se.getLineNumber()))
+				.map(se -> new ServerMssgExecutionPaused.StackElement(se.getLocation(), se.getLineNumber()))
 				.collect(Collectors.toList());
 		
 		stackTrace = new ArrayList<>(stackTrace);
@@ -231,11 +231,11 @@ public class LiveDebugPoint
 		{
 			StepsExecutor.execute(steps, null);
 			
-			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, true, getContextAttr(), null));
+			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, true, getContextAttr(), null));
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred during dynamic step execution", ex);
-			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, false, getContextAttr(), 
+			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, false, getContextAttr(), 
 					"An error occurred during dynamic step execution:\n  " + ex));
 		}
 	}
@@ -255,7 +255,7 @@ public class LiveDebugPoint
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred during expression evaluation: {}", expression, ex);
-			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, false, null, 
+			DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(reqId, false, null, 
 					"An error occurred during expression evaluation:\n  " + ex));
 		}
 	}
@@ -305,7 +305,8 @@ public class LiveDebugPoint
 		{
 			if(!onPause.get())
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, false, null, "Current live-point is not in paused state"));
+				DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, false, null, 
+						"Current live-point is not in paused state"));
 				return;
 			}
 			

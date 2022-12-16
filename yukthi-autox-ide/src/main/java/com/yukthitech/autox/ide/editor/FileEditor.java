@@ -125,6 +125,8 @@ public class FileEditor extends JPanel
 	
 	private FileEditorIconManager iconManager;
 	
+	private Object debugHighlightTag;
+	
 	public FileEditor(Project project, File file)
 	{
 		scrollPane = new RTextScrollPane(new RSyntaxTextArea());
@@ -498,6 +500,30 @@ public class FileEditor extends JPanel
 		return currentFileManager.getToolTip(this, parsedFileContent, offset);
 	}
 	
+	public synchronized void highlightDebugLine(int lineNo)
+	{
+		if(debugHighlightTag != null)
+		{
+			syntaxTextArea.removeLineHighlight(debugHighlightTag);
+		}
+		
+		try
+		{
+			debugHighlightTag = syntaxTextArea.addLineHighlight(lineNo - 2, IIdeConstants.DEBUG_BG_COLOR);
+		}catch(BadLocationException ex)
+		{
+			logger.error("Wrong line number specified for debug highlight: {}", lineNo, ex);
+		}
+	}
+	
+	public synchronized void clearHighlightDebugLine()
+	{
+		if(debugHighlightTag != null)
+		{
+			syntaxTextArea.removeLineHighlight(debugHighlightTag);
+		}
+	}
+
 	private void addMessage(FileParseMessage message)
 	{
 		try
@@ -534,7 +560,7 @@ public class FileEditor extends JPanel
 	private void clearAllMessages()
 	{
 		//remove all non debug points
-		iconManager.clearNonDebugIcons();
+		iconManager.clearIcons(false);
 
 		//remove high lights
 		highlighter.removeAllHighlights();

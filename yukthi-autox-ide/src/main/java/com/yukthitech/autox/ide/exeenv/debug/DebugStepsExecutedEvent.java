@@ -15,26 +15,33 @@
  */
 package com.yukthitech.autox.ide.exeenv.debug;
 
+import com.yukthitech.autox.debug.common.ServerMssgStepExecuted;
+import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.services.IIdeEvent;
 
 /**
- * Raised when a debug point is added or removed.
+ * This event is raised when Steps execution is completed.
  * @author akranthikiran
  */
-public class DebugPointsChangedEvent implements IIdeEvent
+public class DebugStepsExecutedEvent implements IIdeEvent
 {
-	/**
-	 * Source which is responsible for generating this event.
-	 */
-	private Object source;
-	
-	public DebugPointsChangedEvent(Object source)
+	private ExecutionEnvironment executionEnvironment;
+
+	private ServerMssgStepExecuted stepExecuted;
+
+	public DebugStepsExecutedEvent(ExecutionEnvironment executionEnvironment, ServerMssgStepExecuted stepExecuted)
 	{
-		this.source = source;
+		this.executionEnvironment = executionEnvironment;
+		this.stepExecuted = stepExecuted;
 	}
-	
-	public Object getSource()
+
+	public ExecutionEnvironment getExecutionEnvironment()
 	{
-		return source;
+		return executionEnvironment;
+	}
+
+	public ServerMssgStepExecuted getStepExecuted()
+	{
+		return stepExecuted;
 	}
 }

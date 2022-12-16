@@ -26,7 +26,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -45,6 +44,7 @@ import com.yukthitech.autox.ide.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironmentManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
+import com.yukthitech.swing.IconButton;
 
 @Component
 public class ExeEnvironmentPanel extends JPanel
@@ -53,13 +53,13 @@ public class ExeEnvironmentPanel extends JPanel
 	
 	private static Logger logger = LogManager.getLogger(ExeEnvironmentPanel.class);
 	
-	private static Icon ACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/green-dot.svg", 16);
+	private static Icon ACTIVE_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/green-dot.svg", 16);
 	
-	private static Icon INACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/gray-dot.svg", 16);
+	private static Icon INACTIVE_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/gray-dot.svg", 16);
 	
-	private static Icon DEBUG_ICON = IdeUtils.loadIcon("/ui/icons/debug.svg", 16);
+	private static Icon DEBUG_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug.svg", 16);
 	
-	private static Icon INACTIVE_DEBUG_ICON = IdeUtils.loadIcon("/ui/icons/debug.svg", 16, true);
+	private static Icon INACTIVE_DEBUG_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug.svg", 16, true);
 
 	private static class ExeEnvLabel extends DefaultListCellRenderer
 	{
@@ -92,9 +92,9 @@ public class ExeEnvironmentPanel extends JPanel
 	
 	private JComboBox<ExecutionEnvironment> envComboBox = new JComboBox<ExecutionEnvironment>();
 	
-	private final JButton stopBut = new JButton("");
-	private final JButton clearBut = new JButton("");
-	private final JButton clearAllBut = new JButton("");
+	private final IconButton stopBut = new IconButton();
+	private final IconButton clearBut = new IconButton();
+	private final IconButton clearAllBut = new IconButton();
 	private final JLabel lblEnvironments = new JLabel("Environments: ");
 
 	@Autowired
@@ -105,8 +105,8 @@ public class ExeEnvironmentPanel extends JPanel
 	 */
 	public ExeEnvironmentPanel()
 	{
-		setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(5, 0, 5, 0)));
-		setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(2, 0, 2, 0)));
+		setLayout(new FlowLayout(FlowLayout.LEFT, 1, 0));
 		
 		envComboBox.addItemListener(new ItemListener()
 		{
@@ -130,8 +130,7 @@ public class ExeEnvironmentPanel extends JPanel
 		});
 		
 		stopBut.setToolTipText("Stop");
-		stopBut.setBorder(null);
-		stopBut.setIcon(IdeUtils.loadIcon("/ui/icons/kill.svg", 16));
+		stopBut.setIcon(IdeUtils.loadIconWithoutBorder("/ui/icons/kill.svg", 16));
 		add(stopBut);
 		
 		clearBut.addActionListener(new ActionListener()
@@ -141,10 +140,9 @@ public class ExeEnvironmentPanel extends JPanel
 				clearEnvironment();
 			}
 		});
-		clearBut.setToolTipText("Clear Environment");
 
-		clearBut.setBorder(null);
-		clearBut.setIcon(IdeUtils.loadIcon("/ui/icons/clear.svg", 16));
+		clearBut.setToolTipText("Clear Environment");
+		clearBut.setIcon(IdeUtils.loadIconWithoutBorder("/ui/icons/clear.svg", 16));
 		add(clearBut);
 		
 		clearAllBut.addActionListener(new ActionListener()
@@ -156,9 +154,7 @@ public class ExeEnvironmentPanel extends JPanel
 		});
 		
 		clearAllBut.setToolTipText("Clear All Environments");
-
-		clearAllBut.setBorder(null);
-		clearAllBut.setIcon(IdeUtils.loadIcon("/ui/icons/clearAll.svg", 16));
+		clearAllBut.setIcon(IdeUtils.loadIconWithoutBorder("/ui/icons/clearAll.svg", 16));
 		add(clearAllBut);
 	}
 	

@@ -46,14 +46,14 @@ public class DebugPointManager
 	@Autowired
 	private IdeEventManager ideEventManager;
 	
-	public synchronized IdeDebugPoint addDebugPoint(String project, File file, int lineNo)
+	public synchronized IdeDebugPoint addDebugPoint(String project, File file, int lineNo, Object source)
 	{
 		IdeDebugPoint newPoint = new IdeDebugPoint(project, file, lineNo);
-		addDebugPoint(newPoint, true);
+		addDebugPoint(newPoint, true, source);
 		return newPoint;
 	}
 	
-	private void addDebugPoint(IdeDebugPoint newPoint, boolean raiseEvent)
+	private void addDebugPoint(IdeDebugPoint newPoint, boolean raiseEvent, Object source)
 	{
 		List<IdeDebugPoint> points = debugPoints.get(newPoint.getFile());
 		
@@ -76,11 +76,11 @@ public class DebugPointManager
 		
 		if(raiseEvent)
 		{
-			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(newPoint.getProject()));
+			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
 		}
 	}
 	
-	public synchronized void removeBreakPoint(IdeDebugPoint debugPoint)
+	private void removeDebugPoint(IdeDebugPoint debugPoint, boolean sendEvent, Object source)
 	{
 		List<IdeDebugPoint> points = debugPoints.get(debugPoint.getFile());
 		
@@ -90,9 +90,34 @@ public class DebugPointManager
 		}
 		
 		points.remove(debugPoint);
-		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(debugPoint.getProject()));
+		
+		if(sendEvent)
+		{
+			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
+		}
+	}
+
+	public synchronized void removeDebugPoint(IdeDebugPoint debugPoint, Object source)
+	{
+		removeDebugPoint(debugPoint, true, source);
 	}
 	
+	public synchronized void removeDebugPoints(List<IdeDebugPoint> debugPoints, Object source)
+	{
+		for(IdeDebugPoint debugPoint : debugPoints)
+		{
+			removeDebugPoint(debugPoint, false);
+		}
+		
+		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
+	}
+
+	public synchronized void removeAllDebugPoints(Object source)
+	{
+		debugPoints.clear();
+		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
+	}
+
 	public synchronized List<IdeDebugPoint> getDebugPoints()
 	{
 		List<IdeDebugPoint> finalLst = new ArrayList<>();
@@ -157,7 +182,7 @@ public class DebugPointManager
 			
 			try
 			{
-				addDebugPoint(point, false);
+				addDebugPoint(point, false, null);
 			}catch(Exception ex)
 			{
 				//on error ignore the point

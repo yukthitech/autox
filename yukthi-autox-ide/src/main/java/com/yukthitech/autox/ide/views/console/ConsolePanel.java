@@ -27,7 +27,6 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -36,7 +35,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.text.Element;
 import javax.swing.text.html.HTMLDocument;
 
@@ -54,7 +52,9 @@ import com.yukthitech.autox.ide.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.swing.HyperLinkEvent;
+import com.yukthitech.swing.IconButton;
 import com.yukthitech.swing.YukthiHtmlPane;
+import java.awt.FlowLayout;
 
 @Component
 public class ConsolePanel extends JPanel implements IViewPanel
@@ -68,17 +68,18 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	private final JPanel panel = new JPanel();
 	private final JLabel lblEnvironment = new JLabel("Environment: ");
 	private final JScrollPane scrollPane = new JScrollPane();
-	private final JPanel panel_1 = new JPanel();
-	private final JButton btnClear = new JButton("");
+	private final JPanel buttonPanel = new JPanel();
 	private final YukthiHtmlPane consoleDisplayArea = new YukthiHtmlPane();
+	
+	private final IconButton btnClear = new IconButton();
 
 	@Autowired
 	private FileActions fileAction;
 
-	private JTabbedPane parentTabbedPane;
+	//private JTabbedPane parentTabbedPane;
 
 	private ExecutionEnvironment activeEnvironment;
-	private final JButton btnOpenReport = new JButton("Open Report");
+	private final IconButton btnOpenReport = new IconButton();
 
 	/**
 	 * Create the panel.
@@ -90,19 +91,23 @@ public class ConsolePanel extends JPanel implements IViewPanel
 
 		add(panel, BorderLayout.NORTH);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 444, 0 };
-		gbl_panel.rowHeights = new int[] { 21, 0 };
-		gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+		gbl_panel.columnWidths = new int[] {444, 0};
+		gbl_panel.rowHeights = new int[] {21};
+		gbl_panel.columnWeights = new double[] { 1.0, 0.0 };
+		gbl_panel.rowWeights = new double[] { 0.0 };
 		panel.setLayout(gbl_panel);
 
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.anchor = GridBagConstraints.EAST;
-		gbc_panel_1.fill = GridBagConstraints.VERTICAL;
-		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 0;
-		panel.add(panel_1, gbc_panel_1);
-		btnClear.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		GridBagConstraints gbc_buttonPanel = new GridBagConstraints();
+		gbc_buttonPanel.anchor = GridBagConstraints.EAST;
+		gbc_buttonPanel.fill = GridBagConstraints.VERTICAL;
+		gbc_buttonPanel.gridx = 1;
+		gbc_buttonPanel.gridy = 0;
+		FlowLayout fl_buttonPanel = (FlowLayout) buttonPanel.getLayout();
+		fl_buttonPanel.setAlignment(FlowLayout.LEFT);
+		fl_buttonPanel.setVgap(2);
+		fl_buttonPanel.setHgap(2);
+		panel.add(buttonPanel, gbc_buttonPanel);
+
 		btnClear.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -111,14 +116,15 @@ public class ConsolePanel extends JPanel implements IViewPanel
 			}
 		});
 		btnClear.setToolTipText("Clear");
-		btnClear.setIcon(IdeUtils.loadIcon("/ui/icons/clear-console.svg", 16));
+		btnClear.setIcon(IdeUtils.loadIconWithoutBorder("/ui/icons/clear-console.svg", 20));
 
-		panel_1.add(btnClear);
+		buttonPanel.add(btnClear);
 		btnOpenReport.addActionListener(this::openReport);
 		btnOpenReport.setEnabled(false);
-		btnOpenReport.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		btnOpenReport.setIcon(IdeUtils.loadIconWithoutBorder("/ui/icons/report.svg", 20));
+		btnOpenReport.setToolTipText("Open Report");
 		
-		panel_1.add(btnOpenReport);
+		buttonPanel.add(btnOpenReport);
 		lblEnvironment.setBorder(new EmptyBorder(3, 3, 3, 3));
 		lblEnvironment.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblEnvironment.setOpaque(true);
@@ -187,7 +193,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	@Override
 	public void setParent(JTabbedPane parentTabPane)
 	{
-		this.parentTabbedPane = parentTabPane;
+		//this.parentTabbedPane = parentTabPane;
 	}
 
 	private void refreshConsoleText()
@@ -248,10 +254,12 @@ public class ConsolePanel extends JPanel implements IViewPanel
 
 			moveToEnd();
 			
+			/*
 			if(parentTabbedPane != null)
 			{
 				parentTabbedPane.setSelectedComponent(this);
 			}
+			*/
 		} catch(Exception ex)
 		{
 			logger.error("An error occurred while adding html content", ex);

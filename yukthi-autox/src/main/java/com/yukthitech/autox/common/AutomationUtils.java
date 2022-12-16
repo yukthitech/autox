@@ -942,6 +942,17 @@ public class AutomationUtils
 		}
 	}
 	
+	public static String toFormattedJson(Object obj)
+	{
+		try
+		{
+			return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while converting object to json", ex);
+		}
+	}
+
 	public static String getTimeTaken(Date startTime, Date endTime)
 	{
 		if(startTime == null || endTime == null)

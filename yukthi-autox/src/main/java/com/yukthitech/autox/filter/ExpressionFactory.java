@@ -279,7 +279,7 @@ public class ExpressionFactory
 		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(str);
 		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(str);
 		
-		return (matcher.matches() || matcherWithType.matches());
+		return (matcher.find() || matcherWithType.find());
 	}
 	
 	private IPropertyPath getPropertyPath(FilterContext context, String expression)

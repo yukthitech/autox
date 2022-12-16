@@ -44,6 +44,7 @@ import com.yukthitech.autox.ide.MaximizableTabbedPane;
 import com.yukthitech.autox.ide.actions.ProjectActions;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.exeenv.debug.DebugPointsChangedEvent;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.FileState;
@@ -183,13 +184,13 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	}
 	
 	@IdeEventHandler
-	public void onIdeSettingsChanged(IdeSettingChangedEvent event)
+	private void onIdeSettingsChanged(IdeSettingChangedEvent event)
 	{
 		changeEditorSettings(event.getIdeSettings());
 	}
 	
 	@IdeEventHandler
-	public void onStartup(IdeStartedEvent event)
+	private void onStartup(IdeStartedEvent event)
 	{
 		List<FileEditorTab> tabs = getAllTabs();
 		
@@ -207,6 +208,27 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		if(fileEditor != null)
 		{
 			fileEditor.getTextArea().requestFocus();
+		}
+	}
+	
+	@IdeEventHandler
+	private void onDebugPointChange(DebugPointsChangedEvent event)
+	{
+		//if the event is generated as part of file editor, ignore it
+		if(event.getSource() instanceof FileEditorIconManager)
+		{
+			return;
+		}
+		
+		List<FileEditorTab> tabs = getAllTabs();
+		
+		if(CollectionUtils.isNotEmpty(tabs))
+		{
+			tabs.forEach(tab -> 
+			{
+				FileEditor editor = tab.getFileEditor();
+				editor.getIconManager().reloadDebugPoints();
+			});
 		}
 	}
 	
@@ -276,6 +298,38 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		{
 			state.setAtribute(ACTIVE_FILE, activeTab.getFile().getCanonicalPath());
 		}
+	}
+	
+	public FileEditor getOpenFile(Project project, File file)
+	{
+		if(!file.exists())
+		{
+			logger.warn("Tried to open non-existing project file '{}' under project '{}'. Ignoring open request.", 
+					file.getPath(), project.getName());
+			return null;
+		}
+		
+		String canonicalPath = null;
+		
+		try
+		{
+			canonicalPath = file.getCanonicalPath();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An exception occurred while fetching cannonical path of file: {}", file.getPath(), ex);
+		}
+		
+		String projectPath = project.getBaseFolderPath();
+		
+		if(!canonicalPath.startsWith(projectPath))
+		{
+			logger.warn("Tried to open project file '{}' under project '{}'. Ignoring open request specified file as it is not part of project base folder: {}", 
+					canonicalPath, project.getName(), projectPath);
+			return null;
+		}
+
+		FileEditor fileEditor = pathToEditor.get(canonicalPath);
+		return fileEditor;
 	}
 	
 	public FileEditor openProjectFile(Project project, File file)

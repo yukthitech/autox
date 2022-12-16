@@ -102,13 +102,31 @@ public class FileEditorIconManager
 		points.forEach(point -> addDebugPoint(point));
 	}
 	
-	void clearNonDebugIcons()
+	void reloadDebugPoints()
+	{
+		if(!executionSupported)
+		{
+			return;
+		}
+
+		clearIcons(true);
+		loadDebugPoints();
+	}
+	
+	void clearIcons(boolean debugIcons)
 	{
 		List<FileEditorIconGroup> groupsToRemove = new ArrayList<>();
 		
 		for(FileEditorIconGroup grp : this.editorIconGroups)
 		{
-			grp.clearNonDebugIcons();
+			if(debugIcons)
+			{
+				grp.clearDebugIcons();
+			}
+			else
+			{
+				grp.clearNonDebugIcons();
+			}
 			
 			if(grp.isEmpty())
 			{
@@ -176,12 +194,12 @@ public class FileEditorIconManager
 			
 			if(existingDebugIcon == null)
 			{
-				IdeDebugPoint debugPoint = debugManager.addDebugPoint(project.getName(), file, lineNo);
+				IdeDebugPoint debugPoint = debugManager.addDebugPoint(project.getName(), file, lineNo, this);
 				addDebugPoint(debugPoint);
 			}
 			else
 			{
-				debugManager.removeBreakPoint(existingDebugIcon.getDebugPoint());
+				debugManager.removeDebugPoint(existingDebugIcon.getDebugPoint(), this);
 				removeIcon(grp, existingDebugIcon);
 			}
 		}catch(BadLocationException ex)
@@ -230,7 +248,7 @@ public class FileEditorIconManager
 				
 				if(debugIcon != null)
 				{
-					debugManager.removeBreakPoint(debugIcon.getDebugPoint());
+					debugManager.removeDebugPoint(debugIcon.getDebugPoint(), this);
 				}
 				
 				iconArea.removeTrackingIcon(iconGrpToRem.getIconInfo());

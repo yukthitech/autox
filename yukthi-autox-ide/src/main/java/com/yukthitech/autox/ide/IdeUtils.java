@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -47,6 +48,7 @@ import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.context.ApplicationContext;
 
@@ -69,7 +71,6 @@ public class IdeUtils
 	private static Pattern HYPHEN_PATTERN = Pattern.compile("\\-(\\w)");
 	
 	private static final int BORDER_SIZE = 8;
-	private static final int HALF_BORDER_SIZE = BORDER_SIZE / 2;
 
 	/**
 	 * Size of file icon.
@@ -197,14 +198,9 @@ public class IdeUtils
         }
 	}
 	
-	public static void main(String[] args)
-	{
-		loadSvg("/ui/icons/new.svg", 10);
-	}
-	
 	public static ImageIcon loadIcon(String resource, int size)
 	{
-		return loadIcon(resource, size, false);
+		return loadIcon(resource, size, BORDER_SIZE, false);
 	}
 	
 	/**
@@ -215,7 +211,13 @@ public class IdeUtils
 	 */
 	public static ImageIcon loadIcon(String resource, int size, boolean grayScale)
 	{
+		return loadIcon(resource, size, BORDER_SIZE, grayScale);
+	}
+	
+	private static ImageIcon loadIcon(String resource, int size, int borderSize, boolean grayScale)
+	{
 		Image baseImg = null;
+		int width = size, height = size;
 		
 		if(resource.toLowerCase().endsWith(".svg"))
 		{
@@ -227,8 +229,16 @@ public class IdeUtils
 			baseImg = icon.getImage();
 		}
 		
-		BufferedImage img = new BufferedImage(size + BORDER_SIZE, size + BORDER_SIZE, BufferedImage.TYPE_INT_ARGB);
-		img.getGraphics().drawImage(baseImg, HALF_BORDER_SIZE, HALF_BORDER_SIZE, size, size, null);
+		if(size <= 0)
+		{
+			width = baseImg.getWidth(null);
+			height = baseImg.getHeight(null);
+		}
+
+		int halfBorderSize = borderSize / 2;
+		
+		BufferedImage img = new BufferedImage(width + borderSize, height + borderSize, BufferedImage.TYPE_INT_ARGB);
+		img.getGraphics().drawImage(baseImg, halfBorderSize, halfBorderSize, width, height, null);
 		
 		if(grayScale)
 		{
@@ -237,7 +247,7 @@ public class IdeUtils
 		
 		return new ImageIcon(img);
 	}
-	
+
 	private static void convertToGrayScale(BufferedImage img)
 	{
 		int width = img.getWidth();
@@ -262,27 +272,12 @@ public class IdeUtils
 	
 	public static ImageIcon loadIconWithoutBorder(String resource, int size)
 	{
-		Image baseImg = null;
-		
-		if(resource.toLowerCase().endsWith(".svg"))
-		{
-			baseImg = loadSvg(resource, size);
-		}
-		else
-		{
-			ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
-			baseImg = icon.getImage();
-		}
+		return loadIcon(resource, size, 0, false);
+	}
 
-		if(size <= 0)
-		{
-			return new ImageIcon(baseImg);
-		}
-		
-		BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-		img.getGraphics().drawImage(baseImg, 0, 0, size, size, null);
-		
-		return new ImageIcon(img);
+	public static ImageIcon loadIconWithoutBorder(String resource, int size, boolean grayScale)
+	{
+		return loadIcon(resource, size, 0, grayScale);
 	}
 
 	private static ImageIcon getEmptyFileIcon()
@@ -467,5 +462,20 @@ public class IdeUtils
 		text = text.replace("\r", "\n");
 		
 		return text;
+	}
+	
+	public static String loadResource(String resource)
+	{
+		try
+		{
+			InputStream is = IdeUtils.class.getResourceAsStream(resource);
+			String res = IOUtils.toString(is, Charset.defaultCharset());
+			is.close();
+			
+			return res;
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to load resource: {}", resource, ex);
+		}
 	}
 }

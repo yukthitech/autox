@@ -220,7 +220,6 @@ public class DebugClient
 				{
 					ServerMssgConfirmation confirm = (ServerMssgConfirmation) obj;
 					handleConfirmMessage(confirm);
-					continue;
 				}
 				
 				this.listenerManager.get().processData(obj);

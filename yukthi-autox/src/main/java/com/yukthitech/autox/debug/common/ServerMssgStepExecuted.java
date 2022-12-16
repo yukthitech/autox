@@ -24,19 +24,28 @@ import java.util.Map;
 public class ServerMssgStepExecuted extends ServerMssgConfirmation
 {
 	private static final long serialVersionUID = 1L;
+	
+	private String executionId;
 
 	/**
 	 * Step execution request id.
 	 */
 	private Map<String, byte[]> contextAttr;
 	
-	public ServerMssgStepExecuted(String requestId, boolean successful, Map<String, byte[]> contextAttr, String errorMssg, Object... mssgArgs)
+	public ServerMssgStepExecuted(String requestId, String executionId, boolean successful, Map<String, byte[]> contextAttr, String errorMssg, Object... mssgArgs)
 	{
 		super(requestId, successful, errorMssg, mssgArgs);
+		this.executionId = executionId;
 		this.contextAttr = contextAttr;
 	}
+	
 	public Map<String, byte[]> getContextAttr()
 	{
 		return contextAttr;
+	}
+	
+	public String getExecutionId()
+	{
+		return executionId;
 	}
 }

@@ -16,6 +16,7 @@
 
 	<function name="sumWithoutReturn">
 		<s:set expression="sumResult" value="expr: param.a + param.b | int: $"/>
+		<s:set expression="test1" value="int: 10"/>
 		<s:log message="Sum result was: ${attr.sumResult}"/>
 	</function>
 

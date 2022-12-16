@@ -546,4 +546,25 @@ public class FileActions
 		
 		editor.gotoLine(lineNo);
 	}
+
+	public FileEditor gotoFilePath(Project project, String filePath, int lineNo)
+	{
+		File fileToOpen = new File(filePath);
+		String path = IdeFileUtils.getRelativePath(project.getBaseFolder(), fileToOpen);
+		
+		if(path == null)
+		{
+			return null;
+		}
+		
+		FileEditor editor = fileEditorTabbedPane.openProjectFile(project, fileToOpen);
+		
+		if(lineNo < 0 || editor == null)
+		{
+			return editor;
+		}
+		
+		editor.gotoLine(lineNo);
+		return editor;
+	}
 }

@@ -73,6 +73,8 @@ public class ContextAttributeValueDlg extends JDialog
 	public void display(String name, String string)
 	{
 		nameFld.setText(name);
+		nameFld.setCaretPosition(0);
+		
 		textArea.setText(string);
 		IdeUtils.centerOnScreen(this);
 		super.setVisible(true);

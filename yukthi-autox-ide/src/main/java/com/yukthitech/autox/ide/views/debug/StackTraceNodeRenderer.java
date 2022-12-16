@@ -24,6 +24,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.views.debug.StackTraceTreeModel.StackElementNode;
 import com.yukthitech.autox.ide.views.debug.StackTraceTreeModel.ThreadNode;
 
 public class StackTraceNodeRenderer extends DefaultTreeCellRenderer implements TreeCellRenderer
@@ -43,7 +44,7 @@ public class StackTraceNodeRenderer extends DefaultTreeCellRenderer implements T
 		{
 			component.setIcon(THREAD_ICON);
 		}
-		else if(value instanceof ThreadNode)
+		else if(value instanceof StackElementNode)
 		{
 			component.setIcon(STACK_ELEM_ICON);
 		}

@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused.StackElement;
@@ -32,25 +33,52 @@ public class StackTraceTreeModel extends DefaultTreeModel
 {
 	private static final long serialVersionUID = 1L;
 	
-	public static class ThreadNode extends DefaultMutableTreeNode
+	public static class BaseNode extends DefaultMutableTreeNode
 	{
 		private static final long serialVersionUID = 1L;
 		
-		public ThreadNode(String name)
+		private String executionId;
+
+		public BaseNode(String executionId)
 		{
-			super(name);
+			this.executionId = executionId;
+		}
+		
+		public String getExecutionId()
+		{
+			return executionId;
+		}
+	}
+	
+	public static class ThreadNode extends BaseNode
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private String name;
+		
+		public ThreadNode(String executionId, String name)
+		{
+			super(executionId);
+			this.name = name;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return name;
 		}
 	}
 
-	public static class StackElementNode extends DefaultMutableTreeNode
+	public static class StackElementNode extends BaseNode
 	{
 		private static final long serialVersionUID = 1L;
 		
 		private StackElement element;
 		private String stringRep;
 		
-		public StackElementNode(StackElement elem)
+		public StackElementNode(String executionId, StackElement elem)
 		{
+			super(executionId);
 			this.element = elem;
 			
 			File path = new File(elem.getFile());
@@ -79,6 +107,18 @@ public class StackTraceTreeModel extends DefaultTreeModel
 		
 		this.root = (DefaultMutableTreeNode) super.getRoot();
 	}
+	
+	public TreePath getPath(String executionId)
+	{
+		DefaultMutableTreeNode threadNode = pausedExecutions.get(executionId);
+		
+		if(threadNode == null)
+		{
+			return null;
+		}
+		
+		return new TreePath(new Object[] {root, threadNode});
+	}
 
 	public void addOrUpdate(ServerMssgExecutionPaused mssg)
 	{
@@ -92,7 +132,7 @@ public class StackTraceTreeModel extends DefaultTreeModel
 		
 		if(node == null)
 		{
-			node = new ThreadNode(mssg.getName());
+			node = new ThreadNode(mssg.getExecutionId(), mssg.getName());
 			pausedExecutions.put(mssg.getExecutionId(), node);
 			
 			root.add(node);
@@ -107,7 +147,7 @@ public class StackTraceTreeModel extends DefaultTreeModel
 		
 		for(ServerMssgExecutionPaused.StackElement elem : stackTrace)
 		{
-			node.add(new StackElementNode(elem));
+			node.add(new StackElementNode(mssg.getExecutionId(), elem));
 		}
 		
 		if(raiseEvent)
@@ -118,7 +158,8 @@ public class StackTraceTreeModel extends DefaultTreeModel
 			}
 			else
 			{
-				super.nodesWereInserted(root, new int[] {pausedExecutions.size() - 1});
+				//super.nodesWereInserted(root, new int[] {pausedExecutions.size() - 1});
+				super.reload();
 			}
 		}
 	}

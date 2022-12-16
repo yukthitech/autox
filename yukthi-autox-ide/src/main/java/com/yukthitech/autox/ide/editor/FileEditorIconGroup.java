@@ -189,6 +189,26 @@ public class FileEditorIconGroup implements Icon
 		updateIconMssg();
 	}
 	
+	void clearDebugIcons()
+	{
+		List<FileEditorIcon> iconsToRemove = new ArrayList<>();
+		
+		for(FileEditorIcon icon : this.editorIcons)
+		{
+			if(icon.getIconType() != IconType.DEBUG)
+			{
+				continue;
+			}
+			
+			iconsToRemove.add(icon);
+		}
+		
+		this.editorIcons.removeAll(iconsToRemove);
+		
+		//update icon and message
+		updateIconMssg();
+	}
+
 	boolean removeIcon(FileEditorIcon icon)
 	{
 		if(this.editorIcons.remove(icon))
