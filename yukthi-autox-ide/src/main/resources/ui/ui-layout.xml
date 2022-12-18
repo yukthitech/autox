@@ -104,6 +104,18 @@
 			<item label="Run To Current Step" action="runToCurrentStep">
 				<short-key ctrl="true" shift="true" key="ENTER" />
 			</item>
+
+			<item label="-" />
+			
+			<item label="Step into..." action="debugStepInto">
+				<short-key key="F5" global="true"/>
+			</item>
+			<item label="Step over..." action="debugStepOver">
+				<short-key key="F6" global="true"/>
+			</item>
+			<item label="Step return..." action="debugStepReturn">
+				<short-key key="F8" global="true"/>
+			</item>
 		</menu>
 
 		<menu label="Window" mnemonic="W">

@@ -208,6 +208,11 @@ public class MenuItem implements Validateable
 		if(shortKey != null)
 		{
 			menuItem.setAccelerator(shortKey.toKeyStroke());
+			
+			if(shortKey.isGlobal() && action != null)
+			{
+				actionCollection.registerGlobalAction(shortKey, action);
+			}
 		}
 		
 		if(action != null)

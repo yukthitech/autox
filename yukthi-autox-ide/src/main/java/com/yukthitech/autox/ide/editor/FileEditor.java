@@ -39,6 +39,7 @@ import javax.annotation.PostConstruct;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
@@ -250,6 +251,10 @@ public class FileEditor extends JPanel
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl F1"), "dummy help");
 		//syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl shift R"), "dummy");
+		
+		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("F5"), "F5");
+		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("F6"), "F6");
+		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8");
 		
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.VK_CONTROL | KeyEvent.VK_SHIFT), "dummy");
 	}
@@ -507,16 +512,65 @@ public class FileEditor extends JPanel
 			syntaxTextArea.removeLineHighlight(debugHighlightTag);
 		}
 		
+		int actLineNo = lineNo;
+		
 		try
 		{
-			debugHighlightTag = syntaxTextArea.addLineHighlight(lineNo - 2, IIdeConstants.DEBUG_BG_COLOR);
+			//convert to zero index line
+			lineNo = lineNo - 1;
+			
+			//work around for highlight bug - reduce line number by 1
+			debugHighlightTag = syntaxTextArea.addLineHighlight(lineNo - 1, IIdeConstants.DEBUG_BG_COLOR);
+		}catch(BadLocationException ex)
+		{
+			logger.error("Wrong line number specified for debug highlight: {}", lineNo, ex);
+		}
+		
+		IdeUtils.executeUiTask(() -> makeLineVisible(actLineNo));
+	}
+	
+	public void makeLineVisible(int lineNo)
+	{
+		try
+		{
+			int minYPos = syntaxTextArea.yForLine(lineNo - 3);
+			minYPos = (minYPos < 0) ? 0 : minYPos;
+			
+			JScrollBar verScroll = scrollPane.getVerticalScrollBar();
+			int maxYPos = syntaxTextArea.yForLine(lineNo);
+			maxYPos = (maxYPos > verScroll.getMaximum()) ? verScroll.getMaximum() : maxYPos;
+			
+			Rectangle view = scrollPane.getViewport().getViewRect();
+			
+			if(minYPos >= view.y && maxYPos < (view.y + view.height))
+			{
+				return;
+			}
+			
+			int finalPos = 0;
+			
+			//if required line is below current view
+			if(minYPos >= view.y)
+			{
+				//align the view bottom line to max y
+				finalPos = maxYPos - view.height;
+			}
+			//if required line is above current view
+			else
+			{
+				//align the top line to min y
+				finalPos = minYPos;
+			}
+			
+			verScroll.setValue(finalPos);
+			scrollPane.invalidate();
 		}catch(BadLocationException ex)
 		{
 			logger.error("Wrong line number specified for debug highlight: {}", lineNo, ex);
 		}
 	}
 	
-	public synchronized void clearHighlightDebugLine()
+	public void clearHighlightDebugLine()
 	{
 		if(debugHighlightTag != null)
 		{

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.ide.services.GlobalKeyboardListener;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -70,6 +71,9 @@ public class ActionCollection
 	
 	@Autowired
 	private ApplicationContext applicationContext;
+	
+	@Autowired
+	private GlobalKeyboardListener globalKeyboardListener;
 	
 	@PostConstruct
 	private void init()
@@ -111,6 +115,11 @@ public class ActionCollection
 		{
 			throw new InvalidStateException("An error occurred while invoking action: {}", name, ex);
 		}
+	}
+	
+	public void registerGlobalAction(ShortKey shortKey, String action)
+	{
+		globalKeyboardListener.addGlobalKeyListener(shortKey, getActionListener(action));
 	}
 	
 	public ActionListener getActionListener(String action)

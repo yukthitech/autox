@@ -106,7 +106,7 @@ public class RestResponse extends JPanel
 	@PostConstruct
 	public void init()
 	{
-		responsePopup = uiLayout.getPopupMenu("restResponsePopup").toPopupMenu(actionCollection);
+		//responsePopup = uiLayout.getPopupMenu("restResponsePopup").toPopupMenu(actionCollection);
 //		textArea.setPopupMenu(responsePopup);
 
 		/*

@@ -50,6 +50,11 @@ public class ShortKey implements Validateable
 	 * Key to be used.
 	 */
 	private String key;
+	
+	/**
+	 * Flag indicating the keystroke has to be registered as global.
+	 */
+	private boolean global;
 
 	/**
 	 * Gets the true if control should be down.
@@ -130,8 +135,18 @@ public class ShortKey implements Validateable
 	{
 		this.key = key;
 	}
-	
-	private int getKeyCode()
+
+	public boolean isGlobal()
+	{
+		return global;
+	}
+
+	public void setGlobal(boolean global)
+	{
+		this.global = global;
+	}
+
+	public int getKeyCode()
 	{
 		String fieldName = "VK_" + key.toUpperCase();
 		
@@ -143,21 +158,8 @@ public class ShortKey implements Validateable
 			throw new InvalidArgumentException("Invalid key code specified: " + key);
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
-	 */
-	@Override
-	public void validate() throws ValidateException
-	{
-		getKeyCode();
-	}
 	
-	/**
-	 * Converts current object to stroke.
-	 * @return
-	 */
-	public KeyStroke toKeyStroke()
+	public int getModifiers()
 	{
 		int modifiers = 0;
 		
@@ -175,8 +177,26 @@ public class ShortKey implements Validateable
 		{
 			modifiers |= InputEvent.SHIFT_DOWN_MASK;
 		}
-		
-		KeyStroke stroke = KeyStroke.getKeyStroke(getKeyCode(), modifiers);
+
+		return modifiers;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
+	 */
+	@Override
+	public void validate() throws ValidateException
+	{
+		getKeyCode();
+	}
+	
+	/**
+	 * Converts current object to stroke.
+	 * @return
+	 */
+	public KeyStroke toKeyStroke()
+	{
+		KeyStroke stroke = KeyStroke.getKeyStroke(getKeyCode(), getModifiers());
 		return stroke;
 	}
 }

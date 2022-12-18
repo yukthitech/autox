@@ -331,7 +331,8 @@ public class DebugPanel extends JPanel implements IViewPanel
 
 		stackTraceTreeModel.removeStackTrace(event.getPausedMssg().getExecutionId());
 
-		updateActiveThread(activeEnv);
+		//post release active env should be considered as null
+		updateActiveThread(null);
 	}
 	
 	@IdeEventHandler
@@ -365,7 +366,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 	private void updateActiveThread(ExecutionEnvironment activeEnv)
 	{
 		ServerMssgExecutionPaused threadDet = activeEnv == null ? null : activeEnv.getActiveThreadDetails();
-		Map<String, byte[]> contextAttr = activeEnv == null ? null : activeEnv.getContextAttributes();
+		Map<String, byte[]> contextAttr = threadDet == null ? null : activeEnv.getContextAttributes();
 		contextAttr = (contextAttr == null) ? Collections.emptyMap() : new TreeMap<>(contextAttr);
 		
 		if(threadDet != null)
@@ -381,6 +382,21 @@ public class DebugPanel extends JPanel implements IViewPanel
 				
 				activateTab();
 				highlightDebugPoint(activeEnv.getProject(), new File(threadDet.getDebugFilePath()), threadDet.getLineNumber() + 1);
+			}
+		}
+		//if no active env is found or active thread is not found
+		else
+		{
+			if(previousDebugHighlight != null)
+			{
+				FileEditor editor = fileEditorTabbedPane.getOpenFile(previousDebugHighlight.project, previousDebugHighlight.file);
+				
+				if(editor != null)
+				{
+					editor.clearHighlightDebugLine();
+				}
+				
+				previousDebugHighlight = null;
 			}
 		}
 
