@@ -244,13 +244,7 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			//if no prefix is used, by default use expr prefix
-			if(!ExpressionFactory.isExpression(expression))
-			{
-				expression = "expr: " + expression;
-			}
-			
-			Object res = ExpressionFactory.getExpressionFactory().parseExpression(AutomationContext.getInstance(), expression);
+			Object res = ExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), expression);
 			DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(reqId, true, res, null));
 		}catch(Exception ex)
 		{

@@ -215,6 +215,17 @@ public class ExpressionFactory
 		return lst;
 	}
 	
+	public Object parseExpressionString(AutomationContext context, String expression)
+	{
+		//if no prefix is used, by default use expr prefix
+		if(!isExpression(expression))
+		{
+			expression = "expr: " + expression;
+		}
+
+		return parseExpression(context, expression, null);
+	}
+
 	public Object parseExpression(AutomationContext context, Object expressionObj)
 	{
 		return parseExpression(context, expressionObj, null);

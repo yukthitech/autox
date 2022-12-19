@@ -21,6 +21,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.springframework.stereotype.Component;
+
+import com.yukthitech.autox.ide.exeenv.debug.DebugPointManager;
+import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
+import com.yukthitech.autox.ide.services.SpringServiceProvider;
+
+@Component
 public class GutterPopup extends JPopupMenu
 {
 	private static final long serialVersionUID = 1L;
@@ -32,22 +39,50 @@ public class GutterPopup extends JPopupMenu
 	
 	private Point mousePoint;
 	
+	private int lineNumber;
+	
 	public GutterPopup()
 	{
 		add(breakPointToggleItem);
 		add(breakPointPropItem);
 		
-		breakPointToggleItem.addActionListener(this::takeDefaultAction);
+		breakPointToggleItem.addActionListener(this::toggleBreakPoint);
+		breakPointPropItem.addActionListener(this::openDebugPointProp);
 	}
 	
-	public void setActiveEditor(FileEditor activeEditor, Point mousePoint)
+	public void setActiveEditor(FileEditor activeEditor, Point mousePoint, int lineNumber, boolean hasDebugPoint)
 	{
 		this.activeEditor = activeEditor;
 		this.mousePoint = mousePoint;
+		this.lineNumber = lineNumber;
+		
+		if(hasDebugPoint)
+		{
+			breakPointToggleItem.setText("Remove Breakpoint");
+			breakPointPropItem.setEnabled(true);
+		}
+		else
+		{
+			breakPointToggleItem.setText("Add Breakpoint");
+			breakPointPropItem.setEnabled(false);
+		}
 	}
 	
-	private void takeDefaultAction(ActionEvent e)
+	private void toggleBreakPoint(ActionEvent e)
 	{
 		activeEditor.getIconManager().toggleBreakPoint(mousePoint);
+	}
+	
+	private void openDebugPointProp(ActionEvent e)
+	{
+		DebugPointPropDialog dlg = SpringServiceProvider.getService(DebugPointPropDialog.class);
+		DebugPointManager debugPointManager = SpringServiceProvider.getService(DebugPointManager.class);
+		
+		IdeDebugPoint degugPoint = debugPointManager.getDebugPoint(activeEditor.getFile(), lineNumber);
+		
+		if(dlg.display(degugPoint))
+		{
+			activeEditor.getIconManager().reloadDebugPoints();
+		}
 	}
 }

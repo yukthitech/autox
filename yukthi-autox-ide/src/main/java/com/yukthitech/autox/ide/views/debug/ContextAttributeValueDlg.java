@@ -8,7 +8,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -20,8 +19,9 @@ import javax.swing.border.EmptyBorder;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.swing.EscapableDialog;
 
-public class ContextAttributeValueDlg extends JDialog
+public class ContextAttributeValueDlg extends EscapableDialog
 {
 	private static final long serialVersionUID = 1L;
 	private RSyntaxTextArea textArea;
@@ -31,7 +31,7 @@ public class ContextAttributeValueDlg extends JDialog
 
 	public ContextAttributeValueDlg(Window window)
 	{
-		super(window, ModalityType.DOCUMENT_MODAL);
+		super.setModalityType(ModalityType.APPLICATION_MODAL);
 		nameFld.setFont(new Font("Tahoma", Font.BOLD, 14));
 		nameFld.setEditable(false);
 		nameFld.setBorder(null);

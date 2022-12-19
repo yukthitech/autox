@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.debug.server;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,9 +23,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ILocationBased;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
+import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
+import com.yukthitech.autox.filter.ExpressionFactory;
 
 /**
  * Execution debug manager to control flow execution.
@@ -32,6 +39,8 @@ import com.yukthitech.autox.debug.common.DebugPoint;
  */
 public class DebugFlowManager
 {
+	private static Logger logger = LogManager.getLogger(DebugFlowManager.class);
+	
 	private static DebugFlowManager instance = new DebugFlowManager();
 	
 	/**
@@ -132,6 +141,31 @@ public class DebugFlowManager
 		if(point == null)
 		{
 			return;
+		}
+		
+		if(StringUtils.isNotBlank(point.getCondition()))
+		{
+			try
+			{
+				Object res = ExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), point.getCondition());
+				
+				//if condition is not evaluated as true
+				if(!"true".equalsIgnoreCase("" + res))
+				{
+					return;
+				}
+			}catch(Exception ex)
+			{
+				String fileName = new File(point.getFilePath()).getName();
+				
+				logger.error("An error occurred while evaluating debug point condition [Debug point: {}:{}, Condition: {}]", 
+						fileName, point.getLineNumber(), point.getCondition(), ex);
+
+				DebugServer.getInstance().sendClientMessage(
+						new ServerMssgConfirmation(null, false, 
+								"An error occurred while evaluating debug point condition [Debug point: %s:%s, Condition: %s]\nError: %s", 
+								fileName, point.getLineNumber(), point.getCondition(), ex.getMessage()));
+			}
 		}
 		
 		//if live point is present, then before pausing at other debug point, release current live point

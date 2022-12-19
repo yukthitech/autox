@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.ide.exeenv.debug;
 
+import java.util.List;
+
 import com.yukthitech.autox.ide.services.IIdeEvent;
 
 /**
@@ -28,13 +30,58 @@ public class DebugPointsChangedEvent implements IIdeEvent
 	 */
 	private Object source;
 	
-	public DebugPointsChangedEvent(Object source)
+	/**
+	 * Operation which resulted in this event.
+	 */
+	private DebugPointOp operation;
+	
+	/**
+	 * Debug points which got affected (added/modified/removed).
+	 */
+	private List<IdeDebugPoint> debugPoints;
+	
+	/**
+	 * Instantiates a new debug points changed event.
+	 *
+	 * @param source source which is responsible for generating this event.
+	 * @param operation operation which resulted in this event.
+	 * @param debugPoints debug points which got affected
+	 *        (added/modified/removed).
+	 */
+	public DebugPointsChangedEvent(Object source, DebugPointOp operation, List<IdeDebugPoint> debugPoints)
 	{
 		this.source = source;
+		this.operation = operation;
+		this.debugPoints = debugPoints;
 	}
 	
+	/**
+	 * Gets the source which is responsible for generating this event.
+	 *
+	 * @return the source which is responsible for generating this event
+	 */
 	public Object getSource()
 	{
 		return source;
+	}
+
+	/**
+	 * Gets the operation which resulted in this event.
+	 *
+	 * @return the operation which resulted in this event
+	 */
+	public DebugPointOp getOperation()
+	{
+		return operation;
+	}
+
+	/**
+	 * Gets the debug points which got affected (added/modified/removed).
+	 *
+	 * @return the debug points which got affected (added/modified/removed)
+	 */
+	public List<IdeDebugPoint> getDebugPoints()
+	{
+		return debugPoints;
 	}
 }

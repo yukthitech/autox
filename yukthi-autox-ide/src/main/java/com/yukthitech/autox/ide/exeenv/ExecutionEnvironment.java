@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.debug.client.DebugClient;
 import com.yukthitech.autox.debug.client.IMessageCallback;
 import com.yukthitech.autox.debug.common.ClientMessage;
+import com.yukthitech.autox.debug.common.ClientMssgDebugPoints;
 import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
@@ -44,6 +45,7 @@ import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionPausedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.DebugExecutionReleasedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.DebugPointManager;
+import com.yukthitech.autox.ide.exeenv.debug.DebugPointsChangedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.DebugStepsExecutedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.IdeDebugPoint;
 import com.yukthitech.autox.ide.layout.ConsoleLinePattern;
@@ -133,6 +135,34 @@ public class ExecutionEnvironment
 				debugClient.addDataHandler(this::onServerMessage);
 			}, 1);
 		}
+	}
+	
+	/**
+	 * This is expected to be called by {@link ExecutionEnvironmentManager}.
+	 * @param event
+	 */
+	void onDebugPointChange(DebugPointsChangedEvent event)
+	{
+		boolean isAffected = event.getDebugPoints().stream()
+				.filter(point -> project.getName().equals(point.getProject()))
+				.findFirst()
+				.isPresent();
+		
+		if(!isAffected)
+		{
+			return;
+		}
+		
+		IdeUtils.execute(() -> 
+		{
+			DebugPointManager debugManager = SpringServiceProvider.getService(DebugPointManager.class);
+			List<IdeDebugPoint> ideDebugPoints = debugManager.getDebugPoints(project.getName());
+			List<DebugPoint> debugPoints = ideDebugPoints.stream()
+					.map(idePoint -> new DebugPoint(idePoint.getFile().getPath(), idePoint.getLineNo() + 1, idePoint.getCondition()))
+					.collect(Collectors.toList());
+			
+			debugClient.sendDataToServer(new ClientMssgDebugPoints(debugPoints));
+		}, 1);
 	}
 	
 	private void onServerMessage(Serializable data)

@@ -17,6 +17,7 @@ package com.yukthitech.autox.ide.exeenv.debug;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,19 @@ public class DebugPointManager
 		return newPoint;
 	}
 	
+	public synchronized void modifyCondition(IdeDebugPoint point, String condition, Object source)
+	{
+		List<IdeDebugPoint> curPointList = debugPoints.get(point.getFile());
+		
+		if(curPointList == null || !curPointList.contains(point))
+		{
+			return;
+		}
+		
+		point.setCondition(condition);
+		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source, DebugPointOp.MODIFIED, Arrays.asList(point)));
+	}
+
 	private void addDebugPoint(IdeDebugPoint newPoint, boolean raiseEvent, Object source)
 	{
 		List<IdeDebugPoint> points = debugPoints.get(newPoint.getFile());
@@ -76,46 +90,72 @@ public class DebugPointManager
 		
 		if(raiseEvent)
 		{
-			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
+			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source, DebugPointOp.ADDED, Arrays.asList(newPoint)));
 		}
 	}
 	
-	private void removeDebugPoint(IdeDebugPoint debugPoint, boolean sendEvent, Object source)
+	public IdeDebugPoint getDebugPoint(File file, int lineNo)
+	{
+		List<IdeDebugPoint> points = debugPoints.get(file);
+		
+		if(points == null)
+		{
+			return null;
+		}
+		
+		return points.stream()
+				.filter(point -> point.getLineNo() == lineNo)
+				.findFirst()
+				.orElse(null);
+	}
+	
+	private boolean removeDebugPoint(IdeDebugPoint debugPoint, boolean sendEvent, Object source)
 	{
 		List<IdeDebugPoint> points = debugPoints.get(debugPoint.getFile());
 		
 		if(points == null)
 		{
-			return;
+			return false;
 		}
 		
-		points.remove(debugPoint);
+		boolean res = points.remove(debugPoint);
 		
 		if(sendEvent)
 		{
-			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
+			ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source, DebugPointOp.REMOVED, Arrays.asList(debugPoint)));
 		}
+		
+		return res;
 	}
 
-	public synchronized void removeDebugPoint(IdeDebugPoint debugPoint, Object source)
+	public synchronized boolean removeDebugPoint(IdeDebugPoint debugPoint, Object source)
 	{
-		removeDebugPoint(debugPoint, true, source);
+		return removeDebugPoint(debugPoint, true, source);
 	}
 	
 	public synchronized void removeDebugPoints(List<IdeDebugPoint> debugPoints, Object source)
 	{
+		List<IdeDebugPoint> removedPoints = new ArrayList<>(debugPoints.size());
+		
 		for(IdeDebugPoint debugPoint : debugPoints)
 		{
-			removeDebugPoint(debugPoint, false);
+			if(removeDebugPoint(debugPoint, false))
+			{
+				removedPoints.add(debugPoint);
+			}
 		}
 		
-		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
+		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source, DebugPointOp.REMOVED, removedPoints));
 	}
 
 	public synchronized void removeAllDebugPoints(Object source)
 	{
+		List<IdeDebugPoint> removedPoints = new ArrayList<>();
+		
+		this.debugPoints.values().forEach(lst -> removedPoints.addAll(lst));
 		debugPoints.clear();
-		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source));
+		
+		ideEventManager.raiseAsyncEvent(new DebugPointsChangedEvent(source, DebugPointOp.REMOVED, removedPoints));
 	}
 
 	public synchronized List<IdeDebugPoint> getDebugPoints()

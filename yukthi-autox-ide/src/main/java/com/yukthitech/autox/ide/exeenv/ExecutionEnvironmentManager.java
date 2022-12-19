@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,8 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.AutomationLauncher;
+import com.yukthitech.autox.ide.exeenv.debug.DebugPointsChangedEvent;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -52,6 +55,8 @@ public class ExecutionEnvironmentManager
 	private UiLayout uiLayout;
 	
 	private ExecutionEnvironment activeEnvironment;
+	
+	private List<ExecutionEnvironment> runningEnvironments = new LinkedList<>();
 	
 	/**
 	 * Fetches next available socket.
@@ -124,6 +129,11 @@ public class ExecutionEnvironmentManager
 			ExecutionEnvironment env = new ExecutionEnvironment(executionType, project, envName, builder.start(), debugPort, 
 					reportFolder, initMssg.toString(), uiLayout, extraArgs);
 			
+			synchronized(runningEnvironments)
+			{
+				runningEnvironments.add(env);
+			}
+			
 			ideEventManager.raiseAsyncEvent(new EnvironmentStartedEvent(env));
 			
 			return env;
@@ -131,6 +141,28 @@ public class ExecutionEnvironmentManager
 		{
 			throw new InvalidStateException("An error occurred while starting autox process", ex);
 		}
+	}
+	
+	@IdeEventHandler
+	private void onEnviromentTerminate(EnvironmentTerminatedEvent event)
+	{
+		synchronized(runningEnvironments)
+		{
+			runningEnvironments.remove(event.getExecutionEnvironment());
+		}
+	}
+	
+	@IdeEventHandler
+	private void onDebugPointChange(DebugPointsChangedEvent event)
+	{
+		List<ExecutionEnvironment> runningEnvironments = new ArrayList<>();
+		
+		synchronized(runningEnvironments)
+		{
+			runningEnvironments.addAll(this.runningEnvironments);
+		}
+		
+		runningEnvironments.forEach(env -> env.onDebugPointChange(event));
 	}
 	
 	private ExecutionEnvironment executeTestSuite(Project project, String testSuite, boolean debug)

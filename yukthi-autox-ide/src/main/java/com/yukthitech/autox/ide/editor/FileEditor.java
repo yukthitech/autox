@@ -161,7 +161,10 @@ public class FileEditor extends JPanel
 				
 				if(SwingUtilities.isRightMouseButton(e))
 				{
-					gutterPopup.setActiveEditor(FileEditor.this, e.getPoint());
+					gutterPopup.setActiveEditor(FileEditor.this, 
+							e.getPoint(), 
+							iconManager.getLineNo(e.getPoint()),
+							iconManager.getDebugPoint(e.getPoint()) != null);
 					
 					iconArea.add(gutterPopup);
 					gutterPopup.show(e.getComponent(), e.getX(), e.getY());

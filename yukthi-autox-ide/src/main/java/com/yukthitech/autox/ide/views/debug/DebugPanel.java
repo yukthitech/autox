@@ -41,6 +41,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,6 +76,8 @@ public class DebugPanel extends JPanel implements IViewPanel
 	private static final long serialVersionUID = 1L;
 	
 	private static ImageIcon DEBUG_POINT_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug-point.svg", 12);
+	
+	private static ImageIcon DEBUG_POINT_W_CONDITION_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug-point-w-cond.svg", 12);
 	
 	private static ImageIcon REMOVE_SELECTED_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/clear.svg", 16);
 	private static ImageIcon REMOVE_ALL_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/clearAll.svg", 16);
@@ -200,9 +203,10 @@ public class DebugPanel extends JPanel implements IViewPanel
 		});
 		
 		scrollPane_1.setViewportView(debugPointsLst);
+		
 
 		debugPointsListRenderer = new SimpleListCellRenderer<>(
-				point -> DEBUG_POINT_ICON, 
+				point -> StringUtils.isBlank(point.getCondition()) ? DEBUG_POINT_ICON : DEBUG_POINT_W_CONDITION_ICON, 
 				point -> point.getFile().getName() + ":" + (point.getLineNo() + 1)
 			);
 		debugPointsLst.setCellRenderer(debugPointsListRenderer);
@@ -455,7 +459,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 		IdeDebugPoint debugPoint = debugPointModel.get(idx);
 		Project project = projectManager.getProject(debugPoint.getProject());
 		
-		fileAction.gotoFilePath(project, debugPoint.getFile().getPath(), debugPoint.getLineNo());
+		fileAction.gotoFilePath(project, debugPoint.getFile().getPath(), debugPoint.getLineNo() + 1);
 	}
 	
 	private void removeSelectedDebugPoints(ActionEvent e)

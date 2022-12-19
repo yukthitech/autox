@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import javax.swing.text.BadLocationException;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.GutterIconInfo;
@@ -48,6 +49,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class FileEditorIconManager
 {
 	private static ImageIcon DEBUG_POINT_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug-point.svg", 12);
+	
+	private static ImageIcon DEBUG_POINT_W_CONDITION_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug-point-w-cond.svg", 12);
 
 	@Autowired
 	private DebugPointManager debugManager;
@@ -140,7 +143,8 @@ public class FileEditorIconManager
 
 	private void addDebugPoint(IdeDebugPoint debugPoint)
 	{
-		FileEditorIcon iconInfo = addIcon(debugPoint.getLineNo(), DEBUG_POINT_ICON, null, IconType.DEBUG);
+		ImageIcon icon = StringUtils.isBlank(debugPoint.getCondition()) ? DEBUG_POINT_ICON : DEBUG_POINT_W_CONDITION_ICON;
+		FileEditorIcon iconInfo = addIcon(debugPoint.getLineNo(), icon, null, IconType.DEBUG);
 		
 		if(iconInfo == null)
 		{
@@ -150,7 +154,7 @@ public class FileEditorIconManager
 		iconInfo.setDebugPoint(debugPoint);
 	}
 
-	private int getLineNo(Point point)
+	public int getLineNo(Point point)
 	{
 		int viewPort = syntaxTextArea.viewToModel(point);
 		
@@ -340,5 +344,17 @@ public class FileEditorIconManager
 		}
 		
 		toggleBreakPoint(lineNo);
+	}
+	
+	public IdeDebugPoint getDebugPoint(Point point)
+	{
+		int lineNo = getLineNo(point);
+		
+		if(lineNo < 0)
+		{
+			return null;
+		}
+		
+		return debugManager.getDebugPoint(file, lineNo);
 	}
 }
