@@ -184,11 +184,11 @@ public class ExecutionPool
 		
 		for(Executor executor : executors)
 		{
-			parentCallback.newChild(executor.getUniqueId(), callback -> 
+			parentCallback.newChild(executor.getUniqueId() + "-trigger", callback -> 
 			{
 				if(executor.isReadyToExecute())
 				{
-					executor.execute(beforeChild, afterChild, null);
+					executor.execute(beforeChild, afterChild, callback);
 				}
 			}).onError((callback, ex) -> 
 			{

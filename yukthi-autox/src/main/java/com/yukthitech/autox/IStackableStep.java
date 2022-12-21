@@ -16,10 +16,11 @@
 package com.yukthitech.autox;
 
 /**
- * To be implemented by steps, which are externally extended. Example: if-else, try-catch.
- * @author akiran
+ * Indicates a step as stackable. In other terms this step
+ * may invoke other steps, and this step can be used as part of stack-trace.
+ * @author akranthikiran
  */
-public interface IMultiPartStep
+public interface IStackableStep
 {
-	public void addChildPart(IStep step);
+
 }

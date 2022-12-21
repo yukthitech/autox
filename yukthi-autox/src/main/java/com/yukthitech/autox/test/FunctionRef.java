@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IStackableStep;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -37,7 +38,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "functionRef", group = Group.Lang, message = "Reference step to execute target function with specified parameters.")
-public class FunctionRef extends AbstractStep implements IDynamicAttributeAcceptor, DynamicDataAcceptor
+public class FunctionRef extends AbstractStep implements IDynamicAttributeAcceptor, DynamicDataAcceptor, IStackableStep
 {
 	private static final long serialVersionUID = 1L;
 	

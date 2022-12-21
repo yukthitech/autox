@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +77,7 @@ public class IdeEventManager
 	
 	private LinkedList<IIdeEvent> eventQueue = new LinkedList<>();
 	
-	@PostConstruct
-	private void init()
+	public void init()
 	{
 		Set<Method> eventMethods = classScannerService.getMethodsWithAnnotation(IdeEventHandler.class);
 		Class<?> enclosingClass = null;

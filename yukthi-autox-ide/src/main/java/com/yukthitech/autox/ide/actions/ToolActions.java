@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.ide.actions;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.dialog.XpathSandboxDialog;
 import com.yukthitech.autox.ide.layout.Action;
@@ -26,7 +28,8 @@ public class ToolActions
 	/**
 	 * Used to display about autox info.
 	 */
-	private XpathSandboxDialog xpathSandboxDialog = new XpathSandboxDialog();
+	@Autowired
+	private XpathSandboxDialog xpathSandboxDialog;
 	
 	@Action
 	public void displayXpathSandbox()

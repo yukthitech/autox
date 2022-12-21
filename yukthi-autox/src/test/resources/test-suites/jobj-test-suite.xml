@@ -99,7 +99,7 @@
 			</expectedException>
 		</testCase>
 	
-		<testCase name="invoke_Method_With_Data_Provder">
+		<testCase name="invoke_Method_With_Data_Provder" parallelExecutionEnabled="true">
 			<description>
 				Invokes simple method on bean with data provider and
 				ensures data-provider working.
@@ -125,12 +125,10 @@
 				
 					<parameter s:beanType="com.yukthitech.test.beans.NameBean" name="${attr.dataString}"/>
 				</s:invokeMethod>
-			</wrap:steps>
-		
-			<wrap:validations>
+				
 				<s:assert-equals actual="attr: returnValue" expected="beanFromTestSuite=&gt;${attr.dataString}"/>
 				<s:assert-equals actual="attr: dataSetupAttr" expected="data-setup-val"/>
-			</wrap:validations>
+			</wrap:steps>
 			
 			<data-cleanup>
 				<s:log message="This message is from data-cleanup"/>

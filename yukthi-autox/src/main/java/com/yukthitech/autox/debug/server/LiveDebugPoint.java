@@ -26,16 +26,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ILocationBased;
+import com.yukthitech.autox.IStackableStep;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ExecutionStack.StackElement;
 import com.yukthitech.autox.debug.common.DebugOp;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
@@ -160,18 +161,20 @@ public class LiveDebugPoint
 	
 	private void sendOnHoldMssg()
 	{
-		List<ServerMssgExecutionPaused.StackElement> stackTrace = ExecutionContextManager
-				.getInstance().getExecutionStack()
-				.getStackTrace()
-				.stream()
-				.map(se -> new ServerMssgExecutionPaused.StackElement(se.getLocation(), se.getLineNumber()))
-				.collect(Collectors.toList());
-		
-		stackTrace = new ArrayList<>(stackTrace);
-		
-		//add current line on the stack
-		stackTrace.add(new ServerMssgExecutionPaused.StackElement(
-				lastPauseLocation.getLocation().getPath(), lastPauseLocation.getLineNumber()));
+		List<ServerMssgExecutionPaused.StackElement> stackTrace = new ArrayList<>();
+		int index = -1;
+				
+		for(StackElement elem : ExecutionContextManager.getInstance().getExecutionStack().getStackTrace())
+		{
+			index++;
+			
+			if(index > 0 && !(elem.getElement() instanceof IStackableStep))
+			{
+				continue;
+			}
+			
+			stackTrace.add(new ServerMssgExecutionPaused.StackElement(elem.getLocation(), elem.getLineNumber()));
+		}
 		
 		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, threadOnHold.getName(), lastPauseLocation.getLocation().getPath(), 
 				lastPauseLocation.getLineNumber(), stackTrace, getContextAttr());
@@ -424,7 +427,8 @@ public class LiveDebugPoint
 			//  like steps in function call invoked from last location
 			else if(lastDebugOp == DebugOp.STEP_OVER)
 			{
-				boolean subExecution = ExecutionContextManager.getInstance().getExecutionStack().isSubexecutionOf(lastPauseLocation);
+				boolean subExecution = (lastPauseLocation instanceof IStackableStep) && 
+						ExecutionContextManager.getInstance().getExecutionStack().isSubexecutionOf(lastPauseLocation);
 				
 				if(!subExecution)
 				{

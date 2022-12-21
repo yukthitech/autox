@@ -85,7 +85,8 @@ public class ServerMssgExecutionPaused implements Serializable
 	
 	private Map<String, byte[]> contextAttr;
 
-	public ServerMssgExecutionPaused(String executionId, String name, String debugFilePath, int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr)
+	public ServerMssgExecutionPaused(String executionId, String name, String debugFilePath, 
+			int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr)
 	{
 		this.executionId = executionId;
 		this.name = name;
@@ -123,5 +124,10 @@ public class ServerMssgExecutionPaused implements Serializable
 	public Map<String, byte[]> getContextAttr()
 	{
 		return contextAttr;
+	}
+	
+	public void setContextAttr(Map<String, byte[]> contextAttr)
+	{
+		this.contextAttr = contextAttr;
 	}
 }

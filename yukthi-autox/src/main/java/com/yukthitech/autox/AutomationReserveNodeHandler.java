@@ -241,7 +241,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 
 				//Note: The parent multi step validation is already done in method newStep()
 				//add current step as child step to prev multi step
-				((IMultiPartStep) lastStep).addChildStep((IStep) bean);
+				((IMultiPartStep) lastStep).addChildPart((IStep) bean);
 			}
 			else
 			{

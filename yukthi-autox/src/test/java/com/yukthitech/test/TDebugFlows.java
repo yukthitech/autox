@@ -19,13 +19,17 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.yukthitech.autox.AutomationLauncher;
@@ -40,6 +44,8 @@ import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
 import com.yukthitech.autox.exec.report.FinalReport;
+import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.test.DebugFlowTestData.Case;
 import com.yukthitech.utils.ObjectWrapper;
 
 public class TDebugFlows extends BaseTestCases
@@ -51,6 +57,7 @@ public class TDebugFlows extends BaseTestCases
 		private DebugClient debugClient;
 		
 		private List<Integer> pausedLocations = new ArrayList<>();
+		private Map<Integer, String> pausedStrackTraces = new LinkedHashMap<>();
 		
 		private String expectedFile;
 		
@@ -75,6 +82,14 @@ public class TDebugFlows extends BaseTestCases
 				Assert.assertEquals(mssg.getDebugFilePath(), expectedFile);
 				pausedLocations.add(mssg.getLineNumber());
 				
+				pausedStrackTraces.put(
+						mssg.getLineNumber(), 
+						mssg.getStackTrace()
+							.stream()
+							.map(elem -> new File(elem.getFile()).getName() + ":" + elem.getLineNumber())
+							.collect(Collectors.joining(", ")
+						));
+				
 				logger.debug("Debug with execution-id {} is pasused at {}:{}", 
 						mssg.getExecutionId(), mssg.getDebugFilePath(), mssg.getLineNumber());
 				
@@ -96,7 +111,8 @@ public class TDebugFlows extends BaseTestCases
 	public void testDebugFlow(DebugOp debugOp, List<Integer> debugPointLines, 
 			BiConsumer<ServerMssgExecutionPaused, DebugClientHandler> pauseConsumer, 
 			String testCase,
-			List<Integer> expectedPauses) throws Exception
+			List<Integer> expectedPauses,
+			Map<Integer, String> expectedStackTraces) throws Exception
 	{
 		ObjectWrapper<DebugClientHandler> clientHandler = new ObjectWrapper<>();
 		
@@ -106,8 +122,11 @@ public class TDebugFlows extends BaseTestCases
 			{
 				try
 				{
-					String debugFile = new File("./src/test/resources/new-test-suites/debug-flow/debug-flow-suite.xml").getCanonicalPath();
+					String filePath = testCase.startsWith("debug2_") ?
+							"./src/test/resources/new-test-suites/debug-flow/debug-flow-suite-2.xml" :
+							"./src/test/resources/new-test-suites/debug-flow/debug-flow-suite.xml";
 					
+					String debugFile = new File(filePath).getCanonicalPath();
 					List<DebugPoint> points = new ArrayList<>();
 					
 					for(int line : debugPointLines)
@@ -140,7 +159,7 @@ public class TDebugFlows extends BaseTestCases
 				"-rf", "./output/debug-flow", 
 				"-prop", "./src/test/resources/app.properties", 
 				"--debug-port", "9876",
-				//"--report-opening-disabled", "true",
+				"--report-opening-disabled", "true",
 				//"-ts", "data-provider-err"
 				"-tc", testCase
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
@@ -148,8 +167,20 @@ public class TDebugFlows extends BaseTestCases
 		
 		
 		System.out.println("Halt points: " + clientHandler.getValue().pausedLocations);
+		System.out.println("Stack Traces: \n\t" + clientHandler.getValue()
+			.pausedStrackTraces
+			.entrySet()
+			.stream()
+			.map(entry -> entry.getKey() + " => " + entry.getValue())
+			.collect(Collectors.joining("\n\t")));
+		
 		
 		Assert.assertEquals(clientHandler.getValue().pausedLocations, expectedPauses);
+		
+		if(expectedStackTraces != null)
+		{
+			Assert.assertEquals(clientHandler.getValue().pausedStrackTraces, expectedStackTraces);
+		}
 		
 		FinalReport exeResult = objectMapper.readValue(new File("./output/debug-flow/test-results.json"), FinalReport.class);
 		
@@ -158,69 +189,41 @@ public class TDebugFlows extends BaseTestCases
 		Assert.assertEquals(exeResult.getTestCaseSuccessCount(), 1, "Found one more test cases errored.");
 	}
 	
-	@Test
-	public void testStepIntoFlow() throws Exception
+	@DataProvider(name = "testDataProvider")
+	public Object[][] testDataProvider()
 	{
-		testDebugFlow(DebugOp.STEP_INTO, Arrays.asList(8), null, "debugTest1", Arrays.asList(
-				//setup
-				8, 9,
-				
-				//testcase
-				29, 30, 32,
-					//function2
-					18, 19, 21,
-					//function 1
-					13, 14,
-					
-				//cleanup	
-				65, 66
-			));
-	}
+		DebugFlowTestData testData = new DebugFlowTestData();
+		XMLBeanParser.parse(TDebugFlows.class.getResourceAsStream("/data/debug/debug-test-data.xml"), testData);
+		
+		List<Object[]> res = new ArrayList<>();
+		
+		for(DebugFlowTestData.Case caseObj : testData.getCases())
+		{
+			/*
+			if(!"flowWithIfElse".equals(caseObj.getName()))
+			{
+				continue;
+			}
+			*/
 
-	@Test
-	public void testStepOverFlow() throws Exception
-	{
-		testDebugFlow(DebugOp.STEP_OVER, Arrays.asList(8), null, "debugTest1", Arrays.asList(
-				//setup
-				8, 9,
-				
-				//testcase
-				29, 30, 32,
-					
-				//cleanup	
-				65, 66
-			));
+			res.add(new Object[] {caseObj.getName(), caseObj});
+		}
+		
+		return res.toArray(new Object[0][]);
 	}
 	
-	/**
-	 * Test the same step over functionality but with a extra break point in middle
-	 * which will not be in general covered by first debug point during step-over.
-	 * @throws Exception
-	 */
-	@Test
-	public void testStepOverFlow_midPoint() throws Exception
+	@Test(dataProvider =  "testDataProvider")
+	public void testBasicFlows(String name, Case tcase) throws Exception
 	{
-		testDebugFlow(DebugOp.STEP_OVER, Arrays.asList(8, 13), null, "debugTest1", Arrays.asList(
-				//setup
-				8, 9,
-				
-				//testcase
-				29, 30, 32,
-				
-				//function2 (because of second debug point)
-				13, 14,
-					
-				//cleanup	
-				65, 66
-			));
+		testDebugFlow(
+				tcase.getOp(), 
+				tcase.getDebugPoints(), 
+				null, 
+				tcase.getTestCase(), 
+				tcase.getPausePoints(), 
+				tcase.getStackTraces());
 	}
-
-	@Test
-	public void testStepReturnFlow() throws Exception
-	{
-		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(8, 13, 65), null, "debugTest1", Arrays.asList(8, 13, 65));
-	}
-
+	
 	@Test
 	public void testExpressionEvaluation() throws Exception
 	{
@@ -244,7 +247,7 @@ public class TDebugFlows extends BaseTestCases
 			AutomationUtils.sleep(5000);
 		};
 		
-		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(41), onPause, "debugExprTest", Arrays.asList(41));
+		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(41), onPause, "debugExprTest", Arrays.asList(41), null);
 		Assert.assertTrue(consumerExectued.getValue());
 	}
 
@@ -266,7 +269,7 @@ public class TDebugFlows extends BaseTestCases
 			AutomationUtils.sleep(5000);
 		};
 		
-		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(58), onPause, "functionReload", Arrays.asList(58));
+		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(58), onPause, "functionReload", Arrays.asList(58), null);
 		Assert.assertTrue(consumerExectued.getValue());
 	}
 }

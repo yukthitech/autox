@@ -32,6 +32,9 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ExecutionStack;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.Function;
@@ -110,6 +113,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 		}
 		
 		this.elseBlock = new ElseStep();
+		this.elseBlock.setLocation(elseGroup.getLocation(), elseGroup.getLineNumber());
 		this.elseBlock.setSteps(elseGroup.getSteps());
 	}
 	
@@ -126,7 +130,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 	}
 	
 	@Override
-	public void addChildStep(IStep step)
+	public void addChildPart(IStep step)
 	{
 		if(step instanceof ElseIfStep)
 		{
@@ -152,7 +156,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 			this.elseBlock = (ElseStep) step;
 		}
 	}
-
+	
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
@@ -167,27 +171,46 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 		}
 		
 		boolean matched = false;
+		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
 		
 		if(CollectionUtils.isNotEmpty(elseIfBlocks))
 		{
 			for(ElseIfStep elseIfBlock : this.elseIfBlocks)
 			{
-				res = AutomationUtils.evaluateCondition(context, elseIfBlock.getCondition());
-				exeLogger.trace("Else-if-condition evaluation resulted in '{}'. Condition: {}", res, elseIfBlock.getCondition());
+				executionStack.push(elseIfBlock);
+				DebugFlowManager.getInstance().checkForDebugPoint(elseIfBlock);
 				
-				if(res)
+				try
 				{
-					matched = true;
-					StepsExecutor.execute(elseIfBlock.getSteps(), null);
-					break;
+					res = AutomationUtils.evaluateCondition(context, elseIfBlock.getCondition());
+					exeLogger.trace("Else-if-condition evaluation resulted in '{}'. Condition: {}", res, elseIfBlock.getCondition());
+					
+					if(res)
+					{
+						matched = true;
+						StepsExecutor.execute(elseIfBlock.getSteps(), null);
+						break;
+					}
+				}finally
+				{
+					executionStack.pop(elseIfBlock);
 				}
 			}
 		}
 		
 		if(!matched && elseBlock != null)
 		{
-			exeLogger.trace("Executing else block");
-			StepsExecutor.execute(elseBlock.getSteps(), null);
+			executionStack.push(elseBlock);
+			DebugFlowManager.getInstance().checkForDebugPoint(elseBlock);
+			
+			try
+			{
+				exeLogger.trace("Executing else block");
+				StepsExecutor.execute(elseBlock.getSteps(), null);
+			}finally
+			{
+				executionStack.pop(elseBlock);
+			}
 		}
 	}
 }

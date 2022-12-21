@@ -108,4 +108,9 @@ public class ContextAttributeTableModel extends AbstractTableModel
 		String attr[] = attributes.get(rowIndex);
 		return attr[columnIndex];
 	}
+	
+	public String[] getRow(int rowIdx)
+	{
+		return attributes.get(rowIdx);
+	}
 }

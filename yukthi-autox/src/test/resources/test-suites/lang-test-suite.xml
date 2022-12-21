@@ -251,6 +251,7 @@
 			
 				<s:forEach expression="attr: loopExpr">
 					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+					<s:log message="test"/>
 				</s:forEach>
 			
 				<s:assert-equals actual="attr: res" expected="|a|b|c|d|e|f"/>

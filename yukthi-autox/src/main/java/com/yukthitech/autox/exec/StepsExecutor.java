@@ -100,6 +100,7 @@ public class StepsExecutor
 
 		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
 		executionStack.push(step);
+		DebugFlowManager.getInstance().checkForDebugPoint(step);
 		
 		try
 		{
@@ -146,8 +147,6 @@ public class StepsExecutor
 		
 		try
 		{
-			DebugFlowManager debugFlowManager = DebugFlowManager.getInstance();
-			
 			for(IStep step : steps)
 			{
 				if(currentStep != null)
@@ -155,7 +154,6 @@ public class StepsExecutor
 					currentStep.setValue(step);
 				}
 				
-				debugFlowManager.checkForDebugPoint(step);
 				executeStep(step);
 			}
 		}catch(HandledException ex)

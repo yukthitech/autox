@@ -161,6 +161,8 @@ public class AutoxIDE extends JFrame
 	
 	private void initIde()
 	{
+		ideEventManager.init();
+		
 		init();
 		
 		//load previous state from file

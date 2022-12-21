@@ -28,6 +28,7 @@ import javax.swing.tree.TreePath;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused.StackElement;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class StackTraceTreeModel extends DefaultTreeModel
 {
@@ -97,7 +98,12 @@ public class StackTraceTreeModel extends DefaultTreeModel
 		}
 	}
 	
-	private LinkedHashMap<String, DefaultMutableTreeNode> pausedExecutions = new LinkedHashMap<>();
+	private LinkedHashMap<String, ThreadNode> pausedExecutions = new LinkedHashMap<>();
+	
+	/**
+	 * Used to maintain executions in sorted order.
+	 */
+	private List<String> executionNames = new ArrayList<>();
 	
 	private DefaultMutableTreeNode root;
 	
@@ -127,15 +133,27 @@ public class StackTraceTreeModel extends DefaultTreeModel
 	
 	private synchronized void addOrUpdate(ServerMssgExecutionPaused mssg, boolean raiseEvent)
 	{
-		DefaultMutableTreeNode node = pausedExecutions.get(mssg.getExecutionId());
+		ThreadNode node = pausedExecutions.get(mssg.getExecutionId());
 		boolean existing = (node != null);
+		int idx = 0;
 		
 		if(node == null)
 		{
 			node = new ThreadNode(mssg.getExecutionId(), mssg.getName());
 			pausedExecutions.put(mssg.getExecutionId(), node);
 			
-			root.add(node);
+			idx = Collections.binarySearch(executionNames, mssg.getName());
+			
+			if(idx >= 0)
+			{
+				//this is never suppose to happen
+				throw new InvalidStateException("Multiple executions found with same name: {}", mssg.getName());
+			}
+			
+			idx = (0 - idx) - 1;
+			root.insert(node, idx);
+			
+			executionNames.add(idx, mssg.getName());
 		}
 		else
 		{
@@ -143,7 +161,6 @@ public class StackTraceTreeModel extends DefaultTreeModel
 		}
 		
 		List<StackElement> stackTrace = new ArrayList<>(mssg.getStackTrace());
-		Collections.reverse(stackTrace);
 		
 		for(ServerMssgExecutionPaused.StackElement elem : stackTrace)
 		{
@@ -158,15 +175,15 @@ public class StackTraceTreeModel extends DefaultTreeModel
 			}
 			else
 			{
-				//super.nodesWereInserted(root, new int[] {pausedExecutions.size() - 1});
-				super.reload();
+				super.nodesWereInserted(root, new int[] {idx});
+				//super.reload();
 			}
 		}
 	}
 	
 	public synchronized void removeStackTrace(String executionId)
 	{
-		DefaultMutableTreeNode node = pausedExecutions.remove(executionId);
+		ThreadNode node = pausedExecutions.remove(executionId);
 		
 		if(node == null)
 		{
@@ -176,11 +193,16 @@ public class StackTraceTreeModel extends DefaultTreeModel
 		int index = root.getIndex(node);
 		root.remove(node);
 		
+		executionNames.remove(node.name);
+		
 		super.nodesWereRemoved(root, new int[] {index}, new Object[] {node});
 	}
 	
 	public synchronized void setEnvironment(ExecutionEnvironment env)
 	{
+		executionNames.clear();
+		pausedExecutions.clear();
+
 		root.removeAllChildren();
 		
 		if(env != null)

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,8 +90,6 @@ public class ExecutionEnvironment
 	private IdeEventManager ideEventManager;
 	
 	private Map<String, ServerMssgExecutionPaused> pausedThreads = new LinkedHashMap<>();
-	
-	private Map<String, byte[]> contextAttributes;
 	
 	private String activeThreadId; 
 	
@@ -174,7 +173,6 @@ public class ExecutionEnvironment
 			synchronized(pausedThreads)
 			{
 				pausedThreads.put(mssg.getExecutionId(), mssg);
-				this.contextAttributes = mssg.getContextAttr();
 			}
 			
 			ideEventManager.raiseAsyncEvent(new DebugExecutionPausedEvent(this, mssg));
@@ -201,9 +199,11 @@ public class ExecutionEnvironment
 
 			synchronized(pausedThreads)
 			{
-				if(mssg.getContextAttr() != null)
+				ServerMssgExecutionPaused pauseMssg = pausedThreads.get(mssg.getExecutionId());
+						
+				if(mssg.getContextAttr() != null && pauseMssg != null)
 				{
-					this.contextAttributes = mssg.getContextAttr();
+					pauseMssg.setContextAttr(mssg.getContextAttr());
 				}
 			}
 			
@@ -227,7 +227,14 @@ public class ExecutionEnvironment
 	
 	public Map<String, byte[]> getContextAttributes()
 	{
-		return contextAttributes;
+		ServerMssgExecutionPaused pauseMssg = pausedThreads.get(getActiveThreadId());
+		
+		if(pauseMssg == null)
+		{
+			return Collections.emptyMap();
+		}
+		
+		return pauseMssg.getContextAttr();
 	}
 	
 	public String[] getExtraArgs()
@@ -410,17 +417,21 @@ public class ExecutionEnvironment
 	{
 		synchronized(pausedThreads)
 		{
-			if(activeThreadId != null && !pausedThreads.containsKey(activeThreadId))
+			//if explicit thread id is specified and is still valid, then return the same
+			if(activeThreadId != null && pausedThreads.containsKey(activeThreadId))
 			{
-				activeThreadId = null;
+				return activeThreadId;
 			}
 			
-			if(activeThreadId == null && !pausedThreads.isEmpty())
+			//if explicit thread is not specified or specified but not valid
+			
+			//and if other paused threads are present, then return first thread id
+			if(!pausedThreads.isEmpty())
 			{
-				activeThreadId = pausedThreads.keySet().iterator().next();
+				return pausedThreads.keySet().iterator().next();
 			}
 			
-			return activeThreadId;
+			return null;
 		}
 	}
 
@@ -447,7 +458,7 @@ public class ExecutionEnvironment
 
 	public ServerMssgExecutionPaused getActiveThreadDetails()
 	{
-		return getThreadDetails(activeThreadId);
+		return getThreadDetails(getActiveThreadId());
 	}
 	
 	public void visitPausedThreads(Consumer<ServerMssgExecutionPaused> consumer)

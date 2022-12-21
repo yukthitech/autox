@@ -48,6 +48,11 @@ public class ExecutionStack
 			this.entryPointLevel = entryPointLevel;
 		}
 		
+		public ILocationBased getElement()
+		{
+			return element;
+		}
+		
 		public String getLocation()
 		{
 			return element.getLocation().getPath();

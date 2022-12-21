@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.nio.charset.Charset;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -44,10 +45,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.utils.CommonUtils;
+
 import java.awt.FlowLayout;
 
+@Component
 public class XpathSandboxDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
@@ -87,7 +93,7 @@ public class XpathSandboxDialog extends JDialog
 	{
 		try
 		{
-			htmlContent = IOUtils.toString(XpathSandboxDialog.class.getResourceAsStream("/help/xpath-help.html"));
+			htmlContent = IOUtils.toString(XpathSandboxDialog.class.getResourceAsStream("/help/xpath-help.html"), Charset.defaultCharset());
 		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while loading help content", ex);
@@ -385,6 +391,35 @@ public class XpathSandboxDialog extends JDialog
 
 	public void display()
 	{
+		super.setVisible(true);
+	}
+
+	public void display(String attrName, String value)
+	{
+		Object parsedValue = null;
+		
+		try
+		{
+			parsedValue = IAutomationConstants.OBJECT_MAPPER.readValue(value, Object.class);
+		}catch(Exception ex)
+		{
+			parsedValue = value;
+		}
+		
+		Object contextTree = CommonUtils.toMap("attr", CommonUtils.toMap(attrName, parsedValue));
+		String formattedJson = "";
+		
+		try
+		{
+			formattedJson = IAutomationConstants.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(contextTree);		
+		}catch(Exception ex)
+		{
+			
+		}
+		
+		contextJsonFld.setText(formattedJson);
+		xpathFld.setText("/attr/" + attrName);
+		
 		super.setVisible(true);
 	}
 }

@@ -52,11 +52,11 @@ import com.yukthitech.swing.IconButton;
 import com.yukthitech.swing.YukthiHtmlPane;
 import com.yukthitech.utils.CommonUtils;
 
-public class DebugSandbox extends JPanel
+public class DebugSandboxPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static Logger logger = LogManager.getLogger(DebugSandbox.class);
+	private static Logger logger = LogManager.getLogger(DebugSandboxPanel.class);
 	
 	private static final String NEW_ROW_TEMPLATE = IdeUtils.loadResource("/templates/debug/sandbox-new-row.html");
 	
@@ -103,7 +103,7 @@ public class DebugSandbox extends JPanel
 	/**
 	 * Create the panel.
 	 */
-	public DebugSandbox()
+	public DebugSandboxPanel()
 	{
 		setLayout(new BorderLayout(0, 0));
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -151,7 +151,7 @@ public class DebugSandbox extends JPanel
 		exprFld.addKeyListener(new KeyAdapter()
 		{
 			@Override
-			public void keyTyped(KeyEvent e)
+			public void keyReleased(KeyEvent e)
 			{
 				if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_ENTER)
 				{
@@ -335,5 +335,11 @@ public class DebugSandbox extends JPanel
 	{
 		String exprId = event.getHref();
 		displayValue(exprId);
+	}
+	
+	public void setExpression(String expression)
+	{
+		this.exprFld.setText(expression);
+		this.exprFld.requestFocus();
 	}
 }

@@ -24,6 +24,9 @@ import com.yukthitech.autox.IMultiPartStep;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ExecutionStack;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.HandledException;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -41,7 +44,7 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 	private CatchStep catchStep;
 	
 	@Override
-	public void addChildStep(IStep step)
+	public void addChildPart(IStep step)
 	{
 		if(catchStep != null)
 		{
@@ -76,8 +79,19 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 
 			exeLogger.warn("Exception occurred while executing try-block. Executing catch block. Exception: {}", ex);
 			
-			context.setAttribute(catchStep.getErrorAttr(), ex);
-			StepsExecutor.execute(catchStep.getSteps(), null);
+			ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+			
+			executionStack.push(catchStep);
+			DebugFlowManager.getInstance().checkForDebugPoint(catchStep);
+			
+			try
+			{
+				context.setAttribute(catchStep.getErrorAttr(), ex);
+				StepsExecutor.execute(catchStep.getSteps(), null);
+			}finally
+			{
+				executionStack.pop(catchStep);
+			}
 		}
 	}
 }
