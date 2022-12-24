@@ -52,6 +52,7 @@ import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
+import com.yukthitech.autox.ide.search.SearchDialog;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -95,6 +96,9 @@ public class FileActions
 	
 	@Autowired
 	private ProjectActions projectActions;
+	
+	@Autowired
+	private SearchDialog searchDialog;
 
 	@Action
 	public void newFolder()
@@ -566,5 +570,11 @@ public class FileActions
 		
 		editor.gotoLine(lineNo);
 		return editor;
+	}
+
+	@Action
+	public void search()
+	{
+		searchDialog.display();
 	}
 }

@@ -128,6 +128,8 @@ public class FileEditor extends JPanel
 	
 	private Object debugHighlightTag;
 	
+	private boolean contentChanged = false;
+	
 	public FileEditor(Project project, File file)
 	{
 		scrollPane = new RTextScrollPane(new RSyntaxTextArea());
@@ -319,6 +321,11 @@ public class FileEditor extends JPanel
 		}
 	}
 	
+	public boolean isContentChanged()
+	{
+		return contentChanged;
+	}
+	
 	private void onFocusGained(FocusEvent e)
 	{
 		ideContext.setActiveDetails(project, file);
@@ -454,6 +461,7 @@ public class FileEditor extends JPanel
 
 			FileUtils.write(file, syntaxTextArea.getText(), Charset.defaultCharset());
 			ideContext.getProxy().fileSaved(file);
+			contentChanged = false;
 			
 			//update all existing break points with update line numbers
 			iconManager.resetDebugPoints();
@@ -469,6 +477,7 @@ public class FileEditor extends JPanel
 		if(contentChangedEvent)
 		{
 			ideContext.getProxy().fileChanged(file);
+			contentChanged = true;
 		}
 		
 		if(contentChangedEvent)
@@ -668,6 +677,20 @@ public class FileEditor extends JPanel
 	public String getContent()
 	{
 		return syntaxTextArea.getText();
+	}
+	
+	public void setContent(String content)
+	{
+		int carPos = syntaxTextArea.getCaretPosition();
+		
+		syntaxTextArea.setText(content);
+		
+		if(carPos >= content.length())
+		{
+			carPos = content.length() - 1;
+		}
+		
+		syntaxTextArea.setCaretPosition(carPos);
 	}
 	
 	public int getCurrentLineNumber()

@@ -68,8 +68,10 @@ import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.views.debug.StackTraceTreeModel.BaseNode;
 import com.yukthitech.autox.ide.views.debug.StackTraceTreeModel.StackElementNode;
+import com.yukthitech.autox.ide.views.debug.StackTraceTreeModel.ThreadNode;
 import com.yukthitech.swing.IconButton;
 import com.yukthitech.swing.list.SimpleListCellRenderer;
+import com.yukthitech.swing.tree.BasicTreeNodeRenderer;
 
 @Component
 public class DebugPanel extends JPanel implements IViewPanel
@@ -166,7 +168,11 @@ public class DebugPanel extends JPanel implements IViewPanel
 		stackTraceTab.setLayout(new BorderLayout(0, 0));
 		stackTraceTab.add(scrollPane, BorderLayout.CENTER);
 		
-		stackTraceTree.setCellRenderer(new StackTraceNodeRenderer());
+		BasicTreeNodeRenderer renderer = new BasicTreeNodeRenderer()
+				.setTypeIcon(ThreadNode.class, IdeUtils.loadIcon("/ui/icons/debug-thread.svg", 16))
+				.setTypeIcon(StackElementNode.class, IdeUtils.loadIcon("/ui/icons/stack-trace-element.svg", 16));
+		
+		stackTraceTree.setCellRenderer(renderer);
 		scrollPane.setViewportView(stackTraceTree);
 		
 		stackTraceTree.addTreeSelectionListener(this::onStackTraceSelectionChange);

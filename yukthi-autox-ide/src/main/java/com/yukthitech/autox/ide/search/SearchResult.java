@@ -13,35 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.actions.search;
+package com.yukthitech.autox.ide.search;
 
 import java.io.File;
 
-public class FileSearchQuery
+/**
+ * Result of search.
+ * @author akranthikiran
+ */
+public class SearchResult
 {
-	/**
-	 * String to be searched.
-	 */
-	private String searchString;
+	private File file;
 	
-	/**
-	 * Folders in which search should be done.
-	 */
-	private File searchFolders[];
+	private int start;
 	
-	/**
-	 * Whether search string should be search in case sensitive way. 
-	 */
-	private boolean caseSensitive;
+	private int end;
 	
-	/**
-	 * Whether search string should be used as regular expression.
-	 */
-	private boolean regularExpression;
+	private int lineNo;
 	
-	/**
-	 * File name pattern.
-	 */
-	private String fileNamePattern;
-	
+	private String lineHtml;
+
+	public SearchResult(File file, int start, int end, int lineNo, String lineHtml)
+	{
+		this.file = file;
+		this.start = start;
+		this.end = end;
+		this.lineNo = lineNo;
+		this.lineHtml = lineHtml;
+	}
+
+	public File getFile()
+	{
+		return file;
+	}
+
+	public int getStart()
+	{
+		return start;
+	}
+
+	public int getEnd()
+	{
+		return end;
+	}
+
+	public int getLineNo()
+	{
+		return lineNo;
+	}
+
+	public String getLineHtml()
+	{
+		return lineHtml;
+	}
 }

@@ -56,6 +56,7 @@ import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.services.IdeStateManager;
 import com.yukthitech.autox.ide.views.console.ConsolePanel;
 import com.yukthitech.autox.ide.views.debug.DebugPanel;
+import com.yukthitech.autox.ide.views.search.SearchResultPanel;
 
 @ActionHolder
 public class AutoxIDE extends JFrame
@@ -99,12 +100,12 @@ public class AutoxIDE extends JFrame
 	
 	@Autowired
 	private DebugPanel debugPanel;
+	
+	@Autowired
+	private SearchResultPanel searchResultPanel;
 
 	@Autowired
 	private HelpPanel helpPanel;
-	
-	//@Autowired
-	//private ContextAttributesPanel contextAttributePanel;
 	
 	@Autowired
 	private IdeEventManager ideEventManager;
@@ -319,6 +320,9 @@ public class AutoxIDE extends JFrame
 		rightBottomTabbedPane.addTab("Debug", null, debugPanel, null);
 		debugPanel.setParent(rightBottomTabbedPane);
 		
+		rightBottomTabbedPane.addTab("Search", null, searchResultPanel, null);
+		searchResultPanel.setParent(rightBottomTabbedPane);
+
 		rightBottomTabbedPane.addTab("Help", null, helpPanel, null);
 		helpPanel.setParent(rightBottomTabbedPane);
 		

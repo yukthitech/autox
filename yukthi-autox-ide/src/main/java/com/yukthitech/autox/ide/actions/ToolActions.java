@@ -18,6 +18,7 @@ package com.yukthitech.autox.ide.actions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.dialog.RegexSandboxDialog;
 import com.yukthitech.autox.ide.dialog.XpathSandboxDialog;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
@@ -31,11 +32,21 @@ public class ToolActions
 	@Autowired
 	private XpathSandboxDialog xpathSandboxDialog;
 	
+	@Autowired
+	private RegexSandboxDialog regexSandboxDialog;
+
 	@Action
 	public void displayXpathSandbox()
 	{
 		IdeUtils.maximize(xpathSandboxDialog, 50);
 		IdeUtils.centerOnScreen(xpathSandboxDialog);
 		xpathSandboxDialog.display();
+	}
+
+	@Action
+	public void displayRegexSandbox()
+	{
+		IdeUtils.centerOnScreen(regexSandboxDialog);
+		regexSandboxDialog.display();
 	}
 }

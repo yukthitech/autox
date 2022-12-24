@@ -15,8 +15,11 @@
  */
 package com.yukthitech.autox.ide.proj;
 
+import java.io.File;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
@@ -144,6 +147,12 @@ public class ProjectManager
 				.orElse(null);
 		
 		return res;
+	}
+	
+	public Map<String, File> getAllProjectFolders()
+	{
+		return projects.stream()
+				.collect(Collectors.toMap(proj -> proj.getName(), proj -> proj.getBaseFolder()));
 	}
 	
 	public void updateProject(Project project)

@@ -23,8 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
@@ -282,12 +284,19 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	private void saveFilesState(IdeState state) throws IOException
 	{
 		int tabCount = super.getTabCount();
+		Set<String> existingProjects = new HashSet<>();
 		
 		for(int i = 0; i < tabCount; i++)
 		{
 			FileEditorTab tab = (FileEditorTab) super.getTabComponentAt(i);
 			FileEditor editor = (FileEditor) super.getComponentAt(i);
 			ProjectState projectState = state.addOpenProject(tab.getProject());
+			
+			if(!existingProjects.contains(tab.getProject().getName()))
+			{
+				existingProjects.add(tab.getProject().getName());
+				projectState.getOpenFiles().clear();
+			}
 			
 			projectState.addOpenFile(new FileState(tab.getFile().getCanonicalPath(), editor.getCaretPosition()));
 		}
@@ -332,6 +341,22 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		return fileEditor;
 	}
 	
+	public FileEditor getFileEditor(File file)
+	{
+		String canonicalPath = null;
+		
+		try
+		{
+			canonicalPath = file.getCanonicalPath();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An exception occurred while fetching cannonical path of file: {}", file.getPath(), ex);
+		}
+		
+		FileEditor fileEditor = pathToEditor.get(canonicalPath);
+		return fileEditor;
+	}
+
 	public FileEditor openProjectFile(Project project, File file)
 	{
 		if(!file.exists())

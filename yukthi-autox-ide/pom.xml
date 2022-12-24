@@ -100,7 +100,12 @@
 			<version>1.14</version>
 		</dependency>
 
-
+		<!-- Used for escaping special chars-->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.10.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.testng</groupId>

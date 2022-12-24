@@ -84,7 +84,7 @@ public class ProjectExplorer extends JPanel
 	
 	private static ImageIcon EDITOR_LINK_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/toggle-button.svg", 16);
 	
-	private static ImageIcon COLLAPSE_ALL_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/minimize-all.svg", 16);
+	private static ImageIcon COLLAPSE_ALL_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/collapse-all.svg", 16);
 	
 	private static final String STATE_ATTR_EDITOR_LINK_BUTTON_STATE = "ProjectExplorer.editorLinkState";
 	

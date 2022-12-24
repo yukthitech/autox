@@ -41,7 +41,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiMoveTo", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
+@Executable(name = "uiMoveTo", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Moves the view to specified target and optionally clicks the element.")
 public class MoveToStep extends AbstractParentUiStep
 {
 	/** The Constant serialVersionUID. */
@@ -50,7 +50,7 @@ public class MoveToStep extends AbstractParentUiStep
 	/**
 	 * locator for button.
 	 */
-	@Param(description = "Locator of the element to which mouse needs to be moved. Out of located elements, first element will be clicked.", sourceType = SourceType.UI_LOCATOR)
+	@Param(description = "Locator of the element to which view needs to be moved.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 	
 	/**

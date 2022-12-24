@@ -76,6 +76,13 @@
 			</item>
 
 			<item label="-" />
+			
+			<item label="Search Files" mnemonic="S" icon="/ui/icons/search.svg"
+				action="search">
+				<short-key ctrl="true" key="H" />
+			</item>
+
+			<item label="-" />
 
 			<item label="Change Editor Font..." action="changeEditorFont">
 			</item>
@@ -125,8 +132,8 @@
 		</menu>
 
 		<menu label="Tools" mnemonic="T">
-			<item label="JXPath Sandbox" mnemonic="J" action="displayXpathSandbox" icon="/ui/icons/xpath-sandbox.svg">
-			</item>
+			<item label="JXPath Sandbox" mnemonic="J" action="displayXpathSandbox" icon="/ui/icons/xpath-sandbox.svg"/>
+			<item label="Regex Sandbox" mnemonic="R" action="displayRegexSandbox" icon="/ui/icons/regex.svg"/>
 		</menu>
 
 		<menu label="Help" mnemonic="H">
@@ -149,10 +156,12 @@
 		<item icon="/ui/icons/new.svg" tooltip="New Project" action="newProject" />
 		<item icon="/ui/icons/open.svg" tooltip="Open Project" action="openProject" />
 		<item icon="/ui/icons/save.svg" tooltip="Save File" action="saveFile" />
+		<item icon="/ui/icons/search.svg" tooltip="Search Files" action="search" />
 		
 		<item icon="-" />
 		
 		<item icon="/ui/icons/xpath-sandbox.svg" tooltip="JXPath Sandbox" action="displayXpathSandbox" />
+		<item icon="/ui/icons/regex.svg" tooltip="Regex Sandbox" action="displayRegexSandbox" />
 		
 		<item icon="-" />
 		
@@ -171,6 +180,7 @@
 		</menu>
 
 		<item label="Refresh" action="refreshFolder" />
+		<item label="Search" action="search" />
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
@@ -187,38 +197,18 @@
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />
 		<item label="Delete" action="deleteFile" />
-	</popup-menu>
-
-	<popup-menu label="projectExplorerPopup">
-		<item icon="/ui/icons/new.svg" label="New Project" action="newProject" />
-		<item icon="/ui/icons/open.svg" label="Open Project" action="openProject" />
-		
-		<item label="-" />
-		
-		<item label="Execute" action="executeProject" />
+		<item label="Search" action="search" />
 	</popup-menu>
 
 	<popup-menu label="projectPopup">
 		<item label="Delete Project" action="deleteProject" />
 		<item label="Refresh" action="refreshProject" />
+		<item label="Search" action="search" />
 		<item label="Execute" action="executeProject" />
 
 		<item label="-" />
 		<item label="Copy Path" action="copyPath" />		
 		<item label="Properties" action="projectProperties"></item>
-	</popup-menu>
-
-	<popup-menu label="fileTabPopup">
-		<item label="Close" action="closeFile" />
-		<item label="Close All" action="closeAllFiles" />
-		<item label="Close All But This" action="closeAllButThis" />
-
-		<item label="-" />
-
-		<item label="Copy File Path" action="copyFilePath" />
-		<item label="Copy File Name" action="copyFileName" />
-		<item label="Copy Dir Path" action="copyDirPath" />
-
 	</popup-menu>
 
 	<popup-menu label="testStuitePopup">
@@ -229,6 +219,7 @@
 		</menu>
 
 		<item label="Refresh" action="refreshFolder"/>
+		<item label="Search" action="search" />
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
@@ -250,6 +241,7 @@
 		</menu>
 
 		<item label="Refresh" action="refreshFolder"/>
+		<item label="Search" action="search" />
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
@@ -261,6 +253,24 @@
 		<item label="-" />
 		
 		<item label="Execute" action="executeTestSuiteFolder" />
+	</popup-menu>
+
+	<popup-menu label="projectExplorerPopup">
+		<item icon="/ui/icons/new.svg" label="New Project" action="newProject" />
+		<item icon="/ui/icons/open.svg" label="Open Project" action="openProject" />
+	</popup-menu>
+
+	<popup-menu label="fileTabPopup">
+		<item label="Close" action="closeFile" />
+		<item label="Close All" action="closeAllFiles" />
+		<item label="Close All But This" action="closeAllButThis" />
+
+		<item label="-" />
+
+		<item label="Copy File Path" action="copyFilePath" />
+		<item label="Copy File Name" action="copyFileName" />
+		<item label="Copy Dir Path" action="copyDirPath" />
+
 	</popup-menu>
 
 	<popup-menu label="restResponsePopup">
