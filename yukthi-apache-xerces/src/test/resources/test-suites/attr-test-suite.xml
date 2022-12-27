@@ -1,0 +1,38 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="attr-test-suites">
+		<!--
+			================================= Test with properties file -=======================================
+		-->
+		<testCase name="baseTestCase">
+			<description>
+				Base test case to set first level attr.
+			</description>
+		
+			<s:set expression="firstLevelAttr1" value="int: 10"/>
+			<s:set expression="firstLevelAttr2" value="int: 10"/>
+		</testCase>
+	
+		<testCase name="firstLevelTest" dependencies="baseTestCase">
+			<description>
+				Ensures attr from base level is accessible
+			</description>
+		
+			<s:assert-equals actual="attr: firstLevelAttr1" expected="int: 10"/>
+			<s:assert-equals actual="attr: firstLevelAttr2" expected="int: 10"/>
+			
+			<s:set expression="firstLevelAttr2" value="int: 20"/>
+			<s:set expression="secondLevelAttr" value="int: 30"/>
+		</testCase>
+
+		<testCase name="finalAttrAccessTest" dependencies="firstLevelTest">
+			<description>
+				Ensures attr from all low levels is accessible
+			</description>
+		
+			<s:assert-equals actual="attr: secondLevelAttr" expected="int: 30"/>
+
+			<s:assert-equals actual="attr: firstLevelAttr1" expected="int: 10"/>
+			<s:assert-equals actual="attr: firstLevelAttr2" expected="int: 20"/>
+		</testCase>
+	</testSuite>
+</testData>

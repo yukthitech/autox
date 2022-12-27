@@ -1,0 +1,129 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="mongoTestSuite">
+		<setup>
+			<s:mongo-query mongoResourceName="mongoResource">
+				<query>
+					{ 
+						"delete": "AUTOX_TEST",
+						"deletes": [
+							{"q": {}, "limit": 0}
+						]
+					}
+				</query>
+			</s:mongo-query>
+		</setup>
+		
+		<test-case name="mongoQueryTest" author="kranthi, kiran">
+			<description>
+				Ensure the mongo query execution is as expected.
+			</description>
+
+			<s:mongo-multi-query mongoResourceName="mongoResource">
+				<query>
+					{ 
+						"insert": "AUTOX_TEST", 
+						"documents" : [
+							{"name": "test1", "entry": 1},
+							{"name": "test2", "entry": 2},
+							{"name": "test3", "entry": 3}
+						] 
+					}
+				</query>
+			</s:mongo-multi-query>
+
+			<s:assert-mongo mongoResourceName="mongoResource">
+				<query>
+					{ "count": "AUTOX_TEST" }
+				</query>
+				<expected>
+					json: {
+						"n": 3
+					}
+				</expected>
+			</s:assert-mongo>
+			
+			<s:mongo-query mongoResourceName="mongoResource">
+				<query>
+					{ 
+						"delete": "AUTOX_TEST",
+						"deletes": [
+							{"q": {"name": "test1"}, "limit": 1}
+						]
+					}
+				</query>
+			</s:mongo-query>
+
+			<s:mongo-query mongoResourceName="mongoResource">
+				<query>
+					{ "count": "AUTOX_TEST" }
+				</query>
+			</s:mongo-query>
+			<s:assert-equals actual="${attr.result.n}" expected="2"/>
+			
+			<s:assert-equals actual="expr: mongoCount('mongoResource', 'AUTOX_TEST')" expected="long: 2"/>
+			<s:assert-equals actual="expr: mongoCount('mongoResource', 'AUTOX_TEST', 'name', 'test3')" expected="long: 1"/>
+
+			<s:mongo-multi-query mongoResourceName="mongoResource">
+				<query>
+					{ 
+						"insert": "AUTOX_TEST", 
+						"documents" : [
+							{"name": "test3Ref", "entry": "${mongoFetchId('mongoResource', 'AUTOX_TEST', 'name', 'test3')}"}
+						] 
+					}
+				</query>
+			</s:mongo-multi-query>
+			
+			<s:assert-equals 
+				actual="expr: mongoFetchId('mongoResource', 'AUTOX_TEST', 'name', 'test3')" 
+				expected="expr: mongoFetchDoc('mongoResource', 'AUTOX_TEST', 'name', 'test3Ref').entry"/>
+		</test-case>
+
+		<test-case name="mongoQueryWithObj">
+			<description>
+				Tests mongo query executions with objects.
+			</description>
+
+			<s:set expression="time" value="expr: now()"/>
+			
+			<s:mongo-multi-query mongoResourceName="mongoResource">
+				<query> json(jel=true):
+					{ 
+						"insert": "AUTOX_TEST", 
+						"documents" : [
+							{
+								"name": "testObj", 
+								"time": "@fmarker: attr.time"
+							}
+						] 
+					}
+				</query>
+			</s:mongo-multi-query>
+
+			<s:mongo-js mongoResourceName="mongoResource" resultAttribute="objFromDb">
+				<script>
+					print("This is first line");
+					return db.AUTOX_TEST.findOne({"name": "testObj"}, {"_id": 0});
+				</script>
+			</s:mongo-js>
+
+			<s:assert-equals actual="attr: objFromDb">
+				<expected>json(jel=true):
+					{
+						"name": "testObj", 
+						"time": "@fmarker: attr.time"
+					}
+				</expected>
+			</s:assert-equals>
+		</test-case>
+		
+		<cleanup>
+			<s:log message="Message from TS cleanup"/>
+		</cleanup>
+	</test-suite>
+
+</test-file>

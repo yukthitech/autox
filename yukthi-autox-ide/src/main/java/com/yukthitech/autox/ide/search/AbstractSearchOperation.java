@@ -19,12 +19,13 @@ import java.io.File;
 import java.io.FileFilter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
@@ -39,26 +40,29 @@ import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 
 /**
- * Represents file search operation.
+ * Base class for search operations.
  * @author akranthikiran
  */
-public class FileSearchOperation
+public abstract class AbstractSearchOperation implements ISearchOperation
 {
-	private static Logger logger = LogManager.getLogger(FileSearchOperation.class);
+	private static Logger logger = LogManager.getLogger(AbstractSearchOperation.class);
 	
 	/**
 	 * Represents a line in a file.
 	 * @author akranthikiran
 	 */
-	private static class FileLine
+	protected static class FileLine
 	{
-		private int lineNo;
+		int index;
 		
-		private String content;
+		int lineNo;
+		
+		String content;
 
-		public FileLine(int lineNo, String content)
+		public FileLine(int lineNo, int index, String content)
 		{
 			this.lineNo = lineNo;
+			this.index = index;
 			this.content = content;
 		}
 	}
@@ -71,13 +75,13 @@ public class FileSearchOperation
 	
 	private int matchedFileCount;
 	
-	private FileSearchQuery fileSearchQuery;
+	protected FileSearchQuery fileSearchQuery;
 	
 	private List<Pattern> fileNamePatterns = new ArrayList<>();
 	
 	private boolean replaceOperation;
 
-	public FileSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, boolean replaceOp)
+	public AbstractSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, boolean replaceOp)
 	{
 		this.fileSearchQuery = fileSearchQuery;
 		this.searchFiles = new ArrayList<>(searchFiles);
@@ -87,10 +91,11 @@ public class FileSearchOperation
 		
 		fileSearchQuery.getFileNamePatterns().forEach(str -> 
 		{
-			this.fileNamePatterns.add(Pattern.compile(buildPattern(str), Pattern.CASE_INSENSITIVE));
+			this.fileNamePatterns.add(Pattern.compile(buildNamePattern(str), Pattern.CASE_INSENSITIVE));
 		});
 	}
 	
+	@Override
 	public void reset()
 	{
 		currentFiles.clear();
@@ -100,12 +105,13 @@ public class FileSearchOperation
 		fileStack.addAll(searchFiles);
 	}
 	
+	@Override
 	public boolean isReplaceOperation()
 	{
 		return replaceOperation;
 	}
 
-	private static String buildPattern(String str)
+	private static String buildNamePattern(String str)
 	{
 		str = str.replaceAll("[^\\*\\?\\w]", "\\\\$0");
 		str = str.replace("*", ".*");
@@ -114,6 +120,7 @@ public class FileSearchOperation
 		return str;
 	}
 	
+	@Override
 	public int getMatchedFileCount()
 	{
 		return matchedFileCount;
@@ -175,7 +182,7 @@ public class FileSearchOperation
 		return true;
 	}
 	
-	private File nextFile()
+	protected File nextFile()
 	{
 		//till files are found loop through the folders
 		while(currentFiles.isEmpty())
@@ -198,23 +205,7 @@ public class FileSearchOperation
 		return first;
 	}
 	
-	private Pattern buildSearchPattern()
-	{
-		String searchStr = fileSearchQuery.getSearchString();
-		
-		if(!fileSearchQuery.isRegularExpression())
-		{
-			searchStr = Pattern.quote(searchStr);
-		}
-		
-		int mod = 0;
-		mod = fileSearchQuery.isCaseSensitive() ? mod : (mod | Pattern.CASE_INSENSITIVE);
-		mod = fileSearchQuery.isRegularExpression() && fileSearchQuery.isSpanMultipleLines() ? (mod | Pattern.DOTALL) : mod;
-		
-		return Pattern.compile(searchStr, mod);
-	}
-	
-	private TreeMap<Integer, FileLine> loadLineMapping(String content)
+	protected TreeMap<Integer, FileLine> loadLineIndexMapping(String content)
 	{
 		TreeMap<Integer, FileLine> res = new TreeMap<>();
 		
@@ -224,7 +215,7 @@ public class FileSearchOperation
 		while(prevIdx < content.length() && (idx = content.indexOf('\n', prevIdx)) >= 0)
 		{
 			String lineContent = idx > prevIdx ? content.substring(prevIdx, idx) : "";
-			res.put(prevIdx, new FileLine(lineNo, lineContent));
+			res.put(prevIdx, new FileLine(lineNo, prevIdx, lineContent));
 			
 			//move post current \n char
 			prevIdx = idx + 1;
@@ -235,143 +226,125 @@ public class FileSearchOperation
 		if(prevIdx < content.length())
 		{
 			String lineContent = content.substring(prevIdx);
-			res.put(prevIdx, new FileLine(lineNo, lineContent));
+			res.put(prevIdx, new FileLine(lineNo, prevIdx, lineContent));
 		}
 		
 		return res;
 	}
 	
-	private String escapeHtml(String content)
+	protected TreeMap<Integer, FileLine> loadLineNumberMapping(String content)
+	{
+		TreeMap<Integer, FileLine> res = new TreeMap<>();
+		
+		int idx = 0, prevIdx = 0;
+		int lineNo = 1;
+		
+		while(prevIdx < content.length() && (idx = content.indexOf('\n', prevIdx)) >= 0)
+		{
+			String lineContent = idx > prevIdx ? content.substring(prevIdx, idx) : "";
+			res.put(lineNo, new FileLine(lineNo, prevIdx, lineContent));
+			
+			//move post current \n char
+			prevIdx = idx + 1;
+			//increment line number
+			lineNo++;
+		}
+		
+		if(prevIdx < content.length())
+		{
+			String lineContent = content.substring(prevIdx);
+			res.put(lineNo, new FileLine(lineNo, prevIdx, lineContent));
+		}
+		
+		return res;
+	}
+
+	protected String escapeHtml(String content)
 	{
 		//replace white space chars with single space
 		content = content.replaceAll("\\s+", " ");
 		return StringEscapeUtils.escapeHtml4(content);
 	}
 	
-	public List<SearchResult> findAll()
+	protected Map<File, TreeSet<SearchResult>> groupResults(List<SearchResult> matches)
 	{
-		List<SearchResult> res = new LinkedList<>();
-		File file = null;
-		Pattern searchPattern = buildSearchPattern();
-		
-		while((file = nextFile()) != null)
+		Map<File, TreeSet<SearchResult>> fileResults = new HashMap<>();
+		Comparator<SearchResult> resComparator = new Comparator<SearchResult>()
 		{
-			String content = null;
+			@Override
+			public int compare(SearchResult o1, SearchResult o2)
+			{
+				return o2.getStart() - o1.getStart();
+			}
+		};
+		
+		for(SearchResult res : matches)
+		{
+			TreeSet<SearchResult> resSet = fileResults.get(res.getFile());
 			
+			if(resSet == null)
+			{
+				resSet = new TreeSet<SearchResult>(resComparator);
+				fileResults.put(res.getFile(), resSet);
+			}
+			
+			resSet.add(res);
+		}
+		
+		return fileResults;
+	}
+
+	protected String readContent(FileEditorTabbedPane fileEditorTabbedPane, File file)
+	{
+		FileEditor openEditor = fileEditorTabbedPane.getFileEditor(file);
+		String content = null;
+		
+		if(openEditor != null)
+		{
+			if(openEditor.isContentChanged())
+			{
+				int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
+						String.format("File '%s' is open and modified. Would you like to save file before proceeding?", file.getName()),
+						"Search & Replace", JOptionPane.OK_CANCEL_OPTION);
+				
+				if(res != JOptionPane.OK_OPTION)
+				{
+					return null;
+				}
+			}
+			
+			content = openEditor.getContent();
+		}
+		else
+		{
 			try
 			{
 				content = FileUtils.readFileToString(file, Charset.defaultCharset());
 			}catch(Exception ex)
 			{
 				logger.error("An error occurred while loading content of file: {}", file.getPath(), ex);
-				
+
 				JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
 						String.format("An error occurred while loading content of file: %s\nError: %s", file.getPath(), ex.getMessage()));
 				return null;
 			}
-			
-			Matcher matcher = searchPattern.matcher(content);
-			TreeMap<Integer, FileLine> lineMaping = null;
-			
-			while(matcher.find())
-			{
-				if(lineMaping == null)
-				{
-					lineMaping = loadLineMapping(content);
-				}
-				
-				Map.Entry<Integer, FileLine> startLineEntry = lineMaping.floorEntry(matcher.start());
-				FileLine startLine = startLineEntry.getValue();
-				int matchSt = matcher.start() - startLineEntry.getKey();
-				
-				Map.Entry<Integer, FileLine> endLineEntry = lineMaping.floorEntry(matcher.end());
-				int matchEnd = startLine.content.length();
-				
-				if(startLineEntry.getKey().equals(endLineEntry.getKey()))
-				{
-					matchEnd = matcher.end() - startLineEntry.getKey();
-				}
-				
-				StringBuilder builder = new StringBuilder("<html><body>");
-				
-				
-				builder.append("<b>").append(file.getName()).append(":").append(startLine.lineNo).append("</b> - ");
-				builder.append(escapeHtml(startLine.content.substring(0, matchSt)));
-				builder.append("<span style=\"background-color: yellow;\">")
-					.append(escapeHtml(startLine.content.substring(matchSt, matchEnd)))
-					.append("</span>");
-				builder.append((matchEnd < startLine.content.length() ? escapeHtml(startLine.content.substring(matchEnd)) : "") );
-				builder.append("</body></html>");
-				
-				res.add(new SearchResult(file, matchSt, matchEnd, startLine.lineNo, builder.toString()));
-			}
 		}
 		
-		return res;
+		return content;
 	}
+	
+	protected boolean writeContent(FileEditorTabbedPane fileEditorTabbedPane, File file, String content)
+	{
+		FileEditor openEditor = fileEditorTabbedPane.getFileEditor(file);
 
-	public boolean replaceAll(FileEditorTabbedPane fileEditorTabbedPane)
-	{
-		File file = null;
-		Pattern searchPattern = buildSearchPattern();
-		
-		while((file = nextFile()) != null)
+		if(openEditor != null)
 		{
-			FileEditor openEditor = fileEditorTabbedPane.getFileEditor(file);
-			String content = null;
-			
-			if(openEditor != null && openEditor.isContentChanged())
-			{
-				content = openEditor.getContent();
-			}
-			else
-			{
-				try
-				{
-					content = FileUtils.readFileToString(file, Charset.defaultCharset());
-				}catch(Exception ex)
-				{
-					logger.error("An error occurred while loading content of file: {}", file.getPath(), ex);
-	
-					JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
-							String.format("An error occurred while loading content of file: %s\nError: %s", file.getPath(), ex.getMessage()));
-					return false;
-				}
-			}
-			
-			Matcher matcher = searchPattern.matcher(content);
-			StringBuffer buffer = new StringBuffer();
-			boolean matchFound = false;
-			
-			while(matcher.find())
-			{
-				matcher.appendReplacement(buffer, fileSearchQuery.getReplaceWith());
-				matchFound = true;
-			}
-			
-			if(matchFound)
-			{
-				matcher.appendTail(buffer);
-				
-				if(openEditor != null && openEditor.isContentChanged())
-				{
-					openEditor.setContent(buffer.toString());
-				}
-				else
-				{
-					writeToFile(file, buffer);
-				}
-			}
+			openEditor.setContent(content);
 		}
 		
-		return true;
-	}
-	
-	private boolean writeToFile(File file, StringBuffer buffer)
-	{
 		try
 		{
-			FileUtils.write(file, buffer, Charset.defaultCharset());
+			FileUtils.write(file, content, Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while replacing content of file: {}", file.getPath(), ex);

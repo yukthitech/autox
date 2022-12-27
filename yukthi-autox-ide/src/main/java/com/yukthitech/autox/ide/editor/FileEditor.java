@@ -691,6 +691,7 @@ public class FileEditor extends JPanel
 		}
 		
 		syntaxTextArea.setCaretPosition(carPos);
+		IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, IIdeConstants.FILE_EDITOR_PARSE_DELAY);
 	}
 	
 	public int getCurrentLineNumber()

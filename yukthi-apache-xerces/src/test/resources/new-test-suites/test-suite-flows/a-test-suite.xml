@@ -1,0 +1,169 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="a-test-suites">
+		<description>
+			Ensures the order of setups and cleanups.
+		</description>
+		
+		<setup>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+
+			<s:set expression="aTestSuiteSetup" value="1"/>
+			<s:execute expression="push(attr.flowCapture, 'aTestSuiteSetup')"/>
+		</setup>
+		
+		<before-test-case>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+			<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+
+			<s:set expression="aBeforeTestCase" value="1"/>
+			<s:execute expression="push(attr.flowCapture, 'aBeforeTestCase')"/>
+		</before-test-case>
+
+		<after-test-case>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+			<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+
+			<s:set expression="aAfterTestCase" value="1"/>
+			<s:execute expression="push(attr.flowCapture, 'aAfterTestCase')"/>
+		</after-test-case>
+
+		<testCase name="aSuccessTestCase">
+			<description>
+				Ensures setups and cleanups are called in proper order with proper access.
+			</description>
+			
+			<setup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: aBeforeTestCase" expected="1"/>
+	
+				<s:set expression="aSuccessTestCaseSetup" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aSuccessTestCaseSetup')"/>
+			</setup>
+		
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: aBeforeTestCase" expected="1"/>
+				<s:assert-equals actual="attr: aSuccessTestCaseSetup" expected="1"/>
+	
+				<s:set expression="aSuccessTestCase" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aSuccessTestCase')"/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: aBeforeTestCase" expected="1"/>
+				<s:assert-equals actual="attr: aSuccessTestCaseSetup" expected="1"/>
+				<s:assert-equals actual="attr: aSuccessTestCase" expected="1"/>
+	
+				<s:set expression="aSuccessTestCaseCleanup" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aSuccessTestCaseCleanup')"/>
+			</cleanup>
+		</testCase>
+	
+		<testCase name="aSuccessTestCase2">
+			<description>
+				Ensures other test case attributes are not accessible.
+			</description>
+			
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: aBeforeTestCase" expected="1"/>
+				
+				<s:assert-null value="attr: aSuccessTestCaseSetup"/>
+				<s:assert-null value="attr: aSuccessTestCase"/>
+				<s:assert-null value="attr: aSuccessTestCaseCleanup"/>
+	
+				<s:set expression="aSuccessTestCase2" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aSuccessTestCase2')"/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:set expression="aSuccessTestCase2Cleanup" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aSuccessTestCase2Cleanup')"/>
+			</cleanup>
+		</testCase>
+		
+		<testCase name="aDepTestCase" dependencies="aSuccessTestCase, aSuccessTestCase2">
+			<description>
+				Ensures dependencies attributes are accessible.
+			</description>
+			
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: aBeforeTestCase" expected="1"/>
+				
+				<s:assert-equals actual="attr: aSuccessTestCaseSetup" expected="1"/>
+				<s:assert-equals actual="attr: aSuccessTestCase" expected="1"/>
+				<s:assert-equals actual="attr: aSuccessTestCaseCleanup" expected="1"/>
+
+				<s:assert-equals actual="attr: aSuccessTestCase2" expected="1"/>
+				<s:assert-equals actual="attr: aSuccessTestCase2Cleanup" expected="1"/>
+
+				<s:set expression="aDepTestCase" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aDepTestCase')"/>
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="aTestCaseError">
+			<description>
+				Ensures cleanup of testcase is called in case of error.
+			</description>
+			
+			<setup>
+				<s:set expression="aTestCaseErrorSetup" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aTestCaseErrorSetup')"/>
+			</setup>
+		
+			<wrap:steps>
+				<s:execute expression="push(attr.flowCapture, 'aTestCaseError')"/>
+				
+				<s:fail/>
+				
+				<s:execute expression="push(attr.flowCapture, 'aTestCaseErrorPostError')"/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:assert-equals actual="attr: aTestCaseErrorSetup" expected="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aTestCaseErrorSetupCleanup')"/>
+			</cleanup>
+		</testCase>
+
+
+		<testCase name="aTestSetupError">
+			<description>
+				Ensures cleanup of testcase is NOT called in case of setup error.
+			</description>
+			
+			<setup>
+				<s:set expression="aTestSetupErrorSetup" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'aTestSetupErrorSetup')"/>
+				<s:fail/>
+			</setup>
+		
+			<wrap:steps>
+				<s:execute expression="push(attr.flowCapture, 'aTestSetupError')"/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:execute expression="push(attr.flowCapture, 'aTestSetupErrorCleanup')"/>
+			</cleanup>
+		</testCase>
+
+		<cleanup>
+			<s:assert-equals actual="attr: globalSetup" expected="1"/>
+			<s:assert-equals actual="attr: aTestSuiteSetup" expected="1"/>
+			
+			<s:assert-null value="attr: aSuccessTestCase"/>
+			<s:assert-null value="attr: aSuccessTestCase2"/>
+			<s:assert-null value="attr: aDepTestCase"/>
+			<s:assert-null value="attr: aTestCaseErrorSetup"/>
+
+			<s:execute expression="push(attr.flowCapture, 'aTestSuiteCleanup')"/>
+		</cleanup>
+	</testSuite>
+</testData>

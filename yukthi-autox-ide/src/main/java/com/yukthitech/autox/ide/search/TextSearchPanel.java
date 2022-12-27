@@ -189,6 +189,7 @@ public class TextSearchPanel extends JPanel
 		gbc_scrollPane.gridx = 1;
 		gbc_scrollPane.gridy = 2;
 		mainSearchPanel.add(scrollPane, gbc_scrollPane);
+		replaceWithFld.setTabSize(3);
 		scrollPane.setViewportView(replaceWithFld);
 		replaceWithFld.setRows(3);
 		
@@ -288,7 +289,7 @@ public class TextSearchPanel extends JPanel
 		
 		String filePatternStr = this.filePtrnFld.getText().trim();
 		
-		if(srchStr.length() == 0)
+		if(filePatternStr.length() == 0)
 		{
 			JOptionPane.showMessageDialog(this, "Please provide valid file pattern to search for and then try!");
 			return null;

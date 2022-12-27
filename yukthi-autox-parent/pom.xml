@@ -64,6 +64,7 @@
 
 	<modules>
 		<module>../yukthi-autox</module>
+		<module>../yukthi-apache-xerces</module>
 		<module>../yukthi-autox-ide</module>
 	</modules>
 </project>

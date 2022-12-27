@@ -3,7 +3,7 @@
 
 	<step-group name="simpleGroup">
 		<ccg:log message="This message is from step group"/>
-		<ccg:set name="simpleGroupOutput" value="true"/>
+		<ccg:set value="true" name="simpleGroupOutput"/>
 		
 		<ccg:validateContextParam expression="attr.simpleGroupInput" value="true"/>
 	</step-group>

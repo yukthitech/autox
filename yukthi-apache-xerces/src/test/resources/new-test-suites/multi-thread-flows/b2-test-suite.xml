@@ -1,0 +1,49 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="b2-test-suites">
+		<description>
+			Ensures the order of data-setup and data-cleanup.
+		</description>
+		
+		<setup>
+			<s:set expression="b2TestSuiteSetup" value="1"/>
+			<s:sleep time="500"/>
+		</setup>
+		
+		<testCase name="b2DataProviderTestCase" parallelExecutionEnabled="true">
+			<description>
+				Ensures data setups and cleanups are called in proper order with proper access.
+			</description>
+			
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/onFetchExpr-data-provider.xml"/>
+			
+			<setup>
+				<s:set expression="b2DataProviderTestCaseSetup" value="1"/>
+				<s:sleep time="500"/>
+			</setup>
+			
+			<data-setup>
+				<s:set expression="b2DataProviderTestCaseDataSetup" value="1"/>
+				<s:sleep time="500"/>
+			</data-setup>
+		
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: b2TestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: b2DataProviderTestCaseSetup" expected="1"/>
+				<s:assert-equals actual="attr: b2DataProviderTestCaseDataSetup" expected="1"/>
+				<s:sleep time="500"/>
+			</wrap:steps>
+			
+			<data-cleanup>
+				<s:sleep time="500"/>
+			</data-cleanup>
+			
+			<cleanup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: b2TestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: b2DataProviderTestCaseSetup" expected="1"/>
+				<s:sleep time="500"/>
+			</cleanup>
+		</testCase>
+	</testSuite>
+</testData>

@@ -21,28 +21,33 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.io.File;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.border.EtchedBorder;
+import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.search.FileSearchQuery.Scope;
 
 public class XmlSearchPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	
 	private final JPanel panel_2 = new JPanel();
-	private final JButton srchBut = new JButton("Search");
-	private final JButton txtReplaceAllBut = new JButton("Replace All");
-	private final JButton txtCancelBut = new JButton("Cancel");
+	private final JButton findAllBut = new JButton("Find All");
+	private final JButton replaceAllBut = new JButton("Replace All");
 	
 	private final JPanel repAllBut = new JPanel();
 	private final JLabel lblNewLabel = new JLabel("xPath to Search:");
@@ -59,8 +64,20 @@ public class XmlSearchPanel extends JPanel
 	private final JPanel panel = new JPanel();
 	private final JPanel panel_3 = new JPanel();
 	
+	private ButtonGroup scopeGroup = new ButtonGroup();
+
 	@Autowired
 	private SearchDialog parentDialog;
+	
+	@Autowired
+	private ProjectExplorer projectExplorer;
+
+	@Autowired
+	private FileSearchService searchService;
+
+	private final JButton replaceFindBut = new JButton("Find & Replace");
+	private final JLabel lblNewLabel_3 = new JLabel("(Only xml files will be processed)");
+	private final JLabel lblNewLabel_3_1 = new JLabel("(Should point to xml elements only)");
 
 	/**
 	 * Create the panel.
@@ -85,17 +102,22 @@ public class XmlSearchPanel extends JPanel
 		flowLayout.setVgap(2);
 		
 		panel_2.add(panel_3, BorderLayout.CENTER);
-		panel_3.add(srchBut);
-		panel_3.add(txtReplaceAllBut);
-		panel_3.add(txtCancelBut);
+		panel_3.add(findAllBut);
+		findAllBut.addActionListener(this::findAll);
+		
+		panel_3.add(replaceFindBut);
+		replaceFindBut.addActionListener(this::replaceAndFind);
+		
+		panel_3.add(replaceAllBut);
+		replaceAllBut.addActionListener(this::replaceAll);
 		repAllBut.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		add(repAllBut);
 		GridBagLayout gbl_repAllBut = new GridBagLayout();
 		gbl_repAllBut.columnWidths = new int[]{0, 0, 0};
-		gbl_repAllBut.rowHeights = new int[] {0, 0, 0, 0, 0};
+		gbl_repAllBut.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0};
 		gbl_repAllBut.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_repAllBut.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0};
+		gbl_repAllBut.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
 		repAllBut.setLayout(gbl_repAllBut);
 		
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -113,18 +135,26 @@ public class XmlSearchPanel extends JPanel
 		xpathFld.setColumns(10);
 		repAllBut.add(xpathFld, gbc_xpathFld);
 		
+		GridBagConstraints gbc_lblNewLabel_3_1 = new GridBagConstraints();
+		gbc_lblNewLabel_3_1.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_3_1.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel_3_1.gridx = 1;
+		gbc_lblNewLabel_3_1.gridy = 1;
+		lblNewLabel_3_1.setForeground(Color.GRAY);
+		repAllBut.add(lblNewLabel_3_1, gbc_lblNewLabel_3_1);
+		
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
 		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.gridx = 0;
-		gbc_lblNewLabel_4.gridy = 1;
+		gbc_lblNewLabel_4.gridy = 2;
 		repAllBut.add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
 		gbc_panel_1.insets = new Insets(0, 0, 5, 0);
 		gbc_panel_1.fill = GridBagConstraints.BOTH;
 		gbc_panel_1.gridx = 1;
-		gbc_panel_1.gridy = 1;
+		gbc_panel_1.gridy = 2;
 		FlowLayout flowLayout_1 = (FlowLayout) panel_1.getLayout();
 		flowLayout_1.setVgap(0);
 		flowLayout_1.setHgap(2);
@@ -136,18 +166,26 @@ public class XmlSearchPanel extends JPanel
 		
 		panel_1.add(txtSelFoldersRbut);
 		
+		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
+		gbc_lblNewLabel_3.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel_3.gridx = 1;
+		gbc_lblNewLabel_3.gridy = 3;
+		lblNewLabel_3.setForeground(Color.GRAY);
+		repAllBut.add(lblNewLabel_3, gbc_lblNewLabel_3);
+		
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 2;
+		gbc_lblNewLabel_1.gridy = 4;
 		repAllBut.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblNewLabel_2.gridwidth = 2;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 0);
 		gbc_lblNewLabel_2.gridx = 0;
-		gbc_lblNewLabel_2.gridy = 3;
+		gbc_lblNewLabel_2.gridy = 5;
 		lblNewLabel_2.setForeground(Color.GRAY);
 		repAllBut.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
@@ -155,15 +193,105 @@ public class XmlSearchPanel extends JPanel
 		gbc_textScrollPane.gridwidth = 2;
 		gbc_textScrollPane.fill = GridBagConstraints.BOTH;
 		gbc_textScrollPane.gridx = 0;
-		gbc_textScrollPane.gridy = 4;
+		gbc_textScrollPane.gridy = 6;
 		repAllBut.add(textScrollPane, gbc_textScrollPane);
 		replaceScriptFld.setTabSize(3);
 		
 		textScrollPane.setViewportView(replaceScriptFld);
+
+		scopeGroup.add(txtAllProjRbut);
+		scopeGroup.add(txtSelFoldersRbut);
 	}
 
 	void resetForDisplay()
 	{
+		File file = projectExplorer.getSelectedFile();
 		
+		//if at least one file is selected, then only enable selected-folders option
+		txtSelFoldersRbut.setEnabled(file != null);
+		txtSelFoldersRbut.setSelected(file != null);
+		
+		xpathFld.requestFocus();
+	}
+
+	private FileSearchQuery buildQuery(boolean replaceOp)
+	{
+		String srchStr = xpathFld.getText();
+		
+		if(srchStr.length() == 0)
+		{
+			JOptionPane.showMessageDialog(this, "Please provide xpath string and then try!");
+			return null;
+		}
+		
+		try
+		{
+			XpathSearchOperation.parseXpath(srchStr, null);
+		}catch(Exception ex)
+		{
+			JOptionPane.showMessageDialog(this, "An error occurred while parsing specified xpath.\nError: " + ex.getMessage());
+			return null;
+		}
+		
+		String replacementScript = this.replaceScriptFld.getText();
+		
+		if(replaceOp && replacementScript.trim().length() == 0)
+		{
+			JOptionPane.showMessageDialog(this, "Please provide replacement script and then try!");
+			return null;
+		}
+
+		return FileSearchQuery.newXmlQuery(
+				srchStr, 
+				this.txtAllProjRbut.isSelected() ? Scope.ALL_PROJECTS : Scope.SELECTED_FOLDERS,
+				replacementScript
+				);
+	}
+
+	private void findAll(ActionEvent e)
+	{
+		FileSearchQuery query = buildQuery(false);
+		
+		if(query == null)
+		{
+			return;
+		}
+		
+		searchService.findAll(query, false);
+		parentDialog.setVisible(false);
+	}
+	
+	private void replaceAndFind(ActionEvent e)
+	{
+		FileSearchQuery query = buildQuery(true);
+		
+		if(query == null)
+		{
+			return;
+		}
+		
+		searchService.findAll(query, true);
+		parentDialog.setVisible(false);
+	}
+
+	private void replaceAll(ActionEvent e)
+	{
+		FileSearchQuery query = buildQuery(true);
+		
+		if(query == null)
+		{
+			return;
+		}
+		
+		int res = JOptionPane.showConfirmDialog(this, "This operation may change content of multiple files which cannot be undone.\nAre you sure you want to continue.",
+				"Replace All", JOptionPane.YES_NO_OPTION);
+		
+		if(res == JOptionPane.NO_OPTION)
+		{
+			return;
+		}
+		
+		searchService.replaceAll(query);
+		parentDialog.setVisible(false);
 	}
 }

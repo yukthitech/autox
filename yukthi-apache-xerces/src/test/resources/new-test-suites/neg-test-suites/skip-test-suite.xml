@@ -1,0 +1,31 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="skipTestSuite">
+		<test-case name="skip_success">
+			<description>
+				A test case which executes successfully.
+			</description>
+
+			<s:log message="Mssg from skip_success"/>
+		</test-case>
+
+		<test-case name="skip_fail">
+			<description>
+				A test case which fails
+			</description>
+
+			<s:fail message="Failing current testcase"/>
+		</test-case>
+
+		<test-case name="skip_skip" dependencies="skip_success, skip_fail">
+			<description>
+				A test case which is supposed to get skipped.
+			</description>
+
+			<s:log message="Mssg from skipped one"/>
+		</test-case>
+	</test-suite>
+</test-file>

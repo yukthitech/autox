@@ -1,0 +1,51 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="data-provider-err">
+		<testCase name="dataProviderSetupErr">
+			<description>
+				Tests data setup error is handled properly.
+			</description>
+			
+			<data-setup>
+				<s:fail message="Failing the data-setup"/>
+			</data-setup>
+		
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.xml"/>
+		
+			<s:log message="Val = ${attr.extDataProvider.paramValue}"/>
+			
+			<data-cleanup>
+				<s:log message="Message as part of data cleaup..."/>
+			</data-cleanup>
+		
+		</testCase>
+		
+		<testCase name="dataProviderCleanupErr">
+			<description>
+				Tests data cleanup error is handled properly.
+			</description>
+			
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.xml"/>
+		
+			<s:log message="Val = ${attr.extDataProvider.paramValue}"/>
+			
+			<data-cleanup>
+				<s:fail message="Failing the data-setup"/>
+			</data-cleanup>
+		
+		</testCase>
+
+		<test-case name="dataProviderEmptyRes">
+			<description>
+				Tests the flow empty resource is provided.
+			</description>
+
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/empty-data-provider.xml"/>
+		
+			<s:log message="Val = ${extDataProvider.paramValue}"/>
+		</test-case>
+	</test-suite>
+</test-file>

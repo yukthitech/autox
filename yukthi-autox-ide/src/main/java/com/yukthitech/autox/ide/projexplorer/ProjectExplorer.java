@@ -341,6 +341,11 @@ public class ProjectExplorer extends JPanel
 		
 		TreePath treePath = new TreePath(node.getPath());
 		
+		if(tree.isPathSelected(treePath))
+		{
+			return;
+		}
+		
 		tree.setSelectionPath(treePath);
 		tree.scrollPathToVisible(treePath);
 	}

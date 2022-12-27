@@ -27,6 +27,7 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -45,8 +46,8 @@ import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.proj.ProjectManager;
-import com.yukthitech.autox.ide.search.FileSearchOperation;
 import com.yukthitech.autox.ide.search.FileSearchService;
+import com.yukthitech.autox.ide.search.ISearchOperation;
 import com.yukthitech.autox.ide.search.SearchResult;
 import com.yukthitech.autox.ide.views.search.SearchResultTreeModel.FolderNode;
 import com.yukthitech.autox.ide.views.search.SearchResultTreeModel.ProjectNode;
@@ -97,7 +98,7 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 	
 	private JTabbedPane parentTabbedPane;
 	
-	private FileSearchOperation currentOperation;
+	private ISearchOperation currentOperation;
 
 	/**
 	 * Create the panel.
@@ -176,7 +177,7 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		this.parentTabbedPane = parentTabPane;
 	}
 	
-	public void setSearchResults(FileSearchOperation query, List<SearchResult> results)
+	public void setSearchResults(ISearchOperation query, List<SearchResult> results)
 	{
 		this.currentOperation = query;
 		this.replaceBut.setEnabled(query.isReplaceOperation());
@@ -237,6 +238,16 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 
 	private void onReplace(ActionEvent e)
 	{
+		List<SearchResult> resLst = searchResultTreeModel.fetchResults();
+		
+		if(resLst.isEmpty())
+		{
+			JOptionPane.showMessageDialog(this, "No matches found for replacement");
+			return;
+		}
+		
+		//searchResultTreeModel.reset();
+		fileSearchService.replaceMatches(currentOperation, resLst);
 	}
 
 	private void onRemove(ActionEvent e)

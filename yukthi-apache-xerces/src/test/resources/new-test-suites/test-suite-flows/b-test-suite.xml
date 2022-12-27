@@ -1,0 +1,79 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="b-test-suites">
+		<description>
+			Ensures the order of data-setup and data-cleanup.
+		</description>
+		
+		<setup>
+			<s:assert-null value="attr: aTestSuiteSetup"/>
+
+			<s:set expression="bTestSuiteSetup" value="1"/>
+			<s:execute expression="push(attr.flowCapture, 'bTestSuiteSetup')"/>
+		</setup>
+		
+		<before-test-case>
+			<s:set expression="bBeforeTestCase" value="1"/>
+			<s:execute expression="push(attr.flowCapture, 'bBeforeTestCase')"/>
+		</before-test-case>
+
+		<after-test-case>
+			<s:set expression="bAfterTestCase" value="1"/>
+			<s:execute expression="push(attr.flowCapture, 'bAfterTestCase')"/>
+		</after-test-case>
+
+		<testCase name="bDataProviderTestCase">
+			<description>
+				Ensures data setups and cleanups are called in proper order with proper access.
+			</description>
+			
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/onFetchExpr-data-provider.xml"/>
+			
+			<data-setup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: bTestSuiteSetup" expected="1"/>
+
+				<s:set expression="bDataProviderTestCaseDataSetup" value="1"/>
+				<s:execute expression="push(attr.flowCapture, 'bDataProviderTestCaseDataSetup')"/>
+			</data-setup>
+		
+			<setup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: bTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: bDataProviderTestCaseDataSetup" expected="1"/>
+
+				<s:set expression="bDataProviderTestCaseSetup" value="attr: extDataProvider.name"/>
+				<s:execute expression="push(attr.flowCapture, 'bDataProviderTestCaseSetup_' + attr['extDataProvider.name'])"/>
+			</setup>
+
+			<wrap:steps>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: bTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: bDataProviderTestCaseDataSetup" expected="1"/>
+				<s:assert-equals actual="attr: bDataProviderTestCaseSetup" expected="attr: extDataProvider.name"/>
+	
+				<s:execute expression="push(attr.flowCapture, 'bDataProviderTestCase_' + attr['extDataProvider.name'])"/>
+			</wrap:steps>
+			
+			<cleanup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: bTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: bDataProviderTestCaseDataSetup" expected="1"/>
+				<s:assert-equals actual="attr: bDataProviderTestCaseSetup" expected="attr: extDataProvider.name"/>
+	
+				<s:execute expression="push(attr.flowCapture, 'bDataProviderTestCaseCleanup_' + attr['extDataProvider.name'])"/>
+			</cleanup>
+
+			<data-cleanup>
+				<s:assert-equals actual="attr: globalSetup" expected="1"/>
+				<s:assert-equals actual="attr: bTestSuiteSetup" expected="1"/>
+				<s:assert-equals actual="attr: bDataProviderTestCaseDataSetup" expected="1"/>
+				
+				<s:execute expression="push(attr.flowCapture, 'bDataProviderTestCaseDataCleanup')"/>
+			</data-cleanup>
+		</testCase>
+
+		<cleanup>
+			<s:execute expression="push(attr.flowCapture, 'bTestSuiteCleanup')"/>
+		</cleanup>
+	</testSuite>
+</testData>

@@ -69,7 +69,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		gbl_pnl1.columnWidths = new int[]{0, 0, 0};
 		gbl_pnl1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_pnl1.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_pnl1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_pnl1.rowWeights = new double[]{0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		pnl1.setLayout(gbl_pnl1);
 		
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -105,11 +105,13 @@ public class RegexSandboxDialog extends EscapableDialog
 		pnl1.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.weighty = 0.5;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 1;
 		gbc_scrollPane.gridy = 2;
 		pnl1.add(scrollPane, gbc_scrollPane);
+		fldContent.setTabSize(3);
 		fldContent.setRows(4);
 		
 		scrollPane.setViewportView(fldContent);
@@ -122,11 +124,13 @@ public class RegexSandboxDialog extends EscapableDialog
 		pnl1.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
+		gbc_scrollPane_2.weighty = 0.5;
 		gbc_scrollPane_2.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_2.gridx = 1;
 		gbc_scrollPane_2.gridy = 3;
 		pnl1.add(scrollPane_2, gbc_scrollPane_2);
+		replaceWithFld.setTabSize(3);
 		replaceWithFld.setRows(2);
 		
 		scrollPane_2.setViewportView(replaceWithFld);
@@ -178,6 +182,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		pnl1.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
+		gbc_scrollPane_1.weighty = 1;
 		gbc_scrollPane_1.gridwidth = 2;
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_1.gridx = 0;

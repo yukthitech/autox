@@ -1,0 +1,28 @@
+[
+	{
+		"name": "case1",
+		"value" : {
+			"paramValue": 10,
+			"result": 5,
+			"exception": false
+		}
+	},
+	
+	{
+		"name": "case2",
+		"value" : {
+			"paramValue": 2,
+			"result": 1,
+			"exception": false
+		}
+	},
+
+	{
+		"name": "case3",
+		"value" : {
+			"paramValue": -10,
+			"exception": true
+		}
+	}
+	
+]

@@ -364,7 +364,9 @@ public class XmlFormatter
 
 	public static void main(String[] args) throws Exception
 	{
-		String xmlContent = FileUtils.readFileToString(new File("./dml-test-suite.xml"), Charset.defaultCharset());
-		System.out.println(formatXml(xmlContent));
+		File file = new File("C:\\Kranthi\\github\\autox\\yukthi-autox\\src\\test\\resources\\test-suites\\test.xml");
+		String content = FileUtils.readFileToString(file, Charset.defaultCharset());
+		
+		System.out.println(formatXml(content));
 	}
 }

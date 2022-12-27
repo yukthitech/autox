@@ -1,0 +1,24 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="test-suite-cleanup-err">
+		<setup>
+			<s:log message="This is from setup"/> 
+		</setup>
+		
+		<test-case name="tsCleanupErr_test">
+			<description>
+				Simple testcase.
+			</description>
+
+			<s:log message="From testcase"/>
+		</test-case>
+
+		<cleanup>
+			<s:fail message="Failing the cleanup"/>
+		</cleanup>
+	</test-suite>
+
+</test-file>

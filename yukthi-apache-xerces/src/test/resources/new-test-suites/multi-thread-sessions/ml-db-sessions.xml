@@ -1,0 +1,123 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="ml-db-sessions" parallelExecutionEnabled="true">
+	
+		<setup>
+			<s:log message="Message from global setup."/>
+		
+			<s:sql-ddl-query dataSourceName="dataSource" ignoreErrors="true">
+				<query>DROP TABLE EMPLOYEE</query>
+			</s:sql-ddl-query>
+			<s:sql-ddl-query dataSourceName="dataSource" ignoreErrors="true">
+				<query>DROP TABLE LOB_TABLE</query>
+			</s:sql-ddl-query>
+
+			<s:sql-ddl-query dataSourceName="dataSource">
+				<query>
+					CREATE TABLE EMPLOYEE
+					(
+						ID		INT,
+						NAME	VARCHAR(100)
+					)
+				</query>
+			</s:sql-ddl-query>
+	
+			<s:sql-ddl-query dataSourceName="dataSource">
+				<query>
+					CREATE TABLE LOB_TABLE
+					(
+						NAME	VARCHAR(100),
+						BDATA	BLOB,
+						CDATA	LONGTEXT
+					)
+				</query>
+			</s:sql-ddl-query>
+		</setup>
+	
+		<testCase name="insert_query">
+			<description>
+				Validates for inserting record in a table
+			</description>
+
+			<s:sql-dml-query countAttribute="countAttr" dataSourceName="dataSource" failOnNoUpdate="true">
+				<query>
+					INSERT INTO EMPLOYEE VALUES (1, 'employee1')
+				</query>
+			</s:sql-dml-query>
+
+			<s:sql-assert dataSourceName="dataSource">
+				<query>
+					SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
+				</query>
+			
+				<expectedRow>
+					<column name="NAME">employee1</column>
+				</expectedRow>
+			</s:sql-assert>
+			
+			<s:sleep time="2000"/>
+		</testCase>
+	
+		<testCase name="update_query" dependencies="insert_query">
+			<description>
+				Validates for updating record in a table
+			</description>
+		
+			<s:set expression="empId" value="1"/>
+		
+			<s:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
+				<query>
+					UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
+				</query>
+			</s:sql-dml-query>
+
+			<s:assert-equals actual="attr: updateCount" expected="int: 1"/>
+			<s:sleep time="2000"/>
+		</testCase>
+	
+		<testCase name="multiple_query">
+			<description>
+				Validates for executing multiple query in table
+			</description>
+		
+			<s:sql-multi-dml-query dataSourceName="dataSource">
+				<query>
+					INSERT INTO EMPLOYEE VALUES (100, 'employee100')
+				</query>
+			
+				<query>
+					INSERT INTO EMPLOYEE VALUES (200, 'employee200')
+				</query>
+			</s:sql-multi-dml-query>
+
+			<s:sleep time="2000"/>
+		</testCase>
+	
+		<testCase name="lobTest">
+			<description>
+				Checks wether insertion of clob and blob is working as expected or not
+			</description>
+		
+			<s:sql-multi-dml-query dataSourceName="dataSource">
+				<query>
+					INSERT INTO LOB_TABLE(NAME, BDATA) VALUES ('bdata1', ?{expr: resBlob('/data/data.json')})
+				</query>
+				<query>
+					INSERT INTO LOB_TABLE(NAME, CDATA) VALUES ('cdata1', ?{expr: resClob('/data/data.json')})
+				</query>
+			</s:sql-multi-dml-query>
+
+			<s:sql-assert-value dataSourceName="dataSource" expectedValue="res(template=false): /data/data.json" convertExpression="json: $">
+				<query>
+					SELECT BDATA FROM LOB_TABLE WHERE NAME = 'bdata1'
+				</query>
+			</s:sql-assert-value>
+
+			<s:sql-assert-value dataSourceName="dataSource" expectedValue="res(template=false): /data/data.json" convertExpression="json: $">
+				<query>
+					SELECT CDATA FROM LOB_TABLE WHERE NAME = 'cdata1'
+				</query>
+			</s:sql-assert-value>
+			<s:sleep time="2000"/>
+		</testCase>
+	</testSuite>
+</testData>

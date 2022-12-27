@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.search.FileSearchQuery.QueryType;
 import com.yukthitech.autox.ide.search.FileSearchQuery.Scope;
 import com.yukthitech.autox.ide.views.search.SearchResultPanel;
 
@@ -59,20 +60,30 @@ public class FileSearchService
 		return searchFolders;
 	}
 	
-	public void repeatSearch(FileSearchOperation operation)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void repeatSearch(ISearchOperation operation)
 	{
 		operation.reset();
 		
-		List<SearchResult> results = operation.findAll();
+		List<SearchResult> results = (List) operation.findAll();
 		searchResultPanel.setSearchResults(operation, results);
 	}
 	
+	public void replaceMatches(ISearchOperation operation, List<SearchResult> matches)
+	{
+		operation.replace(fileEditorTabbedPane, matches);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void findAll(FileSearchQuery query, boolean replaceOp)
 	{
 		List<File> searchFolders = getSearchFolders(query);
 		
-		FileSearchOperation op = new FileSearchOperation(query, searchFolders, replaceOp);
-		List<SearchResult> results = op.findAll();
+		ISearchOperation op = query.getQueryType() == QueryType.TEXT ?
+				new TextSearchOperation(query, searchFolders, replaceOp) :
+				new XpathSearchOperation(query, searchFolders, replaceOp);
+		
+		List<SearchResult> results = (List) op.findAll();
 		
 		if(results == null)
 		{
@@ -86,7 +97,7 @@ public class FileSearchService
 	{
 		List<File> searchFolders = getSearchFolders(query);
 		
-		FileSearchOperation op = new FileSearchOperation(query, searchFolders, true);
+		ISearchOperation op = new TextSearchOperation(query, searchFolders, true);
 		op.replaceAll(fileEditorTabbedPane);
 	}
 }

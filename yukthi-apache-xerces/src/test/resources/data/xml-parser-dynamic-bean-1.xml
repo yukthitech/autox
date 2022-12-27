@@ -1,0 +1,13 @@
+<test xmlns:ccg="/fw/ccg/XMLBeanParser" attr1="val1" attr2="val2">
+	<node1>node-val1</node1>
+	<node2>node-val2</node2>
+	<node2>node-val3</node2>
+	
+	<node3 intVal="100">
+	</node3>
+
+	<node4 intVal="100">
+	</node4>
+	<node4 intVal="100">
+	</node4>
+</test>

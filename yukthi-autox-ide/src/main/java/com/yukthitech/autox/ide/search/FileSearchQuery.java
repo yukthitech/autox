@@ -143,6 +143,12 @@ public class FileSearchQuery
 	{
 		return fileNamePatterns;
 	}
+	
+	FileSearchQuery setFileNamePatterns(List<String> fileNamePatterns)
+	{
+		this.fileNamePatterns = fileNamePatterns;
+		return this;
+	}
 
 	public Scope getScope()
 	{

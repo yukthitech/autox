@@ -16,11 +16,13 @@
 package com.yukthitech.autox.ide.views.search;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -273,5 +275,40 @@ public class SearchResultTreeModel extends DefaultTreeModel
 			
 			super.fireTreeNodesRemoved(this, entry.getKey().getPath(), indexes, delChilds);
 		}
+	}
+	
+	public List<SearchResult> fetchResults()
+	{
+		List<SearchResult> resLst = new ArrayList<SearchResult>();
+		
+		Stack<DefaultMutableTreeNode> nodeStack = new Stack<DefaultMutableTreeNode>();
+		nodeStack.add(root);
+		
+		while(!nodeStack.isEmpty())
+		{
+			DefaultMutableTreeNode node = nodeStack.pop();
+			int childCount = node.getChildCount();
+			
+			for(int i = 0; i < childCount; i++)
+			{
+				DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+				
+				if(child instanceof SearchResultNode)
+				{
+					resLst.add( ((SearchResultNode) child).result);
+					continue;
+				}
+				
+				nodeStack.push(child);
+			}
+		}
+
+		return resLst;
+	}
+	
+	public void reset()
+	{
+		root.removeAllChildren();
+		super.nodeStructureChanged(root);
 	}
 }

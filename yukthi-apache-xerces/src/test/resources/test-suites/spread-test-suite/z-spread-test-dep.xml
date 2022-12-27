@@ -1,0 +1,27 @@
+<test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<test-suite name="spreadTestSuite" author="kiran">
+		<test-case name="crossDepTestCase" dependencies="spreadTestCase">
+			<description>Ensures dependency test case from other file is executed first</description>
+
+			<wrap:steps>
+				<s:assert-equals actual="attr: spreadVarVal" expected="int: 100"/>
+			</wrap:steps>
+		</test-case>
+
+		<test-case name="interDepTestCase" dependencies="interTestCase" author="xyz">
+			<description>Ensures dependency test case is executed before this test case</description>
+
+			<wrap:steps>
+				<s:assert-equals actual="attr: spreadVarVal" expected="int: 200"/>
+			</wrap:steps>
+		</test-case>
+
+		<test-case name="interTestCase">
+			<description>Simple test case which will used as dependency</description>
+
+			<wrap:steps>
+				<s:set expression="spreadVarVal" value="int: 200"/>
+			</wrap:steps>
+		</test-case>
+	</test-suite>
+</test-file>
