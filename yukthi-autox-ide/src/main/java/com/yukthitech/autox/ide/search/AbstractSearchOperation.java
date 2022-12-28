@@ -35,6 +35,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
@@ -313,21 +314,19 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 				}
 			}
 			
-			content = openEditor.getContent();
+			openEditor.saveFile();
 		}
-		else
+		
+		try
 		{
-			try
-			{
-				content = FileUtils.readFileToString(file, Charset.defaultCharset());
-			}catch(Exception ex)
-			{
-				logger.error("An error occurred while loading content of file: {}", file.getPath(), ex);
+			content = FileUtils.readFileToString(file, Charset.defaultCharset());
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while loading content of file: {}", file.getPath(), ex);
 
-				JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
-						String.format("An error occurred while loading content of file: %s\nError: %s", file.getPath(), ex.getMessage()));
-				return null;
-			}
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
+					String.format("An error occurred while loading content of file: %s\nError: %s", file.getPath(), IIdeConstants.wrap(ex.getMessage())));
+			return null;
 		}
 		
 		return content;
@@ -350,7 +349,7 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 			logger.error("An error occurred while replacing content of file: {}", file.getPath(), ex);
 
 			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
-					String.format("An error occurred while replacing content of file: %s\nError: %s", file.getPath(), ex.getMessage()));
+					String.format("An error occurred while replacing content of file: %s\nError: %s", file.getPath(), IIdeConstants.wrap(ex.getMessage())));
 			return false;
 		}
 		

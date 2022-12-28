@@ -38,8 +38,11 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.search.FileSearchQuery.Scope;
+import com.yukthitech.autox.ide.state.PersistableState;
+import java.awt.Font;
 
 public class XmlSearchPanel extends JPanel
 {
@@ -51,15 +54,23 @@ public class XmlSearchPanel extends JPanel
 	
 	private final JPanel repAllBut = new JPanel();
 	private final JLabel lblNewLabel = new JLabel("xPath to Search:");
+	
+	@PersistableState
 	private final JTextField xpathFld = new JTextField();
+	
 	private final JLabel lblNewLabel_4 = new JLabel("Scope:");
 	private final JPanel panel_1 = new JPanel();
+	
 	private final JRadioButton txtAllProjRbut = new JRadioButton("All Projects");
 	private final JRadioButton txtSelFoldersRbut = new JRadioButton("Selected Folders");
+	
 	private final JLabel lblNewLabel_1 = new JLabel("Replacement Script:");
 	private final RTextScrollPane textScrollPane = new RTextScrollPane();
 	private final JLabel lblNewLabel_2 = new JLabel("<html>\r\ncurrentElement - Current matched element.  This script should return one or more element(s) which would replace current node.\r\n</html>");
+	
+	@PersistableState
 	private final RSyntaxTextArea replaceScriptFld = new RSyntaxTextArea();
+	
 	private final JButton helpBut = new JButton("Help");
 	private final JPanel panel = new JPanel();
 	private final JPanel panel_3 = new JPanel();
@@ -132,6 +143,7 @@ public class XmlSearchPanel extends JPanel
 		gbc_xpathFld.insets = new Insets(0, 0, 5, 0);
 		gbc_xpathFld.gridx = 1;
 		gbc_xpathFld.gridy = 0;
+		xpathFld.setFont(new Font("Monospaced", Font.BOLD, 13));
 		xpathFld.setColumns(10);
 		repAllBut.add(xpathFld, gbc_xpathFld);
 		
@@ -195,9 +207,13 @@ public class XmlSearchPanel extends JPanel
 		gbc_textScrollPane.gridx = 0;
 		gbc_textScrollPane.gridy = 6;
 		repAllBut.add(textScrollPane, gbc_textScrollPane);
+		
 		replaceScriptFld.setTabSize(3);
+		replaceScriptFld.setSyntaxEditingStyle(RSyntaxTextArea.SYNTAX_STYLE_JAVASCRIPT);
+		replaceScriptFld.setCodeFoldingEnabled(true);
 		
 		textScrollPane.setViewportView(replaceScriptFld);
+		textScrollPane.setLineNumbersEnabled(true);
 
 		scopeGroup.add(txtAllProjRbut);
 		scopeGroup.add(txtSelFoldersRbut);
@@ -291,7 +307,22 @@ public class XmlSearchPanel extends JPanel
 			return;
 		}
 		
-		searchService.replaceAll(query);
-		parentDialog.setVisible(false);
+		int replaceCount = searchService.replaceAll(query);
+		
+		if(replaceCount >= 0)
+		{
+			parentDialog.setVisible(false);
+			JOptionPane.showMessageDialog(this, "Number of occurrences replaced: " + replaceCount);
+		}
+	}
+	
+	void loadState(IdeState state)
+	{
+		
+	}
+	
+	void saveState(IdeState state)
+	{
+		
 	}
 }

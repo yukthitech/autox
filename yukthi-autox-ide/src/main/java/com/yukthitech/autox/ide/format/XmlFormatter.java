@@ -95,13 +95,17 @@ public class XmlFormatter
 		}
 	}
 	
-	private static Element formatElement(Element oldElement, Document newDoc, String indentation, AtomicInteger childCount)
+	public static Element formatElement(Element oldElement, Document newDoc, String indentation, AtomicInteger childCount)
 	{
-		Element element = newDoc.createElement(oldElement.getNodeName());
+		Element element = null;
 		
 		if(StringUtils.isNotEmpty(oldElement.getPrefix()))
 		{
-			element.setPrefix(oldElement.getPrefix());
+			element = newDoc.createElementNS(oldElement.getNamespaceURI(), oldElement.getNodeName());
+		}
+		else
+		{
+			element = newDoc.createElement(oldElement.getNodeName());
 		}
 		
 		//set attributes on the new node
@@ -113,13 +117,18 @@ public class XmlFormatter
 			Attr oldAttr = (Attr) attrMap.item(i);
 			String name = oldAttr.getName();
 			
-			Attr attr = newDoc.createAttribute(name);
-			attr.setValue(oldAttr.getValue());
+			Attr attr = null;
 
 			if(StringUtils.isNotEmpty(oldAttr.getPrefix()))
 			{
-				attr.setPrefix(oldAttr.getPrefix());
+				attr = newDoc.createAttributeNS(oldAttr.getNamespaceURI(), oldAttr.getNodeName());
 			}
+			else
+			{
+				attr = newDoc.createAttribute(name);
+			}
+			
+			attr.setValue(oldAttr.getValue());
 			
 			element.setAttributeNode(attr);
 		}

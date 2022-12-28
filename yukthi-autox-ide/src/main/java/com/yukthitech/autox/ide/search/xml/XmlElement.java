@@ -16,14 +16,15 @@
 package com.yukthitech.autox.ide.search.xml;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.InvalidArgumentException;
 import org.w3c.dom.CDATASection;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -32,6 +33,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import com.google.common.base.Objects;
+import com.yukthitech.autox.ide.format.XmlFormatter;
 
 public class XmlElement
 {
@@ -49,39 +51,6 @@ public class XmlElement
 			this.name = name;
 			this.value = value;
 		}
-		
-		public Attribute()
-		{}
-
-		public String getPrefix()
-		{
-			return prefix;
-		}
-
-		public void setPrefix(String prefix)
-		{
-			this.prefix = prefix;
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-		public void setName(String name)
-		{
-			this.name = name;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public void setValue(String value)
-		{
-			this.value = value;
-		}
 	}
 	
 	public static class CdataValue
@@ -92,18 +61,18 @@ public class XmlElement
 		{
 			this.value = value;
 		}
+	}
+	
+	public static class CommentValue
+	{
+		private String value;
 
-		public String getValue()
-		{
-			return value;
-		}
-
-		public void setValue(String value)
+		public CommentValue(String value)
 		{
 			this.value = value;
 		}
 	}
-	
+
 	private Map<String, String> namespaces;
 	
 	private String prefix;
@@ -120,10 +89,11 @@ public class XmlElement
 		this.name = name;
 	}
 	
-	public XmlElement(Document doc, String name)
+	public XmlElement(Document doc, String prefix, String name)
 	{
 		namespaces = XmlSearchUtils.getNameSpaces(doc);
 		this.name = name;
+		this.prefix = prefix;
 	}
 	
 	public XmlElement(Element element)
@@ -138,7 +108,7 @@ public class XmlElement
 		if(attrMap != null && attrMap.getLength() > 0)
 		{
 			this.attributes = new ArrayList<>();
-			int count = 0;
+			int count = attrMap.getLength();
 			
 			for(int i = 0; i < count; i++)
 			{
@@ -162,15 +132,20 @@ public class XmlElement
 				{
 					childNodes.add(new XmlElement((Element) child));
 				}
-				else if(child instanceof Text)
+				else if(child instanceof Comment)
 				{
-					String val = ((Text) child).getNodeValue().trim();
-					childNodes.add(val);
+					String val = ((Comment) child).getNodeValue().trim();
+					childNodes.add(new CommentValue(val));
 				}
 				else if(child instanceof CDATASection)
 				{
 					String val = ((CDATASection) child).getNodeValue().trim();
 					childNodes.add(new CdataValue(val));
+				}
+				else if(child instanceof Text)
+				{
+					String val = ((Text) child).getNodeValue().trim();
+					childNodes.add(val);
 				}
 			}
 		}
@@ -285,6 +260,24 @@ public class XmlElement
 		return Collections.unmodifiableList(childNodes);
 	}
 	
+	public XmlElement getChildElement(String prefix, String name)
+	{
+		if(this.childNodes == null)
+		{
+			return null;
+		}
+		
+		XmlElement res = this.childNodes
+				.stream()
+				.filter(obj -> (obj instanceof XmlElement))
+				.map(obj -> (XmlElement) obj)
+				.filter(elem -> Objects.equal(prefix, elem.prefix) && Objects.equal(name, elem.name))
+				.findFirst()
+				.orElse(null);
+		
+		return res;
+	}
+
 	public List<XmlElement> getChildElements()
 	{
 		if(childNodes == null)
@@ -301,7 +294,7 @@ public class XmlElement
 		return Collections.unmodifiableList(elements);
 	}
 
-	public void setChildElements(List<XmlElement> childElements)
+	public void setChildObjects(List<Object> childElements)
 	{
 		this.childNodes = null;
 
@@ -310,11 +303,20 @@ public class XmlElement
 			return;
 		}
 		
-		childElements.forEach(elem -> addChildElement(elem));
+		childElements.forEach(elem -> addChildObject(elem));
 	}
 	
-	private void addChildObject(Object obj)
+	public void addChildObject(Object obj)
 	{
+		if(!(obj instanceof XmlElement) 
+				&& !(obj instanceof CdataValue)
+				&& !(obj instanceof CommentValue)
+				&& !(obj instanceof String)
+			)
+		{
+			throw new InvalidArgumentException("Invalid chid object specified: " + obj);
+		}
+		
 		if(this.childNodes == null)
 		{
 			this.childNodes = new ArrayList<>();
@@ -338,16 +340,6 @@ public class XmlElement
 		addChildObject(elem);
 	}
 	
-	public void addChildElements(Collection<XmlElement> elements)
-	{
-		if(elements == null)
-		{
-			return;
-		}
-		
-		elements.forEach(elem -> addChildElement(elem));
-	}
-
 	public XmlElement removeChildElement(String prefix, String name)
 	{
 		if(this.childNodes == null)
@@ -458,13 +450,17 @@ public class XmlElement
 		addChildObject(new CdataValue(value));
 	}
 	
-	public Element toDomElement(Document doc, String initIndent, String indentStr)
+	public Element toDomElement(Document doc, String initIndent)
 	{
-		Element newElem = doc.createElementNS(namespaces.get(prefix), name);
+		String qname = prefix != null ? prefix + ":" + name : name;
+		Element newElem = doc.createElementNS(namespaces.get(prefix), qname);
 		
 		if(attributes != null)
 		{
-			attributes.forEach(attr -> newElem.setAttributeNS(namespaces.get(attr.prefix), attr.name, attr.value));
+			attributes.forEach(attr -> newElem.setAttributeNS(
+					namespaces.get(attr.prefix), 
+					attr.prefix != null ? attr.prefix + ":" + attr.name : attr.name, 
+					attr.value));
 		}
 		
 		if(childNodes != null)
@@ -481,16 +477,21 @@ public class XmlElement
 				
 				if(child instanceof XmlElement)
 				{
-					Element childElem = toDomElement(doc, initIndent + indentStr, indentStr);
-					newElem.appendChild(doc.createTextNode("\n" + initIndent + indentStr));
+					Element childElem = ((XmlElement) child).toDomElement(doc, initIndent + "\t");
 					newElem.appendChild(childElem);
 					continue;
 				}
 				
+				if(child instanceof CommentValue)
+				{
+					String strVal = ((CommentValue) child).value;
+					newElem.appendChild(doc.createComment(strVal));
+					continue;
+				}
+
 				if(child instanceof CdataValue)
 				{
 					String strVal = ((CdataValue) child).value;
-					
 					newElem.appendChild(doc.createCDATASection(strVal));
 					continue;
 				}
@@ -498,16 +499,12 @@ public class XmlElement
 				if(child instanceof String)
 				{
 					String strVal = (String) child;
-					
 					newElem.appendChild(doc.createTextNode(strVal));
 					continue;
 				}
-				
-				//add indent for closing node
-				newElem.appendChild(doc.createTextNode("\n" + initIndent));
 			}
 		}
 		
-		return newElem;
+		return XmlFormatter.formatElement(newElem, doc, initIndent, new AtomicInteger(0));
 	}
 }

@@ -19,7 +19,9 @@ import com.yukthitech.autox.ide.model.IdeState;
 
 /**
  * Event that occurs before opening the ide. And after previous state is loaded 
- * by all components/services.
+ * by all components/services in old way.
+ * 
+ * Even this event can be used to load the event.
  * 
  * @author akiran
  */

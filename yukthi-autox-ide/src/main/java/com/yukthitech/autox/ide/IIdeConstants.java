@@ -17,6 +17,8 @@ package com.yukthitech.autox.ide;
 
 import java.awt.Color;
 
+import org.apache.commons.text.WordUtils;
+
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 public interface IIdeConstants
@@ -31,4 +33,11 @@ public interface IIdeConstants
 	public int FILE_EDITOR_PARSE_DELAY = 1000;
 	
 	public Color DEBUG_BG_COLOR = new Color(198, 219, 174);
+	
+	public int MSSG_WRAP_LENGTH = 105;
+	
+	public static String wrap(String text)
+	{
+		return WordUtils.wrap(text, MSSG_WRAP_LENGTH, "\n   ", false);
+	}
 }

@@ -68,6 +68,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
 
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.search.xml.XmlElement;
@@ -398,7 +399,7 @@ public class XpathSearchOperation extends AbstractSearchOperation
 	}
 	
 	@Override
-	public void replaceAll(FileEditorTabbedPane fileEditorTabbedPane)
+	public int replaceAll(FileEditorTabbedPane fileEditorTabbedPane)
 	{
 		File file = null;
 		
@@ -417,6 +418,8 @@ public class XpathSearchOperation extends AbstractSearchOperation
 			throw new InvalidStateException("An error occurred while creating builders", ex);
 		}
 		
+		int replacementCount = 0;
+		
 		while((file = nextFile()) != null)
 		{
 			String content = null;
@@ -429,8 +432,9 @@ public class XpathSearchOperation extends AbstractSearchOperation
 				logger.error("An error occurred while loading content of file: {}", file.getPath(), ex);
 				
 				JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
-						String.format("An error occurred while loading content of file: %s\nError: %s", file.getPath(), ex.getMessage()));
-				return;
+						String.format("An error occurred while loading content of file: %s\nError: %s", file.getPath(), 
+								IIdeConstants.wrap(ex.getMessage())));
+				return -(replacementCount + 1);
 			}
 			
 			TreeMap<Integer, FileLine> lineMaping = null;
@@ -449,8 +453,9 @@ public class XpathSearchOperation extends AbstractSearchOperation
 				logger.error("An error occurred while evaluating xpath expression for file: {}", file.getPath(), ex);
 				
 				JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
-						String.format("An error occurred while evaluating xpath expression for file: %s\nError: %s", file.getPath(), ex.getMessage()));
-				return;
+						String.format("An error occurred while evaluating xpath expression for file: %s\nError: %s", file.getPath(), 
+								IIdeConstants.wrap(ex.getMessage())));
+				return -(replacementCount + 1);
 			}
 				
 			int nodeCount = nodeList.getLength();
@@ -467,30 +472,35 @@ public class XpathSearchOperation extends AbstractSearchOperation
 				ElementLocation elemLoc = (ElementLocation) element.getUserData(LOCATION_KEY);
 				FileLine fileLine = lineMaping.get(elemLoc.lineNumber);
 				
-				List<Element> replacementElem = null;
+				List<Element> replacementElems = null;
+				String lineIndent = XmlSearchUtils.getIndent(fileLine.content);
 				
 				try
 				{
-					replacementElem = executeReplacementScript(xmlDocument, element, XmlSearchUtils.getIndent(fileLine.content));
+					replacementElems = executeReplacementScript(xmlDocument, element, lineIndent);
+					XmlSearchUtils.replaceElement(xmlDocument, element, replacementElems, lineIndent);
 				}catch(Exception ex)
 				{
+					logger.error("An error occurred while replacing matches for file: {}", file.getPath(), ex);
 					JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
-							String.format("An error occurred while evaluating xpath expression for file: %s\nError: %s", file.getPath(), ex.getMessage()));
-					return;
+							String.format("An error occurred while replacing matches for file: %s\n%s", file.getPath(), ex.getMessage()));
+					return -(replacementCount + 1);
 				}
 
-				XmlSearchUtils.replaceElement(xmlDocument, element, replacementElem);
+				replacementCount++;
 			}
 			
 			String finalContent = XmlSearchUtils.toXmlContent(xmlDocument);
 			super.writeContent(fileEditorTabbedPane, file, finalContent);
 		}
+		
+		return replacementCount;
 	}
 	
 	@SuppressWarnings("unchecked")
 	private List<Element> executeReplacementScript(Document doc, Element element, String elementIndent)
 	{
-		Map<String, Object> defaultBindings = CommonUtils.toMap("document", doc, "element", element);
+		Map<String, Object> defaultBindings = CommonUtils.toMap("document", doc, "element", new XmlElement(element));
 				
 		ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 		Object res = null;
@@ -506,14 +516,14 @@ public class XpathSearchOperation extends AbstractSearchOperation
 			res = engine.eval(finalScript);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while executing replace-js script\nError: " + ex.getMessage(), ex);
+			throw new InvalidStateException("Script Error: " + IIdeConstants.wrap(ex.getMessage()), ex);
 		}
 		
 		List<XmlElement> resLst = null;
 
 		if(res instanceof XmlElement)
 		{
-			res = Arrays.asList((XmlElement) res);
+			resLst = Arrays.asList((XmlElement) res);
 		}
 		else if(res instanceof List)
 		{
@@ -524,7 +534,7 @@ public class XpathSearchOperation extends AbstractSearchOperation
 			{
 				if(!(obj instanceof XmlElement))
 				{
-					throw new InvalidStateException("Result list returned by script contains non-xml-element. Error element: {}", obj);
+					throw new InvalidStateException("Invalid Result: list returned by script contains non-xml-element.\nError element: {}", obj);
 				}
 				
 				resLst.add((XmlElement) obj);
@@ -532,11 +542,11 @@ public class XpathSearchOperation extends AbstractSearchOperation
 		}
 		else
 		{
-			throw new InvalidStateException("Result returned by script contains neither xml-element nor list of xml-element. Result was: {}", res);
+			throw new InvalidStateException("Invalid Result: Result returned by script contains neither xml-element nor list of xml-element.\nResult was: {}", res);
 		}
 		
 		return resLst.stream()
-				.map(xmlElem -> xmlElem.toDomElement(doc, elementIndent, "\t"))
+				.map(xmlElem -> xmlElem.toDomElement(doc, elementIndent))
 				.collect(Collectors.toList());
 	}
 }

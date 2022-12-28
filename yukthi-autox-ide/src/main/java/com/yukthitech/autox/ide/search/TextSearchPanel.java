@@ -33,19 +33,20 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.dialog.RegexSandboxDialog;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.search.FileSearchQuery.Scope;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
+import com.yukthitech.autox.ide.state.PersistableState;
 
 public class TextSearchPanel extends JPanel
 {
@@ -56,16 +57,28 @@ public class TextSearchPanel extends JPanel
 	private final JButton txtReplaceAllBut = new JButton("Replace All");
 	private final JPanel mainSearchPanel = new JPanel();
 	private final JLabel lblNewLabel = new JLabel("Search:");
+	
+	@PersistableState
 	private final JTextField searchStrFld = new JTextField();
+	
 	private final JPanel panel = new JPanel();
+	
+	@PersistableState
 	private final JCheckBox txtCaseSensitiveCbox = new JCheckBox("Case Sensitive");
+	
+	@PersistableState
 	private final JCheckBox txtRegexCbox = new JCheckBox("Regular Expression");
+	
 	private final JLabel lblNewLabel_3 = new JLabel("Replace With:");
 	private final JLabel lblNewLabel_1 = new JLabel("File Pattern:");
+	
+	@PersistableState
 	private final JTextField filePtrnFld = new JTextField();
+	
 	private final JLabel lblNewLabel_2 = new JLabel("(Comma separated patterns. * = any string, ? = any character)");
 	private final JLabel lblNewLabel_4 = new JLabel("Scope:");
 	private final JPanel panel_1 = new JPanel();
+	
 	private final JRadioButton txtAllProjRbut = new JRadioButton("All Projects");
 	private final JRadioButton txtSelFoldersRbut = new JRadioButton("Selected Folders");
 	
@@ -84,9 +97,13 @@ public class TextSearchPanel extends JPanel
 	@Autowired
 	private RegexSandboxDialog regexSandboxDialog;
 	
+	@PersistableState
 	private final JCheckBox matchMultiLineCbox = new JCheckBox("Match multiple lines");
 	private final JScrollPane scrollPane = new JScrollPane();
+	
+	@PersistableState
 	private final JTextArea replaceWithFld = new JTextArea();
+	
 	private final JLabel lblNewLabel_5 = new JLabel("(Regex - caturing group values can be refered using $1, $2.. $n)");
 	private final JPanel panel_3 = new JPanel();
 	private final JPanel panel_4 = new JPanel();
@@ -351,8 +368,13 @@ public class TextSearchPanel extends JPanel
 			return;
 		}
 		
-		searchService.replaceAll(query);
-		parentDialog.setVisible(false);
+		int replaceCount = searchService.replaceAll(query);
+		
+		if(replaceCount >= 0)
+		{
+			parentDialog.setVisible(false);
+			JOptionPane.showMessageDialog(this, "Number of occurrences replaced: " + replaceCount);
+		}
 	}
 	
 	private void displayRegexSandbox(ActionEvent e)

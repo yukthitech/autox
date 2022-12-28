@@ -21,6 +21,14 @@ public interface ISearchOperation
 
 	void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches);
 
-	void replaceAll(FileEditorTabbedPane fileEditorTabbedPane);
+	/**
+	 * Should return number of replacements done. On error this should return current number of replacements + 1 as negative value.
+	 * 
+	 * So in case of no replacements value should be -1.
+	 * 
+	 * @param fileEditorTabbedPane
+	 * @return
+	 */
+	int replaceAll(FileEditorTabbedPane fileEditorTabbedPane);
 
 }

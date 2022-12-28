@@ -93,11 +93,14 @@ public class FileSearchService
 		searchResultPanel.setSearchResults(op, results);
 	}
 	
-	public void replaceAll(FileSearchQuery query)
+	public int replaceAll(FileSearchQuery query)
 	{
 		List<File> searchFolders = getSearchFolders(query);
 		
-		ISearchOperation op = new TextSearchOperation(query, searchFolders, true);
-		op.replaceAll(fileEditorTabbedPane);
+		ISearchOperation op = query.getQueryType() == QueryType.TEXT ?
+				new TextSearchOperation(query, searchFolders, true) :
+				new XpathSearchOperation(query, searchFolders, true);
+
+		return op.replaceAll(fileEditorTabbedPane);
 	}
 }

@@ -195,4 +195,9 @@ public class IdeEventManager
 			this.eventQueue.notifyAll();
 		}
 	}
+
+	public void raiseSyncEvent(IIdeEvent event)
+	{
+		processEvent(event);
+	}
 }

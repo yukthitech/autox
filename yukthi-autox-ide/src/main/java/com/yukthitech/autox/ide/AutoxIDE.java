@@ -357,7 +357,7 @@ public class AutoxIDE extends JFrame
 		IdeState ideState = ideStateManager.getState();
 
 		//send the closing event
-		ideEventManager.raiseAsyncEvent(new IdeClosingEvent(ideState));
+		ideEventManager.raiseSyncEvent(new IdeClosingEvent(ideState));
 		
 		//old way of getting distributed state
 		ideContext.getProxy().saveState(ideState);

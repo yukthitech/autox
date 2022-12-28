@@ -163,10 +163,11 @@ public class TextSearchOperation extends AbstractSearchOperation
 
 	
 	@Override
-	public void replaceAll(FileEditorTabbedPane fileEditorTabbedPane)
+	public int replaceAll(FileEditorTabbedPane fileEditorTabbedPane)
 	{
 		File file = null;
 		Pattern searchPattern = buildSearchPattern();
+		int replacementCount = 0;
 		
 		while((file = nextFile()) != null)
 		{
@@ -174,7 +175,7 @@ public class TextSearchOperation extends AbstractSearchOperation
 			
 			if(content == null)
 			{
-				return;
+				return -(replacementCount + 1);
 			}
 			
 			Matcher matcher = searchPattern.matcher(content);
@@ -185,6 +186,7 @@ public class TextSearchOperation extends AbstractSearchOperation
 			{
 				matcher.appendReplacement(buffer, fileSearchQuery.getReplaceWith());
 				matchFound = true;
+				replacementCount++;
 			}
 			
 			if(matchFound)
@@ -193,9 +195,11 @@ public class TextSearchOperation extends AbstractSearchOperation
 	
 				if(!writeContent(fileEditorTabbedPane, file, buffer.toString()))
 				{
-					return;
+					return -(replacementCount + 1);
 				}
 			}
 		}
+		
+		return replacementCount;
 	}
 }

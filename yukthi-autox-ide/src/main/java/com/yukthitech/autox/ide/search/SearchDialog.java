@@ -27,9 +27,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.state.PersistableState;
 import com.yukthitech.swing.EscapableDialog;
 
 @Component
+@PersistableState(fields = true)
 public class SearchDialog extends EscapableDialog
 {
 	private static final long serialVersionUID = 1L;
@@ -39,7 +41,11 @@ public class SearchDialog extends EscapableDialog
 	
 	private final JPanel contentPanel = new JPanel();
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+	
+	@PersistableState(fields = true, directState = false)
 	private final TextSearchPanel textSearchPanel = new TextSearchPanel();
+	
+	@PersistableState(fields = true, directState = false)
 	private final XmlSearchPanel xmlSearchPanel = new XmlSearchPanel();
 	
 	public SearchDialog()
@@ -70,5 +76,4 @@ public class SearchDialog extends EscapableDialog
 		xmlSearchPanel.resetForDisplay();
 		super.setVisible(true);
 	}
-
 }

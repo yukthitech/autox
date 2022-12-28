@@ -193,6 +193,7 @@ public class FileEditor extends JPanel
 			loadedText = IdeUtils.removeCarriageReturns(loadedText);
 			
 			syntaxTextArea.setText(loadedText);
+			syntaxTextArea.discardAllEdits();
 			syntaxTextArea.setCaretPosition(0);
 		} catch(Exception ex)
 		{
@@ -683,7 +684,15 @@ public class FileEditor extends JPanel
 	{
 		int carPos = syntaxTextArea.getCaretPosition();
 		
-		syntaxTextArea.setText(content);
+		syntaxTextArea.beginAtomicEdit();
+		
+		try
+		{
+			syntaxTextArea.setText(content);
+		}finally
+		{
+			syntaxTextArea.endAtomicEdit();
+		}
 		
 		if(carPos >= content.length())
 		{
@@ -1059,20 +1068,28 @@ public class FileEditor extends JPanel
 			{
 				int count = 0;
 				
-				while(true)
+				syntaxTextArea.beginAtomicEdit();
+				
+				try
 				{
-					int range[] = find(command, startPos, getCaretPositionForFind(command), false, fullText);
-					
-					if(range == null)
+					while(true)
 					{
-						break;
+						int range[] = find(command, startPos, getCaretPositionForFind(command), false, fullText);
+						
+						if(range == null)
+						{
+							break;
+						}
+						
+						count++;
+						syntaxTextArea.replaceRange(command.getReplaceWith(), range[0], range[1]);
+						syntaxTextArea.setCaretPosition(range[0] + command.getReplaceWith().length());
+						
+						fullText = syntaxTextArea.getText();
 					}
-					
-					count++;
-					syntaxTextArea.replaceRange(command.getReplaceWith(), range[0], range[1]);
-					syntaxTextArea.setCaretPosition(range[0] + command.getReplaceWith().length());
-					
-					fullText = syntaxTextArea.getText();
+				}finally
+				{
+					syntaxTextArea.endAtomicEdit();
 				}
 				
 				return count + " occurrences are replaced.";

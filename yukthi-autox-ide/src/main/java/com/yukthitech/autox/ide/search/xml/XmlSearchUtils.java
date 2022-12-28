@@ -16,6 +16,7 @@
 package com.yukthitech.autox.ide.search.xml;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,10 +69,10 @@ public class XmlSearchUtils
 		return namespaceMap;
 	}
 
-	public static void replaceElement(Document doc, Element elementToReplace, List<Element> newElements)
+	public static void replaceElement(Document doc, Element elementToReplace, List<Element> newElements, String initIndent)
 	{
 		Element parent = (Element) elementToReplace.getParentNode();
-		Element parentCopy = doc.createElementNS(parent.getNamespaceURI(), parent.getLocalName());
+		Element parentCopy = doc.createElementNS(parent.getNamespaceURI(), parent.getNodeName());
 		
 		//create parent copy with replaced child elements
 		NamedNodeMap attrMap = parent.getAttributes();
@@ -83,20 +84,27 @@ public class XmlSearchUtils
 			for(int i = 0; i < attrCount; i++)
 			{
 				Node attr = attrMap.item(i);
-				parentCopy.setAttributeNS(attr.getNamespaceURI(), attr.getLocalName(), attr.getNodeValue());
+				parentCopy.setAttributeNS(null, attr.getNodeName(), attr.getNodeValue());
 			}
 		}
 		
-		NodeList childLst = parent.getChildNodes();
-		int childCount = childLst.getLength();
-		
-		for(int i = 0; i < childCount; i++)
+		for(Node child : getChildNodes(parent))
 		{
-			Node child = childLst.item(i);
-			
 			if(child == elementToReplace)
 			{
-				newElements.forEach(elem -> parentCopy.appendChild(elem));
+				int index = 0;
+				
+				for(Element elem : newElements)
+				{
+					if(index > 0)
+					{
+						parentCopy.appendChild(doc.createTextNode("\n" + initIndent));
+					}
+					
+					parentCopy.appendChild(elem);
+					index ++;
+				}
+				
 				continue;
 			}
 			
@@ -111,7 +119,7 @@ public class XmlSearchUtils
 		else
 		{
 			Element grandParent = (Element) parent.getParentNode();
-			grandParent.replaceChild(parent, parentCopy);
+			grandParent.replaceChild(parentCopy, parent);
 		}
 	}
 	
@@ -132,6 +140,33 @@ public class XmlSearchUtils
 		}
 
 		return builder.toString();
+	}
+	
+	public static String indentString(String nodeIndent, String content, boolean multiLined)
+	{
+		if(!multiLined)
+		{
+			multiLined = content.contains("\n");
+		}
+		
+		if(!multiLined && content.length() <= 30)
+		{
+			return content.trim();
+		}
+		
+		String lines[] = content.split("\\n");
+		StringBuilder res = new StringBuilder();
+		String lineIndent = nodeIndent + "\t";
+		
+		for(String line : lines)
+		{
+			res.append("\n").append(lineIndent).append(line.trim());
+		}
+		
+		//add required indentation for closing node
+		res.append("\n").append(nodeIndent);
+		
+		return res.toString();
 	}
 	
 	public static String toXmlContent(Document doc)
@@ -155,5 +190,25 @@ public class XmlSearchUtils
 		{
 			throw new InvalidStateException(ex.getMessage(), ex);
 		}
+	}
+	
+	public static List<Node> getChildNodes(Element element)
+	{
+		NodeList lst = element.getChildNodes();
+		
+		if(lst == null)
+		{
+			return Collections.emptyList();
+		}
+		
+		int size = lst.getLength();
+		List<Node> childLst = new ArrayList<>(size);
+		
+		for(int i = 0; i < size; i++)
+		{
+			childLst.add(lst.item(i));
+		}
+		
+		return childLst;
 	}
 }
