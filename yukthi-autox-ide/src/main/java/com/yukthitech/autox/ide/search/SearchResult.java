@@ -16,6 +16,7 @@
 package com.yukthitech.autox.ide.search;
 
 import java.io.File;
+import java.util.Objects;
 
 /**
  * Result of search.
@@ -65,5 +66,36 @@ public class SearchResult
 	public String getLineHtml()
 	{
 		return lineHtml;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj == this)
+		{
+			return true;
+		}
+
+		if(!(obj instanceof SearchResult))
+		{
+			return false;
+		}
+
+		SearchResult other = (SearchResult) obj;
+		return file.equals(other.file) 
+				&& start == other.start
+				&& end == other.end;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashcode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(file, start, end);
 	}
 }

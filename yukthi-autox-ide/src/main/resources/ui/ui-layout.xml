@@ -47,9 +47,6 @@
 			<item label="Rename" mnemonic="R" action="renameFile">
 				<short-key key="F2"/>
 			</item>
-			<item label="Delete" mnemonic="D" action="deleteFile">
-				<short-key key="DELETE"/>
-			</item>
 
 			<item label="-" />
 			
@@ -133,7 +130,7 @@
 
 		<menu label="Tools" mnemonic="T">
 			<item label="JXPath Sandbox" mnemonic="J" action="displayXpathSandbox" icon="/ui/icons/xpath-sandbox.svg"/>
-			<item label="Regex Sandbox" mnemonic="R" action="displayRegexSandbox" icon="/ui/icons/regex.svg"/>
+			<item label="Regex Sandbox" mnemonic="R" action="displayRegexSandbox" icon="/ui/icons/regex-sandbox.svg"/>
 		</menu>
 
 		<menu label="Help" mnemonic="H">
@@ -161,7 +158,7 @@
 		<item icon="-" />
 		
 		<item icon="/ui/icons/xpath-sandbox.svg" tooltip="JXPath Sandbox" action="displayXpathSandbox" />
-		<item icon="/ui/icons/regex.svg" tooltip="Regex Sandbox" action="displayRegexSandbox" />
+		<item icon="/ui/icons/regex-sandbox.svg" tooltip="Regex Sandbox" action="displayRegexSandbox" />
 		
 		<item icon="-" />
 		

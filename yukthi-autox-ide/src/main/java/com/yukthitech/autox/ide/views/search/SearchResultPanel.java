@@ -21,9 +21,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -61,9 +65,12 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 	private static final long serialVersionUID = 1L;
 	
 	private static ImageIcon REPEAT_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/repeat.svg", 18);
-	private static ImageIcon REPLACE_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/replace.svg", 18);
 	private static ImageIcon REMOVE_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/clear.svg", 18);
+	private static ImageIcon REMOVE_ALL_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/clearAll.svg", 18);
 	
+	private static ImageIcon REPLACE_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/replace.svg", 18);
+	private static ImageIcon REPLACE_SELECTED_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/replace-selected.svg", 18);
+
 	private static ImageIcon EXPAND_ALL_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/expand-all.svg", 18);
 	private static ImageIcon COLLAPSE_ALL_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/collapse-all.svg", 18);
 	
@@ -83,14 +90,19 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 	private final JPanel panel = new JPanel();
 
 	private final IconButton repeatBut = new IconButton(REPEAT_ICON);
-	private final IconButton replaceBut = new IconButton(REPLACE_ICON);
 	private final IconButton removeSelectedBut = new IconButton(REMOVE_ICON);
+	private final IconButton removeAllBut = new IconButton(REMOVE_ALL_ICON);
+
 	private final JSeparator separator_1_1 = new JSeparator();
+
+	private final IconButton replaceSelectedBut = new IconButton(REPLACE_SELECTED_ICON);
+	private final IconButton replaceBut = new IconButton(REPLACE_ICON);
+
+	private final JSeparator separator_1_1_1 = new JSeparator();
 
 	private final IconButton expandAllBut = new IconButton(EXPAND_ALL_ICON);
 	private final IconButton collapseAllBut = new IconButton(COLLAPSE_ALL_ICON);
-	private final JSeparator separator = new JSeparator();
-
+	
 	private final JLabel noMatchesLbl = new JLabel("            No matches found !!!");
 	private final JPanel resultsContainerPnl = new JPanel();
 	
@@ -129,6 +141,18 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		searchResTree.setModel(searchResultTreeModel);
 		searchResTree.addTreeSelectionListener(this::onTreeItemSelection);
 		
+		searchResTree.addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+				if(e.getKeyCode() == KeyEvent.VK_DELETE)
+				{
+					onRemove(null);
+				}
+			}
+		});
+		
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setVgap(2);
 		flowLayout.setHgap(2);
@@ -143,8 +167,21 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		removeSelectedBut.addActionListener(this::onRemove);
 		
 		panel.add(removeSelectedBut);
-		replaceBut.setToolTipText("Replace Matches");
+		replaceBut.setToolTipText("Replace All");
 		replaceBut.addActionListener(this::onReplace);
+		
+		removeAllBut.setToolTipText("Remove All");
+		panel.add(removeAllBut);
+		removeAllBut.addActionListener(this::onRemoveAll);
+		
+		separator_1_1_1.setPreferredSize(new Dimension(2, 20));
+		separator_1_1_1.setOrientation(SwingConstants.VERTICAL);
+		
+		panel.add(separator_1_1_1);
+		replaceSelectedBut.setToolTipText("Replace Selected");
+		replaceSelectedBut.addActionListener(this::onReplaceSelected);
+		
+		panel.add(replaceSelectedBut);
 		
 		panel.add(replaceBut);
 		separator_1_1.setPreferredSize(new Dimension(2, 20));
@@ -159,9 +196,6 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		collapseAllBut.addActionListener(this::onCollapseAll);
 		
 		panel.add(collapseAllBut);
-		separator.setOrientation(SwingConstants.VERTICAL);
-		separator.setPreferredSize(new Dimension(2, 20));
-		
 		
 		add(resultsContainerPnl, BorderLayout.CENTER);
 		resultsContainerPnl.setLayout(resCardLayout);
@@ -169,6 +203,23 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		noMatchesLbl.setFont(new Font("Tahoma", Font.BOLD, 13));
 		resultsContainerPnl.add("resutsScrollPane", resutsScrollPane);
 		resultsContainerPnl.add("noMatchesLbl", noMatchesLbl);
+		
+		resetButtonStatus();
+	}
+	
+	private void resetButtonStatus()
+	{
+		boolean hasResults = searchResTree.getRowCount() > 0;
+		
+		repeatBut.setEnabled(this.currentOperation != null);
+		removeSelectedBut.setEnabled(false);
+		removeAllBut.setEnabled(hasResults);
+		
+		replaceBut.setEnabled(this.currentOperation != null && currentOperation.isReplaceOperation() && hasResults);
+		replaceSelectedBut.setEnabled(false);
+		
+		expandAllBut.setEnabled(hasResults);
+		collapseAllBut.setEnabled(hasResults);
 	}
 
 	@Override
@@ -180,7 +231,6 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 	public void setSearchResults(ISearchOperation query, List<SearchResult> results)
 	{
 		this.currentOperation = query;
-		this.replaceBut.setEnabled(query.isReplaceOperation());
 		
 		if(CollectionUtils.isEmpty(results))
 		{
@@ -195,6 +245,8 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		parentTabbedPane.setSelectedComponent(this);
 		
 		expandFirstFolder();
+		
+		resetButtonStatus();
 	}
 
 	private void onMouseClick(MouseEvent e)
@@ -229,6 +281,7 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 	{
 		int count = searchResTree.getSelectionCount();
 		removeSelectedBut.setEnabled(count > 0);
+		replaceSelectedBut.setEnabled(count > 0 && currentOperation.isReplaceOperation());
 	}
 	
 	private void onRepeat(ActionEvent e)
@@ -236,6 +289,24 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		fileSearchService.repeatSearch(currentOperation);
 	}
 
+	private void onReplaceSelected(ActionEvent e)
+	{
+		TreePath treePaths[] = searchResTree.getSelectionPaths();
+		
+		if(treePaths == null || treePaths.length == 0)
+		{
+			return;
+		}
+		
+		Set<SearchResult> selectedResults = searchResultTreeModel.fetchResults(treePaths);
+		
+		if(selectedResults.size() > 0)
+		{
+			fileSearchService.replaceMatches(currentOperation, new ArrayList<>(selectedResults));
+			fileSearchService.repeatSearch(currentOperation);
+		}
+	}
+	
 	private void onReplace(ActionEvent e)
 	{
 		List<SearchResult> resLst = searchResultTreeModel.fetchResults();
@@ -248,6 +319,7 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		
 		searchResultTreeModel.reset();
 		fileSearchService.replaceMatches(currentOperation, resLst);
+		resetButtonStatus();
 	}
 
 	private void onRemove(ActionEvent e)
@@ -260,8 +332,15 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		}
 		
 		searchResultTreeModel.removePaths(treePaths);
+		resetButtonStatus();
 	}
 
+	private void onRemoveAll(ActionEvent e)
+	{
+		searchResultTreeModel.reset();
+		resetButtonStatus();
+	}
+	
 	private void onCollapseAll(ActionEvent e)
 	{
 		IdeUtils.execute(() -> 

@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-utils</artifactId>
-			<version>1.3.7-SNAPSHOT</version>
+			<version>1.3.8-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

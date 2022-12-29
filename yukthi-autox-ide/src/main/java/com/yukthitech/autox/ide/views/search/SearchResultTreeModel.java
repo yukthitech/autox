@@ -18,6 +18,7 @@ package com.yukthitech.autox.ide.views.search;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -306,6 +307,51 @@ public class SearchResultTreeModel extends DefaultTreeModel
 		return resLst;
 	}
 	
+	/**
+	 * Fetches the results from specified treepaths only.
+	 * @param treePaths
+	 * @return
+	 */
+	public Set<SearchResult> fetchResults(TreePath treePaths[])
+	{
+		Set<SearchResult> resLst = new HashSet<SearchResult>();
+		
+		Stack<DefaultMutableTreeNode> nodeStack = new Stack<DefaultMutableTreeNode>();
+		
+		for(TreePath path : treePaths)
+		{
+			nodeStack.add((DefaultMutableTreeNode) path.getLastPathComponent());
+		}
+		
+		while(!nodeStack.isEmpty())
+		{
+			DefaultMutableTreeNode node = nodeStack.pop();
+
+			if(node instanceof SearchResultNode)
+			{
+				resLst.add( ((SearchResultNode) node).result);
+				continue;
+			}
+
+			int childCount = node.getChildCount();
+			
+			for(int i = 0; i < childCount; i++)
+			{
+				DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+				
+				if(child instanceof SearchResultNode)
+				{
+					resLst.add( ((SearchResultNode) child).result);
+					continue;
+				}
+				
+				nodeStack.push(child);
+			}
+		}
+
+		return resLst;
+	}
+
 	public void reset()
 	{
 		root.removeAllChildren();
