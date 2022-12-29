@@ -1,0 +1,245 @@
+<html>
+<head>
+	<link rel="stylesheet" href="res:///help/ide-help-styles.css">
+</head>
+<body style="padding: 10px;">
+
+	<h1 id="textSearch">Text Search</h1>
+	<p>
+		Text search can be used to search for a "text" or a "regular expression" and optionally
+		replace it with other content.
+	</p><br/>
+	
+	<img src="res:///help/images/text-search.png" class="snapshot"/>
+
+	<p>Below are different input fields of this screen along with their use:</p>
+	
+	<ul>
+		<li>
+			<span class="side-heading">Search Field</span>: 
+			This is field where the required search string or regular expression has to be fed.
+		</li>
+		<li>
+			<span class="side-heading">Case Sensitive</span>: 
+			By default all searches are case in-sensitive. This has to be checked if the search has to be case sensitive.
+		</li>
+		<li>
+			<span class="side-heading">Regular Expression</span>: 
+			Check this field if the search is for regular expression. The regular expression in search-field can have groups which can be accessed in 
+			"Replace With" field using $ references. Further info on regular expressions can be found at 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html">Java Pattern docs</a>.
+		</li>
+		<li>
+			<span class="side-heading">Match Multiple Lines</span>: 
+			When using regular expressions, if "." has to span multiple-lines then this check box has to be checked.
+		</li>
+		<li>
+			<span class="side-heading">Replace With</span>: 
+			In case of replacement operation this contains the string the search string/regex to be replaced with.
+			The replacement string can be multi-lined (That is why a text-area is used instead of simple field). 
+			<br/>
+			
+			This field can reference captured group values of regex using $ references. More info about the $ references can be found at 
+			<a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Matcher.html#appendReplacement-java.lang.StringBuffer-java.lang.String-">Java Matcher docs</a>.
+		</li>
+		<li>
+			<span class="side-heading">File Pattern</span>: 
+			This defines the files to be searched. Defaults to * which means all files has to be searched. Below are some examples on usage of this special chars:
+			
+			<ul>
+				<li>
+					<b>*.txt</b> - Searches only text files with .txt extension.
+				</li>
+				<li>
+					<b>help-*.xml</b> - Searches only xml files (with .xml extension) and whose name starts with "help-".
+				</li>
+				<li>
+					<b>help-?.xml</b> - Searches xml files which follows pattern like help-1.xml, help-2.xml, help-a.xml etc.
+				</li>
+			</ul>
+		</li>
+		<li>
+			<span class="side-heading">Scope</span>: 
+			Defines folders/files in which search should happen.
+
+			<ul>
+				<li>
+					<b>All Projects</b> - Search will be done in all projects.
+				</li>
+				<li>
+					<b>Selected folders/Files</b> - Search will be done in selected folders or files.
+				</li>
+			</ul>
+		</li>
+	</ul>
+	
+	<h1 id="xpathSearch">xPath Search</h1>
+	<p>
+		xPath search can be used to search for xml elements and optionally
+		replace it with other nodes. Replacement nodes itself can be generated using javascript.
+	</p><br/>
+	
+	<img src="res:///help/images/xpath-search.png" class="snapshot" style="border: solid black 2px;"/>
+
+	<p>Below are different input fields of this screen along with their use:</p>
+	
+	<ul>
+		<li>
+			<span class="side-heading">xPath to Search</span>: 
+			This is field where the required search xpath has to be fed.
+			<b><i>Note: To search for elements with prefix use prefix in xpath also. <br/>
+			&nbsp;&nbsp;&nbsp;&nbsp; Eg:  //s:for//s:if</i></b>
+		</li>
+		<li>
+			<span class="side-heading">Scope</span>: 
+			Defines folders/files in which search should happen.
+
+			<ul>
+				<li>
+					<b>All Projects</b> - Search will be done in all projects.
+				</li>
+				<li>
+					<b>Selected folders/Files</b> - Search will be done in selected folders or files.
+				</li>
+			</ul>
+		</li>
+		<li>
+			<span class="side-heading">Replacement Script</span>: 
+			In case of replacement operation, Javascript which can be used process current element (matching element) and document. 
+			This script should return one more elements which will be replacing the matching node. 
+			<a href="#xmlElement">Class XmlElement</a> is used to access current
+			matched node or to create new node. This script has access to the following: 
+
+			<ul>
+				<li>
+					<b>element</b> - Current matched element.
+				</li>
+				<li>
+					<b>document</b> - Current xml DOM document object.
+				</li>
+			</ul>
+			
+		</li>
+	</ul>
+
+	<a name="xmlElement"></a>
+	<h1 id="xmlElement">XmlElement Docs</h1>
+	
+	Below are different constructors and methods available with XmlElement<br/><br/>
+	
+	<table>
+		<tr>
+			<th colspan="3">
+				Constructors
+			</th>
+		</tr>
+		<tr>
+			<th>Constructor</td>
+			<th>Parameters</th>
+			<th>Description</th>
+		</tr>
+		<#list xmlElement.constructors as constructor>
+			<tr>
+				<td>
+					<span class="side-heading">${constructor.name}</span>(${escapeHtml(collectionToString(constructor.paramSignatures, '', ', ', '', ''))})
+				</td>
+				<td>
+					<ul>
+						<#list constructor.parameters as param>
+							<li>
+								<b>${param.name}</b>: ${param.description}
+							</li>
+						</#list>
+					</ul>
+				</td>
+				<td>
+					${constructor.description}
+				</td>
+			</tr>
+		</#list>
+	</table>
+	<br/>
+	
+	<table>
+		<tr>
+			<th colspan="3">
+				Methods
+			</th>
+		</tr>
+		<tr>
+			<th>Method</th>
+			<th>Parameters</th>
+			<th>Description</th>
+		</tr>
+		<#list xmlElement.methods as method>
+			<tr>
+				<td>
+					${escapeHtml(method.returnType)} <span class="side-heading">${method.name}</span>(${escapeHtml(collectionToString(method.paramSignatures, '', ', ', '', ''))})
+				</td>
+				<td>
+					<ul>
+						<#list method.parameters as param>
+							<li>
+								<b>${param.name}</b>: ${param.description!''}
+							</li>
+						</#list>
+					</ul>
+				</td>
+				<td>
+					${method.description}
+					
+					<#if method.returnDescription??>
+						<br/>
+						<B>Returns </B> ${method.returnDescription}
+					</#if>
+				</td>
+			</tr>
+		</#list>
+	</table>
+	<br/>
+	
+	<div class="exampleDiv">
+		<span class="side-heading">Example - To modify existing element</span>
+		<br/><br/>
+		<b>xPath for search</b>: //s:if/then/.. (Finds if block having child element with name 'then')
+		<br/><br/> 
+	
+		<b>Replacement Script</b>:<br/> 
+		<pre class="javascript" style="font-family:monospace;">  <span style="color: #006600; font-style: italic;">//remove child element</span>
+  <span style="color: #000066; font-weight: bold;">var</span> oldThenBlock <span style="color: #339933;">=</span> element.<span style="color: #660066;">removeChildElement</span><span style="color: #009900;">&#40;</span><span style="color: #003366; font-weight: bold;">null</span><span style="color: #339933;">,</span> <span style="color: #3366CC;">&quot;then&quot;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+&nbsp;
+  <span style="color: #006600; font-style: italic;">//move sub-child elements from removed child-element to current element</span>
+  element.<span style="color: #660066;">setChildObjects</span><span style="color: #009900;">&#40;</span>oldThenBlock.<span style="color: #660066;">getChildObjects</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+&nbsp;
+  <span style="color: #006600; font-style: italic;">//return modified element</span>
+  <span style="color: #000066; font-weight: bold;">return</span> element<span style="color: #339933;">;</span>
+&nbsp;</pre>
+	
+	</div>
+	
+	<br/>
+
+	<div class="exampleDiv">
+		<span class="side-heading">Example - Replace existing element</span>
+		<br/><br/>
+		<b>xPath for search</b>: //s:if/else/.. (Finds if block having child element with name 'else')
+		<br/><br/> 
+	
+		<b>Replacement Script</b>:<br/>
+		<pre class="javascript" style="font-family:monospace;">  <span style="color: #006600; font-style: italic;">//create new element</span>
+  <span style="color: #000066; font-weight: bold;">var</span> newElse <span style="color: #339933;">=</span> <span style="color: #000066; font-weight: bold;">new</span> XmlElement<span style="color: #009900;">&#40;</span>document<span style="color: #339933;">,</span> <span style="color: #3366CC;">&quot;s&quot;</span><span style="color: #339933;">,</span> <span style="color: #3366CC;">&quot;else&quot;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+  <span style="color: #006600; font-style: italic;">//get a child element</span>
+  <span style="color: #000066; font-weight: bold;">var</span> oldElseBlock <span style="color: #339933;">=</span> element.<span style="color: #660066;">getChildElement</span><span style="color: #009900;">&#40;</span><span style="color: #003366; font-weight: bold;">null</span><span style="color: #339933;">,</span> <span style="color: #3366CC;">&quot;else&quot;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+&nbsp;
+  <span style="color: #006600; font-style: italic;">//transfer all child objects (including text) to new element </span>
+  newElse.<span style="color: #660066;">setChildObjects</span><span style="color: #009900;">&#40;</span>oldElseBlock.<span style="color: #660066;">getChildObjects</span><span style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+&nbsp;
+  <span style="color: #006600; font-style: italic;">//remove old element</span>
+  element.<span style="color: #660066;">removeChildElement</span><span style="color: #009900;">&#40;</span><span style="color: #003366; font-weight: bold;">null</span><span style="color: #339933;">,</span> <span style="color: #3366CC;">&quot;else&quot;</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
+&nbsp;
+  <span style="color: #006600; font-style: italic;">//replace current element with current element itself and newly created element</span>
+  <span style="color: #000066; font-weight: bold;">return</span> Arrays.<span style="color: #660066;">asList</span><span style="color: #009900;">&#40;</span>element<span style="color: #339933;">,</span> newElse<span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>	
+
+	</div>
+</body>
+</html>

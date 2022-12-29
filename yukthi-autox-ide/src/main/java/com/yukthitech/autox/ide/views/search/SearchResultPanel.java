@@ -246,7 +246,7 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 			return;
 		}
 		
-		//searchResultTreeModel.reset();
+		searchResultTreeModel.reset();
 		fileSearchService.replaceMatches(currentOperation, resLst);
 	}
 

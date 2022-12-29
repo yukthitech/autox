@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.script.Bindings;
@@ -221,12 +222,27 @@ public class XpathSearchOperation extends AbstractSearchOperation
 		}
 	}
 	
+	private DocumentBuilder docBuilder = null;
+	private Transformer transformer = null;
+
 	public XpathSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, boolean replaceOp)
 	{
 		super(
 				fileSearchQuery.setFileNamePatterns(Arrays.asList("*.xml")), 
 				searchFiles, 
 				replaceOp);
+
+		try
+		{
+			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+			docBuilder = builderFactory.newDocumentBuilder();
+			
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			transformer = transformerFactory.newTransformer();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while creating builders", ex);
+		}
 	}
 	
 	private Document parseXml(DocumentBuilder docBuilder, Transformer transformer, String content) 
@@ -274,21 +290,6 @@ public class XpathSearchOperation extends AbstractSearchOperation
 	{
 		List<XmlSearchResult> res = new LinkedList<>();
 		File file = null;
-		
-		DocumentBuilder docBuilder = null;
-		Transformer transformer = null;
-		
-		try
-		{
-			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-			docBuilder = builderFactory.newDocumentBuilder();
-			
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			transformer = transformerFactory.newTransformer();
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while creating builders", ex);
-		}
 		
 		while((file = nextFile()) != null)
 		{
@@ -361,41 +362,61 @@ public class XpathSearchOperation extends AbstractSearchOperation
 		return res;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches)
 	{
-		/*
 		//Group the results by file, in descending order
-		Map<File, TreeSet<SearchResult>> fileResults = groupResults(matches);
+		Map<File, TreeSet<XmlSearchResult>> fileResults = (Map) groupResults(matches);
 		
-		//replace the results with replacement string
-		Pattern searchPattern = buildSearchPattern();
-		
-		for(Map.Entry<File, TreeSet<SearchResult>> entry : fileResults.entrySet())
+		for(Map.Entry<File, TreeSet<XmlSearchResult>> entry : fileResults.entrySet())
 		{
 			File file = entry.getKey();
 			String content = readContent(fileEditorTabbedPane, file);
+			Document xmlDocument = null;
+			TreeMap<Integer, FileLine> lineMaping = null;
 			
 			if(content == null)
 			{
 				return;
 			}
 			
-			for(SearchResult res : entry.getValue())
+			for(XmlSearchResult res : entry.getValue())
 			{
-				String matchedContent = content.substring(res.getStart(), res.getEnd());
-				Matcher matcher = searchPattern.matcher(matchedContent);
-				matchedContent = matcher.replaceFirst(fileSearchQuery.getReplaceWith());
+				if(xmlDocument == null)
+				{
+					xmlDocument = res.getDocument();
+					lineMaping = loadLineNumberMapping(content);
+				}
 				
-				content = content.substring(0, res.getStart()) + matchedContent + content.substring(res.getEnd());
+				Element element = res.getElement();
+				
+				ElementLocation elemLoc = (ElementLocation) element.getUserData(LOCATION_KEY);
+				FileLine fileLine = lineMaping.get(elemLoc.lineNumber);
+				
+				List<Element> replacementElems = null;
+				String lineIndent = XmlSearchUtils.getIndent(fileLine.content);
+				
+				try
+				{
+					replacementElems = executeReplacementScript(xmlDocument, element, lineIndent);
+					XmlSearchUtils.replaceElement(xmlDocument, element, replacementElems, lineIndent);
+				}catch(Exception ex)
+				{
+					logger.error("An error occurred while replacing matches for file: {}", file.getPath(), ex);
+					JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
+							String.format("An error occurred while replacing matches for file: %s\n%s", file.getPath(), ex.getMessage()));
+					return;
+				}
 			}
+			
+			content = XmlSearchUtils.toXmlContent(xmlDocument);
 			
 			if(!writeContent(fileEditorTabbedPane, file, content))
 			{
 				return;
 			}
 		}
-		*/
 	}
 	
 	@Override

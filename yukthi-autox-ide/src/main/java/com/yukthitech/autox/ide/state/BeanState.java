@@ -19,12 +19,16 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -40,6 +44,46 @@ public class BeanState implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
+	private static class StateProcessor<C, V>
+	{
+		private Class<C> componentType;
+		
+		private String name;
+		
+		private BiConsumer<C, V> writer;
+		
+		private Function<C, V> reader;
+
+		public StateProcessor(Class<C> componentType, String name, BiConsumer<C, V> writer, Function<C, V> reader)
+		{
+			this.componentType = componentType;
+			this.name = name;
+			this.writer = writer;
+			this.reader = reader;
+		}
+	}
+	
+	private static List<StateProcessor<?, ?>> processors = new ArrayList<>();
+	
+	static
+	{
+		register(Window.class, Rectangle.class, "bounds", (wind, bounds) -> wind.setBounds(bounds), wind -> wind.getBounds());
+		
+		register(JTextField.class, String.class, "value", (fld, txt) -> fld.setText(txt), fld -> fld.getText());
+		register(JTextArea.class, String.class, "value", (fld, txt) -> fld.setText(txt), fld -> fld.getText());
+		register(RSyntaxTextArea.class, String.class, "value", (fld, txt) -> fld.setText(txt), fld -> fld.getText());
+		
+		register(JCheckBox.class, Boolean.class, "value", (fld, flag) -> fld.setSelected(flag), fld -> fld.isSelected());
+		register(JRadioButton.class, Boolean.class, "value", (fld, flag) -> fld.setSelected(flag), fld -> fld.isSelected());
+		
+		register(JTabbedPane.class, Integer.class, "selectedIndex", (fld, idx) -> fld.setSelectedIndex(idx), fld -> fld.getSelectedIndex());
+	}
+	
+	private static <C, V> void register(Class<C> c, Class<V> v, String name, BiConsumer<C, V> writer, Function<C, V> reader)
+	{
+		processors.add(new StateProcessor<>(c, name, writer, reader));
+	}
+	
 	private Map<String, Object> values = new HashMap<>();
 	
 	public BeanState(Object bean, Class<?> beanType)
@@ -53,42 +97,23 @@ public class BeanState implements Serializable
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void fetchDirectState(String prefix, Object bean)
 	{
-		if(bean instanceof Window)
+		if(bean == null)
 		{
-			values.put(prefix + ".bounds", ((Window)bean).getBounds());
 			return;
 		}
 		
-		if(bean instanceof JTextField)
+		for(StateProcessor<?, ?> processor : processors)
 		{
-			values.put(prefix + ".value", ((JTextField)bean).getText());
-			return;
-		}
-
-		if(bean instanceof JTextArea)
-		{
-			values.put(prefix + ".value", ((JTextArea)bean).getText());
-			return;
-		}
-
-		if(bean instanceof JCheckBox)
-		{
-			values.put(prefix + ".value", ((JCheckBox)bean).isSelected());
-			return;
-		}
-
-		if(bean instanceof JRadioButton)
-		{
-			values.put(prefix + ".value", ((JRadioButton)bean).isSelected());
-			return;
-		}
-
-		if(bean instanceof RSyntaxTextArea)
-		{
-			values.put(prefix + ".value", ((RSyntaxTextArea)bean).getText());
-			return;
+			if(processor.componentType.isInstance(bean))
+			{
+				Object value = ((Function) processor.reader).apply(bean);
+				
+				values.put(prefix + "." + processor.name, value);
+				return;
+			}
 		}
 
 		if(bean instanceof Serializable)
@@ -128,70 +153,28 @@ public class BeanState implements Serializable
 		}
 	}
 	
-	private <T, V> void ifNotNull(T bean, V value, BiConsumer<T, V> func)
-	{
-		if(bean == null || value == null)
-		{
-			return;
-		}
-		
-		func.accept(bean, value);
-	}
-	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void setValues(String prefix, Object bean, Object parent, Field field) throws Exception
 	{
-		if(bean instanceof Window)
+		if(bean == null)
 		{
-			ifNotNull(
-					(Window) bean, 
-					(Rectangle) values.get(prefix + ".bounds"), 
-					(window, bounds) -> window.setBounds(bounds));
 			return;
 		}
 		
-		if(bean instanceof JTextField)
+		for(StateProcessor<?, ?> processor : processors)
 		{
-			ifNotNull(
-					(JTextField) bean, 
-					(String) values.get(prefix + ".value"), 
-					(fld, val) -> fld.setText(val));
-			return;
-		}
-
-		if(bean instanceof JTextArea)
-		{
-			ifNotNull(
-					(JTextArea) bean, 
-					(String) values.get(prefix + ".value"), 
-					(fld, val) -> fld.setText(val));
-			return;
-		}
-
-		if(bean instanceof JCheckBox)
-		{
-			ifNotNull(
-					(JCheckBox) bean, 
-					(Boolean) values.get(prefix + ".value"), 
-					(fld, val) -> fld.setSelected(val));
-			return;
-		}
-
-		if(bean instanceof JRadioButton)
-		{
-			ifNotNull(
-					(JRadioButton) bean, 
-					(Boolean) values.get(prefix + ".value"), 
-					(fld, val) -> fld.setSelected(val));
-			return;
-		}
-
-		if(bean instanceof RSyntaxTextArea)
-		{
-			ifNotNull(
-					(RSyntaxTextArea) bean, 
-					(String) values.get(prefix + ".value"), 
-					(fld, val) -> fld.setText(val));
-			return;
+			if(processor.componentType.isInstance(bean))
+			{
+				Object value = values.get(prefix + "." + processor.name);
+				
+				if(value == null)
+				{
+					return;
+				}
+				
+				((BiConsumer) processor.writer).accept(bean, value);
+				return;
+			}
 		}
 		
 		if(field != null)

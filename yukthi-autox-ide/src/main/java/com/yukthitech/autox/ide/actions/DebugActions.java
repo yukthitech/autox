@@ -34,7 +34,7 @@ public class DebugActions
 	{
 		ExecutionEnvironment activeEnv = executionEnvManager.getActiveEnvironment();
 		
-		if(!activeEnv.isDebugEnv() || activeEnv.getActiveThreadId() == null)
+		if(activeEnv == null || !activeEnv.isDebugEnv() || activeEnv.getActiveThreadId() == null)
 		{
 			return;
 		}

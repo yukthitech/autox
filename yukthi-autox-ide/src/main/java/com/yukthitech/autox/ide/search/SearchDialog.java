@@ -26,9 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.search.xml.XmlElement;
 import com.yukthitech.autox.ide.state.PersistableState;
 import com.yukthitech.swing.EscapableDialog;
+import com.yukthitech.swing.HtmlPanel;
+import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.doc.ClassDoc;
+import com.yukthitech.utils.doc.DocInfoGenerator;
 
 @Component
 @PersistableState(fields = true)
@@ -40,6 +46,8 @@ public class SearchDialog extends EscapableDialog
 	private ApplicationContext applicationContext;
 	
 	private final JPanel contentPanel = new JPanel();
+	
+	@PersistableState
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	
 	@PersistableState(fields = true, directState = false)
@@ -47,6 +55,8 @@ public class SearchDialog extends EscapableDialog
 	
 	@PersistableState(fields = true, directState = false)
 	private final XmlSearchPanel xmlSearchPanel = new XmlSearchPanel();
+	
+	private HtmlPanel helpPanel = new HtmlPanel();
 	
 	public SearchDialog()
 	{
@@ -61,6 +71,16 @@ public class SearchDialog extends EscapableDialog
 		
 		tabbedPane.addTab("Text Search", null, textSearchPanel, null);
 		tabbedPane.addTab("Xml Search", null, xmlSearchPanel, null);
+		tabbedPane.addTab("Help", null, helpPanel, null);
+		
+		ClassDoc xmlElemDoc = DocInfoGenerator.generateClassDoc(XmlElement.class);
+		
+		helpPanel.setContentProcessor(content -> 
+		{
+			return FreeMarkerMethodManager.replaceExpressions("/help/search-help.html", CommonUtils.toMap("xmlElement", xmlElemDoc), content);
+		});
+
+		helpPanel.setResource("/help/search-help.html");
 	}
 	
 	@PostConstruct

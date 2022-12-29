@@ -1,0 +1,55 @@
+table
+{
+	border: solid black 1px;
+	border-collapse: collapse;
+	margin-left: 20px;
+}
+
+table td
+{
+	border: solid black 1px;
+	padding: 5px;
+}
+
+table th
+{
+	border: solid black 1px;
+	padding: 5px;
+	background-color: rgb(200, 200, 200);
+}
+
+.highlight
+{
+	color: blue;
+	font-weight: bold;
+}
+
+.snapshot
+{
+	margin: 15px;
+	border: solid black 2px;
+}
+
+ul
+{
+	margin-left: 12px;
+}
+
+.side-heading
+{
+	font-weight: bold;
+	color: blue;
+}
+
+.exampleDiv
+{
+	padding: 10px;
+	border: 1px solid black;
+	margin-left: 15px;
+}
+
+.exampleDiv pre
+{
+	tab-size: 3px;
+}
+

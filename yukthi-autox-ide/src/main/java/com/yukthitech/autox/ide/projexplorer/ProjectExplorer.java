@@ -484,6 +484,11 @@ public class ProjectExplorer extends JPanel
 	{
 		TreePath selectedPath = tree.getSelectionPath();
 		
+		if(selectedPath == null)
+		{
+			return null;
+		}
+		
 		Object selectedItem = selectedPath.getLastPathComponent();
 		
 		if(selectedItem instanceof FolderTreeNode)

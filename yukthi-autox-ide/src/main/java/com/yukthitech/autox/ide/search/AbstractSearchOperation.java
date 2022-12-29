@@ -336,11 +336,6 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 	{
 		FileEditor openEditor = fileEditorTabbedPane.getFileEditor(file);
 
-		if(openEditor != null)
-		{
-			openEditor.setContent(content);
-		}
-		
 		try
 		{
 			FileUtils.write(file, content, Charset.defaultCharset());
@@ -351,6 +346,12 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), 
 					String.format("An error occurred while replacing content of file: %s\nError: %s", file.getPath(), IIdeConstants.wrap(ex.getMessage())));
 			return false;
+		}
+		
+		if(openEditor != null)
+		{
+			openEditor.setContent(content);
+			openEditor.markAsSaved();
 		}
 		
 		return true;

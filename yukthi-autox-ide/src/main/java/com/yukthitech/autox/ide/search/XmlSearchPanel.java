@@ -62,16 +62,14 @@ public class XmlSearchPanel extends JPanel
 	private final JPanel panel_1 = new JPanel();
 	
 	private final JRadioButton txtAllProjRbut = new JRadioButton("All Projects");
-	private final JRadioButton txtSelFoldersRbut = new JRadioButton("Selected Folders");
+	private final JRadioButton txtSelFoldersRbut = new JRadioButton("Selected Folders/Files");
 	
-	private final JLabel lblNewLabel_1 = new JLabel("Replacement Script:");
+	private final JLabel lblNewLabel_1 = new JLabel("Replacement Script (javascript):");
 	private final RTextScrollPane textScrollPane = new RTextScrollPane();
-	private final JLabel lblNewLabel_2 = new JLabel("<html>\r\ncurrentElement - Current matched element.  This script should return one or more element(s) which would replace current node.\r\n</html>");
+	private final JLabel lblNewLabel_2 = new JLabel("<html>\r\nelement - Current matched element (XmlElement type).<br/>\r\ndocument - Current xml DOM document.\r\n</html>");
 	
 	@PersistableState
 	private final RSyntaxTextArea replaceScriptFld = new RSyntaxTextArea();
-	
-	private final JButton helpBut = new JButton("Help");
 	private final JPanel panel = new JPanel();
 	private final JPanel panel_3 = new JPanel();
 	
@@ -106,7 +104,6 @@ public class XmlSearchPanel extends JPanel
 		flowLayout_2.setAlignment(FlowLayout.LEFT);
 		
 		panel_2.add(panel, BorderLayout.WEST);
-		panel.add(helpBut);
 		FlowLayout flowLayout = (FlowLayout) panel_3.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		flowLayout.setHgap(2);
@@ -187,6 +184,8 @@ public class XmlSearchPanel extends JPanel
 		repAllBut.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_1.gridwidth = 2;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 0;
 		gbc_lblNewLabel_1.gridy = 4;

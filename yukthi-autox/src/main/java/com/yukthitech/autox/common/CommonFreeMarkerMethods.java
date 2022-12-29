@@ -41,6 +41,8 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.text.WordUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -629,5 +631,15 @@ public class CommonFreeMarkerMethods
 	public static Map<Object, Object> emptyMap()
 	{
 		return new HashMap<Object, Object>();
+	}
+	
+	@FreeMarkerMethod(
+			description = "Escapes special characters for specified html content.",
+			returnDescription = "Escape html content"
+			)
+	public static String escapeHtml(
+			@FmParam(name = "content", description = "Html content which needs escaping")  String content)
+	{
+		return StringEscapeUtils.escapeHtml4(content);
 	}
 }

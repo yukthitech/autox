@@ -472,6 +472,12 @@ public class FileEditor extends JPanel
 			JOptionPane.showMessageDialog(this, "An error occurred while saving file: " + file.getName() + "\nError: " + ex.getMessage());
 		}
 	}
+	
+	public void markAsSaved()
+	{
+		ideContext.getProxy().fileSaved(file);
+		contentChanged = false;
+	}
 
 	private void fileContentChanged(boolean contentChangedEvent)
 	{

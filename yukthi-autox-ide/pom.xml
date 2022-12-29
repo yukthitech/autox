@@ -98,13 +98,6 @@
 			<version>1.14</version>
 		</dependency>
 
-		<!-- Used for escaping special chars -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-text</artifactId>
-			<version>1.10.0</version>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
 		<dependency>
 			<groupId>com.yukthitech</groupId>

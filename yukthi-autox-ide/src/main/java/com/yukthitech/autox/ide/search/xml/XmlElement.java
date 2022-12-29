@@ -34,7 +34,9 @@ import org.w3c.dom.Text;
 
 import com.google.common.base.Objects;
 import com.yukthitech.autox.ide.format.XmlFormatter;
+import com.yukthitech.utils.doc.Doc;
 
+@Doc("Represents an xml element with attributes and sub-elements")
 public class XmlElement
 {
 	public static class Attribute
@@ -50,6 +52,21 @@ public class XmlElement
 			this.prefix = prefix;
 			this.name = name;
 			this.value = value;
+		}
+
+		public String getPrefix()
+		{
+			return prefix;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getValue()
+		{
+			return value;
 		}
 	}
 	
@@ -83,13 +100,18 @@ public class XmlElement
 	
 	private List<Object> childNodes;
 	
-	private XmlElement(Map<String, String> namespaces, String name)
+	private XmlElement(Map<String, String> namespaces, String prefix, String name)
 	{
 		this.namespaces = namespaces;
 		this.name = name;
+		this.prefix = prefix;
 	}
 	
-	public XmlElement(Document doc, String prefix, String name)
+	@Doc("Used to create new Xml element")
+	public XmlElement(
+			@Doc(name = "document", value = "Current document under which this element will be used") Document doc, 
+			@Doc(name = "prefix", value = "Xml namespace prefix. Eg: s for autox steps") String prefix, 
+			@Doc(name = "name", value = "Name of the element") String name)
 	{
 		namespaces = XmlSearchUtils.getNameSpaces(doc);
 		this.name = name;
@@ -151,33 +173,44 @@ public class XmlElement
 		}
 	}
 
+	@Doc("Fetches prefix of current element")
 	public String getPrefix()
 	{
 		return prefix;
 	}
 
-	public void setPrefix(String prefix)
+	@Doc("Sets the prefix of current element. Eg: s for autox steps")
+	public void setPrefix(
+			@Doc(name = "prefix", value = "Prefix to set") String prefix
+			)
 	{
 		this.prefix = prefix;
 	}
 
+	@Doc("Fetches name of current element")
 	public String getName()
 	{
 		return name;
 	}
 
-	public void setName(String name)
+	@Doc("Sets name of current element")
+	public void setName(
+			@Doc(name = "name", value = "Name to set") String name)
 	{
 		this.name = name;
 	}
 	
-	public XmlElement newChildElement(String name)
+	@Doc("Creates a new xml element with specified prefix and name. And adds it to current element as child element")
+	public XmlElement newChildElement(
+			@Doc(name = "prefix", value = "Prefix for new element") String prefix, 
+			@Doc(name = "prefix", value = "Name for new element") String name)
 	{
-		XmlElement child = new XmlElement(namespaces, name);
+		XmlElement child = new XmlElement(namespaces, prefix, name);
 		this.childNodes.add(child);
 		return child;
 	}
 
+	@Doc("Fetchs all attributes of current element. Each of attribute will have properties - name, prefix, value")
 	public List<Attribute> getAttributes()
 	{
 		if(attributes == null)
@@ -188,18 +221,25 @@ public class XmlElement
 		return Collections.unmodifiableList(attributes);
 	}
 
-	public void setAttributes(List<Attribute> attributes)
+	@Doc("Sets the attributes for this element. Generally used to bulk copy attributes from one element to other element")
+	public void setAttributes(
+			@Doc(name = "attributes", value = "Attributes to set") List<Attribute> attributes)
 	{
+		this.attributes = null;
+		
 		if(attributes == null)
 		{
-			this.attributes = null;
 			return;
 		}
 		
 		attributes.forEach(attr -> setAttribute(attr.prefix, attr.name, attr.value));
 	}
 	
-	public void setAttribute(String prefix, String name, String value)
+	@Doc("Sets specified attribute to current element")
+	public void setAttribute(
+			@Doc(name = "prefix", value = "Prefix for new attribute") String prefix, 
+			@Doc(name = "name", value = "Name for new attribute") String name, 
+			@Doc(name = "value", value = "Value for new attribute") String value)
 	{
 		if(!namespaces.containsKey(prefix))
 		{
@@ -227,7 +267,10 @@ public class XmlElement
 		this.attributes.add(new Attribute(prefix, name, value));
 	}
 	
-	public Attribute removeAttribute(String prefix, String name)
+	@Doc("Removes specified attribute")
+	public Attribute removeAttribute(
+			@Doc(name = "prefix", value = "Prefix of attribute to remove") String prefix, 
+			@Doc(name = "name", value = "Name of attribute to remove") String name)
 	{
 		if(this.attributes == null)
 		{
@@ -250,6 +293,7 @@ public class XmlElement
 		return null;
 	}
 
+	@Doc("Fetches all child objects including indent text, comments, cdata etc. Expected to be used only during bulk copy of child objects.")
 	public List<Object> getChildObjects()
 	{
 		if(childNodes == null)
@@ -260,7 +304,10 @@ public class XmlElement
 		return Collections.unmodifiableList(childNodes);
 	}
 	
-	public XmlElement getChildElement(String prefix, String name)
+	@Doc("Fetches first child element with specified prefix and name.")
+	public XmlElement getChildElement(
+			@Doc(name = "prefix", value = "Prefix of element to fetch") String prefix, 
+			@Doc(name = "name", value = "Name of element to fetch") String name)
 	{
 		if(this.childNodes == null)
 		{
@@ -278,6 +325,7 @@ public class XmlElement
 		return res;
 	}
 
+	@Doc("Fetches all child elements (text, cdata other non-elements will not be part of this).")
 	public List<XmlElement> getChildElements()
 	{
 		if(childNodes == null)
@@ -294,7 +342,10 @@ public class XmlElement
 		return Collections.unmodifiableList(elements);
 	}
 
-	public void setChildObjects(List<Object> childElements)
+	@Doc("Sets specified child objects (which can include element, text, cdata etc). Expected to be used during bulk copy.")
+	public void setChildObjects(
+			@Doc(name = "childElements", value = "Child elements to be copied.") List<Object> childElements
+			)
 	{
 		this.childNodes = null;
 
@@ -306,7 +357,7 @@ public class XmlElement
 		childElements.forEach(elem -> addChildObject(elem));
 	}
 	
-	public void addChildObject(Object obj)
+	private void addChildObject(Object obj)
 	{
 		if(!(obj instanceof XmlElement) 
 				&& !(obj instanceof CdataValue)
@@ -325,7 +376,9 @@ public class XmlElement
 		this.childNodes.add(obj);
 	}
 	
-	public void addChildElement(XmlElement elem)
+	@Doc("Adds specified element as child element")
+	public void addChildElement(
+			@Doc(name = "element", value = "Element to add") XmlElement elem)
 	{
 		if(elem == null)
 		{
@@ -340,7 +393,10 @@ public class XmlElement
 		addChildObject(elem);
 	}
 	
-	public XmlElement removeChildElement(String prefix, String name)
+	@Doc(value = "Removes first child element with specified prefix and name", returnDesc = "Element which was remove. Null if nothing is removed")
+	public XmlElement removeChildElement(
+			@Doc(name = "prefix", value = "Prefix of element to remove") String prefix, 
+			@Doc(name = "name", value = "Name of element to remove") String name)
 	{
 		if(this.childNodes == null)
 		{
@@ -370,7 +426,10 @@ public class XmlElement
 		return null;
 	}
 
-	public List<XmlElement> removeAllChildElements(String prefix, String name)
+	@Doc(value = "Removes all child elements with specified prefix and name", returnDesc = "Elements which were removed. Null if nothing is removed")
+	public List<XmlElement> removeAllChildElements(
+			@Doc(name = "prefix", value = "Prefix of elements to remove") String prefix, 
+			@Doc(name = "name", value = "Name of elements to remove") String name)
 	{
 		if(this.childNodes == null)
 		{
@@ -405,7 +464,9 @@ public class XmlElement
 		return removeElements;
 	}
 	
-	public void removeChildElement(XmlElement childElement)
+	@Doc("Removes specified child element")
+	public void removeChildElement(
+			@Doc(name = "childElement", value = "Element to remove") XmlElement childElement)
 	{
 		if(this.childNodes == null || childElement == null)
 		{
@@ -415,7 +476,9 @@ public class XmlElement
 		this.childNodes.remove(childElement);
 	}
 
-	public void removeChildElements(List<XmlElement> childElements)
+	@Doc("Removes specified child elements")
+	public void removeChildElements(
+			@Doc(name = "childElements", value = "Elements to remove") List<XmlElement> childElements)
 	{
 		if(this.childNodes == null || childElements == null)
 		{
@@ -425,12 +488,15 @@ public class XmlElement
 		this.childNodes.removeAll(childElements);
 	}
 	
+	@Doc("Removes all child nodes (elements, text, cdata etc)")
 	public void removeAllChildNodes()
 	{
 		this.childNodes.clear();
 	}
 	
-	public void setValue(String value)
+	@Doc("Adds specified value as element-text")
+	public void setValue(
+			@Doc(name = "value", value = "Text to set") String value)
 	{
 		if(value == null)
 		{
@@ -440,7 +506,9 @@ public class XmlElement
 		addChildObject(value);
 	}
 	
-	public void setCdataValue(String value)
+	@Doc("Adds specified value as cdata-section under current element")
+	public void setCdataValue(
+			@Doc(name = "value", value = "Cdata text to set") String value)
 	{
 		if(value == null)
 		{

@@ -47,6 +47,7 @@ import com.yukthitech.autox.ide.dialog.RegexSandboxDialog;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.search.FileSearchQuery.Scope;
 import com.yukthitech.autox.ide.state.PersistableState;
+import java.awt.Color;
 
 public class TextSearchPanel extends JPanel
 {
@@ -80,7 +81,7 @@ public class TextSearchPanel extends JPanel
 	private final JPanel panel_1 = new JPanel();
 	
 	private final JRadioButton txtAllProjRbut = new JRadioButton("All Projects");
-	private final JRadioButton txtSelFoldersRbut = new JRadioButton("Selected Folders");
+	private final JRadioButton txtSelFoldersRbut = new JRadioButton("Selected Folders/Files");
 	
 	private ButtonGroup scopeGroup = new ButtonGroup();
 	private final JButton findReplaceBut = new JButton("Find & Replace");
@@ -215,6 +216,7 @@ public class TextSearchPanel extends JPanel
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 0);
 		gbc_lblNewLabel_5.gridx = 1;
 		gbc_lblNewLabel_5.gridy = 3;
+		lblNewLabel_5.setForeground(Color.GRAY);
 		mainSearchPanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		
@@ -239,6 +241,7 @@ public class TextSearchPanel extends JPanel
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 0);
 		gbc_lblNewLabel_2.gridx = 1;
 		gbc_lblNewLabel_2.gridy = 5;
+		lblNewLabel_2.setForeground(Color.GRAY);
 		mainSearchPanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
