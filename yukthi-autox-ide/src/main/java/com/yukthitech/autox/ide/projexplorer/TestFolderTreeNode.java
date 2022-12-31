@@ -19,7 +19,7 @@ import java.io.File;
 
 import com.yukthitech.autox.ide.model.Project;
 
-public class TestFolderTreeNode extends FolderTreeNode
+class TestFolderTreeNode extends FolderTreeNode
 {
 	private static final long serialVersionUID = 1L;
 

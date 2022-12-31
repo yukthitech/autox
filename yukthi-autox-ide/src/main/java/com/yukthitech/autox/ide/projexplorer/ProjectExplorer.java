@@ -16,9 +16,10 @@
 package com.yukthitech.autox.ide.projexplorer;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -26,7 +27,11 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -56,8 +61,10 @@ import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
+import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
@@ -67,9 +74,6 @@ import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.ui.BaseTreeNode;
-import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
-import com.yukthitech.autox.ide.ui.TestSuiteFolderTreeNode;
 import com.yukthitech.swing.IconButton;
 import com.yukthitech.swing.ToggleIconButton;
 import com.yukthitech.utils.CommonUtils;
@@ -91,22 +95,25 @@ public class ProjectExplorer extends JPanel
 	private JTree tree = new JTree();
 	private JScrollPane treeScrollPane = new JScrollPane(tree);
 	
-	private ProjectsTreeModel projectTreeModel;
+	private ProjectExplorerModel projectTreeModel;
 
 	@Autowired
 	private IdeContext ideContext;
 	
 	@Autowired
-	private TreeDragSource source;
+	private TreeDragSource dragSource;
 	
 	@Autowired
-	private TreeDropTarget target;
+	private TreeDropTarget dragTarget;
 	
 	@Autowired
 	private IdeFileManagerFactory ideFileManagerFactory;
 	
 	@Autowired
 	private IdeIndex ideIndex;
+	
+	@Autowired
+	private FileActions fileActions;
 	
 	private JPopupMenu filePopup;
 	
@@ -148,7 +155,7 @@ public class ProjectExplorer extends JPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				handleMouseClick(e);
+				//handleMouseClick(e);
 			}
 			
 			@Override
@@ -171,7 +178,7 @@ public class ProjectExplorer extends JPanel
 		
 		addMouseListener(listener);
 		
-		projectTreeModel = new ProjectsTreeModel();
+		projectTreeModel = new ProjectExplorerModel();
 		tree.setModel(projectTreeModel);
 		tree.setRootVisible(false);
 		tree.setCellRenderer(new BaseTreeNodeRenderer());
@@ -179,8 +186,8 @@ public class ProjectExplorer extends JPanel
 		setLayout(new BorderLayout(0, 0));
 		tree.setShowsRootHandles(true);
 		tree.addMouseListener(listener);
-		source.setSourceTree(tree);
-		target.setTargetTree(tree);
+		dragSource.setSourceTree(tree);
+		dragTarget.setTargetTree(tree);
 		
 		tree.getInputMap().put(KeyStroke.getKeyStroke("ctrl C"), "dummy");
 		tree.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), "dummy");
@@ -201,11 +208,28 @@ public class ProjectExplorer extends JPanel
 		
 		editorSyncButton.addActionListener(this::onEditorSync);
 		
+		tree.addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+				if(e.getKeyCode() == KeyEvent.VK_DELETE)
+				{
+					fileActions.deleteFile();
+				}
+			}
+		});
+		
 		tree.addTreeSelectionListener(new TreeSelectionListener()
 		{
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
 			{
+				if(tree.getSelectionCount() > 1)
+				{
+					return;
+				}
+				
 				TreePath path = e.getPath();
 				DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 				
@@ -217,6 +241,7 @@ public class ProjectExplorer extends JPanel
 					if(editorSyncButton.isSelected())
 					{
 						ideContext.getProxy().activeFileChanged(fileNode.getFile(), ProjectExplorer.this);
+						tree.requestFocus();
 					}
 				}
 				else if(treeNode instanceof FolderTreeNode)
@@ -255,7 +280,7 @@ public class ProjectExplorer extends JPanel
 			@Override
 			public void fileSaved(File file)
 			{
-				FileTreeNode fileNode = getFileNode(file);
+				FileTreeNode fileNode = (FileTreeNode) getFileNode(file);
 				
 				if(fileNode == null)
 				{
@@ -332,7 +357,7 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		FileTreeNode node = getFileNode(file);
+		FileTreeNode node = (FileTreeNode) getFileNode(file);
 		
 		if(node == null)
 		{
@@ -350,7 +375,7 @@ public class ProjectExplorer extends JPanel
 		tree.scrollPathToVisible(treePath);
 	}
 	
-	public FileTreeNode getFileNode(File file)
+	private BaseTreeNode getFileNode(File file)
 	{
 		List<ProjectTreeNode> nodes = projectTreeModel.getProjectNodes();
 		
@@ -359,11 +384,12 @@ public class ProjectExplorer extends JPanel
 			return null;
 		}
 		
-		FileTreeNode fileNode = null;
+		file = IdeFileUtils.getCanonicalFile(file);
+		BaseTreeNode fileNode = null;
 		
 		for(ProjectTreeNode projNode : nodes)
 		{
-			fileNode = projNode.getFileNode(file);
+			fileNode = projNode.getNode(file);
 			
 			if(fileNode != null)
 			{
@@ -480,6 +506,23 @@ public class ProjectExplorer extends JPanel
 		return selectedFiles;
 	}
 	
+	public boolean isSpecialNodeSelected()
+	{
+		TreePath selectedPaths[] = tree.getSelectionPaths();
+		
+		for(TreePath path : selectedPaths)
+		{
+			BaseTreeNode selectedItem = (BaseTreeNode) path.getLastPathComponent();
+			
+			if(IProjectExplorerConstants.isSpecialNode(selectedItem.getId()))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	public File getSelectedFile()
 	{
 		TreePath selectedPath = tree.getSelectionPath();
@@ -626,25 +669,116 @@ public class ProjectExplorer extends JPanel
 		loadFilesToIndex();
 	}
 	
-	public synchronized void reloadFolders(Set<File> folders)
+	public void newFilesAdded(List<File> files)
 	{
-		logger.debug("Reloading folder in project tree: {}", folders);
+		FolderTreeNode folderNode = null;
 		
-		List<FolderTreeNode> reloadedNodes = new ArrayList<>();
-		
-		for(ProjectTreeNode projNode : projectTreeModel.getProjectNodes())
+		if(activeTreeNode instanceof FolderTreeNode)
 		{
-			projNode.reloadFolders(folders, reloadedNodes);
+			folderNode = (FolderTreeNode) activeTreeNode;
+		}
+		else
+		{
+			folderNode = (FolderTreeNode) ((FileTreeNode) activeTreeNode).getParent();
 		}
 		
-		for(FolderTreeNode node : reloadedNodes)
+		folderNode.newFilesAdded(files);
+	}
+	
+	public void newFilesAdded(List<File> files, File parentFolder)
+	{
+		FolderTreeNode folderNode = (FolderTreeNode) getFileNode(parentFolder);
+		folderNode.newFilesAdded(files);
+	}
+
+	public void filesRemoved(List<File> files)
+	{
+		//group the files by directory
+		Map<File, List<File>> folderToFiles = new HashMap<>();
+
+		for(File file : files)
 		{
-			EventQueue.invokeLater(() -> {
-				projectTreeModel.reload(node);
-			});
+			File parent = file.getParentFile();
+			
+			List<File> dirFiles = folderToFiles.get(parent);
+			
+			if(dirFiles == null)
+			{
+				dirFiles = new ArrayList<>();
+				folderToFiles.put(parent, dirFiles);
+			}
+			
+			dirFiles.add(file);
 		}
 		
-		loadFilesToIndex();
+		//parent wise remove the files
+		for(Map.Entry<File, List<File>> entry : folderToFiles.entrySet())
+		{
+			FolderTreeNode node = (FolderTreeNode) getFileNode(entry.getKey());
+			
+			if(node == null)
+			{
+				continue;
+			}
+			
+			node.filesRemoved(entry.getValue());
+		}
+	}
+	
+	public void selectedFilesRemoved()
+	{
+		TreePath selectedPaths[] = tree.getSelectionPaths();
+		Map<BaseTreeNode, Set<String>> removedNodes =  new IdentityHashMap<>();
+		
+		for(TreePath path : selectedPaths)
+		{
+			Object selectedItem = path.getLastPathComponent();
+			File filePath = null;
+			
+			if(selectedItem instanceof FolderTreeNode)
+			{
+				filePath = ((FolderTreeNode)selectedItem).getFolder();
+			}
+			else if(selectedItem instanceof FileTreeNode)
+			{
+				filePath = ((FileTreeNode)selectedItem).getFile();
+			}
+			else
+			{
+				continue;
+			}
+			
+			if(!filePath.exists())
+			{
+				Set<String> lst = removedNodes.get(path.getParentPath().getLastPathComponent());
+				
+				if(lst == null)
+				{
+					lst = new HashSet<>();
+					removedNodes.put((BaseTreeNode) path.getParentPath().getLastPathComponent(), lst);
+				}
+				
+				BaseTreeNode deletedNode = (BaseTreeNode) path.getLastPathComponent();
+				lst.add(deletedNode.getId());
+			}
+		}
+
+		for(Map.Entry<BaseTreeNode, Set<String>> entry : removedNodes.entrySet())
+		{
+			entry.getKey().removeChildNodes(entry.getValue());
+		}
+	}
+	
+	public void selectedFileRenamed(String newName)
+	{
+		TreePath selectedPath = tree.getSelectionPath();
+		BaseTreeNode selectedNode = (BaseTreeNode) selectedPath.getLastPathComponent();
+		
+		String selectedId = selectedNode.getId();
+		String idPrefix = IProjectExplorerConstants.extractIdPrefix(selectedId);
+		
+		String newId = (idPrefix != null) ? idPrefix + newName : newName;
+		selectedNode.rename(newId, newName);
 	}
 	
 	public BaseTreeNode reloadActiveNode()
@@ -716,7 +850,7 @@ public class ProjectExplorer extends JPanel
 		}
 	}
 	
-	public ProjectsTreeModel getProjectTreeModel()
+	public ProjectExplorerModel getProjectTreeModel()
 	{
 		return projectTreeModel;
 	}

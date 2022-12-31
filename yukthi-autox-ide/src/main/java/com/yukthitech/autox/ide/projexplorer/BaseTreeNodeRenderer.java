@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.ui;
+package com.yukthitech.autox.ide.projexplorer;
 
 import java.awt.Component;
 import java.awt.Image;
@@ -24,7 +24,7 @@ import javax.swing.tree.TreeCellRenderer;
 
 import com.yukthitech.autox.ide.IdeUtils;
 
-public class BaseTreeNodeRenderer extends DefaultTreeCellRenderer implements TreeCellRenderer
+class BaseTreeNodeRenderer extends DefaultTreeCellRenderer implements TreeCellRenderer
 {
 	private static final long serialVersionUID = 1L;
 	

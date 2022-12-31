@@ -18,7 +18,6 @@ package com.yukthitech.autox.ide.projexplorer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,18 +25,25 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ide.model.Project;
 
-public class ProjectsTreeModel extends DefaultTreeModel
+public class ProjectExplorerModel extends DefaultTreeModel
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static Logger logger = LogManager.getLogger(ProjectsTreeModel.class);
+	private static Logger logger = LogManager.getLogger(ProjectExplorerModel.class);
 	
-	DefaultMutableTreeNode rootNode;
+	BaseTreeNode rootNode;
 	
-	public ProjectsTreeModel()
+	public ProjectExplorerModel()
 	{
-		super(new DefaultMutableTreeNode("Root"));
-		rootNode = (DefaultMutableTreeNode) super.getRoot();
+		super(new BaseTreeNode("Root", null));
+		rootNode = (BaseTreeNode) super.getRoot();
+		rootNode.setModel(this);
+	}
+	
+	@Override
+	protected void fireTreeNodesRemoved(Object source, Object[] path, int[] childIndices, Object[] children)
+	{
+		super.fireTreeNodesRemoved(source, path, childIndices, children);
 	}
 	
 	public void addProject(ProjectTreeNode projectTreeNode)

@@ -32,6 +32,17 @@ public class IdeFileUtils
 		}
 	}
 	
+	public static File getCanonicalFile(File file)
+	{
+		try
+		{
+			return file.getCanonicalFile();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while fetching canonical path: {}", file.getPath(), ex);
+		}
+	}
+
 	public static String getRelativePath(File parent, File child)
 	{
 		String parentPath = getCanonicalPath(parent);

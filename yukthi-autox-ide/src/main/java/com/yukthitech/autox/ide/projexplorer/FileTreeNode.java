@@ -16,27 +16,21 @@
 package com.yukthitech.autox.ide.projexplorer;
 
 import java.io.File;
-import java.util.function.BiConsumer;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.ui.BaseTreeNode;
 
-public class FileTreeNode extends BaseTreeNode 
+class FileTreeNode extends BaseTreeNode 
 {
 	private static final long serialVersionUID = 1L;
 	
 	private File file;
 	
-	private long lastModifiedOn;
-	
 	private Project project;
-	
-	private BiConsumer<Project, File> fileReloadOp;
 	
 	private ProjectExplorer projectExplorer;
 
-	public FileTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File file, BiConsumer<Project, File> fileReloadOp)
+	public FileTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File file)
 	{
 		super(id, projectExplorer.getProjectTreeModel());
 		
@@ -52,12 +46,17 @@ public class FileTreeNode extends BaseTreeNode
 		
 		this.projectExplorer = projectExplorer;
 		this.project = project;
-		this.fileReloadOp = fileReloadOp;
 		
 		super.setLabel(name);
 		super.setIcon(IdeUtils.getFileIcon(file));
 		this.file=file;
 		
+		//reload(false);
+	}
+	
+	@Override
+	protected void reloadOnInit()
+	{
 		reload(false);
 	}
 	
@@ -68,21 +67,21 @@ public class FileTreeNode extends BaseTreeNode
 		{
 			projectExplorer.checkFile(this);
 		}
+	}
+	
+	@Override
+	public synchronized void rename(String id, String newName)
+	{
+		super.rename(id, newName);
 		
-		if(fileReloadOp == null)
-		{
-			return;
-		}
-		
-		long newLastModified = file.lastModified();
-		
-		if(lastModifiedOn == newLastModified)
-		{
-			return;
-		}
-		
-		fileReloadOp.accept(project, file);
-		this.lastModifiedOn = newLastModified;
+		File newFile = new File(file.getParentFile(), newName);
+		this.file = newFile;
+	}
+	
+	public void parentFolderRenamed(File newParent)
+	{
+		File newFile = new File(newParent, this.file.getName());
+		this.file = newFile;
 	}
 	
 	public Project getProject()

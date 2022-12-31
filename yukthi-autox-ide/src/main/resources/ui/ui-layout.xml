@@ -41,6 +41,9 @@
 			<item label="Copy" mnemonic="C" action="copyFile">
 				<short-key ctrl="true" key="C"/>
 			</item>
+			<item label="Cut" mnemonic="u" action="cutFile">
+				<short-key ctrl="true" key="X"/>
+			</item>
 			<item label="Paste" mnemonic="P" action="pasteFile">
 				<short-key ctrl="true" key="V"/>
 			</item>
@@ -181,6 +184,7 @@
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
+		<item label="Cut" action="cutFile" />
 		<item label="Copy Path" action="copyPath" />
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />
@@ -190,6 +194,7 @@
 	<popup-menu label="filePopup">
 		<item label="Open" action="openFile" />
 		<item label="Copy" action="copyFile" />
+		<item label="Cut" action="cutFile" />
 		<item label="Copy Path" action="copyPath" />
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />

@@ -24,24 +24,19 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.actions.FileActions;
 
 @Component
 public class TreeDropTarget implements DropTargetListener
@@ -49,13 +44,9 @@ public class TreeDropTarget implements DropTargetListener
 	private static Logger logger = LogManager.getLogger(TreeDropTarget.class);
 
 	private JTree targetTree;
-
-	@Autowired
-	private ProjectExplorer projectExplorer;
 	
-	public TreeDropTarget()
-	{
-	}
+	@Autowired
+	private FileActions fileActions;
 
 	public void setTargetTree(JTree targetTree)
 	{
@@ -127,19 +118,10 @@ public class TreeDropTarget implements DropTargetListener
 	{
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) getNodeForEvent(dtde.getLocation());
 		File activeFolder = null;
-		Project project = null;
 
 		if(parent instanceof FolderTreeNode)
 		{
 			activeFolder = ((FolderTreeNode) parent).getFolder();
-			project = ((FolderTreeNode) parent).getProject();
-		}
-		else if(parent instanceof ProjectTreeNode)
-		{
-			project = ((ProjectTreeNode) parent).getProject();
-			
-			String baseFolder = project.getBaseFolderPath();
-			activeFolder = new File(baseFolder);
 		}
 		else
 		{
@@ -166,44 +148,7 @@ public class TreeDropTarget implements DropTargetListener
 				return;
 			}
 			
-			activeFolder = activeFolder.getCanonicalFile();
-			
-			logger.debug("Dnd operation, dragging files {} and dropping to {}", list, activeFolder.getPath());
-			
-			//ensure file/folder is not replacing itself
-			for(File file : list)
-			{
-				if(file.getParentFile().equals(activeFolder))
-				{
-					logger.info("File {} is trying to replace itself, which is not allowed in DND. Hence cancelling the DnD", file.getPath());
-					dtde.rejectDrop();
-					return;
-				}
-			}
-			
-			int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(),
-						String.format("Are you sure you want to move below files/folders \n   %s \nto folder: %s", list, activeFolder),
-						"Move Files",
-						JOptionPane.YES_NO_OPTION
-					);
-			
-			if(res == JOptionPane.NO_OPTION)
-			{
-				return;
-			}
-
-			Set<File> foldersToRefresh = new HashSet<>(); 
-			foldersToRefresh.add(activeFolder);
-			
-			for(File file : list)
-			{
-				FileUtils.moveToDirectory(file, activeFolder, false);
-				foldersToRefresh.add(file.getParentFile());
-			}
-			
-			dtde.dropComplete(true);
-			
-			projectExplorer.reloadFolders(foldersToRefresh);
+			fileActions.pasteFile(activeFolder, list, true);
 		} catch(Exception ex)
 		{
 			logger.error("An error occoure during running of drop method ",ex);

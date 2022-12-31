@@ -18,13 +18,13 @@ package com.yukthitech.autox.ide.actions;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +50,10 @@ import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.projexplorer.BaseTreeNode;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
 import com.yukthitech.autox.ide.search.SearchDialog;
-import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -64,11 +64,6 @@ public class FileActions
 	private static final String TEST_FILE_TEMPLATE = "testFileTemplate";
 
 	private static Map<String, String> templates = new HashMap<>();
-
-	private Transferable fileTransferable;
-	
-	private File moveFile=null;
-	
 
 	static
 	{
@@ -131,7 +126,8 @@ public class FileActions
 			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "Failed to create folder: \n" + finalFolder.getPath() + "\nError: " + ex.getMessage());
 		}
 
-		projectExplorer.reloadActiveNode();
+		//projectExplorer.reloadActiveNode();
+		projectExplorer.newFilesAdded(Arrays.asList(finalFolder));
 	}
 
 	private File createFile(String templateName, String defaultExtension)
@@ -160,18 +156,6 @@ public class FileActions
 			return null;
 		}
 
-		if(!finalFile.getParentFile().exists())
-		{
-			try
-			{
-				FileUtils.forceMkdir(finalFile.getParentFile());
-			} catch(Exception ex)
-			{
-				logger.error("Failed to create folder: " + finalFile.getPath(), ex);
-				JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "Failed to create folder: \n" + finalFile.getPath() + "\nError: " + ex.getMessage());
-			}
-		}
-
 		if(templateName != null)
 		{
 			try
@@ -195,6 +179,7 @@ public class FileActions
 			}
 		}
 
+		projectExplorer.newFilesAdded(Arrays.asList(finalFile));
 		return finalFile;
 	}
 
@@ -202,7 +187,6 @@ public class FileActions
 	public void newTestFile() throws IOException
 	{
 		File file = createFile(TEST_FILE_TEMPLATE, ".xml");
-		projectExplorer.reloadActiveNode();
 
 		if(file != null)
 		{
@@ -215,29 +199,12 @@ public class FileActions
 	public void newFile() throws IOException
 	{
 		File file = createFile(null, null);
-		projectExplorer.reloadActiveNode();
 
 		if(file != null)
 		{
 			ideContext.setActiveDetails(ideContext.getActiveProject(), file);
 			fileEditorTabbedPane.openFile();
 		}
-	}
-
-	public void deleteFolder(File activeFolder)
-	{
-
-		try
-		{
-			FileUtils.forceDelete(activeFolder);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while deleting folder: {}", activeFolder.getPath(), ex);
-		}
-
-		projectExplorer.reloadActiveNodeParent();
-		fileEditorTabbedPane.filePathChanged(activeFolder, activeFolder);
-
 	}
 
 	@Action
@@ -248,6 +215,11 @@ public class FileActions
 		if(baseNode instanceof ProjectTreeNode)
 		{
 			projectActions.deleteProject();
+			return;
+		}
+		
+		if(projectExplorer.isSpecialNodeSelected())
+		{
 			return;
 		}
 		
@@ -269,7 +241,7 @@ public class FileActions
 		
 		int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), mssg, "Delete", JOptionPane.YES_NO_OPTION);
 		
-		if(res == JOptionPane.NO_OPTION)
+		if(res != JOptionPane.YES_OPTION)
 		{
 			return;
 		}
@@ -289,8 +261,8 @@ public class FileActions
 			}
 		}
 		
-		projectExplorer.reloadActiveNodeParent();
-		//TODO: close files which might be already open
+		projectExplorer.selectedFilesRemoved();
+		filesRemoved.forEach(file -> fileEditorTabbedPane.filePathRemoved(file));
 	}
 
 	private void renameFile(File activeFile)
@@ -305,7 +277,7 @@ public class FileActions
 		File newNameFile = new File(activeFile.getParentFile(), newName);
 		activeFile.renameTo(newNameFile);
 
-		projectExplorer.reloadActiveNodeParent();
+		projectExplorer.selectedFileRenamed(newNameFile.getName());
 		fileEditorTabbedPane.filePathChanged(activeFile, newNameFile);
 	}
 
@@ -321,13 +293,18 @@ public class FileActions
 		File newNameFile = new File(activeFolder.getParentFile(), newName);
 		activeFolder.renameTo(newNameFile);
 
-		projectExplorer.reloadActiveNodeParent();
+		projectExplorer.selectedFileRenamed(newNameFile.getName());
 		fileEditorTabbedPane.filePathChanged(activeFolder, newNameFile);
 	}
 
 	@Action
 	public void renameFile()
 	{
+		if(projectExplorer.isSpecialNodeSelected())
+		{
+			return;
+		}
+
 		File activeFile = ideContext.getActiveFile();
 
 		if(activeFile == null)
@@ -346,18 +323,20 @@ public class FileActions
 	}
 	
 	@Action
-	public void cutFile() throws UnsupportedFlavorException, IOException {
-		File file = ideContext.getActiveFile();
-		copyFile(file);
-		moveFile=file;
+	public void cutFile() throws UnsupportedFlavorException, IOException 
+	{
+		if(projectExplorer.isSpecialNodeSelected())
+		{
+			return;
+		}
+
+		List<File> activeFiles = ideContext.getSelectedFiles();
+		copyFile(activeFiles, true);
 	}
 
-	public void copyFile(File activeFile) throws UnsupportedFlavorException, IOException
+	public void copyFile(List<File> listOfFiles, boolean moveOperation) throws UnsupportedFlavorException, IOException
 	{
-		moveFile=null;
-		ArrayList<File> listOfFiles = new ArrayList<File>();
-		listOfFiles.add(activeFile);
-		fileTransferable = new TransferableFiles(listOfFiles);
+		TransferableFiles fileTransferable = new TransferableFiles(listOfFiles, moveOperation);
 		Clipboard clip = (Clipboard) Toolkit.getDefaultToolkit().getSystemClipboard();
 		clip.setContents(fileTransferable, null);
 	}
@@ -365,8 +344,13 @@ public class FileActions
 	@Action
 	public void copyFile() throws UnsupportedFlavorException, IOException
 	{
-		File activeFile = ideContext.getActiveFile();
-		copyFile(activeFile);
+		if(projectExplorer.isSpecialNodeSelected())
+		{
+			return;
+		}
+
+		List<File> activeFiles = ideContext.getSelectedFiles();
+		copyFile(activeFiles, false);
 	}
 	
 	@Action
@@ -397,13 +381,16 @@ public class FileActions
 		return file;
 	}
 
-	public void pasteFile(File activeFolder, List<File> list) throws IOException, InterruptedException
+	public void pasteFile(File activeFolder, List<File> list, boolean moveOperation) throws IOException, InterruptedException
 	{
 		//if active folder is a file, consider its parent directory
 		if(activeFolder.isFile())
 		{
 			activeFolder = activeFolder.getParentFile();
 		}
+		
+		List<File> destFiles = new ArrayList<>(list.size());
+		List<File> srcFiles = new ArrayList<>(list.size());
 		
 		for(File srcFile : list)
 		{
@@ -434,7 +421,17 @@ public class FileActions
 				
 				if(!destFile.isDirectory())
 				{
-					destFile = getNewNameFor(destFile);
+					if(srcFile.equals(destFile))
+					{
+						destFile = getNewNameFor(destFile);
+					}
+					else
+					{
+						res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
+								String.format("A file with name '%s' already exist. Do you want to overwrite?", destFile.getName()), 
+								"Overwrite", 
+								JOptionPane.YES_NO_CANCEL_OPTION);
+					}
 				}
 				else
 				{
@@ -450,6 +447,7 @@ public class FileActions
 				{
 					return;
 				}
+				
 				if(res == JOptionPane.NO_OPTION)
 				{
 					continue;
@@ -464,15 +462,29 @@ public class FileActions
 			{
 				FileUtils.copyFile(srcFile, destFile);
 			}
+			
+			destFiles.add(destFile);
+			srcFiles.add(srcFile);
 		}
-		if(moveFile!=null) {
-			FileUtils.forceDelete(moveFile);
+		
+		if(!destFiles.isEmpty())
+		{
+			projectExplorer.newFilesAdded(destFiles, activeFolder);
 		}
-
-		projectExplorer.reloadActiveNodeParent();
+		
+		if(moveOperation && !srcFiles.isEmpty()) 
+		{
+			for(File file : srcFiles)
+			{
+				FileUtils.forceDelete(file);
+			}
+			
+			projectExplorer.filesRemoved(srcFiles);
+		}
 	}
 
-	public void pasteFile(File activeFolder) throws UnsupportedFlavorException, IOException, InterruptedException
+	@SuppressWarnings("unchecked")
+	private void pasteFile(File activeFolder) throws UnsupportedFlavorException, IOException, InterruptedException
 	{
 		Clipboard clip = (Clipboard) Toolkit.getDefaultToolkit().getSystemClipboard();
 		
@@ -481,9 +493,18 @@ public class FileActions
 			return;
 		}
 		
-		@SuppressWarnings("unchecked")
-		List<File> list = (List<File>) clip.getData(DataFlavor.javaFileListFlavor);
-		pasteFile(activeFolder, list);
+		TransferableFiles.FileData fileData = clip.isDataFlavorAvailable(TransferableFiles.SERIALIZED_DATA) ? 
+				(TransferableFiles.FileData) clip.getData(TransferableFiles.SERIALIZED_DATA) : null;
+		
+		if(fileData != null)
+		{
+			pasteFile(activeFolder, fileData.getListOfFiles(), fileData.isMoveOperation());
+		}
+		else
+		{
+			List<File> list = (List<File>) clip.getData(DataFlavor.javaFileListFlavor);
+			pasteFile(activeFolder, list, false);
+		}
 	}
 
 	@Action

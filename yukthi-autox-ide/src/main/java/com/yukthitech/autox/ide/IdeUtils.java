@@ -300,18 +300,17 @@ public class IdeUtils
 	{
 		ImageIcon emptyFileIcon = getEmptyFileIcon();
 		
-		String extension = file.getName().toUpperCase();
-		int dotIdx = extension.lastIndexOf(".");
+		String fileName = file.getName();
+		int dotIdx = fileName.lastIndexOf(".");
 		
-		if(dotIdx <= 0)
+		if(dotIdx < 0 || dotIdx == (fileName.length() - 1))
 		{
 			return emptyFileIcon;
 		}
 
-		String fullExtension = extension.substring(dotIdx + 1).toLowerCase();
-		extension = extension.substring(dotIdx + 1, dotIdx + 2);
+		String fullExtension = fileName.substring(dotIdx + 1).toLowerCase();
 		
-		ImageIcon fileIcon = extensionToIcon.get(extension);
+		ImageIcon fileIcon = extensionToIcon.get(fullExtension);
 		
 		if(fileIcon != null)
 		{
@@ -324,13 +323,13 @@ public class IdeUtils
 		if(fileIconUrl != null)
 		{
 			fileIcon = loadIconWithoutBorder(fileIconPath, FILE_ICON_SIZE);
-			extensionToIcon.put(extension, fileIcon);
+			extensionToIcon.put(fullExtension, fileIcon);
 			
 			return fileIcon;
 		}
 		
-		fileIcon = getEmptyFileIcon();
-		extensionToIcon.put(extension, fileIcon);
+		fileIcon = emptyFileIcon;
+		extensionToIcon.put(fullExtension, fileIcon);
 		
 		return fileIcon;
 	}

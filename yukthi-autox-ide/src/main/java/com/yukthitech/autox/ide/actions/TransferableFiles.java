@@ -20,7 +20,10 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
+
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Trasferable wrapper for fils which is used to copy file paths to clipboard.
@@ -28,26 +31,79 @@ import java.util.List;
  */
 public class TransferableFiles implements Transferable
 {
-	private List<File> listOfFiles;
-
-	public TransferableFiles(List<File> listOfFiles)
+	public static DataFlavor SERIALIZED_DATA;
+	
+	static
 	{
-		this.listOfFiles = listOfFiles;
+		try
+		{
+			SERIALIZED_DATA = new DataFlavor(DataFlavor.javaSerializedObjectMimeType)
+			{
+				@Override
+				public String getParameter(String paramName)
+				{
+					if("class".equals(paramName))
+					{
+						return FileData.class.getName();
+					}
+					
+					return super.getParameter(paramName);
+				}
+			};
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to create data flavour", ex);
+		}
+	}
+	
+	public static class FileData implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private List<File> listOfFiles;
+		private boolean moveOperation;
+		
+		public FileData(List<File> listOfFiles, boolean moveOperation)
+		{
+			this.listOfFiles = listOfFiles;
+			this.moveOperation = moveOperation;
+		}
+
+		public List<File> getListOfFiles()
+		{
+			return listOfFiles;
+		}
+		
+		public boolean isMoveOperation()
+		{
+			return moveOperation;
+		}
+	}
+
+	private FileData fileData;
+
+	public TransferableFiles(List<File> listOfFiles, boolean moveOperation)
+	{
+		this.fileData = new FileData(listOfFiles, moveOperation);
 	}
 
 	public DataFlavor[] getTransferDataFlavors()
 	{
-		return new DataFlavor[] { DataFlavor.javaFileListFlavor };
+		return new DataFlavor[] { DataFlavor.javaFileListFlavor, SERIALIZED_DATA };
 	}
 
 	public boolean isDataFlavorSupported(DataFlavor flavor)
 	{
-		return DataFlavor.javaFileListFlavor.equals(flavor);
+		return DataFlavor.javaFileListFlavor.equals(flavor) || SERIALIZED_DATA.equals(flavor);
 	}
 
 	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException
 	{
-		return listOfFiles;
+		if(DataFlavor.javaFileListFlavor.equals(flavor))
+		{
+			return fileData.listOfFiles;
+		}
+		
+		return fileData;
 	}
-
 }

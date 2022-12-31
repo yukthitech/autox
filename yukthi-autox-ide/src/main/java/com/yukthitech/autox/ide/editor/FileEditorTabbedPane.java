@@ -690,7 +690,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		return tabs;
 	}
 
-	public void filePathChanged(File oldFolder, File newFolder)
+	public void filePathChanged(File oldPath, File newPath)
 	{
 		List<FileEditorTab> tabs = getAllTabs();
 		String relativePath = null;
@@ -699,13 +699,13 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		for(FileEditorTab tab : tabs)
 		{
 			//if the current file path is not modified
-			if(newFolder != null && tab.getFile().exists())
+			if(tab.getFile().exists())
 			{
 				//continue to next file
 				continue;
 			}
 			
-			relativePath = IdeFileUtils.getRelativePath(oldFolder, tab.getFile());
+			relativePath = IdeFileUtils.getRelativePath(oldPath, tab.getFile());
 			
 			//if the file is not part of modified path
 			if(relativePath == null)
@@ -713,19 +713,19 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				continue;
 			}
 			
-			if(newFolder != null)
+			if(newPath != null)
 			{
 				if("".equals(relativePath))
 				{
-					relativeFile = newFolder;
+					relativeFile = newPath;
 				}
 				else
 				{
-					relativeFile = new File(newFolder, relativePath);
+					relativeFile = new File(newPath, relativePath);
 				}
 			}
 			
-			if(newFolder == null || !relativeFile.exists())
+			if(!relativeFile.exists())
 			{
 				logger.debug("As the file does not exist anymore, closing tab with file: [old path: {}, Modified Path: {}]", tab.getFile().getPath(), relativeFile.getPath());
 				
@@ -736,19 +736,20 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			
 			relativePath = IdeFileUtils.getCanonicalPath(relativeFile);
 			pathToEditor.put(relativePath, tab.getFileEditor());
+			
 			tab.setFile(relativeFile);
 			tab.getFileEditor().setFile(relativeFile);
 		}
 	}
 
-	public void filePathRemoved(File folder)
+	public void filePathRemoved(File file)
 	{
 		List<FileEditorTab> tabs = getAllTabs();
 		String relativePath = null;
 		
 		for(FileEditorTab tab : tabs)
 		{
-			relativePath = IdeFileUtils.getRelativePath(folder, tab.getFile());
+			relativePath = IdeFileUtils.getRelativePath(file, tab.getFile());
 			
 			//if the file is not part of modified path
 			if(relativePath == null)

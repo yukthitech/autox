@@ -31,9 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.services.GlobalKeyboardListener;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Collection of actions.
@@ -106,15 +106,18 @@ public class ActionCollection
 	public void invokeAction(String name)
 	{
 		logger.debug("Invoking action with name: {}", name);
-		
-		try
+
+		IdeUtils.execute(() -> 
 		{
-			ExecutableAction action = actions.get(name);
-			action.method.invoke(action.object);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while invoking action: {}", name, ex);
-		}
+			try
+			{
+				ExecutableAction action = actions.get(name);
+				action.method.invoke(action.object);
+			}catch(Exception ex)
+			{
+				logger.error("An error occurred while invoking action: {}", name, ex);
+			}
+		}, 0);
 	}
 	
 	public void registerGlobalAction(ShortKey shortKey, String action)

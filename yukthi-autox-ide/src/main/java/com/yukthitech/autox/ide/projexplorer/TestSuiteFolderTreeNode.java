@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.ui;
+package com.yukthitech.autox.ide.projexplorer;
 
 import java.io.File;
 
-import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.projexplorer.FileTreeNode;
-import com.yukthitech.autox.ide.projexplorer.FolderTreeNode;
-import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
-import com.yukthitech.autox.ide.projexplorer.TestFolderTreeNode;
 
-public class TestSuiteFolderTreeNode extends FolderTreeNode
+class TestSuiteFolderTreeNode extends FolderTreeNode
 {
 	private static final long serialVersionUID = 1L;
 
@@ -35,19 +30,6 @@ public class TestSuiteFolderTreeNode extends FolderTreeNode
 		
 		super.setIcon(IdeUtils.loadIcon("/ui/icons/source-folder.svg", 20));
 		reload(false);
-	}
-	
-	public FileTreeNode getFileNode(File file, String path[], int index)
-	{
-		String relativePath = IdeFileUtils.getRelativePath(super.getFolder(), file);
-		
-		if(relativePath == null || relativePath.length() == 0)
-		{
-			return null;
-		}
-		
-		String newPath[] = relativePath.split("\\" + File.separator);
-		return super.getFileNode(file, newPath, 0);
 	}
 	
 	@Override

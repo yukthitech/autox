@@ -24,24 +24,19 @@ import java.awt.dnd.DragSourceDropEvent;
 import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.actions.TransferableFiles;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Component
 public class TreeDragSource implements DragSourceListener, DragGestureListener
 {
 	private DragSource source;
-
-	private DefaultMutableTreeNode nodeBeingDragged;
 
 	private JTree sourceTree;
 	
@@ -64,36 +59,39 @@ public class TreeDragSource implements DragSourceListener, DragGestureListener
 	@Override
 	public void dragGestureRecognized(DragGestureEvent dge)
 	{
-		TreePath path = sourceTree.getSelectionPath();
+		TreePath[] paths = sourceTree.getSelectionPaths();
 
-		if(path == null)
+		if(paths == null || paths.length == 0)
 		{
 			return;
 		}
 
-		nodeBeingDragged = (DefaultMutableTreeNode) path.getLastPathComponent();
 		ArrayList<File> listOfFiles = new ArrayList<File>();
-		
-		try
+
+		for(TreePath path : paths)
 		{
+			BaseTreeNode nodeBeingDragged = (BaseTreeNode) path.getLastPathComponent();
+			
+			if(!IProjectExplorerConstants.isDragableNode(nodeBeingDragged.getId()))
+			{
+				return;
+			}
+			
 			if(nodeBeingDragged instanceof FileTreeNode)
 			{
-				listOfFiles.add( ((FileTreeNode) nodeBeingDragged).getFile().getCanonicalFile() );
+				listOfFiles.add( ((FileTreeNode) nodeBeingDragged).getFile());
 			}
 			else if(nodeBeingDragged instanceof FolderTreeNode)
 			{
-				listOfFiles.add( ((FolderTreeNode) nodeBeingDragged).getFolder().getCanonicalFile() );
+				listOfFiles.add( ((FolderTreeNode) nodeBeingDragged).getFolder());
 			}
 			else
 			{
 				return;
 			}
-		}catch(IOException ex)
-		{
-			throw new InvalidStateException("An error occurred while fetching cannoical path of file being dragged", ex);
 		}
 		
-		TransferableFiles fileTransferable = new TransferableFiles(listOfFiles);
+		TransferableFiles fileTransferable = new TransferableFiles(listOfFiles, true);
 		source.startDrag(dge, DragSource.DefaultMoveDrop, fileTransferable, this);
 	}
 
