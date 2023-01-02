@@ -29,6 +29,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.dialog.FontDialog;
+import com.yukthitech.autox.ide.events.IdeOpeningEvent;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.layout.UiIdElementsManager;

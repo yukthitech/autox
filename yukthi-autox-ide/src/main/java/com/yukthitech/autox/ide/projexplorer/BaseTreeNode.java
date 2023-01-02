@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.ide.projexplorer;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.ObjectWrapper;
 
 /**
  * Base class for tree nodes.
@@ -255,11 +257,11 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		model.nodeChanged(this);
 	}
 	
-	public synchronized void rename(String id, String newName)
+	public synchronized void rename(String newId, String newName)
 	{
 		String curId = this.id;
 		
-		this.id = id;
+		this.id = newId;
 		this.label = newName;
 		
 		BaseTreeNode parent = (BaseTreeNode) super.parent;
@@ -289,10 +291,18 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	
 	public synchronized void addChildNode(BaseTreeNode node)
 	{
-		int index = childNodes.add(node);
-		super.insert(node, index);
+		ObjectWrapper<Boolean> isReplaceOp = new ObjectWrapper<>(false);
+		int index = childNodes.addOrReplace(node, isReplaceOp);
 		
-		model.nodesWereInserted(this, new int[] {index});
+		if(isReplaceOp.getValue())
+		{
+			model.nodeChanged(node);
+		}
+		else
+		{
+			super.insert(node, index);
+			model.nodesWereInserted(this, new int[] {index});
+		}
 		
 		IdeUtils.execute(() -> node.reloadOnInit(), 1);
 	}
@@ -303,19 +313,41 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		TreeMap<String, BaseTreeNode> nodeMap = new TreeMap<>();
 		nodes.forEach(node -> nodeMap.put(node.id, node));
 		
-		int indexes[] = new int[nodeMap.size()];
-		int arrIdx = 0;
+		int insertIndexes[] = new int[nodeMap.size()];
+		int insertIdx = 0;
+		
+		int replacedIndexes[] = new int[nodeMap.size()];
+		int replaceIdx = 0;
+
+		ObjectWrapper<Boolean> isReplaceOp = new ObjectWrapper<>(false);
 		
 		for(BaseTreeNode node : nodeMap.values())
 		{
-			int index = childNodes.add(node);
-			super.insert(node, index);
+			int index = childNodes.addOrReplace(node, isReplaceOp);
 			
-			indexes[arrIdx] = index;
-			arrIdx++;
+			if(isReplaceOp.getValue())
+			{
+				replacedIndexes[insertIdx] = index;
+				replaceIdx++;
+			}
+			else
+			{
+				super.insert(node, index);
+				
+				insertIndexes[insertIdx] = index;
+				insertIdx++;
+			}
 		}
 		
-		model.nodesWereInserted(this, indexes);
+		if(insertIdx > 0)
+		{
+			model.nodesWereInserted(this, Arrays.copyOf(insertIndexes, insertIdx));
+		}
+		
+		if(replaceIdx > 0)
+		{
+			model.nodesChanged(this, Arrays.copyOf(replacedIndexes, replaceIdx));
+		}
 		
 		IdeUtils.execute(() -> 
 		{

@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -65,6 +67,11 @@ public class TransferableFiles implements Transferable
 		
 		public FileData(List<File> listOfFiles, boolean moveOperation)
 		{
+			if(CollectionUtils.isEmpty(listOfFiles))
+			{
+				throw new NullPointerException("File list cannot be empty.");
+			}
+			
 			this.listOfFiles = listOfFiles;
 			this.moveOperation = moveOperation;
 		}

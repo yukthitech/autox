@@ -19,7 +19,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 
 import javax.annotation.PostConstruct;
-import javax.swing.JPopupMenu;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,9 +27,8 @@ import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IMaximizationListener;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.MaximizableTabbedPaneTab;
-import com.yukthitech.autox.ide.context.IContextListener;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.ActionCollection;
+import com.yukthitech.autox.ide.layout.IdePopupMenu;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
 
@@ -46,19 +44,18 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	private UiLayout uiLayout;
 	
 	@Autowired
-	private IdeContext ideContext;
-	
-	@Autowired
 	private ActionCollection actionCollection;
 	
 	@Autowired
 	private IdeFileManagerFactory ideFileManagerFactory;
 	
+	private FileEditorTabbedPane fileEditorTabbedPane;
+	
 	private Project project;
 	
 	private File file;
 	
-	private JPopupMenu popupMenu;
+	private IdePopupMenu popupMenu;
 	
 	private FileEditor fileEditor;
 	
@@ -71,26 +68,12 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 		this.project = project;
 		this.file = file;
 		this.fileEditor = fileEditor;
+		this.fileEditorTabbedPane = fileTabPane;
 	}
 	
 	@PostConstruct
 	private void init()
 	{
-		ideContext.addContextListener(new IContextListener()
-		{
-			@Override
-			public void fileChanged(File file)
-			{
-				fileContentChanged(file);
-			}
-			
-			@Override
-			public void fileSaved(File file)
-			{
-				fileContentSaved(file);
-			}
-		});
-		
 		this.ideFileManager = ideFileManagerFactory.getFileManager(project, file);
 		parseFile();
 	}
@@ -98,8 +81,7 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	@Override
 	protected void closeTab()
 	{
-		ideContext.setActiveDetails(project, file);
-		actionCollection.invokeAction("closeFile");
+		fileEditorTabbedPane.closeFile(this);
 		
 		super.checkForMaximizationStatus();
 	}
@@ -107,8 +89,7 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	@Override
 	protected void activateTab()
 	{
-		ideContext.setActiveDetails(project, file);
-		actionCollection.invokeAction("openFile");
+		fileEditorTabbedPane.openOrActivateFile(project, file);
 	}
 	
 	@Override
@@ -119,7 +100,6 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 			 popupMenu = uiLayout.getPopupMenu("fileTabPopup").toPopupMenu(actionCollection);
 		}
 		
-		ideContext.setActiveDetails(project, file);
 		popupMenu.show(this, e.getX(), e.getY());
 	}
 
@@ -144,25 +124,14 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 		return project;
 	}
 	
-	private void fileContentChanged(File file)
+	void fileContentChanged()
 	{
-		if(!this.file.equals(file))
-		{
-			return;
-		}
-		
 		changeLabel.setText("*");
 	}
 	
-	private void fileContentSaved(File file)
+	void fileContentSaved()
 	{
-		if(!this.file.equals(file))
-		{
-			return;
-		}
-		
 		changeLabel.setText("");
-
 		parseFile();
 	}
 	

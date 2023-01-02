@@ -34,6 +34,11 @@ import com.yukthitech.ccg.xml.util.Validateable;
 public class Menu implements Validateable
 {
 	/**
+	 * Id for menu.
+	 */
+	private String id;
+	
+	/**
 	 * Label for the menu.
 	 */
 	private String label;
@@ -47,6 +52,16 @@ public class Menu implements Validateable
 	 * Menu items for the label.
 	 */
 	private List<Object> menuItems;
+	
+	public String getId()
+	{
+		return id;
+	}
+
+	public void setId(String id)
+	{
+		this.id = id;
+	}
 
 	/**
 	 * Gets the label for the menu.
@@ -153,15 +168,21 @@ public class Menu implements Validateable
 				continue;
 			}
 			
-			menu.add(item.toJMenuItem(actionCollection));
+			menu.add(item.toJMenuItem(actionCollection, null));
+		}
+		
+		if(id != null)
+		{
+			UiIdElementsManager.registerElement(id, menu);
 		}
 
 		return menu;
 	}
 	
-	public JPopupMenu toPopupMenu(ActionCollection actionCollection)
+	public IdePopupMenu toPopupMenu(ActionCollection actionCollection)
 	{
 		JPopupMenu popupMenu = new JPopupMenu();
+		IdePopupMenu idePopupMenu = new IdePopupMenu(popupMenu);
 
 		for(Object itemObj : this.menuItems)
 		{
@@ -180,10 +201,15 @@ public class Menu implements Validateable
 				continue;
 			}
 			
-			popupMenu.add(item.toJMenuItem(actionCollection));
+			popupMenu.add(item.toJMenuItem(actionCollection, idePopupMenu));
 		}
 		
-		return popupMenu;
+		if(id != null)
+		{
+			UiIdElementsManager.registerElement(id, popupMenu);
+		}
+
+		return idePopupMenu;
 	}
 	
 }

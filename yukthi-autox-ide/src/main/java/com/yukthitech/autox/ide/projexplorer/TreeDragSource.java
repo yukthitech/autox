@@ -92,7 +92,7 @@ public class TreeDragSource implements DragSourceListener, DragGestureListener
 		}
 		
 		TransferableFiles fileTransferable = new TransferableFiles(listOfFiles, true);
-		source.startDrag(dge, DragSource.DefaultMoveDrop, fileTransferable, this);
+		source.startDrag(dge, null, fileTransferable, this);
 	}
 
 	@Override

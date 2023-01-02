@@ -42,7 +42,7 @@ import com.yukthitech.autox.ide.actions.FileActions;
 public class TreeDropTarget implements DropTargetListener
 {
 	private static Logger logger = LogManager.getLogger(TreeDropTarget.class);
-
+	
 	private JTree targetTree;
 	
 	@Autowired
@@ -71,7 +71,6 @@ public class TreeDropTarget implements DropTargetListener
 	{
 		TreeNode node = getNodeForEvent(dtde.getLocation());
 		
-		// if(node.isLeaf())
 		if(node instanceof FileTreeNode)
 		{
 			dtde.rejectDrag();
@@ -116,6 +115,7 @@ public class TreeDropTarget implements DropTargetListener
 	@Override
 	public void drop(DropTargetDropEvent dtde)
 	{
+		//targetTree.setCursor(DEFAULT_CURSOR);
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) getNodeForEvent(dtde.getLocation());
 		File activeFolder = null;
 

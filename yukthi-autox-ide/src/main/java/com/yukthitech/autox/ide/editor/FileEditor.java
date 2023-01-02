@@ -68,11 +68,13 @@ import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.dialog.FindCommand;
 import com.yukthitech.autox.ide.dialog.FindOperation;
 import com.yukthitech.autox.ide.editor.FileEditorIconGroup.IconType;
+import com.yukthitech.autox.ide.events.ActiveFileChangedEvent;
+import com.yukthitech.autox.ide.events.FileSavedEvent;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -105,10 +107,10 @@ public class FileEditor extends JPanel
 	private ApplicationContext applicationContext;
 
 	@Autowired
-	private IdeContext ideContext;
+	private IdeFileManagerFactory ideFileManagerFactory;
 	
 	@Autowired
-	private IdeFileManagerFactory ideFileManagerFactory;
+	private IdeEventManager eventManager;
 	
 	/**
 	 * File manager for current file.
@@ -129,6 +131,8 @@ public class FileEditor extends JPanel
 	private Object debugHighlightTag;
 	
 	private boolean contentChanged = false;
+	
+	private FileEditorTab fileEditorTab;
 	
 	public FileEditor(Project project, File file)
 	{
@@ -322,6 +326,11 @@ public class FileEditor extends JPanel
 		}
 	}
 	
+	void setFileEditorTab(FileEditorTab tab)
+	{
+		this.fileEditorTab = tab;
+	}
+	
 	public boolean isContentChanged()
 	{
 		return contentChanged;
@@ -329,8 +338,7 @@ public class FileEditor extends JPanel
 	
 	private void onFocusGained(FocusEvent e)
 	{
-		ideContext.setActiveDetails(project, file);
-		ideContext.getProxy().activeFileChanged(file, this);
+		eventManager.raiseAsyncEvent(new ActiveFileChangedEvent(project, file, this));
 	}
 	
 	private void handleHomeKey(KeyEvent e)
@@ -461,8 +469,8 @@ public class FileEditor extends JPanel
 			}
 
 			FileUtils.write(file, syntaxTextArea.getText(), Charset.defaultCharset());
-			ideContext.getProxy().fileSaved(file);
-			contentChanged = false;
+			
+			markAsSaved();
 			
 			//update all existing break points with update line numbers
 			iconManager.resetDebugPoints();
@@ -475,15 +483,22 @@ public class FileEditor extends JPanel
 	
 	public void markAsSaved()
 	{
-		ideContext.getProxy().fileSaved(file);
+		fileEditorTab.fileContentSaved();
+		eventManager.raiseAsyncEvent(new FileSavedEvent(project, file));
 		contentChanged = false;
 	}
 
 	private void fileContentChanged(boolean contentChangedEvent)
 	{
+		//ignore method call, which occurs during init of file editor
+		if(fileEditorTab == null)
+		{
+			return;
+		}
+		
 		if(contentChangedEvent)
 		{
-			ideContext.getProxy().fileChanged(file);
+			fileEditorTab.fileContentChanged();
 			contentChanged = true;
 		}
 		

@@ -156,7 +156,7 @@ public class ToolBarIcon implements Validateable
 
 		if(action != null)
 		{
-			button.addActionListener(actionCollection.getActionListener(action));
+			button.addActionListener(actionCollection.getActionListener(action, null));
 		}
 		
 		if(id != null)

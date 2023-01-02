@@ -54,8 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.yukthitech.autox.ide.FileDetails;
 import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.context.IdeContext;
-import com.yukthitech.autox.ide.layout.ActionCollection;
+import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 
 public class OpenResourceDialog extends JDialog
 {
@@ -75,10 +74,7 @@ public class OpenResourceDialog extends JDialog
 	private IdeIndex ideIndex;
 	
 	@Autowired
-	private IdeContext ideContext;
-	
-	@Autowired
-	private ActionCollection actionCollection;
+	private FileEditorTabbedPane fileEditorTabbedPane;
 
 	/**
 	 * Create the dialog.
@@ -346,9 +342,7 @@ public class OpenResourceDialog extends JDialog
 	
 	private void openResource(FileDetails file)
 	{
-		ideContext.setActiveDetails(file.getProject(), file.getFile());
-		actionCollection.invokeAction("openFile");
-		
+		fileEditorTabbedPane.openOrActivateFile(file.getProject(), file.getFile());
 		super.setVisible(false);
 	}
 }

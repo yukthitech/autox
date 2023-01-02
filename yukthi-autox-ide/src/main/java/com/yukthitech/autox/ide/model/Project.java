@@ -64,8 +64,8 @@ public class Project implements Serializable
 	private String appConfigFilePath;
 	private String appPropertyFilePath;
 	private LinkedHashSet<String> testSuitesFoldersList;
+	private LinkedHashSet<String> resourceFoldersList;
 	private LinkedHashSet<String> classPathEntriesList;
-	private String resourcesFolder;
 	
 	private transient ProjectClassLoader projectClassLoader;
 	
@@ -87,12 +87,17 @@ public class Project implements Serializable
 		appConfigFilePath = "src/main/config/app-configuration.xml";
 		appPropertyFilePath = "src/main/config/app.properties";
 		testSuitesFoldersList = new LinkedHashSet<>(CommonUtils.toSet("src/main/test-suites"));
-		resourcesFolder = "src/main/resources";
+		resourceFoldersList = new LinkedHashSet<>(CommonUtils.toSet("src/main/resources"));
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
 		in.defaultReadObject();
+		
+		if(resourceFoldersList == null)
+		{
+			resourceFoldersList = new LinkedHashSet<>();
+		}
 	}
 
 	public String getName()
@@ -177,6 +182,11 @@ public class Project implements Serializable
 		return testSuitesFoldersList;
 	}
 	
+	public LinkedHashSet<String> getResourceFoldersList()
+	{
+		return resourceFoldersList;
+	}
+	
 	public boolean isTestSuiteFolderFile(File file)
 	{
 		String baseFolderPath = getBaseFolderPath();
@@ -200,19 +210,20 @@ public class Project implements Serializable
 		return testSuitesFoldersList.contains(relPath);
 	}
 
-	public void setTestSuiteFolders(LinkedHashSet<String> testSuitesFoldersList)
+	public boolean isResourceFolder(File file)
+	{
+		String relPath = IdeFileUtils.getRelativePath(getBaseFolder(), file);
+		return resourceFoldersList.contains(relPath);
+	}
+
+	public void setTestSuiteFoldersList(Set<String> testSuitesFoldersList)
 	{
 		this.testSuitesFoldersList = new LinkedHashSet<String>(testSuitesFoldersList);
 	}
 	
-	public void addTestSuiteFolder(String folder)
+	public void setResourceFoldersList(Set<String> resourceFoldersList)
 	{
-		if(this.testSuitesFoldersList == null)
-		{
-			this.testSuitesFoldersList = new LinkedHashSet<>();
-		}
-		
-		this.testSuitesFoldersList.add(folder);
+		this.resourceFoldersList = new LinkedHashSet<String>(resourceFoldersList);
 	}
 
 	@JsonIgnore
@@ -314,11 +325,14 @@ public class Project implements Serializable
 			}
 		}
 		
-		File resourcesFolder = new File(baseFolder, this.resourcesFolder);
-
-		if(!resourcesFolder.exists())
+		for(String resourcesFolderPath : testSuitesFoldersList)
 		{
-			FileUtils.forceMkdir(resourcesFolder);
+			File resourcesFolder = new File(baseFolder, resourcesFolderPath);
+	
+			if(!resourcesFolder.exists())
+			{
+				FileUtils.forceMkdir(resourcesFolder);
+			}
 		}
 
 		Map<String, String> pathToTemp = CommonUtils.toMap(
@@ -472,6 +486,11 @@ public class Project implements Serializable
 				for(String testSuiteFolder : this.testSuitesFoldersList)
 				{
 					reservedFiles.add( new File(baseFolder, testSuiteFolder).getCanonicalFile() );
+				}
+
+				for(String resFolder : this.resourceFoldersList)
+				{
+					reservedFiles.add( new File(baseFolder, resFolder).getCanonicalFile() );
 				}
 			}catch(Exception ex)
 			{

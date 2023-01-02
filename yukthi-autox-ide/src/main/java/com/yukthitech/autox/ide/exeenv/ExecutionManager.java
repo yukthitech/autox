@@ -35,12 +35,13 @@ import org.springframework.stereotype.Service;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.events.IdeStartedEvent;
+import com.yukthitech.autox.ide.events.ProjectRemovedEvent;
 import com.yukthitech.autox.ide.layout.UiIdElementsManager;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
-import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.swing.DropDownButton;
 import com.yukthitech.swing.DropDownItem;
 import com.yukthitech.swing.common.SwingUtils;
@@ -76,12 +77,6 @@ public class ExecutionManager
 			public void saveState(IdeState state)
 			{
 				onSaveState(state);
-			}
-			
-			@Override
-			public void projectRemoved(Project project)
-			{
-				onProjectRemove(project);
 			}
 		});
 	}
@@ -173,8 +168,10 @@ public class ExecutionManager
 		}, 1);
 	}
 
-	private void onProjectRemove(Project project)
+	@IdeEventHandler
+	private void onProjectRemove(ProjectRemovedEvent event)
 	{
+		Project project = event.getProject();
 		String projName = project.getName();
 		
 		Predicate<DropDownItem> removeFilter = item -> 
@@ -194,7 +191,6 @@ public class ExecutionManager
 	{
 		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
 		List<DropDownItem> items = runButton.getItems();
-		
 		
 		List<RunConfig> configs = new ArrayList<RunConfig>();
 		

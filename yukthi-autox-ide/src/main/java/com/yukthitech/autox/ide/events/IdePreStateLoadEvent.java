@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.services;
+package com.yukthitech.autox.ide.events;
 
 import com.yukthitech.autox.ide.model.IdeState;
+import com.yukthitech.autox.ide.services.IIdeEvent;
 
 /**
- * Event that occurs before closing the ide.
+ * Event that occurs before state is loaded by all components.
+ * This needs to be listened by components/services which needs to pre work before loading the state.
+ * 
  * @author akiran
  */
-public class IdeClosingEvent implements IIdeEvent
+public class IdePreStateLoadEvent implements IIdeEvent
 {
 	/**
 	 * State of ide to be persisted.
 	 */
 	private IdeState ideState;
 
-	public IdeClosingEvent(IdeState ideState)
+	public IdePreStateLoadEvent(IdeState ideState)
 	{
 		this.ideState = ideState;
 	}

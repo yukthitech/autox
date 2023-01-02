@@ -46,9 +46,12 @@ import com.yukthitech.autox.ide.MaximizableTabbedPane;
 import com.yukthitech.autox.ide.actions.ProjectActions;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.events.ActiveFileChangedEvent;
+import com.yukthitech.autox.ide.events.IdeStartedEvent;
 import com.yukthitech.autox.ide.exeenv.debug.DebugPointsChangedEvent;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
+import com.yukthitech.autox.ide.layout.IdeActionEvent;
 import com.yukthitech.autox.ide.model.FileState;
 import com.yukthitech.autox.ide.model.IdeSettings;
 import com.yukthitech.autox.ide.model.IdeState;
@@ -56,7 +59,6 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.autox.ide.services.IdeSettingChangedEvent;
-import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -110,17 +112,6 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				openFilesFromState(state);
 				
 				changeEditorSettings(state.getIdeSettings());
-			}
-			
-			@Override
-			public void activeFileChanged(File file, Object source)
-			{
-				if(source == FileEditorTabbedPane.this)
-				{
-					return;
-				}
-				
-				selectProjectFile(ideContext.getActiveProject(), file);
 			}
 		});
 		
@@ -183,6 +174,17 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				super.setSelectedComponent(editor);
 			}
 		}
+	}
+
+	@IdeEventHandler
+	private void onActiveFileChanged(ActiveFileChangedEvent event)
+	{
+		if(event.getSource() == this)
+		{
+			return;
+		}
+		
+		selectProjectFile(event.getProject(), event.getFile());
 	}
 	
 	@IdeEventHandler
@@ -411,6 +413,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
 		IdeUtils.autowireBean(applicationContext, fileEditorTab);
 		
+		fileEditor.setFileEditorTab(fileEditorTab);
+		
 		addTab(file.getName(), null, fileEditor);
 		super.setTabComponentAt(nextTabIndex, fileEditorTab);
 		
@@ -420,7 +424,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		return fileEditor;
 	}
 	
-	private void selectProjectFile(Project project, File file)
+	public void selectProjectFile(Project project, File file)
 	{
 		if(!file.exists())
 		{
@@ -462,19 +466,9 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		return (FileEditor) super.getSelectedComponent();
 	}
 	
-	@Action
-	public void openFile() throws IOException
+	public void openOrActivateFile(Project project, File file)
 	{
-		Project activeProject = ideContext.getActiveProject();
-		File activeFile = ideContext.getActiveFile();
-		
-		if(activeProject == null || activeFile == null || !activeFile.isFile()) 
-		{
-			logger.debug("As no active file on context, ignoring request for new tab.");
-			return;
-		}
-		
-		openProjectFile(activeProject, activeFile);
+		openProjectFile(project, file);
 	}
 	
 	@Action
@@ -490,20 +484,13 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		currentEditor.saveFile();
 	}
 	
-	/**
-	 * Fetches the tab  index where this file is open currently.
-	 * @param file
-	 * @return
-	 */
-	private int getIndexWithFile(File file)
+	private int getIndexOfTab(FileEditorTab tab)
 	{
 		int tabCount = super.getTabCount();
 		
 		for(int i = 0; i < tabCount; i++)
 		{
-			FileEditorTab tab = (FileEditorTab) super.getTabComponentAt(i);
-			
-			if(tab.getFile().equals(file))
+			if(super.getTabComponentAt(i) == tab)
 			{
 				return i;
 			}
@@ -511,7 +498,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		
 		return -1;
 	}
-	
+
 	/**
 	 * Checks for unsaved changes in specified file tab. If no changes are present
 	 * or if changes are saved, this method will return true.
@@ -566,14 +553,19 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	}
 	
 	@Action
-	public void closeFile() throws IOException
+	public void closeFile(IdeActionEvent e) throws IOException
 	{
-		File file = ideContext.getActiveFile();
-		int index = getIndexWithFile(file);
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		closeFile(fileEditorTab);
+	}
+	
+	void closeFile(FileEditorTab tab)
+	{
+		int index = getIndexOfTab(tab);
 		
 		if(index < 0)
 		{
-			logger.debug("No tab found with active file. Hence ignoring close file request. File: {}", file);
+			logger.debug("No tab found with active file. Hence ignoring close file request. File: {}", tab.getFile().getPath());
 			return;
 		}
 		
@@ -582,8 +574,15 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			return;
 		}
 		
-		logger.debug("Closing file with path: {}", file.getPath());
-		closeFileAtIndex(index);
+		logger.debug("Closing file with path: {}", tab.getFile().getPath());
+		
+		try
+		{
+			closeFileAtIndex(index);
+		}catch(IOException ex)
+		{
+			logger.error("An error occurred while closing file: " + tab.getFile().getPath(), ex);
+		}
 	}
 	
 	@Action
@@ -603,10 +602,10 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	}
 	
 	@Action
-	public void closeAllButThis() throws IOException
+	public void closeAllButThis(IdeActionEvent e) throws IOException
 	{
-		File file = ideContext.getActiveFile();
-		int curIdx = getIndexWithFile(file);
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		int curIdx = getIndexOfTab(fileEditorTab);
 		
 		if(curIdx < 0)
 		{
@@ -639,9 +638,10 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	}
 	
 	@Action
-	public void copyFilePath() throws IOException
+	public void copyFilePath(IdeActionEvent e) throws IOException
 	{
-		File file = ideContext.getActiveFile();
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		File file = fileEditorTab.getFile();
 		
 		if(file == null)
 		{
@@ -652,9 +652,10 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	}
 	
 	@Action
-	public void copyFileName()
+	public void copyFileName(IdeActionEvent e)
 	{
-		File file = ideContext.getActiveFile();
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		File file = fileEditorTab.getFile();
 		
 		if(file == null)
 		{
@@ -665,9 +666,10 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	}
 	
 	@Action
-	public void copyDirPath() throws IOException
+	public void copyDirPath(IdeActionEvent e) throws IOException
 	{
-		File file = ideContext.getActiveFile();
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		File file = fileEditorTab.getFile();
 		
 		if(file == null)
 		{

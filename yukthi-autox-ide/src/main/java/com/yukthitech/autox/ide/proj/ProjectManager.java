@@ -31,10 +31,12 @@ import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.events.ProjectRemovedEvent;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -51,6 +53,9 @@ public class ProjectManager
 	
 	@Autowired
 	private ProjectExplorer projectExplorer;
+	
+	@Autowired
+	private IdeEventManager ideEventManager;
 
 	private Set<Project> projects = new HashSet<>();
 
@@ -136,7 +141,7 @@ public class ProjectManager
 			}
 		}
 		
-		ideContext.getProxy().projectRemoved(project);
+		ideEventManager.raiseAsyncEvent(new ProjectRemovedEvent(project));
 	}
 	
 	public Project getProject(String name)
@@ -164,7 +169,6 @@ public class ProjectManager
 		this.projects.removeIf(proj -> (proj == project));
 		this.projects.add(project);
 		
-
-		ideContext.getProxy().projectStateChanged(project);
+		projectExplorer.reloadProjectNode(project);
 	}
 }

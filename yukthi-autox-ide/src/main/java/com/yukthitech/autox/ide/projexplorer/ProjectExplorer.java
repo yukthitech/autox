@@ -17,6 +17,9 @@ package com.yukthitech.autox.ide.projexplorer;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -30,14 +33,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
@@ -69,11 +73,16 @@ import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
+import com.yukthitech.autox.ide.events.ActiveFileChangedEvent;
+import com.yukthitech.autox.ide.events.FileSavedEvent;
 import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.layout.ActionCollection;
+import com.yukthitech.autox.ide.layout.IdePopupMenu;
+import com.yukthitech.autox.ide.layout.UiIdElementsManager;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.swing.IconButton;
 import com.yukthitech.swing.ToggleIconButton;
 import com.yukthitech.utils.CommonUtils;
@@ -115,17 +124,9 @@ public class ProjectExplorer extends JPanel
 	@Autowired
 	private FileActions fileActions;
 	
-	private JPopupMenu filePopup;
+	private IdePopupMenu projectExplorerTreePopup;
 	
-	private JPopupMenu folderPopup;
-	
-	private JPopupMenu projectExplorerPopup;
-	
-	private JPopupMenu projectPopup;
-	
-	private JPopupMenu testSuitePopup;
-	
-	private JPopupMenu testFolderPopup;
+	private IdePopupMenu projectExplorerPopup;
 	
 	@Autowired
 	private UiLayout uiLayout;
@@ -236,18 +237,12 @@ public class ProjectExplorer extends JPanel
 				if(treeNode instanceof FileTreeNode)
 				{
 					FileTreeNode fileNode = (FileTreeNode) treeNode;
-					ideContext.setActiveDetails(fileNode.getProject(), fileNode.getFile());
 					
 					if(editorSyncButton.isSelected())
 					{
-						ideContext.getProxy().activeFileChanged(fileNode.getFile(), ProjectExplorer.this);
+						fileEditorTabbedPane.selectProjectFile(fileNode.getProject(), fileNode.getFile());
 						tree.requestFocus();
 					}
-				}
-				else if(treeNode instanceof FolderTreeNode)
-				{
-					FolderTreeNode folderNode = (FolderTreeNode) treeNode;
-					ideContext.setActiveDetails(folderNode.getProject(), folderNode.getFolder());
 				}
 			}
 		});
@@ -270,36 +265,6 @@ public class ProjectExplorer extends JPanel
 					editorSyncButton.setSelected(true);
 				}
 			}
-			
-			@Override
-			public void projectStateChanged(Project project)
-			{
-				reloadProjectNode(project);
-			}
-
-			@Override
-			public void fileSaved(File file)
-			{
-				FileTreeNode fileNode = (FileTreeNode) getFileNode(file);
-				
-				if(fileNode == null)
-				{
-					return;
-				}
-				
-				checkFile(fileNode);
-			}
-			
-			@Override
-			public void activeFileChanged(File file, Object source)
-			{
-				if(source == ProjectExplorer.this)
-				{
-					return;
-				}
-				
-				setActiveFile(file);
-			}
 		});
 	}
 	
@@ -310,6 +275,30 @@ public class ProjectExplorer extends JPanel
 		onEditorSync(null);
 	}
 	*/
+	
+	@IdeEventHandler
+	private void onActiveFileChanged(ActiveFileChangedEvent event)
+	{
+		if(event.getSource() == ProjectExplorer.this)
+		{
+			return;
+		}
+		
+		IdeUtils.executeUiTask(() -> setActiveFile(event.getFile()));
+	}
+	
+	@IdeEventHandler
+	private void onFileSave(FileSavedEvent e)
+	{
+		FileTreeNode fileNode = (FileTreeNode) getFileNode(e.getFile());
+		
+		if(fileNode == null)
+		{
+			return;
+		}
+		
+		checkFile(fileNode);
+	}
 	
 	private void onCollapseAll(ActionEvent e)
 	{
@@ -471,13 +460,31 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		filePopup = uiLayout.getPopupMenu("filePopup").toPopupMenu(actionCollection);
-		folderPopup = uiLayout.getPopupMenu("folderPopup").toPopupMenu(actionCollection);
-		projectPopup = uiLayout.getPopupMenu("projectPopup").toPopupMenu(actionCollection);
 		projectExplorerPopup = uiLayout.getPopupMenu("projectExplorerPopup").toPopupMenu(actionCollection);
-		testSuitePopup = uiLayout.getPopupMenu("testStuitePopup").toPopupMenu(actionCollection);
+		projectExplorerTreePopup = uiLayout.getPopupMenu("projectExplorerTreePopup").toPopupMenu(actionCollection);
+	}
+	
+	public Project getSelectedProject()
+	{
+		TreePath path = tree.getSelectionPath();
 		
-		testFolderPopup = uiLayout.getPopupMenu("testFolderPopup").toPopupMenu(actionCollection);
+		if(path == null)
+		{
+			return null;
+		}
+		
+		Object lastComp = path.getLastPathComponent();
+		
+		if(lastComp instanceof FolderTreeNode)
+		{
+			return ((FolderTreeNode) lastComp).getProject();
+		}
+		else if(lastComp instanceof FileTreeNode)
+		{
+			return ((FileTreeNode) lastComp).getProject();
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -506,6 +513,22 @@ public class ProjectExplorer extends JPanel
 		return selectedFiles;
 	}
 	
+	public void openSelectedFiles()
+	{
+		TreePath selectedPaths[] = tree.getSelectionPaths();
+		
+		for(TreePath path : selectedPaths)
+		{
+			Object selectedItem = path.getLastPathComponent();
+			
+			if(selectedItem instanceof FileTreeNode)
+			{
+				FileTreeNode node = (FileTreeNode) selectedItem;
+				fileEditorTabbedPane.openOrActivateFile(node.getProject(), node.getFile());
+			}
+		}
+	}
+
 	public boolean isSpecialNodeSelected()
 	{
 		TreePath selectedPaths[] = tree.getSelectionPaths();
@@ -575,55 +598,111 @@ public class ProjectExplorer extends JPanel
 		
 		if(clickedRow < 0)
 		{
-			projectExplorerPopup.show(this, e.getX(), e.getY());
+			//This click may come from tree or project explorer itself. So approp component should
+			//  be used for popup
+			projectExplorerPopup.show( (JComponent) e.getSource(), e.getX(), e.getY());
 			return;
 		}
 
 		selectRow(clickedRow, e.isControlDown() || e.isShiftDown());
 		
-		//find the selected file
-		List<File> selectedFiles = getSelectedFiles();
+		
+		//find the selected files and types
+		TreePath selectedPaths[] = tree.getSelectionPaths();
+		List<File> selectedFiles = new LinkedList<>();
+		Set<String> selectedTypes = new HashSet<>();
+		boolean specialNodeSelected = false;
+		boolean onlyFiles = true;
+		
+		for(TreePath path : selectedPaths)
+		{
+			BaseTreeNode node = (BaseTreeNode) path.getLastPathComponent();
+			
+			if(node instanceof ProjectTreeNode)
+			{
+				selectedTypes.add(IProjectExplorerConstants.TYPE_PROJECT);
+				selectedFiles.add(((ProjectTreeNode) node).getFolder());
+				specialNodeSelected = true;
+				onlyFiles = false;
+			}
+			else if(node instanceof TestSuiteFolderTreeNode)
+			{
+				selectedTypes.add(IProjectExplorerConstants.TYPE_TEST_SUITE_FOLDER);
+				selectedFiles.add(((TestSuiteFolderTreeNode) node).getFolder());
+				specialNodeSelected = true;
+				onlyFiles = false;
+			}
+			else if(node instanceof TestFolderTreeNode)
+			{
+				selectedTypes.add(IProjectExplorerConstants.TYPE_TEST_FOLDER);
+				selectedFiles.add(((TestFolderTreeNode) node).getFolder());
+				onlyFiles = false;
+			}
+			else if(node instanceof FolderTreeNode)
+			{
+				selectedTypes.add(IProjectExplorerConstants.TYPE_NORMAL_FOLDER);
+				selectedFiles.add(((FolderTreeNode) node).getFolder());
+				onlyFiles = false;
+			}
+			else if(node instanceof FileTreeNode)
+			{
+				BaseTreeNode parentNode = (BaseTreeNode) node.getParent();
+				
+				if((parentNode instanceof TestFolderTreeNode) || (parentNode instanceof TestSuiteFolderTreeNode))
+				{
+					selectedTypes.add(IProjectExplorerConstants.TYPE_TEST_FILE);					
+				}
+				else
+				{
+					selectedTypes.add(IProjectExplorerConstants.TYPE_NORMAL_FILE);
+				}
+				
+				selectedFiles.add(((FileTreeNode) node).getFile());
+				
+				if(node.getId().startsWith(IProjectExplorerConstants.ID_PREFIX_APP_CONFIG) 
+						|| node.getId().startsWith(IProjectExplorerConstants.ID_PREFIX_APP_PROP))
+				{
+					specialNodeSelected = true;
+				}
+			}
+		}
+		
+		//Disable project explorer menu items approp
+		boolean multiItemsSelected = (selectedFiles.size() > 1);
+		boolean singleType = (selectedTypes.size() == 1);
+		boolean testFolder = (selectedTypes.contains(IProjectExplorerConstants.TYPE_TEST_FOLDER)
+				|| selectedTypes.contains(IProjectExplorerConstants.TYPE_TEST_SUITE_FOLDER))
+				|| selectedTypes.contains(IProjectExplorerConstants.TYPE_TEST_FILE);
+		
+		UiIdElementsManager.getComponent("peNewMenuList").setEnabled(!multiItemsSelected 
+				&& !selectedFiles.isEmpty() 
+				&& selectedFiles.get(0).isDirectory());
+		
+		UiIdElementsManager.getComponent("peNewTestFile").setEnabled(testFolder);
+		
+		UiIdElementsManager.getComponent("peOpenFile").setEnabled(onlyFiles);
+		
+		boolean executable = 
+				(!multiItemsSelected && selectedTypes.contains(IProjectExplorerConstants.TYPE_PROJECT))
+				|| (!multiItemsSelected && selectedTypes.contains(IProjectExplorerConstants.TYPE_TEST_SUITE_FOLDER));
+		
+		UiIdElementsManager.getComponent("peExecute").setEnabled(executable);
+		UiIdElementsManager.getComponent("peCut").setEnabled(!specialNodeSelected);
+		UiIdElementsManager.getComponent("peCopy").setEnabled(!selectedFiles.isEmpty());
+		UiIdElementsManager.getComponent("peCopyPath").setEnabled(!multiItemsSelected);
+		UiIdElementsManager.getComponent("peRename").setEnabled(!multiItemsSelected && !specialNodeSelected);
+		UiIdElementsManager.getComponent("peDelete").setEnabled(!specialNodeSelected);
+		UiIdElementsManager.getComponent("peProjectProp").setEnabled(singleType && selectedTypes.contains(IProjectExplorerConstants.TYPE_PROJECT));
+		
+		Clipboard clip = (Clipboard) Toolkit.getDefaultToolkit().getSystemClipboard();
+		UiIdElementsManager.getComponent("pePaste").setEnabled(clip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor));
 
+		//show the popup
 		TreePath treePath = tree.getPathForLocation(e.getX(), e.getY());
 		Object clickedItem = treePath.getLastPathComponent();
 		
 		activeTreeNode = (BaseTreeNode) clickedItem;
-		
-		if(clickedItem instanceof ProjectTreeNode)
-		{
-			ProjectTreeNode projTreeNode = (ProjectTreeNode) clickedItem;
-			ideContext.setActiveDetails(projTreeNode.getProject(), projTreeNode.getFolder(), selectedFiles);
-			
-			projectPopup.show(tree, e.getX(), e.getY());
-		}
-		else if(clickedItem instanceof TestSuiteFolderTreeNode) 
-		{
-			TestSuiteFolderTreeNode testSuiteFolderTreeNode = (TestSuiteFolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), testSuiteFolderTreeNode.getFolder(), selectedFiles);
-			
-			testSuitePopup.show(tree, e.getX(), e.getY());
-		}
-		else if(clickedItem instanceof TestFolderTreeNode) 
-		{
-			TestFolderTreeNode testFolderTreeNode = (TestFolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(testFolderTreeNode.getProject(), testFolderTreeNode.getFolder(), selectedFiles);
-			
-			testFolderPopup.show(tree, e.getX(), e.getY());
-		}
-		else if(clickedItem instanceof FileTreeNode)
-		{
-			FileTreeNode fileTreeNode = (FileTreeNode) clickedItem;
-			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile(), selectedFiles);
-			
-			filePopup.show(tree, e.getX(), e.getY());
-		}
-		else if(clickedItem instanceof FolderTreeNode)
-		{
-			FolderTreeNode folderTreeNode = (FolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(folderTreeNode.getProject(), folderTreeNode.getFolder(), selectedFiles);
-	
-			folderPopup.show(tree, e.getX(), e.getY());
-		}
+		projectExplorerTreePopup.show(tree, e.getX(), e.getY());
 	}
 	
 	private void handleOpenEvent(MouseEvent e)
@@ -644,8 +723,7 @@ public class ProjectExplorer extends JPanel
 			
 			logger.debug("Setting active file as: [Project: {}, File: {}]", fileTreeNode.getProject().getName(), fileTreeNode.getFile().getPath());
 			
-			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile());
-			actionCollection.invokeAction("openFile");
+			fileEditorTabbedPane.openOrActivateFile(fileTreeNode.getProject(), fileTreeNode.getFile());
 		}
 		else
 		{
@@ -773,12 +851,21 @@ public class ProjectExplorer extends JPanel
 	{
 		TreePath selectedPath = tree.getSelectionPath();
 		BaseTreeNode selectedNode = (BaseTreeNode) selectedPath.getLastPathComponent();
+		BaseTreeNode parentNode = (BaseTreeNode) selectedNode.getParent();
 		
+		//rename the current node (which would change its id also)
 		String selectedId = selectedNode.getId();
 		String idPrefix = IProjectExplorerConstants.extractIdPrefix(selectedId);
 		
 		String newId = (idPrefix != null) ? idPrefix + newName : newName;
 		selectedNode.rename(newId, newName);
+		
+		//post rename select the renamed node
+		BaseTreeNode renamedNode = parentNode.getChild(newId);
+		Object objPath[] = selectedPath.getPath();
+		objPath[objPath.length - 1] = renamedNode;
+		
+		tree.setSelectionPath(new TreePath(objPath));
 	}
 	
 	public BaseTreeNode reloadActiveNode()

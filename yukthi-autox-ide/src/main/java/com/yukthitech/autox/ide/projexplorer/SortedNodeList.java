@@ -23,7 +23,8 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.InvalidArgumentException;
+import com.yukthitech.utils.ObjectWrapper;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 public class SortedNodeList
 {
@@ -112,6 +113,33 @@ public class SortedNodeList
 		
 		wrapper.incrementIndex();
 		return wrapper.index;
+	}
+	
+	public synchronized int replace(BaseTreeNode node)
+	{
+		NodeWrapper wrapper = map.get(node.getId());
+
+		if(wrapper == null)
+		{
+			throw new InvalidArgumentException("No node found with specified id: " + node.getId());
+		}
+		
+		wrapper.node = node;
+		return wrapper.index;
+	}
+	
+	public synchronized int addOrReplace(BaseTreeNode node, ObjectWrapper<Boolean> isReplaceOp)
+	{
+		boolean exists = map.containsKey(node.getId());
+		
+		if(exists)
+		{
+			isReplaceOp.setValue(true);
+			return replace(node);
+		}
+		
+		isReplaceOp.setValue(false);
+		return add(node);
 	}
 	
 	public synchronized NodeWrapper remove(String id)

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   id="svg2"
+   sodipodi:docname="refresh-icon.svg"
+   inkscape:export-filename="C:\Users\gurzaf\Desktop\refresh_icon.png"
+   viewBox="0 0 500.00002 499.99999"
+   inkscape:export-xdpi="3.3499999"
+   version="1.1"
+   inkscape:export-ydpi="3.3499999"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   width="500"
+   height="500"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs4">
+    <radialGradient
+       id="radialGradient3123"
+       gradientUnits="userSpaceOnUse"
+       cy="350.98999"
+       cx="121.06"
+       gradientTransform="matrix(-1.5207,-0.035511,0.031643,-1.3547,595.23,662.41)"
+       r="191.73"
+       inkscape:collect="always">
+      <stop
+         id="stop3777"
+         style="stop-color:#2bd712"
+         offset="0" />
+      <stop
+         id="stop3779"
+         style="stop-color:#18ac00"
+         offset="1" />
+    </radialGradient>
+    <radialGradient
+       id="radialGradient3125"
+       gradientUnits="userSpaceOnUse"
+       cy="420.54001"
+       cx="332.03"
+       gradientTransform="matrix(1.5624,-0.34577,0.25158,1.1368,-472.54,49.913)"
+       r="191.83"
+       inkscape:collect="always">
+      <stop
+         id="stop3088"
+         style="stop-color:#2bd712"
+         offset="0" />
+      <stop
+         id="stop3090"
+         style="stop-color:#18ac00"
+         offset="1" />
+    </radialGradient>
+    <filter
+       id="filter3127"
+       height="1.1575381"
+       width="1.1210626"
+       color-interpolation-filters="sRGB"
+       y="-0.071736104"
+       x="-0.055507755"
+       inkscape:label="Drop shadow">
+      <feGaussianBlur
+         id="feGaussianBlur3129"
+         result="blur"
+         stdDeviation="10"
+         in="SourceAlpha" />
+      <feColorMatrix
+         id="feColorMatrix3131"
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0 "
+         type="matrix"
+         result="bluralpha" />
+      <feOffset
+         id="feOffset3133"
+         result="offsetBlur"
+         dy="5"
+         dx="5"
+         in="bluralpha" />
+      <feMerge
+         id="feMerge3135">
+        <feMergeNode
+           id="feMergeNode3137"
+           in="offsetBlur" />
+        <feMergeNode
+           id="feMergeNode3139"
+           in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     bordercolor="#666666"
+     inkscape:pageshadow="2"
+     inkscape:window-y="-8"
+     fit-margin-left="0"
+     pagecolor="#ffffff"
+     inkscape:window-height="837"
+     inkscape:window-maximized="1"
+     inkscape:zoom="0.49497475"
+     inkscape:window-x="-8"
+     showgrid="false"
+     borderopacity="1.0"
+     inkscape:current-layer="layer1"
+     inkscape:cx="388.90873"
+     inkscape:cy="217.1828"
+     fit-margin-top="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1600"
+     inkscape:pageopacity="0.0"
+     inkscape:document-units="px"
+     inkscape:pagecheckerboard="0" />
+  <g
+     id="layer1"
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     transform="translate(111.83,-146.98)">
+    <g
+       id="g3119"
+       style="filter:url(#filter3127)"
+       transform="matrix(0.97022447,0,0,1,-134.3172,22.22339)">
+      <path
+         id="path3057"
+         style="fill:url(#radialGradient3123);stroke:#098400;stroke-width:3;stroke-linecap:round"
+         d="m 364.44,158.62 -62.125,62.344 85.406,-0.125 c -0.0421,52.221 -42.4,94.525 -94.625,94.5 -31.284,-0.0151 -59.014,-15.215 -76.219,-38.625 l -2.8633,-3.5691 -57.23,55.007 c 31.771,40.281 81,66.161 136.28,66.188 95.861,0.0462 173.61,-77.639 173.66,-173.5 2e-5,-0.0416 10e-6,-0.0834 0,-0.125 l 70.531,-0.125 -108.28,-107.91 -8.5631,-7.6483 z"
+         sodipodi:nodetypes="cccscccssccccc"
+         transform="translate(-4.5658,172.96)"
+         inkscape:connector-curvature="0" />
+      <path
+         id="path3101"
+         sodipodi:nodetypes="cccscccssccccc"
+         style="fill:url(#radialGradient3125);stroke:#098400;stroke-width:3;stroke-linecap:round"
+         inkscape:connector-curvature="0"
+         d="m 207.85,447.55 62.125,-62.344 -85.406,0.125 c 0.0421,-52.221 42.4,-94.525 94.625,-94.5 31.284,0.0151 59.014,15.215 76.219,38.625 l 2.7008,3.8214 57.582,-55.133 c -31.771,-40.281 -81.189,-66.287 -136.47,-66.314 -95.861,-0.0462 -173.61,77.639 -173.66,173.5 -2e-5,0.0416 -10e-6,0.0834 0,0.125 l -70.531,0.125 108.28,107.91 8.5631,7.6483 z" />
+    </g>
+  </g>
+  <metadata
+     id="metadata21">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title>refresh icon</dc:title>
+        <dc:date>2011-10-26T14:53:56</dc:date>
+        <dc:description>a refresh icon</dc:description>
+        <dc:source>https://openclipart.org/detail/164821/refresh-icon-by-gurzaf</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>gurzaf</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>icon</rdf:li>
+            <rdf:li>refresh</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

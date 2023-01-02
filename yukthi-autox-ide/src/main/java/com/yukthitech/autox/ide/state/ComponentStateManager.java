@@ -21,11 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.yukthitech.autox.ide.events.IdeClosingEvent;
+import com.yukthitech.autox.ide.events.IdeOpeningEvent;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.services.ClassScannerService;
-import com.yukthitech.autox.ide.services.IdeClosingEvent;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
-import com.yukthitech.autox.ide.services.IdeOpeningEvent;
 
 /**
  * Responsible for storing and loading state of different components.

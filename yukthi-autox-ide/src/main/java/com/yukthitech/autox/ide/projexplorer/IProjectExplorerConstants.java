@@ -20,12 +20,26 @@ public interface IProjectExplorerConstants
 	String ID_PREFIX_PROJECT = ":a-project::";
 	
 	String ID_PREFIX_TEST_SUITE_FOLDER = ":a-testSuite::";
+	
+	String ID_PREFIX_RESOURCE_FOLDER = ":a-xResFolder::";
 
 	String ID_PREFIX_APP_CONFIG = ":b-appConfig::";
 
 	String ID_PREFIX_APP_PROP = ":c-appProp::";
 
 	String ID_PREFIX_FOLDER = ":i-folder::";
+	
+	String TYPE_PROJECT = "project";
+	
+	String TYPE_TEST_SUITE_FOLDER = "testSuiteFolder";
+	
+	String TYPE_TEST_FOLDER = "testFolder";
+	
+	String TYPE_TEST_FILE = "testFile";
+	
+	String TYPE_NORMAL_FOLDER = "normalFolder";
+	
+	String TYPE_NORMAL_FILE = "normalFile";
 	
 	public static String extractIdPrefix(String id)
 	{

@@ -196,7 +196,7 @@ public class MenuItem implements Validateable
 	 * @param actionHandler object on which action method should be invoked.
 	 * @return menu item
 	 */
-	public JMenuItem toJMenuItem(ActionCollection actionCollection)
+	public JMenuItem toJMenuItem(ActionCollection actionCollection, IdePopupMenu idePopup)
 	{
 		JMenuItem menuItem = new JMenuItem(label);
 		
@@ -217,7 +217,7 @@ public class MenuItem implements Validateable
 		
 		if(action != null)
 		{
-			menuItem.addActionListener(actionCollection.getActionListener(action));
+			menuItem.addActionListener(actionCollection.getActionListener(action, idePopup));
 		}
 		
 		if(icon != null)

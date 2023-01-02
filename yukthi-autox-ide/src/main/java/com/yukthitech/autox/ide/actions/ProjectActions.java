@@ -26,7 +26,6 @@ import org.springframework.context.ApplicationContext;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.NewProjectDialog;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.dialog.DeleteProjectDialog;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
@@ -42,9 +41,6 @@ import com.yukthitech.autox.ide.ui.InProgressDialog;
 public class ProjectActions
 {
 	private JFileChooser projectChooser = new JFileChooser();
-
-	@Autowired
-	private IdeContext ideContext;
 
 	@Autowired
 	private ProjectExplorer projectExplorer;
@@ -160,7 +156,14 @@ public class ProjectActions
 			projPropertiesDialog = new ProjectPropertiesDialog(IdeUtils.getCurrentWindow());
 			IdeUtils.autowireBean(applicationContext, projPropertiesDialog);
 		}
+		
+		Project project = projectExplorer.getSelectedProject();
+		
+		if(project == null)
+		{
+			return;
+		}
 
-		projPropertiesDialog.display(ideContext);
+		projPropertiesDialog.display(project);
 	}
 }

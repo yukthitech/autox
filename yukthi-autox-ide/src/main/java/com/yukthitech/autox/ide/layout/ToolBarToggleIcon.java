@@ -41,7 +41,7 @@ public class ToolBarToggleIcon extends ToolBarIcon
 
 		if(action != null)
 		{
-			button.addActionListener(actionCollection.getActionListener(action));
+			button.addActionListener(actionCollection.getActionListener(action, null));
 		}
 		
 		String id = super.getId();

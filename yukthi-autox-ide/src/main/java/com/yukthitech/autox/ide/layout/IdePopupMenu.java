@@ -13,33 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.services;
+package com.yukthitech.autox.ide.layout;
 
-import com.yukthitech.autox.ide.model.IdeState;
+import java.awt.Component;
+
+import javax.swing.JPopupMenu;
 
 /**
- * Event that occurs after ide is started.
- * @author akiran
+ * Wrapper over popup and help in capturing the source of popup menu.
+ * Note: same popup menu can be triggered from multiple places, for further processing this popup source is 
+ * important.
+ * 
+ * @author akranthikiran
  */
-public class IdeStartedEvent implements IIdeEvent
+public class IdePopupMenu
 {
-	/**
-	 * State of ide to be persisted.
-	 */
-	private IdeState ideState;
-
-	public IdeStartedEvent(IdeState ideState)
+	private JPopupMenu popupMenu;
+	
+	private Component lastSource;
+	
+	public IdePopupMenu(JPopupMenu popupMenu)
 	{
-		this.ideState = ideState;
+		this.popupMenu = popupMenu;
+	}
+
+	public void show(Component c, int x, int y)
+	{
+		this.lastSource = c;
+		popupMenu.show(c, x, y);
 	}
 	
-	/**
-	 * Gets the state of ide to be persisted.
-	 *
-	 * @return the state of ide to be persisted
-	 */
-	public IdeState getIdeState()
+	public Component getLastSource()
 	{
-		return ideState;
+		return lastSource;
 	}
 }

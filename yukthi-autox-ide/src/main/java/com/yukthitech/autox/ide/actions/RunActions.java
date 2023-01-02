@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.yukthitech.autox.debug.common.ClientMssgExecuteSteps;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
@@ -35,6 +34,7 @@ import com.yukthitech.autox.ide.exeenv.ExecutionType;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 
 @ActionHolder
 public class RunActions
@@ -53,7 +53,7 @@ public class RunActions
 	private ExecutionEnvironmentManager executionEnvManager;
 
 	@Autowired
-	private IdeContext ideContext;
+	private ProjectExplorer projectExplorer;
 	
 	private void runTestSuite(boolean debug)
 	{
@@ -322,14 +322,14 @@ public class RunActions
 	
 	private synchronized void executeTestSuiteFolder(boolean debug) 
 	{
-		File activeFolder = ideContext.getActiveFile();
+		File activeFolder = projectExplorer.getSelectedFile();
 		
 		if(activeFolder == null || !activeFolder.isDirectory())
 		{
 			return;
 		}
 		
-		Project project = ideContext.getActiveProject();
+		Project project = projectExplorer.getSelectedProject();
 		ExecutionType executionType = project.isTestSuiteFolder(activeFolder) ? ExecutionType.SOURCE_FOLDER : ExecutionType.FOLDER;
 
 		executionManager.execute(executionType, project, activeFolder.getPath(), debug);
@@ -337,7 +337,7 @@ public class RunActions
 	
 	private synchronized void executeProject(boolean debug) 
 	{
-		Project project = ideContext.getActiveProject();
+		Project project = projectExplorer.getSelectedProject();
 		executionManager.execute(ExecutionType.PROJECT, project, null, debug);
 	}
 

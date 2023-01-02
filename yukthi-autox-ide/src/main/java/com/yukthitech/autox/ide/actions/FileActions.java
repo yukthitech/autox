@@ -44,7 +44,6 @@ import com.yukthitech.autox.ide.FileDetails;
 import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.layout.Action;
@@ -78,9 +77,6 @@ public class FileActions
 	}
 
 	@Autowired
-	private IdeContext ideContext;
-
-	@Autowired
 	private ProjectExplorer projectExplorer;
 
 	@Autowired
@@ -98,7 +94,7 @@ public class FileActions
 	@Action
 	public void newFolder()
 	{
-		File activeFolder = ideContext.getActiveFile();
+		File activeFolder = projectExplorer.getSelectedFile();
 		String newFolder = JOptionPane.showInputDialog("Please provide new folder name?");
 
 		if(newFolder == null)
@@ -132,7 +128,7 @@ public class FileActions
 
 	private File createFile(String templateName, String defaultExtension)
 	{
-		File activeFolder = ideContext.getActiveFile();
+		File activeFolder = projectExplorer.getSelectedFile();
 		String newFile = JOptionPane.showInputDialog("Please provide new test-file name?");
 
 		if(newFile == null)
@@ -146,6 +142,12 @@ public class FileActions
 		if(defaultExtension != null && !newFile.toLowerCase().endsWith(defaultExtension.toLowerCase()))
 		{
 			newFile += defaultExtension;
+		}
+		
+		//if the action was invoked on file, use its parent folder
+		if(!activeFolder.isDirectory())
+		{
+			activeFolder = activeFolder.getParentFile();
 		}
 
 		File finalFile = new File(activeFolder, newFile);
@@ -190,8 +192,7 @@ public class FileActions
 
 		if(file != null)
 		{
-			ideContext.setActiveDetails(ideContext.getActiveProject(), file);
-			fileEditorTabbedPane.openFile();
+			fileEditorTabbedPane.openOrActivateFile(projectExplorer.getSelectedProject(), file);
 		}
 	}
 
@@ -202,9 +203,14 @@ public class FileActions
 
 		if(file != null)
 		{
-			ideContext.setActiveDetails(ideContext.getActiveProject(), file);
-			fileEditorTabbedPane.openFile();
+			fileEditorTabbedPane.openOrActivateFile(projectExplorer.getSelectedProject(), file);
 		}
+	}
+
+	@Action
+	public void openFile()
+	{
+		projectExplorer.openSelectedFiles();
 	}
 
 	@Action
@@ -305,7 +311,7 @@ public class FileActions
 			return;
 		}
 
-		File activeFile = ideContext.getActiveFile();
+		File activeFile = projectExplorer.getSelectedFile();
 
 		if(activeFile == null)
 		{
@@ -330,7 +336,13 @@ public class FileActions
 			return;
 		}
 
-		List<File> activeFiles = ideContext.getSelectedFiles();
+		List<File> activeFiles = projectExplorer.getSelectedFiles();
+		
+		if(CollectionUtils.isEmpty(activeFiles))
+		{
+			return;
+		}
+		
 		copyFile(activeFiles, true);
 	}
 
@@ -349,14 +361,20 @@ public class FileActions
 			return;
 		}
 
-		List<File> activeFiles = ideContext.getSelectedFiles();
+		List<File> activeFiles = projectExplorer.getSelectedFiles();
+
+		if(CollectionUtils.isEmpty(activeFiles))
+		{
+			return;
+		}
+
 		copyFile(activeFiles, false);
 	}
 	
 	@Action
 	public void copyPath() throws UnsupportedFlavorException, IOException
 	{
-		File activeFile = ideContext.getActiveFile();
+		File activeFile = projectExplorer.getSelectedFile();
 		
 		StringSelection selection = new StringSelection(activeFile.getPath());
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

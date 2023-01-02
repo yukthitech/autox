@@ -13,28 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.context;
+package com.yukthitech.autox.ide.events;
 
 import com.yukthitech.autox.ide.model.IdeState;
+import com.yukthitech.autox.ide.services.IIdeEvent;
 
 /**
- * Listener to listen to the events of the ide and take approp actions.
+ * Event that occurs before opening the ide. And after previous state is loaded 
+ * by all components/services in old way.
+ * 
+ * Even this event can be used to load the event.
+ * 
  * @author akiran
  */
-public interface IContextListener
+public class IdeOpeningEvent implements IIdeEvent
 {
 	/**
-	 * Called before closing the ide. The data set on state will be persisted
-	 * and during next ide start, the same state will be sent via {@link #loadState(IdeState)}
-	 * @param state object on which target object needs to be set.
+	 * State of ide to be persisted.
 	 */
-	public default void saveState(IdeState state)
-	{}
+	private IdeState ideState;
+
+	public IdeOpeningEvent(IdeState ideState)
+	{
+		this.ideState = ideState;
+	}
 	
 	/**
-	 * Invoked when ide is started by passing previously persisted state.
-	 * @param state state to be loaded
+	 * Gets the state of ide to be persisted.
+	 *
+	 * @return the state of ide to be persisted
 	 */
-	public default void loadState(IdeState state)
-	{}
+	public IdeState getIdeState()
+	{
+		return ideState;
+	}
 }

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JComponent;
+
 /**
  * Used to collect different ui elements across with a given "id". And access these
  * ui elements based on this "id".
@@ -70,5 +72,17 @@ public class UiIdElementsManager
 		}
 		
 		return elements.get(0);
+	}
+
+	public static JComponent getComponent(String id)
+	{
+		List<Object> elements = idElements.get(id);
+		
+		if(elements == null)
+		{
+			return null;
+		}
+		
+		return (JComponent) elements.get(0);
 	}
 }

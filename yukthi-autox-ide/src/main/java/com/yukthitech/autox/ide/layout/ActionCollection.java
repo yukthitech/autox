@@ -59,11 +59,32 @@ public class ActionCollection
 		 * Method to be invoked.
 		 */
 		private Method method;
+		
+		private boolean actionEventRequired = false;
 
-		public ExecutableAction(Object object, Method method)
+		public ExecutableAction(Object object, Method method, boolean actionEventRequired)
 		{
 			this.object = object;
 			this.method = method;
+			this.actionEventRequired = actionEventRequired;
+		}
+	}
+	
+	private class IdeActionListener implements ActionListener
+	{
+		private String action;
+		private IdePopupMenu idePopupMenu;
+		
+		public IdeActionListener(String action, IdePopupMenu idePopupMenu)
+		{
+			this.action = action;
+			this.idePopupMenu = idePopupMenu;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			invokeAction(action, idePopupMenu != null ? idePopupMenu.getLastSource() : null);			
 		}
 	}
 	
@@ -91,19 +112,33 @@ public class ActionCollection
 		logger.debug("Registering action holder of type: {}", type.getName());
 		
 		Method methods[] = type.getMethods();
+		boolean actionEventRequired = false;
 		
 		for(Method met : methods)
 		{
-			if(Modifier.isStatic(met.getModifiers()) || met.getAnnotation(Action.class) == null || met.getParameterTypes().length > 0)
+			if(Modifier.isStatic(met.getModifiers()) || met.getAnnotation(Action.class) == null || met.getParameterTypes().length > 1)
 			{
 				continue;
 			}
 			
-			actions.put(met.getName(), new ExecutableAction(actionHolder, met));
+			actionEventRequired = false;
+			
+			if(met.getParameterTypes().length == 1)
+			{
+				if(!IdeActionEvent.class.equals(met.getParameterTypes()[0]))
+				{
+					continue;
+				}
+				
+				actionEventRequired = true;
+			}
+			
+			logger.debug("Registering action '{}' defined by: {}", met.getName(), met.getDeclaringClass().getName());
+			actions.put(met.getName(), new ExecutableAction(actionHolder, met, actionEventRequired));
 		}
 	}
 	
-	public void invokeAction(String name)
+	public void invokeAction(String name, Object actionSource)
 	{
 		logger.debug("Invoking action with name: {}", name);
 
@@ -112,7 +147,15 @@ public class ActionCollection
 			try
 			{
 				ExecutableAction action = actions.get(name);
-				action.method.invoke(action.object);
+				
+				if(action.actionEventRequired)
+				{
+					action.method.invoke(action.object, new IdeActionEvent(actionSource));
+				}
+				else
+				{
+					action.method.invoke(action.object);
+				}
 			}catch(Exception ex)
 			{
 				logger.error("An error occurred while invoking action: {}", name, ex);
@@ -122,25 +165,16 @@ public class ActionCollection
 	
 	public void registerGlobalAction(ShortKey shortKey, String action)
 	{
-		globalKeyboardListener.addGlobalKeyListener(shortKey, getActionListener(action));
+		globalKeyboardListener.addGlobalKeyListener(shortKey, getActionListener(action, null));
 	}
 	
-	public ActionListener getActionListener(String action)
+	public ActionListener getActionListener(String action, IdePopupMenu idePopup)
 	{
 		if(!actions.containsKey(action))
 		{
 			throw new InvalidArgumentException("Invalid action name specified: " + action);
 		}
 		
-		ActionListener listener = new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				invokeAction(action);
-			}
-		};
-		
-		return listener;
+		return new IdeActionListener(action, idePopup);
 	}
 }

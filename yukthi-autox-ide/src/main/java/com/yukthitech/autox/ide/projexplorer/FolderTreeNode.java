@@ -42,14 +42,31 @@ class FolderTreeNode extends BaseTreeNode
 		
 		private boolean testSuiteFolder;
 		
+		private boolean resourceFolder;
+		
 		private String label;
 
-		public NodeInfo(String id, File file, String label, boolean testSuiteFolder)
+		public NodeInfo(String id, File file, String label)
 		{
 			this.id = id;
 			this.file = file;
 			this.label = label;
-			this.testSuiteFolder = testSuiteFolder;
+		}
+
+		public static NodeInfo newTestSuiteFolderNode(String id, File file, String label)
+		{
+			NodeInfo node = new NodeInfo(id, file, label);
+			node.testSuiteFolder = true;
+			
+			return node;
+		}
+
+		public static NodeInfo newResourceFolderNode(String id, File file, String label)
+		{
+			NodeInfo node = new NodeInfo(id, file, label);
+			node.resourceFolder = true;
+			
+			return node;
 		}
 	}
 
@@ -110,7 +127,7 @@ class FolderTreeNode extends BaseTreeNode
 			String id = file.isDirectory() ? IProjectExplorerConstants.ID_PREFIX_FOLDER : "";
 			id += file.getName();
 
-			nodeList.add(new NodeInfo(id, file, file.getName(), false));
+			nodeList.add(new NodeInfo(id, file, file.getName()));
 		}
 		
 		return nodeList;
@@ -156,6 +173,10 @@ class FolderTreeNode extends BaseTreeNode
 				if(nodeInfo.testSuiteFolder)
 				{
 					folderTreeNode = new TestSuiteFolderTreeNode(nodeInfo.id, projectExplorer, project, nodeInfo.label, file);
+				}
+				else if(nodeInfo.resourceFolder)
+				{
+					folderTreeNode = new ResourceFolderTreeNode(nodeInfo.id, projectExplorer, project, nodeInfo.label, file);
 				}
 				else
 				{

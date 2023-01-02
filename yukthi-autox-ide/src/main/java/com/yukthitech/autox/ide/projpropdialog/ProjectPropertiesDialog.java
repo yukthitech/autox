@@ -21,26 +21,19 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.proj.ProjectManager;
+import com.yukthitech.swing.EscapableDialog;
 
-public class ProjectPropertiesDialog extends JDialog
+public class ProjectPropertiesDialog extends EscapableDialog
 {
 	private static final long serialVersionUID = 1L;
 
@@ -62,7 +55,7 @@ public class ProjectPropertiesDialog extends JDialog
 	 */
 	public ProjectPropertiesDialog(Window window)
 	{
-		super(window, ModalityType.APPLICATION_MODAL);
+		super.setModalityType(ModalityType.APPLICATION_MODAL);
 
 		setBounds(100, 100, 550, 400);
 		getContentPane().setLayout(new BorderLayout());
@@ -115,31 +108,9 @@ public class ProjectPropertiesDialog extends JDialog
 		}
 	}
 
-	@Override
-	protected JRootPane createRootPane()
+	public Project display(Project project)
 	{
-		JRootPane rootPane = new JRootPane();
-		KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
-
-		Action actionListener = new AbstractAction()
-		{
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(ActionEvent actionEvent)
-			{
-				setVisible(false);
-			}
-		};
-		InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		inputMap.put(stroke, "ESCAPE");
-		rootPane.getActionMap().put("ESCAPE", actionListener);
-
-		return rootPane;
-	}
-
-	public Project display(IdeContext ideContext)
-	{
-		this.project = ideContext.getActiveProject();
+		this.project = project;
 		
 		projectBasicPropPanel.setProject(project);
 		projectPropertiesClassPath.setProject(project);

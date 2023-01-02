@@ -173,88 +173,33 @@
 		<toggle-item id="ideSettings_enableTextWrapping" icon="/ui/icons/word-wrap.svg" tooltip="Word Wrap" action="toogleWordWrap"/>
 	</toolBar>
 
-	<popup-menu label="folderPopup">
-		<menu label="New">
-			<item label="Folder" action="newFolder" />
-			<item label="File" action="newFile" />
+	<popup-menu label="projectExplorerTreePopup">
+		<menu id="peNewMenuList" label="New">
+			<item icon="/ui/icons/folder.svg" label="Folder" action="newFolder" />
+			<item icon="/ui/icons/file.svg" label="File" action="newFile" />
+			<item id="peNewTestFile" icon="/ui/file-icons/xml.svg" label="Test File" action="newTestFile" />
 		</menu>
 
-		<item label="Refresh" action="refreshFolder" />
-		<item label="Search" action="search" />
+		<item id="peOpenFile" icon="/ui/icons/open.svg" label="Open" action="openFile" />
+		<item icon="/ui/icons/refresh.svg" label="Refresh" action="refreshFolder" />
+		<item icon="/ui/icons/search.svg" label="Search" action="search" />
+		<item id="peExecute" icon="/ui/icons/run.svg" label="Execute" action="executeProject" />
 
 		<item label="-" />
-		<item label="Copy" action="copyFile" />
-		<item label="Cut" action="cutFile" />
-		<item label="Copy Path" action="copyPath" />
-		<item label="Paste" action="pasteFile" />
-		<item label="Rename" action="renameFile" />
-		<item label="Delete" action="deleteFile" />
-	</popup-menu>
+		<item id="peCopy" icon="/ui/icons/copy.svg" label="Copy" action="copyFile" />
+		<item id="peCut" icon="/ui/icons/cut.svg" label="Cut" action="cutFile" />
+		<item id="peCopyPath" label="Copy Path" action="copyPath" />
+		<item id="pePaste" icon="/ui/icons/paste.svg" label="Paste" action="pasteFile" />
 
-	<popup-menu label="filePopup">
-		<item label="Open" action="openFile" />
-		<item label="Copy" action="copyFile" />
-		<item label="Cut" action="cutFile" />
-		<item label="Copy Path" action="copyPath" />
-		<item label="Paste" action="pasteFile" />
-		<item label="Rename" action="renameFile" />
-		<item label="Delete" action="deleteFile" />
-		<item label="Search" action="search" />
-	</popup-menu>
-
-	<popup-menu label="projectPopup">
+		<item label="-" />
+		<item id="peRename" icon="/ui/icons/rename.svg" label="Rename" action="renameFile" />
+		<item id="peDelete" icon="/ui/icons/delete.svg" label="Delete" action="deleteFile" />
+		<!-- 
 		<item label="Delete Project" action="deleteProject" />
-		<item label="Refresh" action="refreshProject" />
-		<item label="Search" action="search" />
-		<item label="Execute" action="executeProject" />
+		 -->
 
 		<item label="-" />
-		<item label="Copy Path" action="copyPath" />		
-		<item label="Properties" action="projectProperties"></item>
-	</popup-menu>
-
-	<popup-menu label="testStuitePopup">
-		<menu label="New">
-			<item label="Folder" action="newFolder" />
-			<item label="Test File" action="newTestFile" />
-			<item label="File" action="newFile" />
-		</menu>
-
-		<item label="Refresh" action="refreshFolder"/>
-		<item label="Search" action="search" />
-
-		<item label="-" />
-		<item label="Copy" action="copyFile" />
-		<item label="Copy Path" action="copyPath" />
-		<item label="Paste" action="pasteFile" />
-		<item label="Rename" action="renameFile" />
-		<item label="Delete" action="deleteFile" />
-		
-		<item label="-" />
-		
-		<item label="Execute" action="executeTestSuiteFolder" />
-	</popup-menu>
-
-	<popup-menu label="testFolderPopup">
-		<menu label="New">
-			<item label="Folder" action="newFolder" />
-			<item label="Test File" action="newTestFile" />
-			<item label="File" action="newFile" />
-		</menu>
-
-		<item label="Refresh" action="refreshFolder"/>
-		<item label="Search" action="search" />
-
-		<item label="-" />
-		<item label="Copy" action="copyFile" />
-		<item label="Copy Path" action="copyPath" />
-		<item label="Paste" action="pasteFile" />
-		<item label="Rename" action="renameFile" />
-		<item label="Delete" action="deleteFile" />
-		
-		<item label="-" />
-		
-		<item label="Execute" action="executeTestSuiteFolder" />
+		<item id="peProjectProp" label="Properties" action="projectProperties"></item>
 	</popup-menu>
 
 	<popup-menu label="projectExplorerPopup">
