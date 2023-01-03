@@ -13,19 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide;
+package com.yukthitech.autox.ide.index;
 
-/**
- * Functionality that optionally be implemented by {@link IIdeFileManager} to support links to other files. 
- * @author akiran
- */
-public interface IHyperlinkSupport
+public interface IIndexConstants
 {
-	/**
-	 * If any hperlink is suppose to come, then 
-	 * @param position
-	 * @param fileContentObject
-	 * @return
-	 */
-	public LinkWithLocation getLinkLocation(int position, Object fileContentObject);
+	String TYPE_FUNCTION = "function";
 }

@@ -15,7 +15,7 @@
  */
 package com.yukthitech.autox.ide.xmlfile;
 
-import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.index.FileParseCollector;
 
 public class XmlFile
 {

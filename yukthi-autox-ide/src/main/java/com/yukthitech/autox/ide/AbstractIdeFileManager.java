@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
+import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 

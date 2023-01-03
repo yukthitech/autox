@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.model;
+package com.yukthitech.autox.ide.rest;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.yukthitech.autox.ide.rest.MultiPart;
 
 public class RestInvocationModel
 {

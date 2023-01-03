@@ -16,6 +16,7 @@
 package com.yukthitech.autox.ide.proj;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.events.ProjectRemovedEvent;
+import com.yukthitech.autox.ide.index.ProjectIndex;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
@@ -58,6 +60,8 @@ public class ProjectManager
 	private IdeEventManager ideEventManager;
 
 	private Set<Project> projects = new HashSet<>();
+	
+	private Map<String, ProjectIndex> projectIndexes = new HashMap<>();
 
 	@PostConstruct
 	private void init()
@@ -113,9 +117,9 @@ public class ProjectManager
 		{
 			throw new InvalidStateException("A project specified name is already open: {}", project.getName());
 		}
-		
-		projectExplorer.openProject(project);
+
 		projects.add(project);
+		projectExplorer.openProject(project);
 		return project;
 	}
 
@@ -129,6 +133,11 @@ public class ProjectManager
 		
 		projectExplorer.deleteProject(project);
 		projects.remove(project);
+		
+		synchronized(projectIndexes)
+		{
+			projectIndexes.remove(project.getName());
+		}
 		
 		if(deleteContent)
 		{
@@ -170,5 +179,28 @@ public class ProjectManager
 		this.projects.add(project);
 		
 		projectExplorer.reloadProjectNode(project);
+	}
+	
+	public ProjectIndex getProjectIndex(String name)
+	{
+		synchronized(projectIndexes)
+		{
+			ProjectIndex index = projectIndexes.get(name);
+			
+			if(index != null)
+			{
+				return index;
+			}
+			
+			if(getProject(name) == null)
+			{
+				return null;
+			}
+			
+			index = new ProjectIndex();
+			projectIndexes.put(name, index);
+			
+			return index;
+		}
 	}
 }

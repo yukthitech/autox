@@ -61,7 +61,6 @@ import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.FileDetails;
-import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
@@ -76,12 +75,14 @@ import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.events.ActiveFileChangedEvent;
 import com.yukthitech.autox.ide.events.FileSavedEvent;
 import com.yukthitech.autox.ide.help.HelpPanel;
+import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.IdePopupMenu;
 import com.yukthitech.autox.ide.layout.UiIdElementsManager;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.swing.IconButton;
 import com.yukthitech.swing.ToggleIconButton;
@@ -133,6 +134,12 @@ public class ProjectExplorer extends JPanel
 	
 	@Autowired
 	private ActionCollection actionCollection;
+	
+	/**
+	 * Used to update project indexes.
+	 */
+	@Autowired
+	private ProjectManager projectManager;
 	
 	private BaseTreeNode activeTreeNode;
 	
@@ -909,9 +916,10 @@ public class ProjectExplorer extends JPanel
 	void checkFile(FileTreeNode fileNode)
 	{
 		File file = fileNode.getFile();
+		Project project = fileNode.getProject();
 		
 		//ignore files which are outside test suite folders
-		if(!fileNode.getProject().isTestSuiteFolderFile(file))
+		if(!project.isTestSuiteFolderFile(file))
 		{
 			return;
 		}
@@ -927,6 +935,7 @@ public class ProjectExplorer extends JPanel
 			try
 			{
 				fileManager.parseFile(fileNode.getProject(), file, collector);
+				projectManager.getProjectIndex(project.getName()).addReferableElements(file, collector.getReferableElements());
 				
 				fileNode.setErrored(collector.getErrorCount() > 0);
 				fileNode.setWarned(collector.getWarningCount() > 0);

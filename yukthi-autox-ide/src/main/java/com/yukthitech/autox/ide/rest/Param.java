@@ -13,40 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.model.proj;
+package com.yukthitech.autox.ide.rest;
 
-import java.io.File;
-import java.util.Map;
-
-import com.yukthitech.autox.ide.xmlfile.Element;
-import com.yukthitech.utils.CommonUtils;
-
-/**
- * Test suite element.
- * @author akiran
- */
-public class TestCaseElement extends CodeElementContainer
+public class Param
 {
-	/**
-	 * Name of the test suite.
-	 */
-	private String name;
-
-	public TestCaseElement(File file, int position, Element element)
+	public String name;
+	public String value;
+	
+	public Param(String name, String value)
 	{
-		super(file, position);
-
-		Map<String, String> valMap = element.getChildValues(CommonUtils.toSet("name"));
-		this.name = valMap.get("name");
+		this.name = name;
+		this.value = value;
 	}
-
-	/**
-	 * Gets the name of the test suite.
-	 *
-	 * @return the name of the test suite
-	 */
 	public String getName()
 	{
 		return name;
 	}
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	public String getValue()
+	{
+		return value;
+	}
+	public void setValue(String value)
+	{
+		this.value = value;
+	}
+	
 }

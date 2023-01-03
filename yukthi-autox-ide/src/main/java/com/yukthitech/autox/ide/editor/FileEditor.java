@@ -44,6 +44,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.BadLocationException;
 
 import org.apache.commons.io.FileUtils;
@@ -52,7 +53,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
-import org.fife.ui.rsyntaxtextarea.LinkGenerator;
 import org.fife.ui.rsyntaxtextarea.LinkGeneratorResult;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaHighlighter;
@@ -63,17 +63,23 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.dialog.FindCommand;
 import com.yukthitech.autox.ide.dialog.FindOperation;
 import com.yukthitech.autox.ide.editor.FileEditorIconGroup.IconType;
 import com.yukthitech.autox.ide.events.ActiveFileChangedEvent;
 import com.yukthitech.autox.ide.events.FileSavedEvent;
+import com.yukthitech.autox.ide.index.FileIndex;
+import com.yukthitech.autox.ide.index.FileParseCollector;
+import com.yukthitech.autox.ide.index.ProjectIndex;
+import com.yukthitech.autox.ide.index.ReferableElement;
+import com.yukthitech.autox.ide.index.ReferenceElement;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
@@ -90,6 +96,37 @@ public class FileEditor extends JPanel
 	private static ImageIcon WARN_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark-warn.svg", 16);
 	
 	private static GutterPopup gutterPopup = new GutterPopup();
+	
+	private class LinkeGeneratorResultImpl implements LinkGeneratorResult
+	{
+		private ReferenceElement ref;
+		
+		public LinkeGeneratorResultImpl(ReferenceElement ref)
+		{
+			this.ref = ref;
+		}
+
+		@Override
+		public HyperlinkEvent execute()
+		{
+			ProjectIndex projectIndex = projectManager.getProjectIndex(project.getName());
+			ReferableElement element = projectIndex.getReferableElement(ref.getType(), ref.getName(), ref.getScopes());
+			
+			if(element == null)
+			{
+				return null;
+			}
+			
+			fileActions.gotoFilePath(project, element.getFile().getPath(), -1, element.getSelectionRange());
+			return null;
+		}
+
+		@Override
+		public int getSourceOffset()
+		{
+			return ref.getStartPostion();
+		}
+	}
 	
 	private RTextScrollPane scrollPane;
 
@@ -112,6 +149,12 @@ public class FileEditor extends JPanel
 	@Autowired
 	private IdeEventManager eventManager;
 	
+	@Autowired
+	private ProjectManager projectManager;
+	
+	@Autowired
+	private FileActions fileActions;
+	
 	/**
 	 * File manager for current file.
 	 */
@@ -133,6 +176,11 @@ public class FileEditor extends JPanel
 	private boolean contentChanged = false;
 	
 	private FileEditorTab fileEditorTab;
+	
+	/**
+	 * Maintains list of references in this file (clickable elements).
+	 */
+	private FileIndex fileIndex = new FileIndex();
 	
 	public FileEditor(Project project, File file)
 	{
@@ -244,7 +292,6 @@ public class FileEditor extends JPanel
 			@Override
 			public void keyReleased(KeyEvent e)
 			{
-				
 				fileContentChanged(false);
 			}
 		});
@@ -301,23 +348,12 @@ public class FileEditor extends JPanel
 			}
 			
 			syntaxTextArea.setHyperlinksEnabled(true);
-			syntaxTextArea.setLinkGenerator(new LinkGenerator(){
-
-				@Override
-				public LinkGeneratorResult isLinkAtOffset(RSyntaxTextArea textArea, int offs)
-				{
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-			});
+			syntaxTextArea.setLinkGenerator(this::generateLink);
 		}
 
 		setSyntaxStyle();
 		syntaxTextArea.setCodeFoldingEnabled(true);
 
-		fileContentChanged(false);
-		
 		IdeUtils.autowireBean(applicationContext, iconManager);
 		
 		if(executionSupported)
@@ -329,6 +365,22 @@ public class FileEditor extends JPanel
 	void setFileEditorTab(FileEditorTab tab)
 	{
 		this.fileEditorTab = tab;
+		
+		// as tab is set post init of editor and tab
+		//   parse the content post setting the tab
+		IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, IIdeConstants.FILE_EDITOR_PARSE_DELAY);
+	}
+	
+	private LinkGeneratorResult generateLink(RSyntaxTextArea textArea, int offs)
+	{
+		ReferenceElement element = fileIndex.getReference(offs);
+		
+		if(element == null)
+		{
+			return null;
+		}
+		
+		return new LinkeGeneratorResultImpl(element);
 	}
 	
 	public boolean isContentChanged()
@@ -507,7 +559,7 @@ public class FileEditor extends JPanel
 			//from last change time, try to parse the content and highlight regions if any
 			IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, IIdeConstants.FILE_EDITOR_PARSE_DELAY);
 		}
-		//if content is not changed, if job is already submitted, simply reshedule it
+		//if content is not changed, if job is already submitted, simply reshedule it (so that job is not present yet, this call be ignored)
 		else
 		{
 			IdeUtils.rescheduleConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, IIdeConstants.FILE_EDITOR_PARSE_DELAY);
@@ -670,6 +722,12 @@ public class FileEditor extends JPanel
 		FileParseCollector collector = new FileParseCollector(project, file);
 		parsedFileContent = currentFileManager.parseContent(project, file.getName(), syntaxTextArea.getText(), collector);
 		
+		//update indexes
+		fileIndex.setReferences(collector.getReferences());
+		projectManager.getProjectIndex(project.getName()).addReferableElements(file, collector.getReferableElements());
+		
+		fileEditorTab.setParseResults(collector.getErrorCount() > 0, collector.getWarningCount() > 0);
+		
 		collector.getMessages().stream().forEach(mssg -> this.addMessage(mssg));
 		
 		//this will ensure selection is not lost when resetting the messages
@@ -803,6 +861,11 @@ public class FileEditor extends JPanel
 		}
 
 		return null;
+	}
+	
+	public void selectText(int start, int end)
+	{
+		syntaxTextArea.select(start, end);
 	}
 	
 	private boolean isWordChar(char ch)

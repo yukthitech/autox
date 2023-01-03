@@ -22,25 +22,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.ElementInfo;
+import com.yukthitech.autox.doc.ParamInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
-import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
+import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLConstants;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.beans.BeanProperty;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -48,6 +54,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class Element implements INode
 {
 	private static Logger logger = LogManager.getLogger(Element.class);
+	
+	private static final Pattern DOLLAR_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
 	
 	private static DefaultParserHandler defaultParserHandler = new DefaultParserHandler();
 	
@@ -90,17 +98,23 @@ public class Element implements INode
 	private Map<String, String> namespaceToPrefix;
 	
 	private BeanProperty beanProperty;
+	
+	/**
+	 * Range where this element name is defined.
+	 */
+	private IndexRange nameIndex;
 
 	public Element()
 	{}
 
-	public Element(Element parentElement, String prefix, String namespace, String name, LocationRange startLocation)
+	public Element(Element parentElement, String prefix, String namespace, String name, LocationRange startLocation, IndexRange nameIndex)
 	{
 		this.prefix = prefix;
 		this.parentElement = parentElement;
 		this.namespace = namespace;
 		this.name = name;
 		this.startLocation = startLocation;
+		this.nameIndex = nameIndex;
 	}
 
 	public void addNameSpaceMapping(String prefix, String namespace)
@@ -113,6 +127,11 @@ public class Element implements INode
 		
 		this.prefixToNamespace.put(prefix, namespace);
 		this.namespaceToPrefix.put(namespace, prefix);
+	}
+	
+	public IndexRange getNameIndex()
+	{
+		return nameIndex;
 	}
 	
 	public LocationRange getStartLocation()
@@ -133,6 +152,23 @@ public class Element implements INode
 	public void setEndLocation(LocationRange endLocation)
 	{
 		this.endLocation = endLocation;
+	}
+	
+	public Element getParentOfType(List<Class<?>> types)
+	{
+		Element curParent = this.parentElement;
+		
+		while(curParent != null)
+		{
+			if(types.contains(curParent.elementType))
+			{
+				return curParent;
+			}
+			
+			curParent = curParent.parentElement;
+		}
+		
+		return null;
 	}
 
 	public Element getParentElement()
@@ -203,6 +239,18 @@ public class Element implements INode
 	public Attribute getAttribute(String name)
 	{
 		return this.attributes.get(name);
+	}
+	
+	public String getAttributeValue(String name)
+	{
+		Attribute attr = this.attributes.get(name);
+		
+		if(attr == null)
+		{
+			return null;
+		}
+		
+		return attr.getValue();
 	}
 	
 	public Class<?> getElementType()
@@ -706,6 +754,7 @@ public class Element implements INode
 		else if(AutomationUtils.isReserveNamespace(namespace))
 		{
 			populateTypesForReserved(project, collector, recursive);
+			return;
 		}
 		else if(parentElementType == null)
 		{
@@ -789,7 +838,6 @@ public class Element implements INode
 			}
 		}
 		
-		
 		//if failed to determine the current element type
 		// move to next element
 		if(this.elementType == null)
@@ -804,6 +852,11 @@ public class Element implements INode
 		if(StringUtils.isNotBlank(beanCopy))
 		{
 			return;
+		}
+		
+		if(Function.class.equals(this.elementType))
+		{
+			collector.addFuncton(this);
 		}
 
 		if(recursive)
@@ -820,6 +873,13 @@ public class Element implements INode
 		{
 			for(INode node : this.nodes)
 			{
+				if(node instanceof TextNode)
+				{
+					TextNode textNode = (TextNode) node;
+					parentElement.parseTextContent(this.name, textNode.getLocation(), textNode.getContent(), collector);
+					continue;
+				}
+				
 				if(!(node instanceof Element))
 				{
 					continue;
@@ -838,11 +898,13 @@ public class Element implements INode
 					continue;
 				}
 				
-				BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(attr.getName());
+				String name = attr.getName();
+				BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(name);
 				
-				if(propInfo == null && attr.getName().contains("-"))
+				if(propInfo == null && name.contains("-"))
 				{
-					propInfo =  beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(IdeUtils.removeHyphens(attr.getName()));
+					name = IdeUtils.removeHyphens(attr.getName());
+					propInfo =  beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(name);
 				}
 				
 				if(propInfo == null)
@@ -887,11 +949,63 @@ public class Element implements INode
 				}
 				
 				attr.setAttributeType(propInfo.getType());
+				parseTextContent(name, attr.getValueLocation(), attr.getValue(), collector);
 			}
 		}finally
 		{
 			collector.elementEnded(this);
 		}
+	}
+	
+	private void parseTextContent(String propName, LocationRange location, String text, FileParseCollector collector)
+	{
+		if(stepInfo == null)
+		{
+			return;
+		}
+		
+		ParamInfo paramInfo = stepInfo.getParam(propName);
+		
+		if(paramInfo != null && paramInfo.getSourceType() == SourceType.CONDITION)
+		{
+			parseConditionText(propName, location, new TextContent(text), collector);
+		}
+	}
+	
+	private void parseConditionText(String propName, LocationRange location, TextContent text, FileParseCollector collector)
+	{
+		Map<String, String> tokenToError = CommonUtils.toMap(
+			">", "Greater than (>) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
+			"<", "Lesser than (>) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead",
+			"&gt;", "Greater than (&gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
+			"&lt;", "Lesser than (&lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead"
+		);
+		
+		for(Map.Entry<String, String> tokenEntry : tokenToError.entrySet())
+		{
+			int idx = text.indexOf(tokenEntry.getKey());
+
+			if(idx >= 0)
+			{
+				int stIdx = location.getStartOffset() + idx;
+				collector.addMessage(new FileParseMessage(MessageType.WARNING, 
+						tokenEntry.getValue(), 
+						location.getStartLineNumber() + text.lineOf(idx),
+						stIdx, 
+						stIdx + tokenEntry.getKey().length()));
+			}
+		}
+
+		Matcher matcher = DOLLAR_PATTERN.matcher(text.getText());
+		
+		while(matcher.find())
+		{
+			collector.addMessage(new FileParseMessage(MessageType.WARNING, "Dollar expression is being used in condition expression. Context can be accessed directly.", 
+					location.getStartLineNumber() + text.lineOf(matcher.start()), 
+					location.getStartOffset() + matcher.start(), 
+					location.getStartOffset() + matcher.end()));
+		}
+		
 	}
 	
 	/**

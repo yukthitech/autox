@@ -28,8 +28,6 @@ import javax.swing.table.DefaultTableModel;
 
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.model.Header;
-
 @Component
 public class RestRequestHeaders extends JPanel
 {

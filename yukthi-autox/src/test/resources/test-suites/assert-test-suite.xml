@@ -7,7 +7,7 @@
 			<description>
 				Validates assert equals work properly
 			</description>
-		
+
 			<s:set expression="intAttr" value="int: 10"/>
 		
 			<s:set expression="attr(int): intAttr1" value="10"/>

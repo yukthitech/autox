@@ -287,6 +287,12 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		{
 			model.nodeStructureChanged(this);
 		}
+		
+		IdeUtils.execute(() -> 
+		{
+			newNodes.forEach(node -> node.reloadOnInit());
+		}, 1);
+
 	}
 	
 	public synchronized void addChildNode(BaseTreeNode node)
@@ -403,7 +409,6 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	 */
 	protected void reloadOnInit()
 	{
-		
 	}
 	
 	public void reload(boolean childReload)

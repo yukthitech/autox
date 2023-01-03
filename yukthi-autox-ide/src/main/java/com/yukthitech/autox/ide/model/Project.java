@@ -37,7 +37,6 @@ import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.model.proj.ProjectElementTracker;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -78,8 +77,6 @@ public class Project implements Serializable
 	private transient Set<File> reservedFiles;
 	
 	private transient Set<String> finalClassPathEntries = null; 
-	
-	private transient ProjectElementTracker projectElementTracker;
 	
 	public Project()
 	{
@@ -295,7 +292,6 @@ public class Project implements Serializable
 	{
 		finalClassPathEntries = null;
 		projectClassLoader = null;
-		projectElementTracker = null;
 	}
 
 	/**
@@ -508,17 +504,6 @@ public class Project implements Serializable
 		FileUtils.forceDelete(baseFolder);
 	}
 	
-	@JsonIgnore
-	public synchronized ProjectElementTracker getProjectElementTracker()
-	{
-		if(projectElementTracker == null)
-		{
-			projectElementTracker = new ProjectElementTracker(this);
-		}
-		
-		return projectElementTracker;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -13,33 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.model;
+package com.yukthitech.autox.ide.xmlfile;
 
-public class Param
+/**
+ * Represents simple start and end offset range.
+ * @author akranthikiran
+ */
+public class IndexRange
 {
-	public String name;
-	public String value;
+	private int start;
 	
-	public Param(String name, String value)
+	private int end;
+
+	public IndexRange(int start, int end)
 	{
-		this.name = name;
-		this.value = value;
+		this.start = start;
+		this.end = end;
 	}
-	public String getName()
+
+	public int getStart()
 	{
-		return name;
+		return start;
 	}
-	public void setName(String name)
+
+	public int getEnd()
 	{
-		this.name = name;
+		return end;
 	}
-	public String getValue()
-	{
-		return value;
-	}
-	public void setValue(String value)
-	{
-		this.value = value;
-	}
-	
 }

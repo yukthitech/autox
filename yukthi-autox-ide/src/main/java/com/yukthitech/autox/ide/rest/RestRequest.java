@@ -44,7 +44,6 @@ import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.model.RestInvocationModel;
 
 //@Component
 public class RestRequest extends JPanel

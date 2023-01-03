@@ -28,9 +28,6 @@ import javax.swing.table.DefaultTableModel;
 
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.model.Header;
-import com.yukthitech.autox.ide.model.PathVariable;
-
 @Component
 public class RestRequestPathVariables extends JPanel
 {

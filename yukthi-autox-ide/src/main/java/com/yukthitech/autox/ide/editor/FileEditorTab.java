@@ -18,14 +18,9 @@ package com.yukthitech.autox.ide.editor;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.yukthitech.autox.ide.FileParseCollector;
-import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IMaximizationListener;
-import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.MaximizableTabbedPaneTab;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.IdePopupMenu;
@@ -46,9 +41,6 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	@Autowired
 	private ActionCollection actionCollection;
 	
-	@Autowired
-	private IdeFileManagerFactory ideFileManagerFactory;
-	
 	private FileEditorTabbedPane fileEditorTabbedPane;
 	
 	private Project project;
@@ -58,8 +50,6 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	private IdePopupMenu popupMenu;
 	
 	private FileEditor fileEditor;
-	
-	private IIdeFileManager ideFileManager;
 	
 	public FileEditorTab(Project project, File file, FileEditor fileEditor, FileEditorTabbedPane fileTabPane, IMaximizationListener maximizationListener)
 	{
@@ -71,13 +61,6 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 		this.fileEditorTabbedPane = fileTabPane;
 	}
 	
-	@PostConstruct
-	private void init()
-	{
-		this.ideFileManager = ideFileManagerFactory.getFileManager(project, file);
-		parseFile();
-	}
-
 	@Override
 	protected void closeTab()
 	{
@@ -132,16 +115,12 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	void fileContentSaved()
 	{
 		changeLabel.setText("");
-		parseFile();
 	}
 	
-	private void parseFile()
+	void setParseResults(boolean errored, boolean warning)
 	{
-		FileParseCollector collector = new FileParseCollector(project, file);
-		ideFileManager.parseFile(project, file, collector);
-		
-		super.setErrored(collector.getErrorCount() > 0);
-		super.setWarned(collector.getWarningCount() > 0);
+		super.setErrored(errored);
+		super.setWarned(warning);
 	}
 	
 	public boolean isFileChanged()

@@ -41,8 +41,6 @@ import javax.swing.table.TableColumn;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.model.Param;
-
 @Component
 public class RestRequestBody extends JPanel
 {

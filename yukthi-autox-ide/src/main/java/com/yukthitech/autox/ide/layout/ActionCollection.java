@@ -140,7 +140,7 @@ public class ActionCollection
 	
 	public void invokeAction(String name, Object actionSource)
 	{
-		logger.debug("Invoking action with name: {}", name);
+		//logger.debug("Invoking action with name: {}", name);
 
 		IdeUtils.execute(() -> 
 		{

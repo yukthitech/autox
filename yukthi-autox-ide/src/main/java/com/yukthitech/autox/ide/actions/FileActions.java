@@ -53,6 +53,7 @@ import com.yukthitech.autox.ide.projexplorer.BaseTreeNode;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
 import com.yukthitech.autox.ide.search.SearchDialog;
+import com.yukthitech.autox.ide.xmlfile.IndexRange;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -589,8 +590,13 @@ public class FileActions
 		
 		editor.gotoLine(lineNo);
 	}
-
+	
 	public FileEditor gotoFilePath(Project project, String filePath, int lineNo)
+	{
+		return gotoFilePath(project, filePath, lineNo, null);
+	}
+
+	public FileEditor gotoFilePath(Project project, String filePath, int lineNo, IndexRange indexRange)
 	{
 		File fileToOpen = new File(filePath);
 		String path = IdeFileUtils.getRelativePath(project.getBaseFolder(), fileToOpen);
@@ -602,12 +608,21 @@ public class FileActions
 		
 		FileEditor editor = fileEditorTabbedPane.openProjectFile(project, fileToOpen);
 		
-		if(lineNo < 0 || editor == null)
+		if(editor == null)
 		{
 			return editor;
 		}
 		
-		editor.gotoLine(lineNo);
+		if(lineNo >= 0)
+		{
+			editor.gotoLine(lineNo);
+		}
+		
+		if(indexRange != null)
+		{
+			editor.selectText(indexRange.getStart(), indexRange.getEnd());
+		}
+		
 		return editor;
 	}
 

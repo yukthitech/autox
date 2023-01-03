@@ -25,12 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.AbstractIdeFileManager;
-import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IdeNotificationPanel;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
+import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
 
 /**

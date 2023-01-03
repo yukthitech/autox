@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
+import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.xmlfile.PatternScanner.ScannerMatch;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -238,7 +238,8 @@ public class XmlFileParser
 		String name = nameTokens[1];
 
 		String namespace = (currentElement != null) ? currentElement.getNamespaceWithPrefix(prefix) : null;
-		Element newElement = new Element(currentElement, prefix, namespace, name, new LocationRange(match.start(), curRange.line, col));
+		Element newElement = new Element(currentElement, prefix, namespace, name, new LocationRange(match.start(), curRange.line, col),
+				new IndexRange(match.start(1), match.end(1)));
 		
 		if(currentElement != null)
 		{
