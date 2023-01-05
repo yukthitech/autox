@@ -17,7 +17,6 @@ package com.yukthitech.autox.ide.index;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,9 +41,9 @@ public class FileParseCollector
 	
 	private int warningCount;
 	
-	private List<Element> functions = new LinkedList<>();
+	private List<ReferableElement> referableElements = new LinkedList<>();
 	
-	private List<Element> functionReferences = new LinkedList<>();
+	private List<ReferenceElement> references = new LinkedList<>();
 	
 	private File file;
 	
@@ -60,8 +59,8 @@ public class FileParseCollector
 			addMessage(mssg);
 		}
 		
-		this.functions.addAll(collector.functions);
-		this.functionReferences.addAll(collector.functionReferences);
+		this.referableElements.addAll(collector.referableElements);
+		this.references.addAll(collector.references);
 		this.file = collector.file;
 	}
 	
@@ -105,89 +104,78 @@ public class FileParseCollector
 		//project.getProjectElementTracker().elementEnded(file, element, this);
 	}
 	
-	public void addFunctionRef(Element element)
+	public void addFunctionRef(Element funcRef)
 	{
-		functionReferences.add(element);
+		Element parent = funcRef.getParentOfType(Arrays.asList(TestSuite.class, TestDataFile.class));
+		
+		if(parent == null)
+		{
+			return;
+		}
+		
+		String scope = null;
+		
+		if(TestSuite.class.equals(parent.getElementType()))
+		{
+			scope = parent.getAttributeValue("name");
+		}
+		
+		IndexRange nameIndex = funcRef.getNameIndex();
+		this.references.add(new ReferenceElement(IIndexConstants.TYPE_FUNCTION, funcRef.getName(), 
+				scope != null ? Arrays.asList(scope) : null, 
+				nameIndex.getStart(), 
+				nameIndex.getEnd()));
 	}
 	
-	public void addFuncton(Element element)
+	public void addAppPropRef(String name, int startOffset, int endOffset)
 	{
-		functions.add(element);
+		this.references.add(new ReferenceElement(IIndexConstants.TYPE_APP_PROPERTY, name, 
+				null, 
+				startOffset, 
+				endOffset));
+	}
+	
+	public void addFuncton(Element func)
+	{
+		Element parent = func.getParentOfType(Arrays.asList(TestSuite.class, TestDataFile.class));
+		
+		if(parent == null)
+		{
+			return;
+		}
+		
+		String name = func.getAttributeValue("name");
+
+		if(name == null)
+		{
+			return;
+		}
+		
+		LocationRange selLocationRange = func.getAttribute("name").getValueLocation();
+
+		String scope = null;
+		
+		if(TestSuite.class.equals(parent.getElementType()))
+		{
+			scope = parent.getAttributeValue("name");
+		}
+		
+		this.referableElements.add(new ReferableElement(IIndexConstants.TYPE_FUNCTION, name, scope, this.file,
+				new IndexRange(selLocationRange.getStartOffset(), selLocationRange.getEndOffset())));
+	}
+	
+	public void addReferable(ReferableElement referable)
+	{
+		this.referableElements.add(referable);
 	}
 	
 	public List<ReferenceElement> getReferences()
 	{
-		if(functionReferences.isEmpty())
-		{
-			return Collections.emptyList();
-		}
-		
-		List<ReferenceElement> res = new LinkedList<>();
-		
-		for(Element funcRef : this.functionReferences)
-		{
-			Element parent = funcRef.getParentOfType(Arrays.asList(TestSuite.class, TestDataFile.class));
-			
-			if(parent == null)
-			{
-				continue;
-			}
-			
-			String scope = null;
-			
-			if(TestSuite.class.equals(parent.getElementType()))
-			{
-				scope = parent.getAttributeValue("name");
-			}
-			
-			IndexRange nameIndex = funcRef.getNameIndex();
-			res.add(new ReferenceElement(IIndexConstants.TYPE_FUNCTION, funcRef.getName(), 
-					scope != null ? Arrays.asList(scope) : null, 
-					nameIndex.getStart(), 
-					nameIndex.getEnd()));
-		}
-		
-		return res;
+		return references;
 	}
 	
 	public List<ReferableElement> getReferableElements()
 	{
-		if(functions.isEmpty())
-		{
-			return Collections.emptyList();
-		}
-
-		List<ReferableElement> res = new LinkedList<>();
-		
-		for(Element func : this.functions)
-		{
-			Element parent = func.getParentOfType(Arrays.asList(TestSuite.class, TestDataFile.class));
-			
-			if(parent == null)
-			{
-				continue;
-			}
-			
-			String name = func.getAttributeValue("name");
-
-			if(name == null)
-			{
-				continue;
-			}
-			
- 			LocationRange selLocationRange = func.getAttribute("name").getValueLocation();
-
-			String scope = null;
-			
-			if(TestSuite.class.equals(parent.getElementType()))
-			{
-				scope = parent.getAttributeValue("name");
-			}
-			
-			res.add(new ReferableElement(IIndexConstants.TYPE_FUNCTION, name, scope, this.file, func,
-					new IndexRange(selLocationRange.getStartOffset(), selLocationRange.getEndOffset())));
-		}
-		
-		return res;
+		return referableElements;
 	}
 }

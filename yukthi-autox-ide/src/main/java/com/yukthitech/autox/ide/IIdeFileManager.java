@@ -17,6 +17,8 @@ package com.yukthitech.autox.ide;
 
 import java.io.File;
 
+import org.fife.ui.rsyntaxtextarea.Token;
+
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.index.FileParseCollector;
@@ -70,7 +72,7 @@ public interface IIdeFileManager
 	 * 
 	 * @return parsed file content object.
 	 */
-	public Object parseContent(Project project, String name, String content, FileParseCollector collector);
+	public Object parseContent(Project project, File file, String content, FileParseCollector collector);
 	
 	/**
 	 * Fetches the tooltip at the specified offset.
@@ -138,5 +140,15 @@ public interface IIdeFileManager
 	public default boolean isExecutionSupported()
 	{
 		return false;
+	}
+	
+	/**
+	 * File managers which wants to subtokenize already parsed tokens 
+	 * can use this method.
+	 * @param tokenLst
+	 */
+	public default Token subtokenize(Token tokenLst)
+	{
+		return tokenLst;
 	}
 }

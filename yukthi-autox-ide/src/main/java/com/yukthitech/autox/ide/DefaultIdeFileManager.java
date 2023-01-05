@@ -53,7 +53,7 @@ public class DefaultIdeFileManager implements IIdeFileManager
 	}
 
 	@Override
-	public Object parseContent(Project project, String name, String content, FileParseCollector collector)
+	public Object parseContent(Project project, File file, String content, FileParseCollector collector)
 	{
 		return null;
 	}

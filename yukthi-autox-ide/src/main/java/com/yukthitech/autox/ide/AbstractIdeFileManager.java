@@ -75,7 +75,7 @@ public abstract class AbstractIdeFileManager implements IIdeFileManager
 		
 		try
 		{
-			result = parseContent(project, file.getName(), FileUtils.readFileToString(file, Charset.defaultCharset()), newCollector);
+			result = parseContent(project, file, FileUtils.readFileToString(file, Charset.defaultCharset()), newCollector);
 			collector.load(newCollector);
 		}catch(Exception ex)
 		{
@@ -94,7 +94,7 @@ public abstract class AbstractIdeFileManager implements IIdeFileManager
 	}
 
 	@Override
-	public Object parseContent(Project project, String name, String content, FileParseCollector collector)
+	public Object parseContent(Project project, File file, String content, FileParseCollector collector)
 	{
 		return null;
 	}

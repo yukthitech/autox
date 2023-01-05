@@ -880,6 +880,13 @@ public class Element implements INode
 					continue;
 				}
 				
+				if(node instanceof CdataNode)
+				{
+					CdataNode textNode = (CdataNode) node;
+					parentElement.parseTextContent(this.name, textNode.getValueLocation(), textNode.getContent(), collector);
+					continue;
+				}
+
 				if(!(node instanceof Element))
 				{
 					continue;
@@ -970,6 +977,8 @@ public class Element implements INode
 		{
 			parseConditionText(propName, location, new TextContent(text), collector);
 		}
+		
+		collectReferences(location, text, collector);
 	}
 	
 	private void parseConditionText(String propName, LocationRange location, TextContent text, FileParseCollector collector)
@@ -1006,6 +1015,14 @@ public class Element implements INode
 					location.getStartOffset() + matcher.end()));
 		}
 		
+	}
+	
+	private void collectReferences(LocationRange location, String content, FileParseCollector collector)
+	{
+		TestDataFileTokenizer.parse(content, location.getStartOffset(), token -> 
+		{
+			collector.addAppPropRef(token.value, token.startOffset, token.endOffset);
+		});
 	}
 	
 	/**

@@ -84,6 +84,6 @@ public class ReferenceElement
 	
 	public boolean includes(int idx)
 	{
-		return (idx >= startPostion && idx <= endPosition);
+		return (idx >= startPostion && idx < endPosition);
 	}
 }

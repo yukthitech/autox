@@ -83,6 +83,8 @@ public class LocationRange
 		this.startOffset = startOffset;
 		this.startLineNumber = startLineNumber;
 		this.startColumnNumber = startColumnNumber;
+		
+		this.setEndLocation(startOffset, startLineNumber, startColumnNumber);
 	}
 	
 	/**
@@ -233,13 +235,13 @@ public class LocationRange
 		StringBuilder builder = new StringBuilder();
 		builder.append("[");
 
-		builder.append(startOffset).append(", ");
-		builder.append(startLineNumber).append(", ");
-		builder.append(startColumnNumber).append(" => ");
+		builder.append("O: ").append(startOffset).append(", ");
+		builder.append("L: ").append(startLineNumber).append(", ");
+		builder.append("C: ").append(startColumnNumber).append(" => ");
 
-		builder.append(endOffset).append(", ");
-		builder.append(endLineNumber).append(", ");
-		builder.append(endColumnNumber);
+		builder.append("O: ").append(endOffset).append(", ");
+		builder.append("L: ").append(endLineNumber).append(", ");
+		builder.append("C: ").append(endColumnNumber);
 
 		builder.append("]");
 		return builder.toString();

@@ -18,4 +18,6 @@ package com.yukthitech.autox.ide.index;
 public interface IIndexConstants
 {
 	String TYPE_FUNCTION = "function";
+	
+	String TYPE_APP_PROPERTY = "appProp";
 }

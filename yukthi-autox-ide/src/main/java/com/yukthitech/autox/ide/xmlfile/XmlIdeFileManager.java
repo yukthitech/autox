@@ -70,7 +70,7 @@ public class XmlIdeFileManager extends AbstractIdeFileManager
 	}
 	
 	@Override
-	public Object parseContent(Project project, String name, String content, FileParseCollector collector)
+	public Object parseContent(Project project, File file, String content, FileParseCollector collector)
 	{
 		XmlFile xmlFile = null;
 		
@@ -83,7 +83,7 @@ public class XmlIdeFileManager extends AbstractIdeFileManager
 			collector.addMessage(new FileParseMessage(MessageType.ERROR, ex.getMessage(), ex.getLineNumber(), ex.getOffset(), ex.getEndOffset()));
 		}catch(Exception ex)
 		{
-			logger.debug("Failed to parse xml file: " + name, ex);
+			logger.debug("Failed to parse xml file: " + file.getName(), ex);
 			collector.addMessage(new FileParseMessage(MessageType.ERROR, "Failed to parse xml file with error: " + ex, 1));
 		}
 		

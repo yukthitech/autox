@@ -16,11 +16,14 @@
 package com.yukthitech.autox.ide.xmlfile;
 
 import java.io.File;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.Token;
+import org.fife.ui.rsyntaxtextarea.TokenImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +35,7 @@ import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.utils.CommonUtils;
 
 /**
  * Ide file manager for test-data files.
@@ -41,6 +45,14 @@ import com.yukthitech.autox.ide.model.Project;
 public class TestDataIdeFileManager extends AbstractIdeFileManager
 {
 	private static Logger logger = LogManager.getLogger(TestDataIdeFileManager.class);
+	
+	private static final int RSA_XML_TOKEN_TYPE_ATTR_VAL = 28;
+	
+	private static final int RSA_XML_TOKEN_TYPE_ELEM_TEXT = 20;
+	
+	private static final int RSA_XML_TOKEN_TYPE_CDATA_TEXT = 33;
+	
+	private static Set<Integer> TEXT_TOKEN_TYPES = CommonUtils.toSet(RSA_XML_TOKEN_TYPE_ATTR_VAL, RSA_XML_TOKEN_TYPE_ELEM_TEXT, RSA_XML_TOKEN_TYPE_CDATA_TEXT);
 	
 	@Autowired
 	private IdeNotificationPanel ideNotificationPanel;
@@ -78,7 +90,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	}
 	
 	@Override
-	public Object parseContent(Project project, String name, String content, FileParseCollector collector)
+	public Object parseContent(Project project, File file, String content, FileParseCollector collector)
 	{
 		XmlFile xmlFile = null;
 		
@@ -91,7 +103,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 			collector.addMessage(new FileParseMessage(MessageType.ERROR, ex.getMessage(), ex.getLineNumber(), ex.getOffset(), ex.getEndOffset()));
 		}catch(Exception ex)
 		{
-			logger.debug("Failed to parse xml file: " + name, ex);
+			logger.debug("Failed to parse xml file: " + file.getName(), ex);
 			collector.addMessage(new FileParseMessage(MessageType.ERROR, "Failed to parse xml file with error: " + ex, 1));
 		}
 		
@@ -237,5 +249,102 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 			ideNotificationPanel.displayWarning("Failed to parse xml till current location. Error: " + ex.getMessage());
 			return null;
 		}
+	}
+	
+	private Token subtokenizeText(Token token)
+	{
+		TokenImpl tokenImpl = (TokenImpl) token;
+		String content = token.getLexeme();
+		
+		RtaTokenBuilder tokenBuilder = new RtaTokenBuilder(tokenImpl);
+		int tokenStart = token.getTextOffset();
+		
+		TestDataFileTokenizer.parse(content, tokenStart, xmlToken -> 
+		{
+			tokenBuilder.addSubtoken(xmlToken.startOffset, xmlToken.endOffset);
+		});
+		
+		if(!tokenBuilder.hasSubtokens())
+		{
+			return token;
+		}
+		
+		tokenBuilder.appendTailToken();
+		return tokenBuilder.toToken();
+	}
+	
+	public static void printTokenTree(Token token)
+	{
+		String indent = "";
+		
+		while(token != null)
+		{
+			StringBuilder builder = new StringBuilder(indent);
+			
+			if(token.getLexeme() != null)
+			{
+				builder.append("[").append(token.getLexeme().replace("\n", "\\n").replace("\t", "\\t")).append("] ");
+				builder.append(" St Offset: ").append(token.getOffset());
+				builder.append(", End Offset: ").append(token.getEndOffset());
+				builder.append(", Txt Offset: ").append(token.getTextOffset());
+			}
+			else
+			{
+				builder.append("[null]");
+			}
+				
+			System.out.println(builder);
+			indent += "  ";
+			
+			token = token.getNextToken();
+		}
+	}
+	
+	@Override
+	public Token subtokenize(Token tokenLst)
+	{
+		Token head = tokenLst;
+		Token curToken = tokenLst;
+		Token prevToken = null;
+		
+		while(curToken != null)
+		{
+			//if null token is encountered, stop
+			if(curToken.getType() == 0)
+			{
+				break;
+			}
+			
+			if(TEXT_TOKEN_TYPES.contains(curToken.getType()))
+			{
+				Token newToken = subtokenizeText(curToken);
+				
+				//if no change in cur token
+				if(newToken == curToken)
+				{
+					prevToken = curToken;
+					curToken = curToken.getNextToken();
+					continue;
+				}
+				
+				//if first token is getting modified
+				if(prevToken == null)
+				{
+					head = newToken;
+				}
+				//if mid token got modified
+				else
+				{
+					((TokenImpl) prevToken).setNextToken(newToken);
+				}
+				
+				curToken = newToken;
+			}
+			
+			prevToken = curToken;
+			curToken = curToken.getNextToken();
+		}
+		
+		return head;
 	}
 }

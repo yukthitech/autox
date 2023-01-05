@@ -21,7 +21,15 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.AbstractIdeFileManager;
+import com.yukthitech.autox.ide.index.FileParseCollector;
+import com.yukthitech.autox.ide.index.IIndexConstants;
+import com.yukthitech.autox.ide.index.ReferableElement;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.prop.PropFileParser;
+import com.yukthitech.autox.ide.prop.PropertyFile;
+import com.yukthitech.autox.ide.xmlfile.IndexRange;
+import com.yukthitech.autox.ide.xmlfile.LocationRange;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Ide file manager for property files.
@@ -34,6 +42,37 @@ public class PropertyIdeFileManager extends AbstractIdeFileManager
 	public boolean isSuppored(Project project, File file)
 	{
 		return file.getName().toLowerCase().endsWith(".properties");
+	}
+	
+	private void loadAppPropFile(String content, File appProperties, FileParseCollector collector)
+	{
+		try
+		{
+			PropertyFile propFile = PropFileParser.parse(content);
+			
+			for(PropertyFile.PropertyEntry entry : propFile.entries())
+			{
+				LocationRange locRange = entry.getKeyLocationRange();
+				
+				collector.addReferable(new ReferableElement(IIndexConstants.TYPE_APP_PROPERTY, entry.getKey(), null, 
+						appProperties, new IndexRange(locRange.getStartOffset(), locRange.getEndOffset())));
+			}
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while loading prop file", ex);
+		}
+	}
+	
+	@Override
+	public Object parseContent(Project project, File file, String content, FileParseCollector collector)
+	{
+		if(file.equals(project.getAppPropertyFile()))
+		{
+			loadAppPropFile(content, file, collector);
+			return null;
+		}
+		
+		return super.parseContent(project, file, content, collector);
 	}
 
 	@Override

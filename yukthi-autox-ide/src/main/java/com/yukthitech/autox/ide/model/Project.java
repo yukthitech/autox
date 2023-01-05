@@ -61,7 +61,11 @@ public class Project implements Serializable
 	private String name;
 	private String projectFilePath;
 	private String appConfigFilePath;
+	
 	private String appPropertyFilePath;
+	private File appPropertyFile;
+	
+	
 	private LinkedHashSet<String> testSuitesFoldersList;
 	private LinkedHashSet<String> resourceFoldersList;
 	private LinkedHashSet<String> classPathEntriesList;
@@ -163,6 +167,22 @@ public class Project implements Serializable
 	{
 		this.appConfigFilePath = appConfigFilePath;
 	}
+	
+	public File getAppPropertyFile()
+	{
+		if(appPropertyFile == null)
+		{
+			try
+			{
+				appPropertyFile = new File(this.baseFolder, appPropertyFilePath).getCanonicalFile();
+			}catch(IOException ex)
+			{
+				throw new InvalidStateException("An error occurred while forming cannoical path", ex);
+			}
+		}
+		
+		return appPropertyFile;
+	}
 
 	public String getAppPropertyFilePath()
 	{
@@ -172,6 +192,7 @@ public class Project implements Serializable
 	public void setAppPropertyFilePath(String appPropertyFilePath)
 	{
 		this.appPropertyFilePath = appPropertyFilePath;
+		this.appPropertyFile = null;
 	}
 
 	public Set<String> getTestSuitesFoldersList()

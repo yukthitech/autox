@@ -315,13 +315,15 @@ public class XmlFileParser
 		}
 	}
 	
-	private LocationRange setCurrentPositionAsStart(LocationRange locationRange)
+	private LocationRange setCurrentPositionAsStart(LocationRange locationRange, boolean starting)
 	{
 		ScannerMatch match = scanner.getLastMatch();
-		Range curRange = moveToPositon(match.start());
-		int col = curRange.getColumn(match.start());
+		int pos = starting ? match.start() : match.end();
 		
-		locationRange.setStartLocation(match.start(), curRange.line, col);
+		Range curRange = moveToPositon(pos);
+		int col = curRange.getColumn(pos);
+		
+		locationRange.setStartLocation(pos, curRange.line, col);
 		return locationRange;
 	}
 	
@@ -361,7 +363,7 @@ public class XmlFileParser
 					"When expecting close tag </{}> found close tag </{}>", currentElement.getFullElementName(), match.group(1));
 		}
 		
-		currentElement.setEndLocation(setCurrentPositionAsStart(new LocationRange()));
+		currentElement.setEndLocation(setCurrentPositionAsStart(new LocationRange(), true));
 		setCurrentPositionAsEnd(currentElement.getEndLocation(), false);
 		currentElement = currentElement.getParentElement();
 	}
@@ -374,8 +376,11 @@ public class XmlFileParser
 		}
 		
 		LocationRange locRange = new LocationRange();
-		setCurrentPositionAsStart(locRange);
+		setCurrentPositionAsStart(locRange, true);
 		
+		LocationRange valRange = new LocationRange();
+		setCurrentPositionAsStart(valRange, false);
+
 		ScannerMatch match = scanner.getLastMatch();
 		Range curRange = moveToPositon(match.start());
 		int col = curRange.getColumn(match.start());
@@ -394,8 +399,9 @@ public class XmlFileParser
 		
 		scanner.next(PATTERN_CDATA_CLOSER);
 		setCurrentPositionAsEnd(locRange, false);
+		setCurrentPositionAsEnd(valRange, true);
 
-		currentElement.addNode(new CdataNode(text, locRange));
+		currentElement.addNode(new CdataNode(text, locRange, valRange));
 	}
 	
 	private EventType parseNextContent()

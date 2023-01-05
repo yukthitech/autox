@@ -29,6 +29,8 @@ public class FileIndex
 	
 	public synchronized void setReferences(List<ReferenceElement> references)
 	{
+		this.references.clear();
+		
 		for(ReferenceElement ref : references)
 		{
 			int idx = ref.getStartPostion();

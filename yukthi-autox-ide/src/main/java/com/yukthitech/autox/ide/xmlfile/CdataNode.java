@@ -30,6 +30,11 @@ public class CdataNode implements INode
 	 * Start location of cdata section.
 	 */
 	private LocationRange location;
+	
+	/**
+	 * Value location enclosed by this cdata section.
+	 */
+	private LocationRange valueLocation;
 
 	/**
 	 * Instantiates a new cdata node.
@@ -37,10 +42,11 @@ public class CdataNode implements INode
 	 * @param content the content
 	 * @param location the location
 	 */
-	public CdataNode(String content, LocationRange location)
+	public CdataNode(String content, LocationRange location, LocationRange valueLocation)
 	{
 		this.content = content;
 		this.location = location;
+		this.valueLocation = valueLocation;
 	}
 
 	/**
@@ -61,6 +67,11 @@ public class CdataNode implements INode
 	public LocationRange getLocation()
 	{
 		return location;
+	}
+	
+	public LocationRange getValueLocation()
+	{
+		return valueLocation;
 	}
 
 	/* (non-Javadoc)

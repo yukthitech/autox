@@ -75,6 +75,14 @@
 				<short-key ctrl="true" key="L"/>
 			</item>
 
+			<item label="Go Back" action="goBack">
+				<short-key alt="true" key="LEFT"/>
+			</item>
+
+			<item label="Go Forward" action="goForward">
+				<short-key alt="true" key="RIGHT"/>
+			</item>
+
 			<item label="-" />
 			
 			<item label="Search Files" mnemonic="S" icon="/ui/icons/search.svg"

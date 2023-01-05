@@ -192,7 +192,9 @@ public class ProjectManager
 				return index;
 			}
 			
-			if(getProject(name) == null)
+			Project project = getProject(name);
+			
+			if(project == null)
 			{
 				return null;
 			}

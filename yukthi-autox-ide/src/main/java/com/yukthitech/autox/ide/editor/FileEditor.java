@@ -54,6 +54,7 @@ import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.rsyntaxtextarea.LinkGeneratorResult;
+import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaHighlighter;
 import org.fife.ui.rsyntaxtextarea.SquiggleUnderlineHighlightPainter;
@@ -81,6 +82,7 @@ import com.yukthitech.autox.ide.index.ReferenceElement;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.IdeEventManager;
+import com.yukthitech.autox.ide.xmlfile.IndexRange;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -116,6 +118,11 @@ public class FileEditor extends JPanel
 			{
 				return null;
 			}
+			
+			//push the current hyper link position on history
+			navigationHistoryManager.push(project, file, new IndexRange(ref.getStartPostion(), ref.getEndPosition()));
+			//then push the target position to history, which would act as current location
+			navigationHistoryManager.push(project, element.getFile(), element.getSelectionRange());
 			
 			fileActions.gotoFilePath(project, element.getFile().getPath(), -1, element.getSelectionRange());
 			return null;
@@ -154,6 +161,9 @@ public class FileEditor extends JPanel
 	
 	@Autowired
 	private FileActions fileActions;
+	
+	@Autowired
+	private NavigationHistoryManager navigationHistoryManager;
 	
 	/**
 	 * File manager for current file.
@@ -489,6 +499,8 @@ public class FileEditor extends JPanel
 			extension = file.getName().substring(extIdx + 1).toLowerCase();
 		}
 		
+		((RSyntaxDocument) syntaxTextArea.getDocument()).setTokenMakerFactory(new FileEditorTokenFactory(currentFileManager));
+
 		String style = currentFileManager.getSyntaxEditingStyle(extension);
 		syntaxTextArea.setSyntaxEditingStyle(style);
 	}
@@ -720,7 +732,7 @@ public class FileEditor extends JPanel
 		}
 		
 		FileParseCollector collector = new FileParseCollector(project, file);
-		parsedFileContent = currentFileManager.parseContent(project, file.getName(), syntaxTextArea.getText(), collector);
+		parsedFileContent = currentFileManager.parseContent(project, file, syntaxTextArea.getText(), collector);
 		
 		//update indexes
 		fileIndex.setReferences(collector.getReferences());
@@ -849,6 +861,14 @@ public class FileEditor extends JPanel
 	public String getCurrentElementText(String nodeType)
 	{
 		return currentFileManager.getActiveElementText(this, nodeType);
+	}
+	
+	public IndexRange getSelectedRange()
+	{
+		int st = syntaxTextArea.getSelectionStart();
+		int end = syntaxTextArea.getSelectionEnd();
+		
+		return new IndexRange(st, end);
 	}
 
 	public String getSelectedText()

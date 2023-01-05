@@ -17,7 +17,6 @@ package com.yukthitech.autox.ide.index;
 
 import java.io.File;
 
-import com.yukthitech.autox.ide.xmlfile.Element;
 import com.yukthitech.autox.ide.xmlfile.IndexRange;
 
 /**
@@ -47,22 +46,16 @@ public class ReferableElement
 	private File file;
 	
 	/**
-	 * Actual element in the xml.
-	 */
-	private Element element;
-	
-	/**
 	 * Range to be used to select when this element is referred.
 	 */
 	private IndexRange selectionRange;
 
-	public ReferableElement(String type, String name, String scope, File file, Element element, IndexRange selectionRange)
+	public ReferableElement(String type, String name, String scope, File file, IndexRange selectionRange)
 	{
 		this.type = type;
 		this.name = name;
 		this.scope = scope;
 		this.file = file;
-		this.element = element;
 		this.selectionRange = selectionRange;
 	}
 
@@ -86,11 +79,6 @@ public class ReferableElement
 		return file;
 	}
 
-	public Element getElement()
-	{
-		return element;
-	}
-	
 	public IndexRange getSelectionRange()
 	{
 		return selectionRange;
