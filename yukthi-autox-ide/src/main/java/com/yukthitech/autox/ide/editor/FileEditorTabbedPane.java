@@ -22,6 +22,7 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -59,6 +61,7 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.autox.ide.services.IdeSettingChangedEvent;
+import com.yukthitech.swing.MessageDialog;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -91,6 +94,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	@PostConstruct
 	private void init()
 	{
+		super.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		
 		ideContext.addContextListener(new IContextListener()
 		{
 			@Override
@@ -484,7 +489,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		currentEditor.saveFile();
 	}
 	
-	private int getIndexOfTab(FileEditorTab tab)
+	int getIndexOfTab(FileEditorTab tab)
 	{
 		int tabCount = super.getTabCount();
 		
@@ -497,6 +502,55 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		}
 		
 		return -1;
+	}
+	
+	public boolean checkForUnsavedFiles()
+	{
+		int tabCount = super.getTabCount();
+		boolean saveAll = false;
+		
+		for(int i = 0; i < tabCount; i++)
+		{
+			FileEditorTab tab = (FileEditorTab) super.getTabComponentAt(i);
+			
+			if(!tab.isFileChanged())
+			{
+				continue;
+			}
+			
+			if(saveAll)
+			{
+				tab.getFileEditor().saveFile();
+				continue;
+			}
+			
+			String action = MessageDialog.display("IDE Closing", String.format("File '%s' is not saved. Do you want to save the file before closing?", tab.getFile().getName()), 
+					Arrays.asList("Save", "Save All", "Skip", "Skip All", "Cancel"));
+			
+			if(action == null || "Cancel".equals(action))
+			{
+				return false;
+			}
+			
+			if("Skip All".equals(action))
+			{
+				return true;
+			}
+			
+			if("Skip".equals(action))
+			{
+				continue;
+			}
+			
+			if("Save All".equals(action))
+			{
+				saveAll = true;
+			}
+			
+			tab.getFileEditor().saveFile();
+		}
+		
+		return true;
 	}
 
 	/**
@@ -601,27 +655,10 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		}
 	}
 	
-	@Action
-	public void closeAllButThis(IdeActionEvent e) throws IOException
+	private void closeTabs(int fromIdx, int toIdx) throws IOException
 	{
-		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
-		int curIdx = getIndexOfTab(fileEditorTab);
-		
-		if(curIdx < 0)
+		for(int i = toIdx; i >= fromIdx; i--)
 		{
-			logger.debug("As no tab is found with active file, ignoring acion closeAllButThis");
-			return;
-		}
-		
-		int tabCount = super.getTabCount();
-		
-		for(int i = tabCount - 1; i >= 0; i--)
-		{
-			if(i == curIdx)
-			{
-				continue;
-			}
-			
 			if(!checkForChanges(i))
 			{
 				return;
@@ -631,6 +668,48 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		}
 	}
 	
+	@Action
+	public void closeAllButThis(IdeActionEvent e) throws IOException
+	{
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		int curIdx = getIndexOfTab(fileEditorTab);
+		
+		int tabCount = super.getTabCount();
+		int maxIdx = tabCount - 1;
+		
+		if(curIdx < maxIdx)
+		{
+			closeTabs(curIdx + 1, maxIdx);
+		}
+		
+		if(curIdx > 0)
+		{
+			closeTabs(0, curIdx - 1);
+		}
+	}
+	
+	@Action
+	public void closeTabsToRight(IdeActionEvent e) throws IOException
+	{
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		int curIdx = getIndexOfTab(fileEditorTab);
+		
+		int tabCount = super.getTabCount();
+		closeTabs(curIdx + 1, tabCount - 1);
+	}
+
+	@Action
+	public void closeTabsToLeft(IdeActionEvent e) throws IOException
+	{
+		FileEditorTab fileEditorTab = (FileEditorTab) e.getActionSource();
+		int curIdx = getIndexOfTab(fileEditorTab);
+		
+		if(curIdx > 0)
+		{
+			closeTabs(0, curIdx - 1);
+		}
+	}
+
 	private void copyToClipboard(String content)
 	{
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

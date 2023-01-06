@@ -24,6 +24,7 @@ import com.yukthitech.autox.ide.IMaximizationListener;
 import com.yukthitech.autox.ide.MaximizableTabbedPaneTab;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.IdePopupMenu;
+import com.yukthitech.autox.ide.layout.UiIdElementsManager;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
 
@@ -34,6 +35,8 @@ import com.yukthitech.autox.ide.model.Project;
 public class FileEditorTab extends MaximizableTabbedPaneTab
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static IdePopupMenu popupMenu;
 	
 	@Autowired
 	private UiLayout uiLayout;
@@ -46,8 +49,6 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	private Project project;
 	
 	private File file;
-	
-	private IdePopupMenu popupMenu;
 	
 	private FileEditor fileEditor;
 	
@@ -80,8 +81,16 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	{
 		if(popupMenu == null)
 		{
-			 popupMenu = uiLayout.getPopupMenu("fileTabPopup").toPopupMenu(actionCollection);
+			popupMenu = uiLayout.getPopupMenu("fileTabPopup").toPopupMenu(actionCollection);
 		}
+
+		int curIdx = fileEditorTabbedPane.getIndexOfTab(this);
+		int count = fileEditorTabbedPane.getTabCount();
+		
+		UiIdElementsManager.getComponent("ftCloseAllButThis").setEnabled(count > 1);
+		UiIdElementsManager.getComponent("ftCloseAll").setEnabled(count > 1);
+		UiIdElementsManager.getComponent("ftCloseToLeft").setEnabled(curIdx > 0);
+		UiIdElementsManager.getComponent("ftCloseToRight").setEnabled(curIdx < (count - 1));
 		
 		popupMenu.show(this, e.getX(), e.getY());
 	}

@@ -352,6 +352,13 @@ public class AutoxIDE extends JFrame
 	@Action
 	public void closeIde()
 	{
+		boolean res = fileEditorTabbedPane.checkForUnsavedFiles();
+		
+		if(!res)
+		{
+			return;
+		}
+		
 		logger.debug("Closing the ide..");
 		
 		IdeState ideState = ideStateManager.getState();

@@ -61,7 +61,7 @@ public class MaximizableTabbedPaneTab extends JPanel
 	private static ImageIcon ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark-error.svg", 14);
 	
 	private static ImageIcon WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark-warn.svg", 14);
-
+	
 	protected JLabel iconLabel = new JLabel();
 
 	protected JLabel changeLabel = new JLabel();
@@ -92,7 +92,7 @@ public class MaximizableTabbedPaneTab extends JPanel
 		label.setText(text);
 		label.setBackground(null);
 		
-		closeButton.setBorder(new EmptyBorder(5, 5, 5, 5));
+		closeButton.setBorder(new EmptyBorder(2, 2, 2, 2));
 		closeButton.setBackground(null);
 		closeButton.setContentAreaFilled(false);
 		closeButton.setFocusable(false);

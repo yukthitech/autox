@@ -199,6 +199,20 @@ public class XmlFileParser
 		throw new InvalidStateException("Failed to find range for position {}\nCurrent Ranges: {}", pos, Arrays.toString(lineRanges));
 	}
 	
+	private Range getLineRange(int pos)
+	{
+		for(int i = 0; i < lineRanges.length; i++)
+		{
+			if(lineRanges[i].end >= pos)
+			{
+				rangeIndex = i;
+				return lineRanges[i];
+			}
+		}
+
+		return null;
+	}
+
 	private String[] split(String name, int offset, int lineNo, int colNo)
 	{
 		int idx = name.indexOf(":");
@@ -447,6 +461,20 @@ public class XmlFileParser
 		
 		if(textContent.trim().length() > 0)
 		{
+			int idx = textContent.indexOf(">");
+			
+			if(idx >= 0)
+			{
+				int errPos = curPos + idx;
+				Range errLine = getLineRange(errPos);
+				int errCol = errPos - errLine.start;
+				
+				throw new XmlParseException(new XmlFile(rootElement), 
+						errPos, errPos + 1,
+						errLine.line, errCol, 
+						"Text content cannot have '>' character");
+			}
+			
 			LocationRange loc = new LocationRange(curPos, range.line, col);
 			setCurrentPositionAsEnd(loc, true);
 			

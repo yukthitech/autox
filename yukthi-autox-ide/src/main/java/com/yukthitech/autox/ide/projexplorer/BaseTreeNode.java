@@ -257,7 +257,7 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		model.nodeChanged(this);
 	}
 	
-	public synchronized void rename(String newId, String newName)
+	public void rename(String newId, String newName)
 	{
 		String curId = this.id;
 		
@@ -269,7 +269,7 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		parent.addChildNode(this);
 	}
 
-	public synchronized void setChildNodes(List<BaseTreeNode> newNodes)
+	public void setChildNodes(List<BaseTreeNode> newNodes)
 	{
 		super.removeAllChildren();
 		this.childNodes.clear();
@@ -295,7 +295,7 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 
 	}
 	
-	public synchronized void addChildNode(BaseTreeNode node)
+	public void addChildNode(BaseTreeNode node)
 	{
 		ObjectWrapper<Boolean> isReplaceOp = new ObjectWrapper<>(false);
 		int index = childNodes.addOrReplace(node, isReplaceOp);
@@ -313,7 +313,7 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		IdeUtils.execute(() -> node.reloadOnInit(), 1);
 	}
 
-	public synchronized void addChildNodes(Collection<BaseTreeNode> nodes)
+	public void addChildNodes(Collection<BaseTreeNode> nodes)
 	{
 		//sort nodes in ascending order
 		TreeMap<String, BaseTreeNode> nodeMap = new TreeMap<>();
@@ -371,7 +371,7 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		return childNodes.getNodes();
 	}
 	
-	public synchronized void removeChildNodes(Set<String> nodeIds)
+	public void removeChildNodes(Set<String> nodeIds)
 	{
 		//order the node ids in descending order
 		nodeIds = new TreeSet<>(nodeIds).descendingSet();

@@ -223,9 +223,11 @@
 
 	<popup-menu label="fileTabPopup">
 		<item label="Close" action="closeFile" />
-		<item label="Close All" action="closeAllFiles" />
-		<item label="Close All But This" action="closeAllButThis" />
-
+		<item id="ftCloseAll" label="Close All" action="closeAllFiles" />
+		<item id="ftCloseAllButThis" label="Close All But This" action="closeAllButThis" />
+		<item id="ftCloseToLeft" label="Close All to the Left" action="closeTabsToLeft" />
+		<item id="ftCloseToRight" label="Close All to the Right" action="closeTabsToRight" />
+		
 		<item label="-" />
 
 		<item label="Copy File Path" action="copyFilePath" />

@@ -46,6 +46,7 @@ import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLConstants;
+import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.beans.BeanProperty;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
@@ -876,14 +877,16 @@ public class Element implements INode
 				if(node instanceof TextNode)
 				{
 					TextNode textNode = (TextNode) node;
-					parentElement.parseTextContent(this.name, textNode.getLocation(), textNode.getContent(), collector);
+					parentElement.parseTextContent(this.name, textNode.getLocation(), textNode.getContent(), collector, 
+							AutomationUtils.isReserveNamespace(namespace), elementType);
 					continue;
 				}
 				
 				if(node instanceof CdataNode)
 				{
 					CdataNode textNode = (CdataNode) node;
-					parentElement.parseTextContent(this.name, textNode.getValueLocation(), textNode.getContent(), collector);
+					parentElement.parseTextContent(this.name, textNode.getValueLocation(), textNode.getContent(), collector, 
+							AutomationUtils.isReserveNamespace(namespace), elementType);
 					continue;
 				}
 
@@ -956,7 +959,7 @@ public class Element implements INode
 				}
 				
 				attr.setAttributeType(propInfo.getType());
-				parseTextContent(name, attr.getValueLocation(), attr.getValue(), collector);
+				parseTextContent(name, attr.getValueLocation(), attr.getValue(), collector, false, attr.getAttributeType());
 			}
 		}finally
 		{
@@ -964,8 +967,29 @@ public class Element implements INode
 		}
 	}
 	
-	private void parseTextContent(String propName, LocationRange location, String text, FileParseCollector collector)
+	private boolean isSupportedTextType(Class<?> type)
 	{
+		//object is used by diff prop to support expressions
+		if(type == null || Object.class.equals(type))
+		{
+			return true;
+		}
+		
+		return XMLUtil.isSupportedAttributeClass(type);
+	}
+	
+	private void parseTextContent(String propName, LocationRange location, String text, FileParseCollector collector, 
+			boolean reservedElementText, Class<?> propType)
+	{
+		if(reservedElementText || !isSupportedTextType(propType))
+		{
+			collector.addMessage(new FileParseMessage(MessageType.ERROR, "Encountered text in unsupported element.", 
+					location.getStartLineNumber(), 
+					location.getStartOffset(), 
+					location.getEndOffset()));
+			return;
+		}
+		
 		if(stepInfo == null)
 		{
 			return;

@@ -61,7 +61,7 @@ class FileTreeNode extends BaseTreeNode
 	}
 	
 	@Override
-	public synchronized void reload(boolean childReload)
+	public void reload(boolean childReload)
 	{
 		if(projectExplorer != null)
 		{
@@ -70,7 +70,7 @@ class FileTreeNode extends BaseTreeNode
 	}
 	
 	@Override
-	public synchronized void rename(String id, String newName)
+	public void rename(String id, String newName)
 	{
 		super.rename(id, newName);
 		
