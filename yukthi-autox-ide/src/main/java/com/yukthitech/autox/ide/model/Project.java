@@ -70,6 +70,8 @@ public class Project implements Serializable
 	private LinkedHashSet<String> resourceFoldersList;
 	private LinkedHashSet<String> classPathEntriesList;
 	
+	private LinkedHashSet<String> ignoreFoldersList;
+	
 	private transient ProjectClassLoader projectClassLoader;
 	
 	private transient DocInformation docInformation;
@@ -89,16 +91,15 @@ public class Project implements Serializable
 		appPropertyFilePath = "src/main/config/app.properties";
 		testSuitesFoldersList = new LinkedHashSet<>(CommonUtils.toSet("src/main/test-suites"));
 		resourceFoldersList = new LinkedHashSet<>(CommonUtils.toSet("src/main/resources"));
+		ignoreFoldersList = new LinkedHashSet<>(CommonUtils.toSet("target"));
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
 		in.defaultReadObject();
 		
-		if(resourceFoldersList == null)
-		{
-			resourceFoldersList = new LinkedHashSet<>();
-		}
+		resourceFoldersList = (resourceFoldersList == null) ? new LinkedHashSet<>() : resourceFoldersList;
+		ignoreFoldersList = (ignoreFoldersList == null) ? new LinkedHashSet<>() : ignoreFoldersList;
 	}
 
 	public String getName()
@@ -205,6 +206,11 @@ public class Project implements Serializable
 		return resourceFoldersList;
 	}
 	
+	public LinkedHashSet<String> getIgnoreFoldersList()
+	{
+		return ignoreFoldersList;
+	}
+	
 	public boolean isTestSuiteFolderFile(File file)
 	{
 		String baseFolderPath = getBaseFolderPath();
@@ -234,14 +240,22 @@ public class Project implements Serializable
 		return resourceFoldersList.contains(relPath);
 	}
 
-	public void setTestSuiteFoldersList(Set<String> testSuitesFoldersList)
+	public synchronized void setTestSuiteFoldersList(Set<String> testSuitesFoldersList)
 	{
 		this.testSuitesFoldersList = new LinkedHashSet<String>(testSuitesFoldersList);
+		this.reservedFiles = null;
 	}
 	
-	public void setResourceFoldersList(Set<String> resourceFoldersList)
+	public synchronized void setResourceFoldersList(Set<String> resourceFoldersList)
 	{
 		this.resourceFoldersList = new LinkedHashSet<String>(resourceFoldersList);
+		this.reservedFiles = null;
+	}
+	
+	public synchronized void setIgnoreFoldersList(Set<String> ignoreFoldersList)
+	{
+		this.ignoreFoldersList = new LinkedHashSet<String>(ignoreFoldersList);
+		this.reservedFiles = null;
 	}
 
 	@JsonIgnore
@@ -508,6 +522,11 @@ public class Project implements Serializable
 				for(String resFolder : this.resourceFoldersList)
 				{
 					reservedFiles.add( new File(baseFolder, resFolder).getCanonicalFile() );
+				}
+
+				for(String ignoredFolder : this.ignoreFoldersList)
+				{
+					reservedFiles.add( new File(baseFolder, ignoredFolder).getCanonicalFile() );
 				}
 			}catch(Exception ex)
 			{

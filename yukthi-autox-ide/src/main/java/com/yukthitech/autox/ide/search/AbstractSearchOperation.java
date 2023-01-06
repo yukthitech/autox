@@ -72,6 +72,8 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 	
 	private List<File> searchFiles;
 	
+	private List<File> ignoredFolders;
+	
 	private TreeSet<File> currentFiles = new TreeSet<>();
 	
 	private int matchedFileCount;
@@ -82,10 +84,11 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 	
 	private boolean replaceOperation;
 
-	public AbstractSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, boolean replaceOp)
+	public AbstractSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, List<File> ignoredFolders, boolean replaceOp)
 	{
 		this.fileSearchQuery = fileSearchQuery;
 		this.searchFiles = new ArrayList<>(searchFiles);
+		this.ignoredFolders = new ArrayList<>(ignoredFolders);
 		
 		fileStack.addAll(new TreeSet<>(searchFiles));
 		this.replaceOperation = replaceOp;
@@ -111,7 +114,7 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 	{
 		return replaceOperation;
 	}
-
+	
 	private static String buildNamePattern(String str)
 	{
 		str = str.replaceAll("[^\\*\\?\\w]", "\\\\$0");
@@ -155,7 +158,11 @@ public abstract class AbstractSearchOperation implements ISearchOperation
 			{
 				if(file.isDirectory())
 				{
-					newFolders.add(file);
+					if(!ignoredFolders.contains(file))
+					{
+						newFolders.add(file);
+					}
+					
 					return false;
 				}
 				

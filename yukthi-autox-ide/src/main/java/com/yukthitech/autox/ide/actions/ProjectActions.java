@@ -135,20 +135,6 @@ public class ProjectActions
 	}
 
 	@Action
-	public void refreshProject()
-	{
-		BaseTreeNode node = projectExplorer.getActiveNode();
-		
-		if(node instanceof ProjectTreeNode)
-		{
-			ProjectTreeNode projNode = (ProjectTreeNode) node;
-			projNode.getProject().reset();
-		}
-
-		projectExplorer.reloadActiveNode();
-	}
-
-	@Action
 	public void projectProperties()
 	{
 		if(projPropertiesDialog == null)
@@ -164,6 +150,11 @@ public class ProjectActions
 			return;
 		}
 
-		projPropertiesDialog.display(project);
+		boolean updated = projPropertiesDialog.display(project);
+		
+		if(updated)
+		{
+			projectExplorer.reloadProjectNode(project);
+		}
 	}
 }

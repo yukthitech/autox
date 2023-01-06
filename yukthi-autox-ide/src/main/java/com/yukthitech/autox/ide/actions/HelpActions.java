@@ -15,14 +15,12 @@
  */
 package com.yukthitech.autox.ide.actions;
 
-import java.awt.Component;
-import java.awt.Window;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.dialog.AboutAutoxDialog;
 import com.yukthitech.autox.ide.editor.FileEditor;
+import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
@@ -33,42 +31,14 @@ public class HelpActions
 	@Autowired
 	private HelpPanel helpPanel;
 	
+	@Autowired
+	private FileEditorTabbedPane fileTabbedPane;
+	
 	/**
 	 * Used to display about autox info.
 	 */
 	private AboutAutoxDialog aboutAutoxDialog = new AboutAutoxDialog();
 	
-	private FileEditor getActiveFileEditor()
-	{
-		Window activeWindow = IdeUtils.getCurrentWindow();
-		
-		if(activeWindow == null)
-		{
-			return null;
-		}
-		
-		Component activeComp = activeWindow.getFocusOwner();
-		
-		if(activeComp == null)
-		{
-			return null;
-		}
-		
-		Component curComp = activeComp;
-		
-		while(curComp != null)
-		{
-			if(curComp instanceof FileEditor)
-			{
-				return (FileEditor) curComp;
-			}
-			
-			curComp = curComp.getParent();
-		}
-		
-		return null;
-	}
-
 	@Action
 	public void help()
 	{
@@ -78,8 +48,13 @@ public class HelpActions
 	@Action
 	public void contextHelp()
 	{
-		FileEditor fileEditor = getActiveFileEditor();
-		String currentWord = fileEditor.getCursorWord();
+		FileEditor fileEditor = fileTabbedPane.getCurrentFileEditor();
+		String currentWord = (fileEditor == null) ? null : fileEditor.getCursorWord();
+		
+		if(currentWord == null)
+		{
+			return;
+		}
 		
 		helpPanel.activatePanel(currentWord);
 	}

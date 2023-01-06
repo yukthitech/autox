@@ -52,6 +52,8 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.projexplorer.BaseTreeNode;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
+import com.yukthitech.autox.ide.search.FileSearchQuery;
+import com.yukthitech.autox.ide.search.FileSearchService;
 import com.yukthitech.autox.ide.search.SearchDialog;
 import com.yukthitech.autox.ide.xmlfile.IndexRange;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -91,6 +93,12 @@ public class FileActions
 	
 	@Autowired
 	private SearchDialog searchDialog;
+
+	@Autowired
+	private FileEditorTabbedPane fileTabbedPane;
+	
+	@Autowired
+	private FileSearchService fileSearchService;
 
 	@Action
 	public void newFolder()
@@ -536,6 +544,14 @@ public class FileActions
 	@Action
 	public void refreshFolder()
 	{
+		BaseTreeNode node = projectExplorer.getActiveNode();
+		
+		if(node instanceof ProjectTreeNode)
+		{
+			ProjectTreeNode projNode = (ProjectTreeNode) node;
+			projNode.getProject().reset();
+		}
+
 		projectExplorer.reloadActiveNode();
 	}
 	
@@ -630,5 +646,46 @@ public class FileActions
 	public void search()
 	{
 		searchDialog.display();
+	}
+
+	@Action
+	public void searchContextWord()
+	{
+		FileEditor fileEditor = fileTabbedPane.getCurrentFileEditor();
+		
+		if(fileEditor == null)
+		{
+			return;
+		}
+		
+		String currentWord = fileEditor.getSelectedText();
+		
+		if(currentWord == null)
+		{
+			currentWord = fileEditor.getCursorWord();
+			
+			if(currentWord == null)
+			{
+				return;
+			}
+		}
+		//when using selected text, use only first line, in case text spans multiple lines
+		else
+		{
+			int lineIdx = currentWord.indexOf("\n");
+			
+			if(lineIdx == 0)
+			{
+				return;
+			}
+			
+			if(lineIdx > 0)
+			{
+				currentWord = currentWord.substring(0, lineIdx);
+			}
+		}
+		
+		FileSearchQuery qry = FileSearchQuery.newTextQuery(currentWord, true, false, false, "", Arrays.asList("*"), fileEditor.getProject());
+		fileSearchService.findAll(qry, false);
 	}
 }

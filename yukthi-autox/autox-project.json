@@ -2,7 +2,9 @@
   "name" : "Autox",
   "appConfigFilePath" : "src/test/resources/app-configuration.xml",
   "appPropertyFilePath" : "src/test/resources/app.properties",
+  "appPropertyFile" : "E:\\Kranthi\\github\\autox\\yukthi-autox\\src\\test\\resources\\app.properties",
   "testSuitesFoldersList" : [ "src\\test\\resources\\new-test-suites\\debug-flow", "src\\test\\resources\\new-test-suites\\global-cleanup-err", "src\\test\\resources\\new-test-suites\\global-setup-err", "src\\test\\resources\\new-test-suites\\multi-thread-flows", "src\\test\\resources\\new-test-suites\\multi-thread-sessions", "src\\test\\resources\\new-test-suites\\neg-test-suites", "src\\test\\resources\\new-test-suites\\session-events", "src\\test\\resources\\new-test-suites\\test-suite-flows", "src\\test\\resources\\test-suites" ],
   "resourceFoldersList" : [ "src\\test\\resources\\data" ],
+  "ignoreFoldersList" : [ "autox-report", "docs", "drivers", "lib", "output", "target", "test-output", "work" ],
   "classPathEntries" : [ "E:\\Kranthi\\github\\autox\\yukthi-autox\\target\\test-classes", "E:\\Kranthi\\github\\autox\\yukthi-autox\\src\\test\\resources" ]
 }

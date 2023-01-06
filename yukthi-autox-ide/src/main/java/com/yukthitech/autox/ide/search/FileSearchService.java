@@ -23,10 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
+import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.search.FileSearchQuery.QueryType;
 import com.yukthitech.autox.ide.search.FileSearchQuery.Scope;
+import com.yukthitech.autox.ide.ui.InProgressDialog;
 import com.yukthitech.autox.ide.views.search.SearchResultPanel;
 
 @Service
@@ -52,6 +54,10 @@ public class FileSearchService
 		{
 			searchFolders.addAll(projectManager.getAllProjectFolders().values());
 		}
+		if(query.getScope() == Scope.PROJECT)
+		{
+			searchFolders.add(query.getProject().getBaseFolder());
+		}
 		else
 		{
 			searchFolders.addAll(projectExplorer.getSelectedFiles());
@@ -60,6 +66,36 @@ public class FileSearchService
 		return searchFolders;
 	}
 	
+	private List<File> getIgnoredFolders(FileSearchQuery query)
+	{
+		List<File> ignoredFolders = new ArrayList<>();
+		
+		if(query.getScope() == Scope.ALL_PROJECTS)
+		{
+			projectManager.getAllProjects().forEach(proj -> 
+			{
+				File baseFolder = proj.getBaseFolder();
+				
+				proj.getIgnoreFoldersList().forEach(str -> 
+				{
+					ignoredFolders.add(new File(baseFolder, str));
+				});
+			});
+		}
+		if(query.getScope() == Scope.PROJECT)
+		{
+			Project proj = query.getProject();
+			File baseFolder = proj.getBaseFolder();
+			
+			proj.getIgnoreFoldersList().forEach(str -> 
+			{
+				ignoredFolders.add(new File(baseFolder, str));
+			});
+		}
+
+		return ignoredFolders;
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void repeatSearch(ISearchOperation operation)
 	{
@@ -69,38 +105,51 @@ public class FileSearchService
 		searchResultPanel.setSearchResults(operation, results);
 	}
 	
-	public void replaceMatches(ISearchOperation operation, List<SearchResult> matches)
+	public void replaceMatches(ISearchOperation operation, List<SearchResult> matches, String dynReplaceText)
 	{
-		operation.replace(fileEditorTabbedPane, matches);
+		InProgressDialog.getInstance().display("Replace operation in progress", () -> 
+		{
+			operation.replace(fileEditorTabbedPane, matches, dynReplaceText);
+		});
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void findAll(FileSearchQuery query, boolean replaceOp)
 	{
 		List<File> searchFolders = getSearchFolders(query);
+		List<File> ignoredFolders = getIgnoredFolders(query);
 		
 		ISearchOperation op = query.getQueryType() == QueryType.TEXT ?
-				new TextSearchOperation(query, searchFolders, replaceOp) :
-				new XpathSearchOperation(query, searchFolders, replaceOp);
+				new TextSearchOperation(query, searchFolders, ignoredFolders, replaceOp) :
+				new XpathSearchOperation(query, searchFolders, ignoredFolders, replaceOp);
 		
-		List<SearchResult> results = (List) op.findAll();
-		
-		if(results == null)
+		InProgressDialog.getInstance().display("Search in progress", () -> 
 		{
-			return;
-		}
-		
-		searchResultPanel.setSearchResults(op, results);
+			List<SearchResult> results = (List) op.findAll();
+			
+			if(results == null)
+			{
+				return;
+			}
+			
+			searchResultPanel.setSearchResults(op, results);
+		});
 	}
 	
 	public int replaceAll(FileSearchQuery query)
 	{
 		List<File> searchFolders = getSearchFolders(query);
+		List<File> ignoredFolders = getIgnoredFolders(query);
 		
 		ISearchOperation op = query.getQueryType() == QueryType.TEXT ?
-				new TextSearchOperation(query, searchFolders, true) :
-				new XpathSearchOperation(query, searchFolders, true);
+				new TextSearchOperation(query, searchFolders, ignoredFolders, true) :
+				new XpathSearchOperation(query, searchFolders, ignoredFolders, true);
 
-		return op.replaceAll(fileEditorTabbedPane);
+		Integer res = InProgressDialog.getInstance().display("Replace operation in progress", () -> 
+		{
+			return op.replaceAll(fileEditorTabbedPane);
+		});
+		
+		return (res == null) ? -1 : res;
 	}
 }

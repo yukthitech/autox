@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -42,6 +43,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -215,7 +217,8 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		removeSelectedBut.setEnabled(false);
 		removeAllBut.setEnabled(hasResults);
 		
-		replaceBut.setEnabled(this.currentOperation != null && currentOperation.isReplaceOperation() && hasResults);
+		boolean replaceOp = this.currentOperation != null && (currentOperation.isReplaceOperation() || currentOperation.isDynamicReplaceSupported());
+		replaceBut.setEnabled(replaceOp && hasResults);
 		replaceSelectedBut.setEnabled(false);
 		
 		expandAllBut.setEnabled(hasResults);
@@ -281,12 +284,31 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 	{
 		int count = searchResTree.getSelectionCount();
 		removeSelectedBut.setEnabled(count > 0);
-		replaceSelectedBut.setEnabled(count > 0 && currentOperation.isReplaceOperation());
+		replaceSelectedBut.setEnabled(count > 0 && (currentOperation.isReplaceOperation() || currentOperation.isDynamicReplaceSupported()));
 	}
 	
 	private void onRepeat(ActionEvent e)
 	{
 		fileSearchService.repeatSearch(currentOperation);
+	}
+	
+	private void executeReplaceOp(Consumer<String> consumer)
+	{
+		if(!currentOperation.isDynamicReplaceSupported())
+		{
+			consumer.accept(null);
+			return;
+		}
+		
+		String replacementText = JOptionPane.showInputDialog(this, "Please provide replacement text: ", 
+				currentOperation.getDynamicReplaceDefault());
+		
+		if(StringUtils.isBlank(replacementText))
+		{
+			return;
+		}
+		
+		consumer.accept(replacementText);
 	}
 
 	private void onReplaceSelected(ActionEvent e)
@@ -302,8 +324,11 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 		
 		if(selectedResults.size() > 0)
 		{
-			fileSearchService.replaceMatches(currentOperation, new ArrayList<>(selectedResults));
-			fileSearchService.repeatSearch(currentOperation);
+			executeReplaceOp(replaceWith -> 
+			{
+				fileSearchService.replaceMatches(currentOperation, new ArrayList<>(selectedResults), replaceWith);
+				fileSearchService.repeatSearch(currentOperation);
+			});
 		}
 	}
 	
@@ -317,9 +342,12 @@ public class SearchResultPanel extends JPanel implements IViewPanel
 			return;
 		}
 		
-		searchResultTreeModel.reset();
-		fileSearchService.replaceMatches(currentOperation, resLst);
-		resetButtonStatus();
+		executeReplaceOp(replaceWith -> 
+		{
+			searchResultTreeModel.reset();
+			fileSearchService.replaceMatches(currentOperation, resLst, replaceWith);
+			resetButtonStatus();
+		});
 	}
 
 	private void onRemove(ActionEvent e)

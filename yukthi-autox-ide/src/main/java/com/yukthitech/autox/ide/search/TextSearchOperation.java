@@ -42,11 +42,27 @@ public class TextSearchOperation extends AbstractSearchOperation
 {
 	private static Logger logger = LogManager.getLogger(TextSearchOperation.class);
 	
-	public TextSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, boolean replaceOp)
+	private boolean dynamicReplaceSupported;
+	
+	public TextSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, List<File> ignoredFolders, boolean replaceOp)
 	{
-		super(fileSearchQuery, searchFiles, replaceOp);
+		super(fileSearchQuery, searchFiles, ignoredFolders, replaceOp);
+		
+		this.dynamicReplaceSupported = (!replaceOp && !fileSearchQuery.isRegularExpression());
 	}
 	
+	@Override
+	public boolean isDynamicReplaceSupported()
+	{
+		return dynamicReplaceSupported;
+	}
+	
+	@Override
+	public String getDynamicReplaceDefault()
+	{
+		return fileSearchQuery.getSearchString();
+	}
+
 	private Pattern buildSearchPattern()
 	{
 		String searchStr = fileSearchQuery.getSearchString();
@@ -127,7 +143,7 @@ public class TextSearchOperation extends AbstractSearchOperation
 	}
 	
 	@Override
-	public void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches)
+	public void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches, String dynReplaceText)
 	{
 		//Group the results by file, in descending order
 		Map<File, TreeSet<SearchResult>> fileResults = groupResults(matches);
@@ -148,8 +164,10 @@ public class TextSearchOperation extends AbstractSearchOperation
 			for(SearchResult res : entry.getValue())
 			{
 				String matchedContent = content.substring(res.getStart(), res.getEnd());
+				String replaceWith = dynamicReplaceSupported ? dynReplaceText : fileSearchQuery.getReplaceWith();
+				
 				Matcher matcher = searchPattern.matcher(matchedContent);
-				matchedContent = matcher.replaceFirst(fileSearchQuery.getReplaceWith());
+				matchedContent = matcher.replaceFirst(replaceWith);
 				
 				content = content.substring(0, res.getStart()) + matchedContent + content.substring(res.getEnd());
 			}

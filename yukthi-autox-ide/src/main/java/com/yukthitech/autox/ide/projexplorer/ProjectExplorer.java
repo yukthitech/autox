@@ -698,8 +698,10 @@ public class ProjectExplorer extends JPanel
 		UiIdElementsManager.getComponent("peCopy").setEnabled(!selectedFiles.isEmpty());
 		UiIdElementsManager.getComponent("peCopyPath").setEnabled(!multiItemsSelected);
 		UiIdElementsManager.getComponent("peRename").setEnabled(!multiItemsSelected && !specialNodeSelected);
-		UiIdElementsManager.getComponent("peDelete").setEnabled(!specialNodeSelected);
-		UiIdElementsManager.getComponent("peProjectProp").setEnabled(singleType && selectedTypes.contains(IProjectExplorerConstants.TYPE_PROJECT));
+		
+		boolean isProjectSelected = (singleType && selectedTypes.contains(IProjectExplorerConstants.TYPE_PROJECT));
+		UiIdElementsManager.getComponent("peDelete").setEnabled(!specialNodeSelected || isProjectSelected);
+		UiIdElementsManager.getComponent("peProjectProp").setEnabled(isProjectSelected);
 		
 		Clipboard clip = (Clipboard) Toolkit.getDefaultToolkit().getSystemClipboard();
 		UiIdElementsManager.getComponent("pePaste").setEnabled(clip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor));
@@ -748,8 +750,8 @@ public class ProjectExplorer extends JPanel
 		}
 		
 		node.reload(true);
-		projectTreeModel.reload(node);
-		projectTreeModel.nodeChanged(node);
+		//projectTreeModel.reload(node);
+		//projectTreeModel.nodeChanged(node);
 		
 		loadFilesToIndex();
 	}

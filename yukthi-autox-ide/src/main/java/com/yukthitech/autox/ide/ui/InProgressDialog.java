@@ -17,26 +17,28 @@ package com.yukthitech.autox.ide.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.Window;
+import java.util.function.Supplier;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.ide.IdeUtils;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EtchedBorder;
+import com.yukthitech.utils.ObjectWrapper;
 
 public class InProgressDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static InProgressDialog instance;
+	private static InProgressDialog instance = new InProgressDialog();
 	
 	private static Logger logger = LogManager.getLogger(InProgressDialog.class);
 	
@@ -47,11 +49,9 @@ public class InProgressDialog extends JDialog
 	/**
 	 * Create the dialog.
 	 */
-	public InProgressDialog(Window window)
+	public InProgressDialog()
 	{
-		super(window);
-//		super(window,ModalityType.APPLICATION_MODAL);
-//		setModalityType(ModalityType.APPLICATION_MODAL);
+		setModalityType(ModalityType.APPLICATION_MODAL);
 		setUndecorated(true);
 		setResizable(false);
 		setBounds(100, 100, 531, 143);
@@ -74,35 +74,57 @@ public class InProgressDialog extends JDialog
 		lblSubMessage.setText(mssg);
 	}
 	
-	public synchronized void display(String message, final Runnable jobToExecute)
+	public synchronized <T> T display(String message, final Supplier<T> jobToExecute)
 	{
 		lblPleaseWait.setText(message);
-
-		super.setVisible(true);
-		IdeUtils.centerOnScreen(this);
 		
+		ObjectWrapper<T> resWrapper = new ObjectWrapper<>();
+
 		IdeUtils.execute(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				//wait till current dialog becomes visible
+				while(!InProgressDialog.this.isVisible())
+				{
+					AutomationUtils.sleep(5);
+				}
+				
+				//once visible execute the actual operation
 				try
 				{
-					jobToExecute.run();
+					T res = jobToExecute.get();
+					resWrapper.setValue(res);
 				}catch(Exception ex)
 				{
 					logger.error("An error occurred while executing in-progress action", ex);
 				}
 				
+				//post operation close the dialog
 				InProgressDialog.this.setVisible(false);
 			}
 		}, 1);
+
+		IdeUtils.centerOnScreen(this);
+		super.setVisible(true);
+		
+		return resWrapper.getValue();
 	}
 	
-	public synchronized static InProgressDialog getInstance(){
-		if(instance==null){
-			instance=new InProgressDialog(IdeUtils.getCurrentWindow());
-		}
+	public synchronized void display(String message, final Runnable jobToExecute)
+	{
+		Supplier<Object> wrapper = () -> 
+		{
+			jobToExecute.run();
+			return null;
+		};
+		
+		display(message, wrapper);
+	}
+	
+	public synchronized static InProgressDialog getInstance()
+	{
 		return instance;
 	}
 }

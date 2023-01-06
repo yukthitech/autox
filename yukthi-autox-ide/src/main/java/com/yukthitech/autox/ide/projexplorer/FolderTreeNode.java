@@ -68,6 +68,12 @@ class FolderTreeNode extends BaseTreeNode
 			
 			return node;
 		}
+		
+		@Override
+		public String toString()
+		{
+			return super.toString() + "[" + label + "]";
+		}
 	}
 
 	private File folder;

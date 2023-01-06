@@ -90,6 +90,11 @@
 				<short-key ctrl="true" key="H" />
 			</item>
 
+			<item label="Search Current Word" mnemonic="S" icon="/ui/icons/search-cur-word.svg"
+				action="searchContextWord">
+				<short-key ctrl="true" shift="true" key="W" />
+			</item>
+
 			<item label="-" />
 
 			<item label="Change Editor Font..." action="changeEditorFont">
@@ -165,6 +170,7 @@
 		<item icon="/ui/icons/open.svg" tooltip="Open Project" action="openProject" />
 		<item icon="/ui/icons/save.svg" tooltip="Save File" action="saveFile" />
 		<item icon="/ui/icons/search.svg" tooltip="Search Files" action="search" />
+		<item icon="/ui/icons/search-cur-word.svg" tooltip="Search Current Word" action="searchContextWord" />
 		
 		<item icon="-" />
 		

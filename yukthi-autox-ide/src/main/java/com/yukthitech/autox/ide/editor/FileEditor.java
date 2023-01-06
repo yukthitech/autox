@@ -890,7 +890,7 @@ public class FileEditor extends JPanel
 	
 	private boolean isWordChar(char ch)
 	{
-		if(Character.isAlphabetic(ch))
+		if(Character.isAlphabetic(ch) || Character.isDigit(ch) || ch == '_')
 		{
 			return true;
 		}

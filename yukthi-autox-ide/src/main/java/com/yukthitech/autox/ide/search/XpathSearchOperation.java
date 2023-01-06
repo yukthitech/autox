@@ -225,11 +225,12 @@ public class XpathSearchOperation extends AbstractSearchOperation
 	private DocumentBuilder docBuilder = null;
 	private Transformer transformer = null;
 
-	public XpathSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, boolean replaceOp)
+	public XpathSearchOperation(FileSearchQuery fileSearchQuery, List<File> searchFiles, List<File> ignoredFolders, boolean replaceOp)
 	{
 		super(
 				fileSearchQuery.setFileNamePatterns(Arrays.asList("*.xml")), 
-				searchFiles, 
+				searchFiles,
+				ignoredFolders,
 				replaceOp);
 
 		try
@@ -364,7 +365,7 @@ public class XpathSearchOperation extends AbstractSearchOperation
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches)
+	public void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches, String dynReplaceText)
 	{
 		//Group the results by file, in descending order
 		Map<File, TreeSet<XmlSearchResult>> fileResults = (Map) groupResults(matches);

@@ -17,6 +17,8 @@ package com.yukthitech.autox.ide.search;
 
 import java.util.List;
 
+import com.yukthitech.autox.ide.model.Project;
+
 /**
  * Represents a file search query.
  * @author akranthikiran
@@ -34,7 +36,7 @@ public class FileSearchQuery
 	
 	public static enum Scope
 	{
-		ALL_PROJECTS, SELECTED_FOLDERS;
+		ALL_PROJECTS, SELECTED_FOLDERS, PROJECT;
 	}
 	
 	/**
@@ -82,6 +84,11 @@ public class FileSearchQuery
 	 */
 	private String replacementScript;
 	
+	/**
+	 * Project to be searched.
+	 */
+	private Project project;
+	
 	private FileSearchQuery()
 	{}
 
@@ -102,6 +109,16 @@ public class FileSearchQuery
 		return qry;
 	}
 
+	public static FileSearchQuery newTextQuery(String searchString, boolean caseSensitive, boolean regularExpression, boolean spanMultipleLines,
+			String replaceWith, List<String> fileNamePatterns, Project project)
+	{
+		FileSearchQuery qry = newTextQuery(searchString, caseSensitive, regularExpression, 
+				spanMultipleLines, replaceWith, fileNamePatterns, Scope.PROJECT);
+		
+		qry.project = project;
+		return qry;
+	}
+
 	public static FileSearchQuery newXmlQuery(String searchString, Scope scope, String replacementScript)
 	{
 		FileSearchQuery qry = new FileSearchQuery();
@@ -112,6 +129,11 @@ public class FileSearchQuery
 		qry.replacementScript = replacementScript;
 		
 		return qry;
+	}
+	
+	public Project getProject()
+	{
+		return project;
 	}
 
 	public QueryType getQueryType()

@@ -39,9 +39,11 @@ public class ProjectPropertiesDialog extends EscapableDialog
 
 	private final JPanel contentPanel = new JPanel();
 	private Project project;
+	
+	private boolean updated = false;
 
-	private ProjectSourceFolderPanel projectSourceFolderPanel;
-	private ProjectClassPathPanel projectPropertiesClassPath;
+	private ProjectSourceFolderPanel projectSourceFolderPanel = new ProjectSourceFolderPanel();
+	//private ProjectClassPathPanel projectPropertiesClassPath = new ProjectClassPathPanel();
 	
 	private JTabbedPane tabbedPane;
 
@@ -49,6 +51,7 @@ public class ProjectPropertiesDialog extends EscapableDialog
 	private ProjectManager projectManager;
 	
 	private final ProjectBasicPropPanel projectBasicPropPanel = new ProjectBasicPropPanel();
+	private final ProjectIgnoreFolderPanel ignoredFoldersPanel = new ProjectIgnoreFolderPanel();
 	
 	/**
 	 * Create the dialog.
@@ -66,15 +69,10 @@ public class ProjectPropertiesDialog extends EscapableDialog
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			contentPanel.add(tabbedPane);
 			
-			tabbedPane.addTab("Basic", null, projectBasicPropPanel, null);
-			{
-				projectSourceFolderPanel = new ProjectSourceFolderPanel();
-				tabbedPane.addTab("Source Folders", null, projectSourceFolderPanel, null);
-			}
-			{
-				projectPropertiesClassPath = new ProjectClassPathPanel();
-				tabbedPane.addTab("ClassPath", null, projectPropertiesClassPath, null);
-			}
+			tabbedPane.addTab("Basic", null, projectBasicPropPanel, "Basic Project Properties");
+			tabbedPane.addTab("Source Folders", null, projectSourceFolderPanel, "Source & Resource Folders");
+			//tabbedPane.addTab("ClassPath", null, projectPropertiesClassPath, null);
+			tabbedPane.addTab("Ignored Folders", null, ignoredFoldersPanel, "Folders to ignore");
 		}
 		{
 			JPanel buttonPane = new JPanel();
@@ -108,21 +106,24 @@ public class ProjectPropertiesDialog extends EscapableDialog
 		}
 	}
 
-	public Project display(Project project)
+	public boolean display(Project project)
 	{
 		this.project = project;
+		updated = false;
 		
 		projectBasicPropPanel.setProject(project);
-		projectPropertiesClassPath.setProject(project);
+		//projectPropertiesClassPath.setProject(project);
 		projectSourceFolderPanel.setProject(project);
+		ignoredFoldersPanel.setProject(project);
 		setTitle("Project Properties - " + project.getName());
 		
-		tabbedPane.setSelectedIndex(0);
+		//tabbedPane.setSelectedIndex(0);
 
 		IdeUtils.centerOnScreen(this);
+		super.repaint();
 		super.setVisible(true);
 		
-		return project;
+		return updated;
 	}
 
 	protected void saveProjectProperties()
@@ -134,10 +135,12 @@ public class ProjectPropertiesDialog extends EscapableDialog
 		}
 		
 		projectSourceFolderPanel.applyChanges();
-		projectPropertiesClassPath.applyChanges();
+		//projectPropertiesClassPath.applyChanges();
+		ignoredFoldersPanel.applyChanges();
 		
 		projectManager.updateProject(project);
 		
+		updated = true;
 		super.setVisible(false);
 	}
 }

@@ -14,12 +14,22 @@ public interface ISearchOperation
 	void reset();
 
 	boolean isReplaceOperation();
+	
+	default boolean isDynamicReplaceSupported()
+	{
+		return false;
+	}
+	
+	default String getDynamicReplaceDefault()
+	{
+		return null;
+	}
 
 	int getMatchedFileCount();
 
 	List<? extends SearchResult> findAll();
 
-	void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches);
+	void replace(FileEditorTabbedPane fileEditorTabbedPane, List<SearchResult> matches, String dynReplaceText);
 
 	/**
 	 * Should return number of replacements done. On error this should return current number of replacements + 1 as negative value.

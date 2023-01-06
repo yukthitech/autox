@@ -16,8 +16,10 @@
 package com.yukthitech.autox.ide.proj;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -167,6 +169,11 @@ public class ProjectManager
 	{
 		return projects.stream()
 				.collect(Collectors.toMap(proj -> proj.getName(), proj -> proj.getBaseFolder()));
+	}
+	
+	public List<Project> getAllProjects()
+	{
+		return new ArrayList<>(this.projects);
 	}
 	
 	public void updateProject(Project project)
