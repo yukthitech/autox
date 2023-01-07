@@ -59,4 +59,10 @@ public class DebugActions
 	{
 		executeDebugOp(DebugOp.STEP_RETURN);
 	}
+
+	@Action
+	public void debugResume()
+	{
+		executeDebugOp(DebugOp.RESUME);
+	}
 }

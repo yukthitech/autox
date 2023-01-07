@@ -15,13 +15,18 @@
  */
 package com.yukthitech.autox.ide.projexplorer;
 
-import static com.yukthitech.autox.ide.projexplorer.IProjectExplorerConstants.*;
+import static com.yukthitech.autox.ide.projexplorer.IProjectExplorerConstants.ID_PREFIX_APP_CONFIG;
+import static com.yukthitech.autox.ide.projexplorer.IProjectExplorerConstants.ID_PREFIX_APP_PROP;
+import static com.yukthitech.autox.ide.projexplorer.IProjectExplorerConstants.ID_PREFIX_RESOURCE_FOLDER;
+import static com.yukthitech.autox.ide.projexplorer.IProjectExplorerConstants.ID_PREFIX_TEST_SUITE_FOLDER;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
 
@@ -48,6 +53,21 @@ public class ProjectTreeNode extends FolderTreeNode
 		
 		//reload once project is set
 		reload(false);
+	}
+	
+	public File getTestSuiteFolder(File file)
+	{
+		for(TestSuiteFolderTreeNode node : this.testSuiteFolderNodes)
+		{
+			String relPath = IdeFileUtils.getRelativePath(node.getFolder(), file);
+			
+			if(relPath != null)
+			{
+				return node.getFolder();
+			}
+		}
+		
+		return null;
 	}
 	
 	@Override

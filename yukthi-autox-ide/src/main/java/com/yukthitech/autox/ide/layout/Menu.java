@@ -49,6 +49,11 @@ public class Menu implements Validateable
 	private char mnemonic = 0;
 	
 	/**
+	 * Group name of this item.
+	 */
+	private String group;
+
+	/**
 	 * Menu items for the label.
 	 */
 	private List<Object> menuItems;
@@ -101,6 +106,16 @@ public class Menu implements Validateable
 	public void setMnemonic(char mnemonic)
 	{
 		this.mnemonic = mnemonic;
+	}
+	
+	public String getGroup()
+	{
+		return group;
+	}
+
+	public void setGroup(String group)
+	{
+		this.group = group;
 	}
 
 	/**
@@ -173,7 +188,7 @@ public class Menu implements Validateable
 		
 		if(id != null)
 		{
-			UiIdElementsManager.registerElement(id, menu);
+			UiIdElementsManager.registerElement(id, group, menu);
 		}
 
 		return menu;
@@ -206,7 +221,7 @@ public class Menu implements Validateable
 		
 		if(id != null)
 		{
-			UiIdElementsManager.registerElement(id, popupMenu);
+			UiIdElementsManager.registerElement(id, group, popupMenu);
 		}
 
 		return idePopupMenu;

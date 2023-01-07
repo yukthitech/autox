@@ -267,4 +267,9 @@ public class ExecutionStack
 		
 		return stackTrace.getFirst().getSourceLocation();
 	}
+	
+	public int getStackSize()
+	{
+		return stackTrace.size();
+	}
 }

@@ -77,8 +77,13 @@ public class ExecutionEnvironmentManager
 		}
 	}
 	
-	private ExecutionEnvironment startAutoxEnvironment(ExecutionType executionType, String envName, Project project, boolean debug, String... extraArgs)
+	private ExecutionEnvironment startAutoxEnvironment(ExecuteCommand executeCommand, String envName, String... extraArgs)
 	{
+		ExecutionType executionType = executeCommand.getExecutionType();
+		Project project = executeCommand.getProject();
+		File testSuiteFolder = executeCommand.getTestSuiteFolder();
+		boolean debug = executeCommand.isDebug();
+		
 		String classpath = project.getProjectClassLoader().toClassPath();
 		String javaCmd = "java";
 		String outputDir = "autox-report";
@@ -112,6 +117,11 @@ public class ExecutionEnvironmentManager
 			command.addAll(Arrays.asList("--debug-port", "" + debugPort));
 		}
 		
+		if(executionType != ExecutionType.SOURCE_FOLDER && testSuiteFolder != null)
+		{
+			command.addAll(Arrays.asList("--test-suite-folders", testSuiteFolder.getPath()));
+		}
+		
 		command.addAll(Arrays.asList(extraArgs));
 		
 		StringBuilder initMssg = new StringBuilder();
@@ -126,7 +136,7 @@ public class ExecutionEnvironmentManager
 		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(executionType, project, envName, builder.start(), debugPort, 
+			ExecutionEnvironment env = new ExecutionEnvironment(executeCommand, envName, builder.start(), debugPort, 
 					reportFolder, initMssg.toString(), uiLayout, extraArgs);
 			
 			synchronized(runningEnvironments)
@@ -165,63 +175,63 @@ public class ExecutionEnvironmentManager
 		runningEnvironments.forEach(env -> env.onDebugPointChange(event));
 	}
 	
-	private ExecutionEnvironment executeTestSuite(Project project, String testSuite, boolean debug)
+	private ExecutionEnvironment executeTestSuite(ExecuteCommand executeCommand)
 	{
-		return startAutoxEnvironment(ExecutionType.TEST_SUITE, "ts-" + testSuite, project, debug, "-ts", testSuite);
+		return startAutoxEnvironment(executeCommand, "ts-" + executeCommand.getName(), "-ts", executeCommand.getName());
 	}
 	
-	private ExecutionEnvironment executeTestCase(Project project, String testCase, boolean debug)
+	private ExecutionEnvironment executeTestCase(ExecuteCommand executeCommand)
 	{
-		return startAutoxEnvironment(ExecutionType.TEST_CASE, "tc-" + testCase, project, debug, "-tc", testCase);
+		return startAutoxEnvironment(executeCommand, "tc-" + executeCommand.getName(), "-tc", executeCommand.getName());
 	}
 	
-	private ExecutionEnvironment executeFolder(Project project, List<File> testSuiteFolder, boolean debug)
+	private ExecutionEnvironment executeFolder(ExecuteCommand executeCommand, List<File> folders)
 	{
-		String foldersPath = testSuiteFolder.stream()
+		String foldersPath = folders.stream()
 			.map(file -> file.getPath())
 			.collect(Collectors.joining(","));
 		
-		String firstFolderName = testSuiteFolder.get(0).getName();
-		return startAutoxEnvironment(ExecutionType.FOLDER, "dir-" + firstFolderName, project, debug, "-flmt", foldersPath);
+		String firstFolderName = folders.get(0).getName();
+		return startAutoxEnvironment(executeCommand, "dir-" + firstFolderName, "-flmt", foldersPath);
 	}
 
-	private ExecutionEnvironment executeSourceFolder(Project project, File sourceFolder, boolean debug)
+	private ExecutionEnvironment executeSourceFolder(ExecuteCommand executeCommand, File sourceFolder)
 	{
-		return startAutoxEnvironment(ExecutionType.SOURCE_FOLDER, "dir-" + sourceFolder.getName(), project, debug, "-tsf", sourceFolder.getPath());
+		return startAutoxEnvironment(executeCommand, "tsDir-" + sourceFolder.getName(), "--test-suite-folders", sourceFolder.getPath());
 	}
 
-	private ExecutionEnvironment executeProject(Project project, boolean debug)
+	private ExecutionEnvironment executeProject(ExecuteCommand executeCommand)
 	{
-		return startAutoxEnvironment(ExecutionType.PROJECT, project.getName(), project, debug);
+		return startAutoxEnvironment(executeCommand, "prj-" + executeCommand.getProject().getName());
 	}
 
-	ExecutionEnvironment execute(ExecutionType executionType, Project project, String name, boolean debug)
+	ExecutionEnvironment execute(ExecuteCommand executeCommand)
 	{
-		switch (executionType)
+		switch (executeCommand.getExecutionType())
 		{
 			case TEST_CASE:
 			{
-				return executeTestCase(project, name, debug);
+				return executeTestCase(executeCommand);
 			}
 			case TEST_SUITE:
 			{
-				return executeTestSuite(project, name, debug);
+				return executeTestSuite(executeCommand);
 			}
 			case FOLDER:
 			{
-				return executeFolder(project, Arrays.asList(new File(name)), debug);
+				return executeFolder(executeCommand, Arrays.asList(new File(executeCommand.getName())));
 			}
 			case SOURCE_FOLDER:
 			{
-				return executeSourceFolder(project, new File(name), debug);
+				return executeSourceFolder(executeCommand, new File(executeCommand.getName()));
 			}
 			case PROJECT:
 			{
-				return executeProject(project, debug);
+				return executeProject(executeCommand);
 			}
 			default:
 			{
-				throw new InvalidArgumentException("Invalid execution type specified: {}", executionType);
+				throw new InvalidArgumentException("Invalid execution type specified: {}", executeCommand.getExecutionType());
 			}
 		}
 	}

@@ -339,40 +339,8 @@ public class Element implements INode
 		return elemName.equals(name);
 	}
 	
-	public Element getElement(String withName, int curLineNo)
+	private Element getMatchingChildElement(String withName, int curLineNo)
 	{
-		//$ indicates any step 
-		
-		//if the search is for non-step
-		if(!IIdeConstants.ELEMENT_TYPE_STEP.equals(withName))
-		{
-			String elemName = name.toLowerCase().replaceAll("\\W+", "");
-			
-			if(elemName.equals(withName))
-			{
-				return this;
-			}
-		}
-		else
-		{
-			if(stepInfo != null && stepInfo.isExecutable())
-			{
-				return this;
-			}
-			
-			if(functionCall != null)
-			{
-				return this;
-			}
-			
-			String elemName = name.toLowerCase().replaceAll("\\W+", "");
-			
-			if(("customuilocator".equals(elemName) || "function".equals(elemName)) && this.startLocation.hasLine(curLineNo))
-			{
-				return this;
-			}
-		}
-
 		for(INode node : this.nodes)
 		{
 			if(!(node instanceof Element))
@@ -393,6 +361,54 @@ public class Element implements INode
 			}
 		}
 		
+		return null;
+	}
+	
+	public Element getElement(String withName, int curLineNo)
+	{
+		//$ indicates any step 
+		
+		//check if there is any subchild which matches required criteria
+		Element matchingChild = getMatchingChildElement(withName, curLineNo);
+		
+		if(matchingChild != null)
+		{
+			return matchingChild;
+		}
+		
+		//if no child is matching check for current step
+		
+		//if non-step is being searched
+		if(!IIdeConstants.ELEMENT_TYPE_STEP.equals(withName))
+		{
+			String elemName = name.toLowerCase().replaceAll("\\W+", "");
+			
+			if(elemName.equals(withName))
+			{
+				return this;
+			}
+			
+			return null;
+		}
+		
+		//if step is being searched
+		if(stepInfo != null && stepInfo.isExecutable())
+		{
+			return this;
+		}
+		
+		if(functionCall != null)
+		{
+			return this;
+		}
+		
+		String elemName = name.toLowerCase().replaceAll("\\W+", "");
+		
+		if(("customuilocator".equals(elemName) || "function".equals(elemName)) && this.startLocation.hasLine(curLineNo))
+		{
+			return this;
+		}
+
 		return null;
 	}
 	

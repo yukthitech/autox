@@ -30,19 +30,37 @@ import javax.swing.JComponent;
  */
 public class UiIdElementsManager
 {
-	private static Map<String, List<Object>> idElements = new HashMap<>();
+	private static Map<String, List<JComponent>> idElements = new HashMap<>();
 	
-	public static void registerElement(String id, Object element)
+	private static Map<String, List<JComponent>> groupElements = new HashMap<>();
+	
+	public static void registerElement(String id, String group, JComponent element)
 	{
-		List<Object> elements = idElements.get(id);
-		
-		if(elements == null)
+		if(id != null)
 		{
-			elements = new ArrayList<>();
-			idElements.put(id, elements);
+			List<JComponent> elements = idElements.get(id);
+			
+			if(elements == null)
+			{
+				elements = new ArrayList<>();
+				idElements.put(id, elements);
+			}
+			
+			elements.add(element);
 		}
 		
-		elements.add(element);
+		if(group != null)
+		{
+			List<JComponent> grpElements = groupElements.get(group);
+			
+			if(grpElements == null)
+			{
+				grpElements = new ArrayList<>();
+				groupElements.put(group, grpElements);
+			}
+			
+			grpElements.add(element);
+		}
 	}
 	
 	public static Set<String> getUiIds()
@@ -50,9 +68,9 @@ public class UiIdElementsManager
 		return idElements.keySet();
 	}
 	
-	public static List<Object> getElements(String id)
+	public static List<JComponent> getElements(String id)
 	{
-		List<Object> elements = idElements.get(id);
+		List<JComponent> elements = idElements.get(id);
 		
 		if(elements == null)
 		{
@@ -62,9 +80,9 @@ public class UiIdElementsManager
 		return new ArrayList<>(elements);
 	}
 
-	public static Object getElement(String id)
+	public static JComponent getElement(String id)
 	{
-		List<Object> elements = idElements.get(id);
+		List<JComponent> elements = idElements.get(id);
 		
 		if(elements == null)
 		{
@@ -73,16 +91,16 @@ public class UiIdElementsManager
 		
 		return elements.get(0);
 	}
-
-	public static JComponent getComponent(String id)
+	
+	public static void setEnableFlagByGroup(String groupName, boolean enableFlag)
 	{
-		List<Object> elements = idElements.get(id);
+		List<JComponent> elements = groupElements.get(groupName);
 		
 		if(elements == null)
 		{
-			return null;
+			return;
 		}
 		
-		return (JComponent) elements.get(0);
+		elements.forEach(elem -> elem.setEnabled(enableFlag));
 	}
 }

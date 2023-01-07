@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JComponent;
 import javax.swing.JToggleButton;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -109,7 +110,7 @@ public class IdeSettingsManager
 	
 	private void changeUiStatus(String name, boolean value)
 	{
-		List<Object> elements = UiIdElementsManager.getElements(ID_SETTINGS_PREFIX + name);
+		List<JComponent> elements = UiIdElementsManager.getElements(ID_SETTINGS_PREFIX + name);
 		
 		for(Object uiElem : elements)
 		{

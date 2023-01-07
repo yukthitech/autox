@@ -174,6 +174,14 @@ public class DebugFlowManager
 			currentLivePoint.clearThread();
 		}
 		
+		synchronized(debugPoints)
+		{
+			if(point.isSinglePauseOnly())
+			{
+				debugPoints.remove(debugRef);
+			}
+		}
+
 		LiveDebugPoint.pauseAtDebugPoint(step, point, livePoint -> 
 		{
 			synchronized(livePoints)

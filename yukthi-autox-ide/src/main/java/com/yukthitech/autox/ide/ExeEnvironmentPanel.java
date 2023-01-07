@@ -43,6 +43,7 @@ import com.yukthitech.autox.ide.exeenv.EnvironmentStartedEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironmentManager;
+import com.yukthitech.autox.ide.layout.UiIdElementsManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.swing.IconButton;
 
@@ -195,6 +196,7 @@ public class ExeEnvironmentPanel extends JPanel
 		checkForButtons();
 		
 		executionEnvironmentManager.setActiveEnvironment(environment);
+		UiIdElementsManager.setEnableFlagByGroup("debugGroup", (environment != null && environment.isDebugEnv()));
 	}
 
 	@IdeEventHandler
@@ -206,6 +208,9 @@ public class ExeEnvironmentPanel extends JPanel
 		if(selIdx >= 0)
 		{
 			envComboBox.setSelectedIndex(selIdx);
+			
+			ExecutionEnvironment selEnv = envComboBox.getItemAt(selIdx);
+			UiIdElementsManager.setEnableFlagByGroup("debugGroup", (!selEnv.isTerminated() && selEnv.isDebugEnv()));
 		}
 		
 		checkForButtons();
@@ -242,6 +247,7 @@ public class ExeEnvironmentPanel extends JPanel
 		{
 			envComboBox.removeItem(activeEnv);
 			executionEnvironmentManager.setActiveEnvironment(null);
+			UiIdElementsManager.setEnableFlagByGroup("debugGroup", false);
 			
 			checkForButtons();
 		}
@@ -284,6 +290,7 @@ public class ExeEnvironmentPanel extends JPanel
 		if(activeEnvRemoved)
 		{
 			executionEnvironmentManager.setActiveEnvironment(null);
+			UiIdElementsManager.setEnableFlagByGroup("debugGroup", false);
 		}
 		
 		checkForButtons();
@@ -293,6 +300,8 @@ public class ExeEnvironmentPanel extends JPanel
 	{
 		ExecutionEnvironment env = (ExecutionEnvironment) envComboBox.getSelectedItem();
 		executionEnvironmentManager.setActiveEnvironment(env);
+		
+		UiIdElementsManager.setEnableFlagByGroup("debugGroup", (env != null && env.isDebugEnv()));
 	}
 	
 	private synchronized void checkForButtons()

@@ -87,6 +87,11 @@ public class LiveDebugPoint
 	 */
 	private ILocationBased lastPauseLocation;
 	
+	/**
+	 * Stack size when last pause occurred.
+	 */
+	private int lastPauseStackSize;
+	
 	private DebugOp lastDebugOp;
 	
 	private AtomicBoolean onPause = new AtomicBoolean(false);
@@ -195,6 +200,7 @@ public class LiveDebugPoint
 			}
 			
 			this.lastPauseLocation = location;
+			this.lastPauseStackSize = ExecutionContextManager.getInstance().getExecutionStack().getStackSize();
 			
 			sendOnHoldMssg();
 			
@@ -366,7 +372,7 @@ public class LiveDebugPoint
 				return false;
 			}
 			
-			if(debugOp == DebugOp.STEP_RETURN)
+			if(debugOp == DebugOp.RESUME)
 			{
 				clearThread();
 			}
@@ -441,6 +447,27 @@ public class LiveDebugPoint
 					return true;
 				}
 				
+				//as pause is not taken care by current point
+				// return false so that other points are evaluated for pause
+				return false;
+			}
+			//Step return should return to the previous caller which will be done based
+			//  on stack size. Stack size should be less than that of previous pause
+			else if(lastDebugOp == DebugOp.STEP_RETURN)
+			{
+				int newStackSize = ExecutionContextManager.getInstance().getExecutionStack().getStackSize();
+				
+				if(lastPauseStackSize > newStackSize)
+				{
+					//clear last debug op, as step-return will be completed by this pause
+					this.lastDebugOp = null;
+					this.lastPauseStackSize = -1;
+					pause(step, null);
+
+					//as pause is taken care by current live point
+					return true;
+				}
+
 				//as pause is not taken care by current point
 				// return false so that other points are evaluated for pause
 				return false;

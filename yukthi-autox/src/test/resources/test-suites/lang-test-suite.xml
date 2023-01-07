@@ -39,7 +39,7 @@
 			<s:set expression="testAttr" value="SimpleValue"/>
 		
 			<s:set expression="testAttr2" value="string: Value: #{test.app.prop}"/>
-		
+			
 			<s:set expression="testAttr3">
 				<value>
 					string: Value: #{test.app.prop} ${attr.testAttr}

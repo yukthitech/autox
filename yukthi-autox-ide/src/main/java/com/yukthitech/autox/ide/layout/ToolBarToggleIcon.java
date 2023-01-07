@@ -48,7 +48,7 @@ public class ToolBarToggleIcon extends ToolBarIcon
 		
 		if(id != null)
 		{
-			UiIdElementsManager.registerElement(id, button);
+			UiIdElementsManager.registerElement(id, getGroup(), button);
 		}
 		
 		return button;

@@ -199,12 +199,10 @@ public class TDebugFlows extends BaseTestCases
 		
 		for(DebugFlowTestData.Case caseObj : testData.getCases())
 		{
-			/*
-			if(!"flowWithIfElse".equals(caseObj.getName()))
+			if(!"stepReturn".equals(caseObj.getName()))
 			{
 				continue;
 			}
-			*/
 
 			res.add(new Object[] {caseObj.getName(), caseObj});
 		}
@@ -247,7 +245,7 @@ public class TDebugFlows extends BaseTestCases
 			AutomationUtils.sleep(5000);
 		};
 		
-		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(41), onPause, "debugExprTest", Arrays.asList(41), null);
+		testDebugFlow(DebugOp.RESUME, Arrays.asList(42), onPause, "debugExprTest", Arrays.asList(42), null);
 		Assert.assertTrue(consumerExectued.getValue());
 	}
 
@@ -269,7 +267,7 @@ public class TDebugFlows extends BaseTestCases
 			AutomationUtils.sleep(5000);
 		};
 		
-		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(58), onPause, "functionReload", Arrays.asList(58), null);
+		testDebugFlow(DebugOp.RESUME, Arrays.asList(59), onPause, "functionReload", Arrays.asList(59), null);
 		Assert.assertTrue(consumerExectued.getValue());
 	}
 }

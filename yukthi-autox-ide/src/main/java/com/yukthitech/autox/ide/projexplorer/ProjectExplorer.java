@@ -396,6 +396,30 @@ public class ProjectExplorer extends JPanel
 		return null;
 	}
 	
+	public File getTestSuiteFolder(File file)
+	{
+		List<ProjectTreeNode> nodes = projectTreeModel.getProjectNodes();
+		
+		if(nodes == null || nodes.isEmpty())
+		{
+			return null;
+		}
+		
+		File res = null;
+		
+		for(ProjectTreeNode projNode : nodes)
+		{
+			res = projNode.getTestSuiteFolder(file);
+			
+			if(res != null)
+			{
+				return res;
+			}
+		}
+		
+		return null;
+	}
+
 	public void setActiveTreeNode(BaseTreeNode activeTreeNode)
 	{
 		this.activeTreeNode = activeTreeNode;
@@ -681,30 +705,30 @@ public class ProjectExplorer extends JPanel
 				|| selectedTypes.contains(IProjectExplorerConstants.TYPE_TEST_SUITE_FOLDER))
 				|| selectedTypes.contains(IProjectExplorerConstants.TYPE_TEST_FILE);
 		
-		UiIdElementsManager.getComponent("peNewMenuList").setEnabled(!multiItemsSelected 
+		UiIdElementsManager.getElement("peNewMenuList").setEnabled(!multiItemsSelected 
 				&& !selectedFiles.isEmpty() 
 				&& selectedFiles.get(0).isDirectory());
 		
-		UiIdElementsManager.getComponent("peNewTestFile").setEnabled(testFolder);
+		UiIdElementsManager.getElement("peNewTestFile").setEnabled(testFolder);
 		
-		UiIdElementsManager.getComponent("peOpenFile").setEnabled(onlyFiles);
+		UiIdElementsManager.getElement("peOpenFile").setEnabled(onlyFiles);
 		
 		boolean executable = 
 				(!multiItemsSelected && selectedTypes.contains(IProjectExplorerConstants.TYPE_PROJECT))
 				|| (!multiItemsSelected && selectedTypes.contains(IProjectExplorerConstants.TYPE_TEST_SUITE_FOLDER));
 		
-		UiIdElementsManager.getComponent("peExecute").setEnabled(executable);
-		UiIdElementsManager.getComponent("peCut").setEnabled(!specialNodeSelected);
-		UiIdElementsManager.getComponent("peCopy").setEnabled(!selectedFiles.isEmpty());
-		UiIdElementsManager.getComponent("peCopyPath").setEnabled(!multiItemsSelected);
-		UiIdElementsManager.getComponent("peRename").setEnabled(!multiItemsSelected && !specialNodeSelected);
+		UiIdElementsManager.getElement("peExecute").setEnabled(executable);
+		UiIdElementsManager.getElement("peCut").setEnabled(!specialNodeSelected);
+		UiIdElementsManager.getElement("peCopy").setEnabled(!selectedFiles.isEmpty());
+		UiIdElementsManager.getElement("peCopyPath").setEnabled(!multiItemsSelected);
+		UiIdElementsManager.getElement("peRename").setEnabled(!multiItemsSelected && !specialNodeSelected);
 		
 		boolean isProjectSelected = (singleType && selectedTypes.contains(IProjectExplorerConstants.TYPE_PROJECT));
-		UiIdElementsManager.getComponent("peDelete").setEnabled(!specialNodeSelected || isProjectSelected);
-		UiIdElementsManager.getComponent("peProjectProp").setEnabled(isProjectSelected);
+		UiIdElementsManager.getElement("peDelete").setEnabled(!specialNodeSelected || isProjectSelected);
+		UiIdElementsManager.getElement("peProjectProp").setEnabled(isProjectSelected);
 		
 		Clipboard clip = (Clipboard) Toolkit.getDefaultToolkit().getSystemClipboard();
-		UiIdElementsManager.getComponent("pePaste").setEnabled(clip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor));
+		UiIdElementsManager.getElement("pePaste").setEnabled(clip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor));
 
 		//show the popup
 		TreePath treePath = tree.getPathForLocation(e.getX(), e.getY());

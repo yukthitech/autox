@@ -118,22 +118,25 @@
 				<short-key alt="true" shift="true" key="F9" />
 			</item>
 
-			<item label="Run Selected Steps..." action="runSelectedSteps">
-				<short-key ctrl="true" key="ENTER" />
-			</item>
 			<item label="Run To Current Step" action="runToCurrentStep">
 				<short-key ctrl="true" shift="true" key="ENTER" />
 			</item>
 
 			<item label="-" />
 			
-			<item label="Step into..." action="debugStepInto">
+			<item label="Run Selected Steps..." action="runSelectedSteps" group="debugGroup" enabled="false">
+				<short-key ctrl="true" key="ENTER" />
+			</item>
+			<item label="Step Into" action="debugStepInto" group="debugGroup" enabled="false">
 				<short-key key="F5" global="true"/>
 			</item>
-			<item label="Step over..." action="debugStepOver">
+			<item label="Step Over" action="debugStepOver" group="debugGroup" enabled="false">
 				<short-key key="F6" global="true"/>
 			</item>
-			<item label="Step return..." action="debugStepReturn">
+			<item label="Step Return" action="debugStepReturn" group="debugGroup" enabled="false">
+				<short-key key="F7"/>
+			</item>
+			<item label="Resume" action="debugResume" group="debugGroup" enabled="false">
 				<short-key key="F8" global="true"/>
 			</item>
 		</menu>
@@ -169,6 +172,9 @@
 		<item icon="/ui/icons/new.svg" tooltip="New Project" action="newProject" />
 		<item icon="/ui/icons/open.svg" tooltip="Open Project" action="openProject" />
 		<item icon="/ui/icons/save.svg" tooltip="Save File" action="saveFile" />
+
+		<item icon="-" />
+
 		<item icon="/ui/icons/search.svg" tooltip="Search Files" action="search" />
 		<item icon="/ui/icons/search-cur-word.svg" tooltip="Search Current Word" action="searchContextWord" />
 		

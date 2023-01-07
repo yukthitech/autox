@@ -9,29 +9,32 @@
 			8, 9,
 			
 			<!-- testcase -->
-			29, 30, 32,
+			30, 31, 33,
 				<!-- function2 -->
 				18, 19, 21,
 				<!-- function 1 -->
 				13, 14,
+				<!-- function2 -->
+				22,
 				
 			<!-- cleanup -->
-			65, 66
+			66, 67
 		</pausePoints>
 		
 		<stackTraces>
 			8 => debug-flow-suite.xml:8
 			9 => debug-flow-suite.xml:9
-			29 => debug-flow-suite.xml:29
 			30 => debug-flow-suite.xml:30
-			32 => debug-flow-suite.xml:32
-			18 => debug-flow-suite.xml:18, debug-flow-suite.xml:32
-			19 => debug-flow-suite.xml:19, debug-flow-suite.xml:32
-			21 => debug-flow-suite.xml:21, debug-flow-suite.xml:32
-			13 => debug-flow-suite.xml:13, debug-flow-suite.xml:21, debug-flow-suite.xml:32
-			14 => debug-flow-suite.xml:14, debug-flow-suite.xml:21, debug-flow-suite.xml:32
-			65 => debug-flow-suite.xml:65
+			31 => debug-flow-suite.xml:31
+			33 => debug-flow-suite.xml:33
+			18 => debug-flow-suite.xml:18, debug-flow-suite.xml:33
+			19 => debug-flow-suite.xml:19, debug-flow-suite.xml:33
+			21 => debug-flow-suite.xml:21, debug-flow-suite.xml:33
+			13 => debug-flow-suite.xml:13, debug-flow-suite.xml:21, debug-flow-suite.xml:33
+			14 => debug-flow-suite.xml:14, debug-flow-suite.xml:21, debug-flow-suite.xml:33
+			22 => debug-flow-suite.xml:22, debug-flow-suite.xml:33
 			66 => debug-flow-suite.xml:66
+			67 => debug-flow-suite.xml:67
 		</stackTraces>
 	</case>
 
@@ -45,20 +48,20 @@
 			8, 9,
 			
 			<!-- testcase -->
-			29, 30, 32,
+			30, 31, 33,
 				
 			<!-- cleanup -->
-			65, 66
+			66, 67
 		</pausePoints>
 		
 		<stackTraces>
 			8 => debug-flow-suite.xml:8
 			9 => debug-flow-suite.xml:9
-			29 => debug-flow-suite.xml:29
 			30 => debug-flow-suite.xml:30
-			32 => debug-flow-suite.xml:32
-			65 => debug-flow-suite.xml:65
+			31 => debug-flow-suite.xml:31
+			33 => debug-flow-suite.xml:33
 			66 => debug-flow-suite.xml:66
+			67 => debug-flow-suite.xml:67
 		</stackTraces>
 	</case>
 
@@ -76,41 +79,61 @@
 			8, 9,
 			
 			<!-- testcase -->
-			29, 30, 32,
+			30, 31, 33,
 				
 			<!-- function2 (because of second debug point) -->
 			13, 14,
+			
+			<!-- back to func1 -->
+			22,
 
 			<!-- cleanup -->
-			65, 66
+			66, 67
 		</pausePoints>
 		
 		<stackTraces>
 			8 => debug-flow-suite.xml:8
 			9 => debug-flow-suite.xml:9
-			29 => debug-flow-suite.xml:29
 			30 => debug-flow-suite.xml:30
-			32 => debug-flow-suite.xml:32
-			13 => debug-flow-suite.xml:13, debug-flow-suite.xml:21, debug-flow-suite.xml:32
-			14 => debug-flow-suite.xml:14, debug-flow-suite.xml:21, debug-flow-suite.xml:32
-			65 => debug-flow-suite.xml:65
+			31 => debug-flow-suite.xml:31
+			33 => debug-flow-suite.xml:33
+			13 => debug-flow-suite.xml:13, debug-flow-suite.xml:21, debug-flow-suite.xml:33
+			14 => debug-flow-suite.xml:14, debug-flow-suite.xml:21, debug-flow-suite.xml:33
+			22 => debug-flow-suite.xml:22, debug-flow-suite.xml:33
 			66 => debug-flow-suite.xml:66
+			67 => debug-flow-suite.xml:67
 		</stackTraces>
 	</case>
 
 	<case name="stepReturn" op="STEP_RETURN" testCase="debugTest1">
 		<debugPoints>
-			8, 13, 65
+			13
 		</debugPoints>
 		
 		<pausePoints>
-			8, 13, 65
+			13, 22, 66
+		</pausePoints>
+		
+		<stackTraces>
+			13 => debug-flow-suite.xml:13, debug-flow-suite.xml:21, debug-flow-suite.xml:33
+			22 => debug-flow-suite.xml:22, debug-flow-suite.xml:33
+			66 => debug-flow-suite.xml:66
+		</stackTraces>
+	</case>
+
+	<case name="stepResume" op="RESUME" testCase="debugTest1">
+		<debugPoints>
+			8, 13, 66
+		</debugPoints>
+		
+		<pausePoints>
+			8, 13, 66
 		</pausePoints>
 		
 		<stackTraces>
 			8 => debug-flow-suite.xml:8
-			13 => debug-flow-suite.xml:13, debug-flow-suite.xml:21, debug-flow-suite.xml:32
-			65 => debug-flow-suite.xml:65
+			13 => debug-flow-suite.xml:13, debug-flow-suite.xml:21, debug-flow-suite.xml:33
+			66 => debug-flow-suite.xml:66
 		</stackTraces>
 	</case>
 
@@ -168,16 +191,15 @@
 
 	<case name="flowWithTryCase" op="STEP_OVER" testCase="debug2_tryCatch">
 		<debugPoints>
-			62
+			63
 		</debugPoints>
 		
 		<pausePoints>
-			62, 63,
+			63, 69,
 			
-			69, 70, 73, 74
+			70, 73, 74
 		</pausePoints>
 		<stackTraces>
-			62 => debug-flow-suite-2.xml:62
 			63 => debug-flow-suite-2.xml:63
 			69 => debug-flow-suite-2.xml:69
 			70 => debug-flow-suite-2.xml:70

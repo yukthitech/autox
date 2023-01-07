@@ -51,6 +51,11 @@ public class ToolBarIcon implements Validateable
 	protected String action;
 	
 	/**
+	 * Group name of this item.
+	 */
+	private String group;
+
+	/**
 	 * Gets the used to access this icon directly.
 	 *
 	 * @return the used to access this icon directly
@@ -130,6 +135,16 @@ public class ToolBarIcon implements Validateable
 		this.action = action;
 	}
 	
+	public String getGroup()
+	{
+		return group;
+	}
+
+	public void setGroup(String group)
+	{
+		this.group = group;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
 	 */
@@ -161,7 +176,7 @@ public class ToolBarIcon implements Validateable
 		
 		if(id != null)
 		{
-			UiIdElementsManager.registerElement(id, button);
+			UiIdElementsManager.registerElement(id, group, button);
 		}
 		
 		return button;

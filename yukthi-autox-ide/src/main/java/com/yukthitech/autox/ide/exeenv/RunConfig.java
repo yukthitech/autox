@@ -15,7 +15,10 @@
  */
 package com.yukthitech.autox.ide.exeenv;
 
+import java.io.File;
 import java.io.Serializable;
+
+import com.google.common.base.Objects;
 
 /**
  * Run configuration.
@@ -41,14 +44,14 @@ public class RunConfig implements Serializable
 	private String projectName;
 	
 	/**
+	 * Test suite folder path under which executable is defined.
+	 */
+	private File testSuiteFolder;
+	
+	/**
 	 * Name of the executable.
 	 */
 	private String executableName;
-	
-	/**
-	 * Unique id of the execution.
-	 */
-	private transient String uniqueId;
 	
 	/**
 	 * Instantiates a new run config.
@@ -57,11 +60,12 @@ public class RunConfig implements Serializable
 	{
 	}
 
-	public RunConfig(ExecutionType executionType, String projectName, String executableName)
+	public RunConfig(ExecutionType executionType, String projectName, File testSuiteFolder, String executableName)
 	{
 		this.executionType = executionType;
 		this.projectName = projectName;
 		this.executableName = executableName;
+		this.testSuiteFolder = testSuiteFolder;
 	}
 
 	/**
@@ -144,19 +148,17 @@ public class RunConfig implements Serializable
 	{
 		this.executableName = executableName;
 	}
-	
-	public synchronized String getUniqueId()
+
+	public File getTestSuiteFolder()
 	{
-		if(uniqueId != null)
-		{
-			return uniqueId;
-		}
-		
-		String id = projectName + "#" + executionType.name() + "#" + executableName;
-		id = id.replaceAll("\\W", "_");
-		return (uniqueId = id);
+		return testSuiteFolder;
 	}
-	
+
+	public void setTestSuiteFolder(File testSuiteFolder)
+	{
+		this.testSuiteFolder = testSuiteFolder;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -174,7 +176,10 @@ public class RunConfig implements Serializable
 		}
 
 		RunConfig other = (RunConfig) obj;
-		return getUniqueId().equals(other.getUniqueId());
+		return Objects.equal(projectName, other.projectName)
+				&& Objects.equal(testSuiteFolder, other.testSuiteFolder)
+				&& Objects.equal(executionType, other.executionType)
+				&& Objects.equal(executableName, other.executableName);
 	}
 
 	/* (non-Javadoc)
@@ -183,6 +188,7 @@ public class RunConfig implements Serializable
 	@Override
 	public int hashCode()
 	{
-		return getUniqueId().hashCode();
+		return Objects.hashCode(projectName, testSuiteFolder, 
+				executionType, executableName);
 	}
 }

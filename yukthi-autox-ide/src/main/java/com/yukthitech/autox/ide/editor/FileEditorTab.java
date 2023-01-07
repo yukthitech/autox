@@ -87,10 +87,10 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 		int curIdx = fileEditorTabbedPane.getIndexOfTab(this);
 		int count = fileEditorTabbedPane.getTabCount();
 		
-		UiIdElementsManager.getComponent("ftCloseAllButThis").setEnabled(count > 1);
-		UiIdElementsManager.getComponent("ftCloseAll").setEnabled(count > 1);
-		UiIdElementsManager.getComponent("ftCloseToLeft").setEnabled(curIdx > 0);
-		UiIdElementsManager.getComponent("ftCloseToRight").setEnabled(curIdx < (count - 1));
+		UiIdElementsManager.getElement("ftCloseAllButThis").setEnabled(count > 1);
+		UiIdElementsManager.getElement("ftCloseAll").setEnabled(count > 1);
+		UiIdElementsManager.getElement("ftCloseToLeft").setEnabled(curIdx > 0);
+		UiIdElementsManager.getElement("ftCloseToRight").setEnabled(curIdx < (count - 1));
 		
 		popupMenu.show(this, e.getX(), e.getY());
 	}

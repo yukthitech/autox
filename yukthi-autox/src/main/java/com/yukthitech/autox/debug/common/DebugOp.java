@@ -32,7 +32,12 @@ public enum DebugOp
 	STEP_OVER,
 	
 	/**
+	 * Goes to the previous level of execution.
+	 */
+	STEP_RETURN,
+	
+	/**
 	 * Goes to next debug point.
 	 */
-	STEP_RETURN
+	RESUME
 }

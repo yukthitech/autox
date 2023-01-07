@@ -59,6 +59,16 @@ public class MenuItem implements Validateable
 	private String action;
 	
 	/**
+	 * Group name of this item.
+	 */
+	private String group;
+	
+	/**
+	 * Flag indicating default enable status of item.
+	 */
+	private boolean enabled = true;
+	
+	/**
 	 * Gets the id of this item.
 	 *
 	 * @return the id of this item
@@ -178,6 +188,26 @@ public class MenuItem implements Validateable
 		this.action = action;
 	}
 
+	public String getGroup()
+	{
+		return group;
+	}
+
+	public void setGroup(String group)
+	{
+		this.group = group;
+	}
+	
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
 	 */
@@ -225,11 +255,12 @@ public class MenuItem implements Validateable
 			menuItem.setIcon(IdeUtils.loadIcon(this.icon, 16));
 		}
 		
-		if(id != null)
+		if(id != null || group != null)
 		{
-			UiIdElementsManager.registerElement(id, menuItem);
+			UiIdElementsManager.registerElement(id, group, menuItem);
 		}
 		
+		menuItem.setEnabled(enabled);
 		return menuItem;
 	}
 }

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -93,12 +94,13 @@ public class ExecutionEnvironment
 	
 	private String activeThreadId; 
 	
-	ExecutionEnvironment(ExecutionType executionType, Project project, String name, Process process, int debugPort, File reportFolder, 
+	ExecutionEnvironment(ExecuteCommand command, String envName, Process process, int debugPort, File reportFolder, 
 			String initialMessage, UiLayout uiLayout, String extraArgs[])
 	{
-		this.executionType = executionType;
-		this.project = project;
-		this.name = name;
+		this.executionType = command.getExecutionType();
+		this.project = command.getProject();
+		
+		this.name = envName;
 		this.process = process;
 		this.reportFolder = reportFolder;
 		this.uiLayout = uiLayout;
@@ -127,6 +129,17 @@ public class ExecutionEnvironment
 				List<DebugPoint> debugPoints = ideDebugPoints.stream()
 						.map(idePoint -> new DebugPoint(idePoint.getFile().getPath(), idePoint.getLineNo() + 1, idePoint.getCondition()))
 						.collect(Collectors.toList());
+				
+				if(command.getRunToLinePoint() != null)
+				{
+					IdeDebugPoint runToPoint = command.getRunToLinePoint();
+					
+					debugPoints = new ArrayList<>(debugPoints);
+					
+					DebugPoint newDebPoint = new DebugPoint(runToPoint.getFile().getPath(), runToPoint.getLineNo() + 1, null);
+					newDebPoint.setSinglePauseOnly(true);
+					debugPoints.add(newDebPoint);
+				}
 				
 				ClientMssgDebuggerInit initMssg = new ClientMssgDebuggerInit(debugPoints);
 				

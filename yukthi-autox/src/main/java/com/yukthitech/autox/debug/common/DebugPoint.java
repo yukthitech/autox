@@ -42,6 +42,11 @@ public class DebugPoint implements Serializable
 	 */
 	private String condition;
 	
+	/**
+	 * Indicates this debug point has to be used for only one pause.
+	 */
+	private boolean singlePauseOnly;
+	
 	public DebugPoint()
 	{}
 	
@@ -82,6 +87,16 @@ public class DebugPoint implements Serializable
 		this.condition = condition;
 	}
 	
+	public boolean isSinglePauseOnly()
+	{
+		return singlePauseOnly;
+	}
+
+	public void setSinglePauseOnly(boolean onePauseOnly)
+	{
+		this.singlePauseOnly = onePauseOnly;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
