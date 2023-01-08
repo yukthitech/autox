@@ -18,7 +18,6 @@ package com.yukthitech.autox.test.assertion;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutoxValidationException;
@@ -26,6 +25,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
@@ -119,7 +119,7 @@ public class AssertEqualsStep extends AbstractValidation
 		}
 		else
 		{
-			isEqual = Objects.equals(expected, actual);
+			isEqual = AutomationUtils.equals(expected, actual);
 		}
 		
 		exeLogger.debug("Result of comparison is: {}", isEqual);

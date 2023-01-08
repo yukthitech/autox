@@ -15,13 +15,13 @@
  */
 package com.yukthitech.autox.test.assertion;
 
-import com.google.common.base.Objects;
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
@@ -75,7 +75,7 @@ public class AssertNotEqualStep extends AbstractValidation
 				expected, AssertEqualsStep.getType(expected),  
 				actual, AssertEqualsStep.getType(actual));
 
-		boolean isEqual = Objects.equal(expected, actual);
+		boolean isEqual = AutomationUtils.equals(expected, actual);
 		
 		if(isEqual)
 		{

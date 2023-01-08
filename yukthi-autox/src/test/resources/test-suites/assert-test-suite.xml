@@ -15,6 +15,9 @@
 			<s:assert-equals actual="string:value" expected="string:value"/>
 		
 			<s:assert-equals actual="prop: attr.intAttr" expected="int:10"/>
+
+			<!-- Ensure number values of different data types are compared by value -->
+			<s:assert-equals actual="int: 1000" expected="long: 1000"/>
 			
 			<s:assert-equals actual="expr: strContains('thisIsExpr', 'Is')" expected="boolean: true"/>
 			<s:assert-equals actual="expr: strContains('thisIsExpr', 'expr')" expected="boolean: false"/>

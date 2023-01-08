@@ -420,7 +420,7 @@ public class CommonFreeMarkerMethods
 			@FmParam(name = "value2", description = "Value2 to compare") Object value2
 			)
 	{
-		return Objects.equals(value1, value2);
+		return AutomationUtils.equals(value1, value2);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

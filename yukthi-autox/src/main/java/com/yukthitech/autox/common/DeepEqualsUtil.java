@@ -17,7 +17,6 @@ package com.yukthitech.autox.common;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.context.AutomationContext;
@@ -218,7 +217,7 @@ public class DeepEqualsUtil
 			return deepCompare((List<Object>) actual, (List<Object>) expected, propPath, context, logger);
 		}
 
-		boolean res = Objects.equals(actual, expected);
+		boolean res = AutomationUtils.equals(actual, expected);
 		
 		if(!res)
 		{

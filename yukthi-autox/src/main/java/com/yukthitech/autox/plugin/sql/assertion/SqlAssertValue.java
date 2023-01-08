@@ -190,7 +190,7 @@ public class SqlAssertValue extends AbstractValidation
 			
 			Object res = QueryUtils.getQueryRunner().query(connection, processedQuery, rsHandler);
 			
-			if(!Objects.equals(expectedValue, res))
+			if(!AutomationUtils.equals(expectedValue, res))
 			{
 				exeLogger.error("Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));
 				throw new AutoxValidationException(this, "Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));

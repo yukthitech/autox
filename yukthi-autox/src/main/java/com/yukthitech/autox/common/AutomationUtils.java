@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -984,5 +985,20 @@ public class AutomationUtils
 
 		res.append(seconds).append(" Sec");
 		return res.toString();
+	}
+	
+	public static boolean equals(Object val1, Object val2)
+	{
+		//when two numbers of different data types has to be compared
+		// like long and BigDecimal
+		if(val1 != null && val2 != null && !val1.getClass().equals(val2.getClass()) 
+				&& (val1 instanceof Number) && (val2 instanceof Number))
+		{
+			//compare them with their long value
+			return ((Number) val1).longValue() == ((Number) val2).longValue();
+		}
+		
+		//in all other cases follow standard comparison
+		return Objects.equals(val1, val2);
 	}
 }
