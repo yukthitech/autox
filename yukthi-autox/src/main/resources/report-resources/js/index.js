@@ -1,9 +1,10 @@
 $.application.controller('testAutomationAppController', function($scope){
 	
 	$scope.status = "Test Case Status";
+	$scope.searchTestSuiteName = "";
 	$scope.searchTestCaseName = "";
 	
-	$scope.statusToName = {"All" : "ALL", "Success" : "SUCCESSFUL", "Error" : "ERRORED", "Failed" : "FAILED", "Skipped" : "SKIPPED"};
+	$scope.statusToName = {"Test Case Status" : "ALL", "All" : "ALL", "Success" : "SUCCESSFUL", "Error" : "ERRORED", "Failed" : "FAILED", "Skipped" : "SKIPPED"};
 	
 	/**
 	 * Gets invoked on init.
@@ -49,122 +50,58 @@ $.application.controller('testAutomationAppController', function($scope){
 	 * On change of status.
 	 */
 	$scope.onChangeStatus = function(dataDisplay){
-		
 		$scope.status = dataDisplay;
-		
-		var dataFilter = $scope.statusToName[dataDisplay];
-		
-		var filterByNameAndStatus = false;
-		if($scope.searchTestCaseName.length > 0)
-		{
-			filterByNameAndStatus = true;
-		}
-		
-		$scope.commonFilterTestCaseNameStatus("STATUS", dataFilter, filterByNameAndStatus);
+		$scope.applyFilter();
 	};
 	
-	
-	
-	/**
-	 * Gets invoked on type for filter test case.
-	 */
-	$scope.filterTestCase = function(event){
+	$scope.applyFilter = function() {
+		var testCaseFilter = $scope.searchTestCaseName;
+		testCaseFilter = (testCaseFilter.trim().length > 0) ? testCaseFilter.trim().toLowerCase() : null;
 		
-		var searchString = $scope.searchTestCaseName.toLowerCase();
+		var testSuiteFilter = $scope.searchTestSuiteName;
+		testSuiteFilter = (testSuiteFilter.trim().length > 0) ? testSuiteFilter.trim().toLowerCase() : null;
 		
-		var filterByNameAndStatus = false;
-		if($scope.status != "Test Case Status")
-		{
-			filterByNameAndStatus = true;
-		}
-		
-		$scope.commonFilterTestCaseNameStatus("TEST_CASE_NAME", searchString, filterByNameAndStatus);
-	};
-	
-	/**
-	 * Common filter for status and name.
-	 */
-	$scope.commonFilterTestCaseNameStatus = function(filterType, filterValue, filterByNameAndStatus){
+		var statusFilter = $scope.statusToName[$scope.status];
+		statusFilter = (statusFilter != 'ALL') ? statusFilter : null;
 		
 		for(var i = 0 ; i < $scope.testSuiteResults.length ; i++)
-		 {
-			 var testSuiteObj = $scope.testSuiteResults[i];
-			 var testCaseResults = $scope.testSuiteResults[i].testCaseResults;
+		{
+			var testSuiteObj = $scope.testSuiteResults[i];
+			var testCaseResults = $scope.testSuiteResults[i].testCaseResults;
+			
+			testSuiteObj.display = false;
+			
+			if(testSuiteFilter && testSuiteObj.report.name.toLowerCase().indexOf(testSuiteFilter) < 0)
+			{
+				continue;
+			}
+			
+			var filteredTcCount = 0;
 			 
-			 var allRowsAreFiltered = true;
-			 
-			 for(var j = 0 ; j < testCaseResults.length ; j++)
-			 {
+			for(var j = 0 ; j < testCaseResults.length ; j++)
+			{
 				var testCaseObj = testCaseResults[j];
+				testCaseObj.display = false;
 
-				switch(filterType)
+				if(statusFilter && testCaseObj.mainExecutionDetails.statusStr != statusFilter)
 				{
-					case "STATUS":
-						{
-							if(filterValue == "ALL")
-							{
-								testCaseObj.filterByStatus = true
-							}else
-							{
-								testCaseObj.filterByStatus = testCaseObj.status.includes(filterValue);
-							}
-							break;
-						}
-						
-					case "TEST_CASE_NAME":
-						{
-							testCaseObj.filterByTestCaseName = testCaseObj.testCaseName.toLowerCase().includes(filterValue);
-						}
+					continue;
 				}
 				
-				if(filterByNameAndStatus)
+				if(testCaseFilter && testCaseObj.name.toLowerCase().indexOf(testCaseFilter) < 0)
 				{
-					if(testCaseObj.filterByStatus && testCaseObj.filterByTestCaseName)
-					{
-						testCaseObj.display = true;
-					}else
-					{
-						testCaseObj.display = false;
-					}
-				}else
-				{
-					if(testCaseObj.filterByStatus || testCaseObj.filterByTestCaseName)
-					{
-						testCaseObj.display = true;
-					}else
-					{
-						testCaseObj.display = false;
-					}
+					continue;
 				}
 				
-				// check for if all rows are filtered
-				if(testCaseObj.display)
-				{
-					allRowsAreFiltered = false;
-				}
+				testCaseObj.display = true;
+				filteredTcCount++;
 			 }
 			 
-			// set display value if all rows are hidden. 
-			$scope.suiteNameToObj[testSuiteObj.suiteName].display = !allRowsAreFiltered; 
+			 if(filteredTcCount > 0)
+			 {
+				testSuiteObj.display = true;
+			 }
 		 }
-	};
-	
-	
-	/**
-	 * Gets  invoked on type for filter test suite.
-	 */
-	$scope.filterTestSuite = function(event){
-		
-		var searchString = $scope.searchTestSuiteName.toLowerCase();
-		
-		for(var i = 0 ; i < $scope.testSuiteResults.length ; i++)
-		{
-			var obj = $scope.testSuiteResults[i];
-			obj.display = obj.suiteName.toLowerCase().includes(searchString);
-			
-			$scope.suiteNameToObj[obj.suiteName].display = obj.display;
-		}
-		
 	};
 	
 	/**
