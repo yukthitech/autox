@@ -71,7 +71,7 @@ public class DocInformation
 	/**
 	 * Expression parser details.
 	 */
-	private Map<String, ExpressionParserDoc> parsers = new TreeMap<>();
+	private Map<String, PrefixExpressionDoc> prefixExpressions = new TreeMap<>();
 	
 	/**
 	 * Gets the basic documents.
@@ -244,14 +244,14 @@ public class DocInformation
 	 *
 	 * @return the expression parser details
 	 */
-	public Collection<ExpressionParserDoc> getParsers()
+	public Collection<PrefixExpressionDoc> getPrefixExpressions()
 	{
-		return parsers.values();
+		return prefixExpressions.values();
 	}
 	
-	public ExpressionParserDoc getParser(String name)
+	public PrefixExpressionDoc getPrefixExpression(String name)
 	{
-		return parsers.get(name);
+		return prefixExpressions.get(name);
 	}
 
 	/**
@@ -259,9 +259,9 @@ public class DocInformation
 	 *
 	 * @param parsers the new expression parser details
 	 */
-	public void setParsers(Map<String, ExpressionParserDoc> parsers)
+	public void setPrefixExpressions(Map<String, PrefixExpressionDoc> parsers)
 	{
-		this.parsers = parsers;
+		this.prefixExpressions = parsers;
 	}
 
 	/**
@@ -269,9 +269,9 @@ public class DocInformation
 	 *
 	 * @param parser the parser
 	 */
-	public void addParser(ExpressionParserDoc parser)
+	public void addPrefixExpression(PrefixExpressionDoc parser)
 	{
-		this.parsers.put(parser.getName(), parser);
+		this.prefixExpressions.put(parser.getName(), parser);
 	}
 	
 	public Set<StepInfo> getStepsWithGroup(String group)

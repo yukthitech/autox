@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.filter;
+package com.yukthitech.autox.prefix;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -46,21 +46,21 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Factory for parsing expressions.
  * @author akiran
  */
-public class ExpressionFactory
+public class PrefixExpressionFactory
 {
-	private static Logger logger = LogManager.getLogger(ExpressionFactory.class);
+	private static Logger logger = LogManager.getLogger(PrefixExpressionFactory.class);
 	
 	/**
 	 * Singleton instance.
 	 */
-	private static ExpressionFactory expressionFactory;
+	private static PrefixExpressionFactory expressionFactory;
 	
 	/**
 	 * Available expression parsers.
 	 */
-	private Map<String, ExpressionParserDetails> parsers = new HashMap<>();
+	private Map<String, PrefixExpressionDetails> parsers = new HashMap<>();
 	
-	private ExpressionFactory()
+	private PrefixExpressionFactory()
 	{}
 	
 	/**
@@ -84,7 +84,7 @@ public class ExpressionFactory
 		
 		basePackages.add("com.yukthitech");
 		
-		ExpressionFactory factory = new ExpressionFactory();
+		PrefixExpressionFactory factory = new PrefixExpressionFactory();
 
 		Reflections reflections = null;
 		Set<Method> parserMethods = null;
@@ -98,13 +98,13 @@ public class ExpressionFactory
 					ConfigurationBuilder.build(pack, Scanners.MethodsAnnotated)
 				);
 			
-			parserMethods = reflections.getMethodsAnnotatedWith(ExpressionFilter.class);
+			parserMethods = reflections.getMethodsAnnotatedWith(PrefixExpression.class);
 			
 			if(parserMethods != null)
 			{
 				Object parserObj = null;
-				ExpressionFilter parserAnnot = null;
-				ExpressionParserDetails parserDet = null;
+				PrefixExpression parserAnnot = null;
+				PrefixExpressionDetails parserDet = null;
 				Class<?> paramTypes[] = null;
 				
 				for(Method method : parserMethods)
@@ -113,14 +113,14 @@ public class ExpressionFactory
 					
 					if(paramTypes.length == 2)
 					{
-						if(!FilterContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]))
+						if(!PrefixExpressionContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]))
 						{
 							throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
 						}
 					}
 					else if(paramTypes.length == 3)
 					{
-						if(!FilterContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]) || !String[].class.equals(paramTypes[2]))
+						if(!PrefixExpressionContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]) || !String[].class.equals(paramTypes[2]))
 						{
 							throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
 						}
@@ -135,7 +135,7 @@ public class ExpressionFactory
 						throw new InvalidStateException("Expression parser method is not returning property path: {}.{}", method.getDeclaringClass().getName(), method.getName());
 					}
 					
-					parserAnnot = method.getAnnotation(ExpressionFilter.class);
+					parserAnnot = method.getAnnotation(PrefixExpression.class);
 					parserObj = parserClasses.get(method.getDeclaringClass());
 					
 					if(parserObj == null)
@@ -151,13 +151,13 @@ public class ExpressionFactory
 						parserClasses.put(method.getDeclaringClass(), parserObj);
 					}
 					
-					parserDet = new ExpressionParserDetails(parserAnnot.type(), parserAnnot.description(), 
+					parserDet = new PrefixExpressionDetails(parserAnnot.type(), parserAnnot.description(), 
 							parserAnnot.example(), parserObj, method, parserAnnot.contentType());
 					
-					for(ParserParam paramAnnot : parserAnnot.params())
+					for(PrefixExprParam paramAnnot : parserAnnot.params())
 					{
-						parserDet.addParam(new ExpressionParserDetails.Param(paramAnnot.name(), paramAnnot.type(), 
-								paramAnnot.defaultValue(), paramAnnot.description()));
+						parserDet.addParam(new PrefixExpressionDetails.Param(paramAnnot.name(), paramAnnot.type(), 
+								paramAnnot.defaultValue(), paramAnnot.required(), paramAnnot.description()));
 					}
 					
 					factory.parsers.put(parserDet.getType(), parserDet);
@@ -166,10 +166,10 @@ public class ExpressionFactory
 		}
 		
 		logger.debug("Found expression parsers to be: {}", factory.parsers);
-		ExpressionFactory.expressionFactory = factory;
+		PrefixExpressionFactory.expressionFactory = factory;
 	}
 	
-	public static ExpressionFactory getExpressionFactory()
+	public static PrefixExpressionFactory getExpressionFactory()
 	{
 		return expressionFactory;
 	}
@@ -252,7 +252,7 @@ public class ExpressionFactory
 			
 		
 		Object result = null;
-		FilterContext expressionParserContext = new FilterContext(context, ((exprConfig != null) ? exprConfig.getInitValue() : null));
+		PrefixExpressionContext expressionParserContext = new PrefixExpressionContext(context, ((exprConfig != null) ? exprConfig.getInitValue() : null));
 		ObjectWrapper<Boolean> expressionParsed = new ObjectWrapper<Boolean>(true);
 		
 		if(exprConfig != null)
@@ -293,7 +293,7 @@ public class ExpressionFactory
 		return (matcher.find() || matcherWithType.find());
 	}
 	
-	private IPropertyPath getPropertyPath(FilterContext context, String expression)
+	private IPropertyPath getPropertyPath(PrefixExpressionContext context, String expression)
 	{
 		IExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		
@@ -347,7 +347,7 @@ public class ExpressionFactory
 			return null;
 		}
 		
-		ExpressionParserDetails parser = parsers.get(exprType);
+		PrefixExpressionDetails parser = parsers.get(exprType);
 		
 		if(parser == null)
 		{
@@ -363,7 +363,7 @@ public class ExpressionFactory
 		return parser.invoke(context, mainExpr, exprTypeParams);
 	}
 	
-	private Object parseSingleExpression(FilterContext context, String expression, ObjectWrapper<Boolean> expressionParsed)
+	private Object parseSingleExpression(PrefixExpressionContext context, String expression, ObjectWrapper<Boolean> expressionParsed)
 	{
 		IPropertyPath propPath = getPropertyPath(context, expression);
 		
@@ -379,7 +379,7 @@ public class ExpressionFactory
 		try
 		{
 			Object result = propPath.getValue();
-			ExpressionParserDetails parser = context.getCurrentParser();
+			PrefixExpressionDetails parser = context.getCurrentParser();
 			String exprTypeParams[] = context.getExpressionTypeParameters();
 			
 			exeLogger.debug("Execution of property expression '{}' resulted in: {} [Type: {}]", expression, result, (result != null ? result.getClass().getName() : "") );
@@ -434,7 +434,7 @@ public class ExpressionFactory
 	 */
 	public void removeByExpression(AutomationContext context, String expression, Object effectiveContext)
 	{
-		FilterContext expressionParserContext = new FilterContext(context, effectiveContext);
+		PrefixExpressionContext expressionParserContext = new PrefixExpressionContext(context, effectiveContext);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		IExecutionLogger exeLogger = context.getExecutionLogger();
 		
@@ -471,7 +471,7 @@ public class ExpressionFactory
 	 */
 	public void setExpressionValue(AutomationContext context, String expression, Object value, Object effectiveContext)
 	{
-		FilterContext expressionParserContext = new FilterContext(context, effectiveContext);
+		PrefixExpressionContext expressionParserContext = new PrefixExpressionContext(context, effectiveContext);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		IExecutionLogger exeLogger = context.getExecutionLogger();
 		
@@ -484,7 +484,7 @@ public class ExpressionFactory
 		
 		exeLogger.debug("Setting expression '{}' as value: {}", expression, value);
 		
-		ExpressionParserDetails parser = expressionParserContext.getCurrentParser();
+		PrefixExpressionDetails parser = expressionParserContext.getCurrentParser();
 		String exprTypeParams[] = expressionParserContext.getExpressionTypeParameters();
 
 		if(!parser.isConversionHandled() && exprTypeParams != null)
@@ -520,7 +520,7 @@ public class ExpressionFactory
 		}
 	}
 	
-	public Collection<ExpressionParserDetails> getParserDetails()
+	public Collection<PrefixExpressionDetails> getParserDetails()
 	{
 		return parsers.values();
 	}

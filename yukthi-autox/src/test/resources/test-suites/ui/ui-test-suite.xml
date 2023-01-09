@@ -24,6 +24,8 @@
 			<wrap:validations>
 				<s:ui-assert-value locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
 
+				<s:assert-equals actual="uiVal: xpath: //input[@name='statusFld']" expected="button Clicked"/>
+
 				<s:assert-false value="attr: visibFlag1"/>
 				<s:assert-true value="attr: visibFlag2"/>
 				<s:assert-equals actual="attr: fldValue" expected="button Clicked"/>
@@ -112,6 +114,9 @@
 			<description>Validates form filling is working</description>
 			
 			<s:ui-goto-page uri="/form.html" />
+
+			<s:set expression="uiVal: id:genderDropDown" value="female"/>
+			<s:ui-log-screen-shot name="filledForm-1.png" />
 
 			<s:ui-fill-form locator="id:sampleForm">
 				<data>

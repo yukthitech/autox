@@ -17,6 +17,8 @@ package com.yukthitech.autox.plugin.sql;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.autox.plugin.AbstractPluginSession;
 
 /**
@@ -38,6 +40,11 @@ public class DbPluginSession extends AbstractPluginSession<DbPluginSession, DbPl
 	 */
 	public DataSource getDataSource(String name)
 	{
+		if(StringUtils.isBlank(name))
+		{
+			return parentPlugin.getDefaultDataSource();
+		}
+		
 		return parentPlugin.getDataSource(name);
 	}
 }

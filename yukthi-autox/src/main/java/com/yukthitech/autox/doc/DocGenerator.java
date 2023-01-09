@@ -35,10 +35,10 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
-import com.yukthitech.autox.filter.ExpressionFactory;
-import com.yukthitech.autox.filter.ExpressionParserDetails;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.ui.common.LocatorType;
+import com.yukthitech.autox.prefix.PrefixExpressionDetails;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 import com.yukthitech.utils.fmarker.FreeMarkerMethodExampleDoc;
@@ -199,26 +199,26 @@ public class DocGenerator
 	
 	private static void loadExpressionParsers(DocInformation docInfo, ExampleCollectionFile exampleCollections)
 	{
-		ExpressionFactory.init(null, null);
+		PrefixExpressionFactory.init(null, null);
 		
-		for(ExpressionParserDetails parser : ExpressionFactory.getExpressionFactory().getParserDetails())
+		for(PrefixExpressionDetails parser : PrefixExpressionFactory.getExpressionFactory().getParserDetails())
 		{
-			ExpressionParserDoc parserDoc = new ExpressionParserDoc(parser.getType(), parser.getDescription(), parser.getContentType());
+			PrefixExpressionDoc parserDoc = new PrefixExpressionDoc(parser.getType(), parser.getDescription(), parser.getContentType());
 			parserDoc.addExample(new Example("Default", parser.getExample()));
 			
 			parserDoc.addExamples(exampleCollections.getExamples("$parsers." + parser.getType()));
 			
 			if(parser.getParams() != null)
 			{
-				for(ExpressionParserDetails.Param param : parser.getParams())
+				for(PrefixExpressionDetails.Param param : parser.getParams())
 				{
-					parserDoc.addParam(new ExpressionParserDoc.Param(param.getName(), param.getType(), param.getDefaultValue(), param.getDescription()));
+					parserDoc.addParam(new PrefixExpressionDoc.Param(param.getName(), param.getType(), param.getDefaultValue(), param.isMandatory(), param.getDescription()));
 				}
 			}
 			
 			parserDoc.setAdditionalInfo(parser.getAdditionalInfo());
 			
-			docInfo.addParser(parserDoc);
+			docInfo.addPrefixExpression(parserDoc);
 		}
 	}
 	

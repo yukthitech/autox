@@ -24,18 +24,31 @@ import org.fife.ui.rsyntaxtextarea.OccurrenceMarker;
 import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMaker;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.modes.AbstractMarkupTokenMaker;
 
 import com.yukthitech.autox.ide.IIdeFileManager;
 
 public class FileEditorTokenFactory extends TokenMakerFactory
 {
-	private class TokenMakerWrapper implements TokenMaker
+	private class TokenMakerWrapper extends AbstractMarkupTokenMaker
 	{
 		private TokenMaker actualTokenMaker;
 		
 		public TokenMakerWrapper(TokenMaker actualTokenMaker)
 		{
 			this.actualTokenMaker = actualTokenMaker;
+		}
+
+		@Override
+		public boolean getCompleteCloseTags()
+		{
+			return ((AbstractMarkupTokenMaker) actualTokenMaker).getCompleteCloseTags();
+		}
+
+		@Override
+		public void yybegin(int newState)
+		{
+			((AbstractMarkupTokenMaker) actualTokenMaker).yybegin(newState);
 		}
 
 		public void addNullToken()
@@ -99,11 +112,6 @@ public class FileEditorTokenFactory extends TokenMakerFactory
 		public boolean isIdentifierChar(int languageIndex, char ch)
 		{
 			return actualTokenMaker.isIdentifierChar(languageIndex, ch);
-		}
-
-		public boolean isMarkupLanguage()
-		{
-			return actualTokenMaker.isMarkupLanguage();
 		}
 	}
 	

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.filter;
+package com.yukthitech.autox.prefix;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-public class ExpressionParserDetails
+public class PrefixExpressionDetails
 {
 	/**
 	 * Parameter of the parser.
@@ -48,6 +48,11 @@ public class ExpressionParserDetails
 		 * Default value.
 		 */
 		private String defaultValue;
+		
+		/**
+		 * Flag indicating if this param is mandatory.
+		 */
+		private boolean mandatory;
 		
 		/**
 		 * Description.
@@ -72,11 +77,12 @@ public class ExpressionParserDetails
 		 * @param description
 		 *            description.
 		 */
-		public Param(String name, String type, String defaultValue, String description)
+		public Param(String name, String type, String defaultValue, boolean mandatory, String description)
 		{
 			this.name = name;
 			this.type = type;
 			this.defaultValue = defaultValue;
+			this.mandatory = mandatory;
 			this.description = description;
 		}
 
@@ -161,6 +167,16 @@ public class ExpressionParserDetails
 		{
 			this.description = description;
 		}
+
+		public boolean isMandatory()
+		{
+			return mandatory;
+		}
+
+		public void setMandatory(boolean mandatory)
+		{
+			this.mandatory = mandatory;
+		}
 	}
 	
 	/**
@@ -191,7 +207,7 @@ public class ExpressionParserDetails
 	/**
 	 * Expected content type of the expression.
 	 */
-	private ParserContentType contentType;
+	private PrefixExpressionContentType contentType;
 	
 	/**
 	 * Params supported by this parser.
@@ -206,7 +222,7 @@ public class ExpressionParserDetails
 	/**
 	 * Instantiates a new expression parser details.
 	 */
-	public ExpressionParserDetails()
+	public PrefixExpressionDetails()
 	{}
 	
 	/**
@@ -219,7 +235,7 @@ public class ExpressionParserDetails
 	 * @param method the method
 	 * @param contentType the content type
 	 */
-	public ExpressionParserDetails(String type, String description, String example, Object enclosingObject, Method method, ParserContentType contentType)
+	public PrefixExpressionDetails(String type, String description, String example, Object enclosingObject, Method method, PrefixExpressionContentType contentType)
 	{
 		this.type = type;
 		this.description = description;
@@ -344,7 +360,7 @@ public class ExpressionParserDetails
 	 * @param expression expression to be executed
 	 * @return result
 	 */
-	public IPropertyPath invoke(FilterContext context, String expression, String expectedType[])
+	public IPropertyPath invoke(PrefixExpressionContext context, String expression, String expectedType[])
 	{
 		try
 		{
@@ -368,7 +384,7 @@ public class ExpressionParserDetails
 	 *
 	 * @param contentType the new expected content type of the expression
 	 */
-	public void setContentType(ParserContentType contentType)
+	public void setContentType(PrefixExpressionContentType contentType)
 	{
 		this.contentType = contentType;
 	}
@@ -378,7 +394,7 @@ public class ExpressionParserDetails
 	 *
 	 * @return the expected content type of the expression
 	 */
-	public ParserContentType getContentType()
+	public PrefixExpressionContentType getContentType()
 	{
 		return contentType;
 	}

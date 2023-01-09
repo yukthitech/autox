@@ -77,7 +77,7 @@ public class MongoJsStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		Object result = MongoQuryUtils.executeJs(context, exeLogger, mongoResourceName, script);
+		Object result = MongoQueryUtils.executeJs(context, mongoResourceName, script);
 		
 		exeLogger.debug("Using attribute '{}' setting the obtained result. Result: {}", resultAttribute, result);
 		

@@ -15,19 +15,12 @@
  */
 package com.yukthitech.autox.plugin.sql.steps;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.handlers.MapHandler;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
@@ -35,12 +28,9 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.sql.DbPlugin;
-import com.yukthitech.autox.plugin.sql.DbPluginSession;
 import com.yukthitech.autox.test.TestCaseFailedException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Executes specified query and creates map out of results. And sets this map on
@@ -62,7 +52,8 @@ public class LoadQueryRowMapStep extends AbstractStep
 	 * Flag to indicate if all rows should be processed into map. If true, list of maps will be loaded on context otherwise first row map will be loaded
 	 * on context.
 	 */
-	@Param(description = "If false, only first row will be processed into map. If true, per row new map will be created and loads of this maps into context.\nDefault: true", required = false)
+	@Param(description = "If false, only first row will be processed into map. "
+			+ "If true, per row new map will be created and loads of this maps into context.\nDefault: true", required = false)
 	private boolean processAllRows = true;
 
 	/**
@@ -166,6 +157,11 @@ public class LoadQueryRowMapStep extends AbstractStep
 	
 	private void doTransform(AutomationContext context, Map<String, Object> row)
 	{
+		if(row.isEmpty())
+		{
+			return;
+		}
+		
 		for(Map.Entry<String, String> colTrans : columnTransformations.entrySet())
 		{
 			Object colVal = row.get(colTrans.getKey());
@@ -183,80 +179,39 @@ public class LoadQueryRowMapStep extends AbstractStep
 	 * com.yukthitech.ui.automation.IValidation#execute(com.yukthitech.ui.automation.
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		DbPluginSession dbSession = ExecutionContextManager.getInstance().getPluginSession(DbPlugin.class);
-		DataSource dataSource = dbSession.getDataSource(dataSourceName);
-
-		if(dataSource == null)
-		{
-			throw new InvalidStateException("No data source found with specified name - {}", dataSourceName);
-		}
-
-		Connection connection = null;
-
+		
 		try
 		{
-			connection = dataSource.getConnection();
-
-			Map<String, Object> paramMap = new HashMap<>();
-			List<Object> values = new ArrayList<>();
-
-			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
+			List<Map<String, Object>> resLst = QueryUtils.fetchRowMaps(context, dataSourceName, query, processAllRows);
 			
-			exeLogger.debug(false, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
-			
-			exeLogger.trace(false, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
-
-			Object result = null;
-			Object valueArr[] = values.isEmpty() ? null : values.toArray();
-			
-			if(processAllRows)
+			if(MapUtils.isNotEmpty(columnTransformations))
 			{
-				exeLogger.debug("Loading muliple row maps on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new MapListHandler(), valueArr);
-				
-				if(result == null)
+				for(Map<String, Object> row : resLst)
 				{
-					result = new ArrayList<>();
+					doTransform(context, row);
 				}
-				else if(MapUtils.isNotEmpty(columnTransformations))
-				{
-					List<Map<String, Object>> rowLst = (List<Map<String,Object>>) result;
-					
-					for(Map<String, Object> row : rowLst)
-					{
-						doTransform(context, row);
-					}
-				}
+			}
+			
+			Object result = resLst;
+
+			if(!processAllRows)
+			{
+				exeLogger.debug("Loading first-row as map on context attribute: {}", contextAttribute);
+				result = resLst.get(0);
 			}
 			else
 			{
-				exeLogger.debug("Loading first-row as map on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new MapHandler(), valueArr);
-				
-				if(result == null)
-				{
-					result = new HashMap<>();
-				}
-				else if(MapUtils.isNotEmpty(columnTransformations))
-				{
-					doTransform(context, (Map<String, Object>) result);
-				}
+				exeLogger.debug("Loading all rows as maps on context attribute: {}", contextAttribute);
 			}
 			
 			context.setAttribute(contextAttribute, result);
-			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);
+			exeLogger.debug("Data loaded on context with name {}", contextAttribute);
 		} catch(SQLException ex)
 		{
-			//exeLogger.error(ex, "An error occurred while executing query: {}", query);
-			
 			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
-		} finally
-		{
-			DbUtils.closeQuietly(connection);
 		}
 	}
 }

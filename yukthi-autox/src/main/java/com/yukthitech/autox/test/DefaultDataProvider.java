@@ -20,8 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.filter.ExpressionConfig;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.ExpressionConfig;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -49,7 +49,7 @@ public class DefaultDataProvider extends AbstractDataProvider implements Validat
 	@SuppressWarnings("rawtypes")
 	private void processDataList(Object data, List<TestCaseData> testCaseDataLst)
 	{
-		ExpressionFactory expressionFactory = ExpressionFactory.getExpressionFactory();
+		PrefixExpressionFactory expressionFactory = PrefixExpressionFactory.getExpressionFactory();
 		Object result = expressionFactory.parseExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
 		
 		if(!(result instanceof List))

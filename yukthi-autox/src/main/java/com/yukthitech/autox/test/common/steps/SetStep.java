@@ -22,7 +22,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 
 /**
  * Sets the specified context attribute with specified value.
@@ -69,6 +69,6 @@ public class SetStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		ExpressionFactory.getExpressionFactory().setExpressionValue(context, expression, value);
+		PrefixExpressionFactory.getExpressionFactory().setExpressionValue(context, expression, value);
 	}
 }

@@ -43,9 +43,9 @@ import com.yukthitech.autox.exec.ExecutionPool;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.exec.report.ReportDataManager;
-import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.PluginManager;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
@@ -356,7 +356,7 @@ public class AutomationLauncher
 		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfigurationFile, basicArguments);
 		AutomationContext context = new AutomationContext(appConfig);
 		
-		ExpressionFactory.init(null, appConfig.getBasePackages());
+		PrefixExpressionFactory.init(null, appConfig.getBasePackages());
 
 		context.setBasicArguments(basicArguments);
 		context.setReportFolder(reportFolder);

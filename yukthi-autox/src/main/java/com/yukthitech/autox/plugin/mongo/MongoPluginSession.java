@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.mongo;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.autox.plugin.AbstractPluginSession;
 
 public class MongoPluginSession extends AbstractPluginSession<MongoPluginSession, MongoPlugin>
@@ -31,6 +33,11 @@ public class MongoPluginSession extends AbstractPluginSession<MongoPluginSession
 	 */
 	public MongoResource getMongoResource(String name)
 	{
+		if(StringUtils.isBlank(name))
+		{
+			name = parentPlugin.getDefaultMongoResource();
+		}
+		
 		return parentPlugin.getMongoResource(name);
 	}
 }

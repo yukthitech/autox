@@ -16,23 +16,29 @@
 				</s:sql-dml-query>
 			</wrap:steps>
 		
-			<wrap:validations>
-				<s:sql-assert dataSourceName="dataSource">
-					<query>
-						SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
-					</query>
-				
-					<expectedRow>
-						<column name="NAME">employee1</column>
-					</expectedRow>
-				</s:sql-assert>
+			<s:sql-assert dataSourceName="dataSource">
+				<query>
+					SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
+				</query>
+			
+				<expectedRow>
+					<column name="NAME">employee1</column>
+				</expectedRow>
+			</s:sql-assert>
 
-				<s:sql-assert-value dataSourceName="dataSource" expectedValue="long: 1">
-					<query>
-						SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'
-					</query>
-				</s:sql-assert-value>
-			</wrap:validations>
+			<s:assert-equals actual="sqlColumnList: SELECT NAME FROM EMPLOYEE WHERE NAME = 'employee1'">
+				<expected>
+					json: ["employee1"]
+				</expected>
+			</s:assert-equals>
+
+			<s:sql-assert-value dataSourceName="dataSource" expectedValue="long: 1">
+				<query>
+					SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'
+				</query>
+			</s:sql-assert-value>
+
+			<s:assert-equals actual="sqlVal: SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'" expected="long: 1"/>
 		</testCase>
 	
 		<testCase dependencies="insert_query" name="update_query">
@@ -169,10 +175,10 @@
 		
 			<s:sql-multi-dml-query dataSourceName="dataSource">
 				<query>
-					INSERT INTO LOB_TABLE(NAME, BDATA) VALUES ('bdata1', ?{expr: resBlob('/data/data.json')})
+					INSERT INTO LOB_TABLE(NAME, L_TEXT, BDATA) VALUES ('bdata1', 'bdata1 desc', ?{expr: resBlob('/data/data.json')})
 				</query>
 				<query>
-					INSERT INTO LOB_TABLE(NAME, CDATA) VALUES ('cdata1', ?{expr: resClob('/data/data.json')})
+					INSERT INTO LOB_TABLE(NAME, L_TEXT, CDATA) VALUES ('cdata1', 'cdata1 desc', ?{expr: resClob('/data/data.json')})
 				</query>
 			</s:sql-multi-dml-query>
 
@@ -187,6 +193,24 @@
 					SELECT CDATA FROM LOB_TABLE WHERE NAME = 'cdata1'
 				</query>
 			</s:sql-assert-value>
+
+			<s:assert-equals actual="sqlRowMaps: SELECT NAME, L_TEXT FROM LOB_TABLE ORDER BY NAME">
+				<expected>
+					json: [
+						{"NAME": "bdata1", "L_TEXT": "bdata1 desc"},
+						{"NAME": "cdata1", "L_TEXT": "cdata1 desc"}
+					]
+				</expected>
+			</s:assert-equals>
+
+			<s:assert-equals actual="sqlMap(keyColumn=NAME, valueColumn=L_TEXT): SELECT NAME, L_TEXT FROM LOB_TABLE ORDER BY NAME">
+				<expected>
+					json: {
+						"bdata1": "bdata1 desc",
+						"cdata1": "cdata1 desc"
+					}
+				</expected>
+			</s:assert-equals>
 		</testCase>
 	</testSuite>
 </testData>

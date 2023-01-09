@@ -27,7 +27,7 @@ import org.openqa.selenium.InvalidArgumentException;
 import org.xml.sax.Locator;
 
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.IParserHandler;
@@ -145,7 +145,7 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 		public void setSet(SetInfo info)
 		{
 			AutomationContext automationContext = AutomationContext.getInstance();
-			ExpressionFactory exprFactory = ExpressionFactory.getExpressionFactory();
+			PrefixExpressionFactory exprFactory = PrefixExpressionFactory.getExpressionFactory();
 			
 			String prop = info.property;
 			
@@ -161,7 +161,7 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 		public void setRemove(RemoveInfo removeInfo)
 		{
 			AutomationContext automationContext = AutomationContext.getInstance();
-			ExpressionFactory exprFactory = ExpressionFactory.getExpressionFactory();
+			PrefixExpressionFactory exprFactory = PrefixExpressionFactory.getExpressionFactory();
 
 			exprFactory.removeByExpression(automationContext, removeInfo.property, bean);
 		}

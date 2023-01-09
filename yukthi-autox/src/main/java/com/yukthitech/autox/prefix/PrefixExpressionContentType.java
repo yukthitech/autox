@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.filter;
+package com.yukthitech.autox.prefix;
 
 /**
  * Enumeration of parser content types.
  * @author akiran
  */
-public enum ParserContentType
+public enum PrefixExpressionContentType
 {
 	FM_EXPRESSION,
 	

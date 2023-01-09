@@ -15,30 +15,16 @@
  */
 package com.yukthitech.autox.plugin.sql.steps;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.sql.DbPlugin;
-import com.yukthitech.autox.plugin.sql.DbPluginSession;
 import com.yukthitech.autox.test.TestCaseFailedException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Executes specified query and creates map out of results. And sets this map on
@@ -108,60 +94,16 @@ public class FetchValueQueryStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		DbPluginSession dbSession = ExecutionContextManager.getInstance().getPluginSession(DbPlugin.class);
-		DataSource dataSource = dbSession.getDataSource(dataSourceName);
-
-		if(dataSource == null)
-		{
-			throw new InvalidStateException("No data source found with specified name - {}", dataSourceName);
-		}
-
-		Connection connection = null;
-
 		try
 		{
-			connection = dataSource.getConnection();
-
-			Map<String, Object> paramMap = new HashMap<>();
-			List<Object> values = new ArrayList<>();
-
-			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
-			
-			exeLogger.debug(false, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
-			
-			exeLogger.trace(false, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
-
-			Object result = null;
-			Object valueArr[] = values.isEmpty() ? null : values.toArray();
-			
 			exeLogger.debug("Loading single valued result on context attribute: {}", contextAttribute);
-			
-			ResultSetHandler<Object> handler = new ResultSetHandler<Object>()
-			{
-				@Override
-				public Object handle(ResultSet rs) throws SQLException
-				{
-					if(!rs.next())
-					{
-						return null;
-					}
-					
-					return rs.getObject(1);
-				}
-			};
-			
-			result = QueryUtils.getQueryRunner().query(connection, processedQuery, handler, valueArr);
+			Object result = QueryUtils.fetchSingleValue(context, dataSourceName, query);
 			
 			context.setAttribute(contextAttribute, result);
 			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)
 		{
-			//exeLogger.error(ex, "An error occurred while executing query: {}", query);
-			
 			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
-		} finally
-		{
-			DbUtils.closeQuietly(connection);
 		}
 	}
 }

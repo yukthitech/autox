@@ -31,7 +31,7 @@ import com.yukthitech.autox.ILocationBased;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 
 /**
  * Execution debug manager to control flow execution.
@@ -147,7 +147,7 @@ public class DebugFlowManager
 		{
 			try
 			{
-				Object res = ExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), point.getCondition());
+				Object res = PrefixExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), point.getCondition());
 				
 				//if condition is not evaluated as true
 				if(!"true".equalsIgnoreCase("" + res))

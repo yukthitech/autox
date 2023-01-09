@@ -50,6 +50,9 @@ public class MongoMultiQueryStep extends AbstractStep
 	@Param(description = "Mongo Resource to be used for query execution.")
 	private String mongoResourceName;
 
+	@Param(description = "If true, fmarker expression should be processed in the query post json parsing.", required = false, attrName = true, defaultValue = "true")
+	private boolean replaceExpressions = true;
+
 	public void addQuery(Object query)
 	{
 		this.queries.add(query);
@@ -60,13 +63,18 @@ public class MongoMultiQueryStep extends AbstractStep
 		this.mongoResourceName = mongoResourceName;
 	}
 
+	public void setReplaceExpressions(boolean replaceExpressions)
+	{
+		this.replaceExpressions = replaceExpressions;
+	}
+
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		for(Object query : this.queries)
 		{
 			exeLogger.debug("Executing query: {}", query);
-			Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
+			Map<String, Object> result = MongoQueryUtils.execute(context, mongoResourceName, query, replaceExpressions);
 		
 			exeLogger.debug("Got result of query as: {}", result);
 		}

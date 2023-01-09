@@ -56,7 +56,7 @@
 		</selenium-plugin>
 	
 		<!-- Db plugin for sql base steps -->
-		<db-plugin>
+		<db-plugin defaultDataSource="dataSource">
 			<!--  
 			<dataSource name="dataSource" ccg:beanType="com.yukthitech.autox.ds.DataSourceWrapper">
 				<dataSourceType>org.apache.commons.dbcp2.BasicDataSource</dataSourceType>
@@ -78,7 +78,7 @@
 			</dataSource>
 		</db-plugin>
 
-		<mongo-plugin>
+		<mongo-plugin defaultMongoResource="mongoResource">
 			<mongo-resource name="mongoResource" replicas="localhost:27017" dbName="weaver"/>
 		</mongo-plugin>
 		

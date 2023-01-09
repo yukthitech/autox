@@ -13,39 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.filter;
+package com.yukthitech.autox.prefix;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Used to document parser parameters.
+ * Used to mark a method as expression parser method.
  * @author akiran
  */
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ParserParam
+public @interface PrefixExpression
 {
 	/**
-	 * Name of the parameter.
-	 * @return name
-	 */
-	public String name();
-	
-	/**
-	 * Type of parameter.
-	 * @return type
+	 * Provides expression type.
+	 * @return expression type.
 	 */
 	public String type();
 	
 	/**
-	 * Default value of the parameter.
-	 * @return default value
-	 */
-	public String defaultValue();
-	
-	/**
-	 * Description of the parameter.
-	 * @return description.
+	 * Description of the parser.
+	 * @return description
 	 */
 	public String description();
+
+	/**
+	 * Example.
+	 * @return example
+	 */
+	public String example();
+	
+	/**
+	 * Type of content expected.
+	 * @return content type
+	 */
+	public PrefixExpressionContentType contentType() default PrefixExpressionContentType.NONE;
+	
+	/**
+	 * Parameters supported by this parser.
+	 * @return parameters
+	 */
+	public PrefixExprParam[] params() default {};
 }

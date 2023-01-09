@@ -45,7 +45,7 @@ import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
 import com.yukthitech.autox.debug.common.ServerMssgStepExecuted;
 import com.yukthitech.autox.exec.StepsExecutor;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -253,7 +253,7 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			Object res = ExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), expression);
+			Object res = PrefixExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), expression);
 			DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(reqId, true, res, null));
 		}catch(Exception ex)
 		{

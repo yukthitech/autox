@@ -15,29 +15,17 @@
  */
 package com.yukthitech.autox.plugin.sql.steps;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.sql.DbPlugin;
-import com.yukthitech.autox.plugin.sql.DbPluginSession;
 import com.yukthitech.autox.test.TestCaseFailedException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Executes specified query and loads the result first column values as list on the context. In case of zero results empty list will be kept on context.
@@ -107,50 +95,16 @@ public class LoadQueryColumnListStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		DbPluginSession dbSession = ExecutionContextManager.getInstance().getPluginSession(DbPlugin.class);
-		DataSource dataSource = dbSession.getDataSource(dataSourceName);
-
-		if(dataSource == null)
-		{
-			throw new InvalidStateException("No data source found with specified name - {}", dataSourceName);
-		}
-
-		Connection connection = null;
-
 		try
 		{
-			connection = dataSource.getConnection();
-
-			Map<String, Object> paramMap = new HashMap<>();
-			List<Object> values = new ArrayList<>();
-
-			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
-			
-			exeLogger.debug(false, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
-			
-			exeLogger.trace(false, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
-
-			Object result = null;
-			Object valueArr[] = values.isEmpty() ? null : values.toArray();
-			
 			exeLogger.debug("Loading result first column as list on context attribute: {}", contextAttribute);
-			result = QueryUtils.getQueryRunner().query(connection, processedQuery, new ColumnListHandler<>(), valueArr);
-			
-			if(result == null)
-			{
-				result = new ArrayList<>();
-			}
+			List<Object> result = QueryUtils.fetchColumnList(context, dataSourceName, query);
 			
 			context.setAttribute(contextAttribute, result);
 			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)
 		{
-			//exeLogger.error(ex, "An error occurred while executing query: {}", query);
-			
 			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
-		} finally
-		{
-			DbUtils.closeQuietly(connection);
 		}
 	}
 }

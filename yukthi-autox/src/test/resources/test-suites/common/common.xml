@@ -24,6 +24,7 @@
 				CREATE TABLE LOB_TABLE
 				(
 					NAME	VARCHAR(100),
+					L_TEXT VARCHAR(20),
 					BDATA	BLOB,
 					CDATA	LONGTEXT
 				)

@@ -57,6 +57,11 @@ public abstract class AbstractParentUiStep extends AbstractStep
 	 */
 	protected String getLocatorWithParent(String locator)
 	{
+		return getLocatorWithParent(parentElement, locator);
+	}
+
+	protected static String getLocatorWithParent(String parentElement, String locator)
+	{
 		if(parentElement != null)
 		{
 			return String.format("[Locator: %s, Parent: %s]", locator, parentElement);

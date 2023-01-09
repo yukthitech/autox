@@ -54,6 +54,9 @@ public class MongoQueryStep extends AbstractStep
 	@Param(description = "Name of the attribute to be used to set the result.", required = false, attrName = true, defaultValue = "result")
 	private String resultAttribute = "result";
 	
+	@Param(description = "If true, fmarker expression should be processed in the query post json parsing.", required = false, attrName = true, defaultValue = "true")
+	private boolean replaceExpressions = true;
+	
 	public void setQuery(Object query)
 	{
 		this.query = query;
@@ -68,11 +71,16 @@ public class MongoQueryStep extends AbstractStep
 	{
 		this.resultAttribute = resultAttribute;
 	}
+	
+	public void setReplaceExpressions(boolean replaceExpressions)
+	{
+		this.replaceExpressions = replaceExpressions;
+	}
 
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
+		Map<String, Object> result = MongoQueryUtils.execute(context, mongoResourceName, query, replaceExpressions);
 		
 		exeLogger.debug("Using attribute '{}' setting the obtained result. Result: {}", resultAttribute, result);
 		context.setAttribute(resultAttribute, result);

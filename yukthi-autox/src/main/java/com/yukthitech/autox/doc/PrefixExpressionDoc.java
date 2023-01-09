@@ -21,13 +21,13 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.yukthitech.autox.filter.ParserContentType;
+import com.yukthitech.autox.prefix.PrefixExpressionContentType;
 
 /**
  * Expression parser details.
  * @author akiran
  */
-public class ExpressionParserDoc extends AbstractDocInfo
+public class PrefixExpressionDoc extends AbstractDocInfo
 {
 	/**
 	 * Parameter of the parser.
@@ -55,15 +55,21 @@ public class ExpressionParserDoc extends AbstractDocInfo
 		 */
 		private String description;
 		
+		/**
+		 * Flag indicating if this param is mandatory.
+		 */
+		private boolean mandatory;
+		
 		public Param()
 		{}
 
-		public Param(String name, String type, String defaultValue, String description)
+		public Param(String name, String type, String defaultValue, boolean mandatory, String description)
 		{
 			this.name = name;
 			this.type = type;
 			this.defaultValue = defaultValue;
 			this.description = description;
+			this.mandatory = mandatory;
 		}
 
 		/**
@@ -145,6 +151,16 @@ public class ExpressionParserDoc extends AbstractDocInfo
 		{
 			this.description = description;
 		}
+
+		public boolean isMandatory()
+		{
+			return mandatory;
+		}
+
+		public void setMandatory(boolean mandatory)
+		{
+			this.mandatory = mandatory;
+		}
 	}
 	
 	/**
@@ -160,7 +176,7 @@ public class ExpressionParserDoc extends AbstractDocInfo
 	/**
 	 * Expected content type of the parser.
 	 */
-	private ParserContentType contentType;
+	private PrefixExpressionContentType contentType;
 	
 	/**
 	 * Examples of the parser.
@@ -175,7 +191,7 @@ public class ExpressionParserDoc extends AbstractDocInfo
 	/**
 	 * Instantiates a new expression parser doc.
 	 */
-	public ExpressionParserDoc()
+	public PrefixExpressionDoc()
 	{}
 	
 	/**
@@ -184,7 +200,7 @@ public class ExpressionParserDoc extends AbstractDocInfo
 	 * @param name the name
 	 * @param description the description
 	 */
-	public ExpressionParserDoc(String name, String description, ParserContentType contentType)
+	public PrefixExpressionDoc(String name, String description, PrefixExpressionContentType contentType)
 	{
 		this.name = name;
 		this.description = description;
@@ -276,12 +292,12 @@ public class ExpressionParserDoc extends AbstractDocInfo
 		return CollectionUtils.isNotEmpty(examples);
 	}
 
-	public ParserContentType getContentType()
+	public PrefixExpressionContentType getContentType()
 	{
 		return contentType;
 	}
 
-	public void setContentType(ParserContentType contentType)
+	public void setContentType(PrefixExpressionContentType contentType)
 	{
 		this.contentType = contentType;
 	}

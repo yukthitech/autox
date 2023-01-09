@@ -40,10 +40,10 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.plugin.sql.DbPlugin;
 import com.yukthitech.autox.plugin.sql.DbPluginSession;
 import com.yukthitech.autox.plugin.sql.steps.QueryUtils;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -181,7 +181,7 @@ public class SqlAssertValue extends AbstractValidation
 
 					if(convertExpression != null)
 					{
-						res = ExpressionFactory.getExpressionFactory().parseExpression(context, convertExpression, res);
+						res = PrefixExpressionFactory.getExpressionFactory().parseExpression(context, convertExpression, res);
 					}
 					
 					return res;

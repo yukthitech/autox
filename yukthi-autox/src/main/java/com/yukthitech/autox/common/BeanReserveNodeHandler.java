@@ -20,7 +20,7 @@ import org.openqa.selenium.InvalidArgumentException;
 import org.xml.sax.Locator;
 
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -69,7 +69,7 @@ public class BeanReserveNodeHandler implements IReserveNodeHandler
 		}
 		
 		AutomationContext automationContext = AutomationContext.getInstance();
-		ExpressionFactory exprFactory = ExpressionFactory.getExpressionFactory();
+		PrefixExpressionFactory exprFactory = PrefixExpressionFactory.getExpressionFactory();
 		
 		Object bean = exprFactory.parseExpression(automationContext, info.value);
 		parserHandler.registerBean(info.id, bean);

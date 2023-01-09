@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.filter;
+package com.yukthitech.autox.prefix;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ import com.yukthitech.autox.context.AutomationContext;
  * Context used by expression parsers.
  * @author akiran
  */
-public class FilterContext
+public class PrefixExpressionContext
 {
 	/**
 	 * Automation context being used.
@@ -44,7 +44,7 @@ public class FilterContext
 	/**
 	 * Current parser in use.
 	 */
-	private ExpressionParserDetails currentParser;
+	private PrefixExpressionDetails currentParser;
 	
 	/**
 	 * Parameters passed to expression.
@@ -61,7 +61,7 @@ public class FilterContext
 	 *
 	 * @param context the context
 	 */
-	public FilterContext(AutomationContext context, Object currentValue)
+	public PrefixExpressionContext(AutomationContext context, Object currentValue)
 	{
 		this.automationContext = context;
 		this.currentValue = currentValue;
@@ -151,7 +151,7 @@ public class FilterContext
 	 *
 	 * @return the current parser in use
 	 */
-	public ExpressionParserDetails getCurrentParser()
+	public PrefixExpressionDetails getCurrentParser()
 	{
 		return currentParser;
 	}
@@ -161,7 +161,7 @@ public class FilterContext
 	 *
 	 * @param currentParser the new current parser in use
 	 */
-	void setCurrentParser(ExpressionParserDetails currentParser)
+	void setCurrentParser(PrefixExpressionDetails currentParser)
 	{
 		this.currentParser = currentParser;
 	}

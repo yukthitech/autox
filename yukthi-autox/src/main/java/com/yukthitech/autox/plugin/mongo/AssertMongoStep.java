@@ -57,6 +57,9 @@ public class AssertMongoStep extends AbstractValidation
 	@Param(description = "Expected value in comparison.", sourceType = SourceType.EXPRESSION)
 	private Object expected;
 	
+	@Param(description = "If true, fmarker expression should be processed in the query post json parsing.", required = false, attrName = true, defaultValue = "true")
+	private boolean replaceExpressions = true;
+
 	public void setQuery(String query)
 	{
 		this.query = query;
@@ -72,10 +75,15 @@ public class AssertMongoStep extends AbstractValidation
 		this.expected = expected;
 	}
 
+	public void setReplaceExpressions(boolean replaceExpressions)
+	{
+		this.replaceExpressions = replaceExpressions;
+	}
+
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
+		Map<String, Object> result = MongoQueryUtils.execute(context, mongoResourceName, query, replaceExpressions);
 		
 		exeLogger.debug("Got result of the query as: {}", result);
 

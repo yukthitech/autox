@@ -79,7 +79,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
-import com.yukthitech.autox.doc.ExpressionParserDoc;
+import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
@@ -210,14 +210,14 @@ public class HelpPanel extends JPanel implements IViewPanel
 				methodNode.addHelpNode(new HelpNodeData("method:" + method.getName(), method.getName(), buildDoc(fmMethodDocTemplate, context), method));
 			}
 
-			HelpNodeData expressionNode = new HelpNodeData("expressions", "Expression Prefixes", "", null);
+			HelpNodeData expressionNode = new HelpNodeData("expressions", "Prefix Expressions", "", null);
 			rootNode.addHelpNode(expressionNode);
 
-			for(ExpressionParserDoc method : docInformation.getParsers())
+			for(PrefixExpressionDoc prefixExpr : docInformation.getPrefixExpressions())
 			{
 				context.put("type", "expression");
-				context.put("node", method);
-				expressionNode.addHelpNode(new HelpNodeData("expression:" + method.getName(), method.getName(), buildDoc(exprDocTemplate, context), method));
+				context.put("node", prefixExpr);
+				expressionNode.addHelpNode(new HelpNodeData("expression:" + prefixExpr.getName(), prefixExpr.getName(), buildDoc(exprDocTemplate, context), prefixExpr));
 			}
 
 			HelpNodeData uiLocatorNode = new HelpNodeData("uiLocators", "UI Locators", "", null);

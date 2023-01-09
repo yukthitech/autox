@@ -15,30 +15,17 @@
  */
 package com.yukthitech.autox.plugin.sql.steps;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.dbutils.DbUtils;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.sql.DbPlugin;
-import com.yukthitech.autox.plugin.sql.DbPluginSession;
 import com.yukthitech.autox.test.TestCaseFailedException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Executes specified query and creates map out of results. And sets this map on
@@ -141,56 +128,17 @@ public class LoadQueryMapStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		DbPluginSession dbSession = ExecutionContextManager.getInstance().getPluginSession(DbPlugin.class);
-		DataSource dataSource = dbSession.getDataSource(dataSourceName);
-
-		if(dataSource == null)
-		{
-			throw new InvalidStateException("No data source found with specified name - {}", dataSourceName);
-		}
-
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
 		try
 		{
-			connection = dataSource.getConnection();
-			statement = connection.createStatement();
-
-			Map<String, Object> paramMap = new HashMap<>();
-			List<Object> values = new ArrayList<>();
-
-			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
+			exeLogger.debug("Loading results as map using key-column '{}' and value-column '{}' on context attribute: {}", 
+					keyColumn, valueColumn, contextAttribute);
+			Map<Object, Object> resMap = QueryUtils.fetchQueryMap(context, dataSourceName, query, keyColumn, valueColumn);
 			
-			exeLogger.debug(false, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
-			
-			exeLogger.trace(false, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, processedQuery, values);
-			
-			rs = statement.executeQuery(query);
-
-			Map<Object, Object> resMap = new HashMap<>();
-
-			exeLogger.debug("Loading results as map using key-column '{}' and value-column '{}'", keyColumn, valueColumn);
-			
-			int rowCount = 0;
-			
-			while(rs.next())
-			{
-				resMap.put(rs.getObject(keyColumn), rs.getObject(valueColumn));
-				rowCount++;
-			}
-
 			context.setAttribute(contextAttribute, resMap);
-			exeLogger.debug("Processed number of rows {} and set result map on context with attribute name '{}'. Data Map: {}", rowCount, contextAttribute, resMap);
+			exeLogger.debug("Data loaded on context with name {}. Data map size: {}", contextAttribute, resMap.size());
 		} catch(SQLException ex)
 		{
-			//exeLogger.error(ex, "An error occurred while executing query: {}", query);
-			
 			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
-		} finally
-		{
-			DbUtils.closeQuietly(connection, statement, rs);
 		}
 	}
 }

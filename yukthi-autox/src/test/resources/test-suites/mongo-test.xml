@@ -35,6 +35,29 @@
 				</query>
 			</s:mongo-multi-query>
 
+			<s:assert-deep-equals ignoreExtraProperties="true">
+				<actual>mongo:
+					{
+					   "find": "AUTOX_TEST",
+					   "filter": {"name" : "test1"}
+					} | xpath: /cursor/firstBatch
+				</actual>
+				<expected>json:
+					[
+						{"name": "test1", "entry": 1}
+					]
+				</expected>
+			</s:assert-deep-equals>
+
+			<s:assert-deep-equals ignoreExtraProperties="true">
+				<actual>mongoJs: return db.AUTOX_TEST.find({"name" : "test1"})</actual>
+				<expected>json:
+					[
+						{"name": "test1", "entry": 1}
+					]
+				</expected>
+			</s:assert-deep-equals>
+
 			<s:assert-mongo mongoResourceName="mongoResource">
 				<query>
 					{ "count": "AUTOX_TEST" }

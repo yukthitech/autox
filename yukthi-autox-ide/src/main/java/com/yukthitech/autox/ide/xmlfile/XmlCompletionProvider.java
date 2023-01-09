@@ -39,20 +39,20 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.doc.ElementInfo;
-import com.yukthitech.autox.doc.ExpressionParserDoc;
+import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.ParamInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
-import com.yukthitech.autox.filter.ExpressionFactory;
-import com.yukthitech.autox.filter.ParserContentType;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.editor.IdeShortHandCompletion;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.prefix.PrefixExpressionContentType;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.CommonUtils;
@@ -415,7 +415,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		curVal = StringUtils.isBlank(curVal) ? null : curVal;
 
 		//fetch the content type based on expression type
-		ParserContentType contentType = ParserContentType.NONE;
+		PrefixExpressionContentType contentType = PrefixExpressionContentType.NONE;
 
 		if(sourceType == SourceType.EXPRESSION || sourceType == SourceType.EXPRESSION_PATH)
 		{
@@ -423,7 +423,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 			{
 				String name = null;
 				
-				for(ExpressionParserDoc parser : project.getDocInformation().getParsers())
+				for(PrefixExpressionDoc parser : project.getDocInformation().getPrefixExpressions())
 				{
 					if(curVal != null && !parser.getName().startsWith(curVal))
 					{
@@ -440,13 +440,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 
 			if(curVal != null)
 			{
-				List<String> expressionTokens = ExpressionFactory.parseExpressionTokens(curVal);
+				List<String> expressionTokens = PrefixExpressionFactory.parseExpressionTokens(curVal);
 				Matcher matcher = EXPR_PREFIX_PATTERN.matcher(expressionTokens.get(expressionTokens.size() - 1));
 				
 				if(matcher.find())
 				{
 					String exprType = matcher.group(1);
-					ExpressionParserDoc parser = project.getDocInformation().getParser(exprType);
+					PrefixExpressionDoc parser = project.getDocInformation().getPrefixExpression(exprType);
 					
 					if(parser != null)
 					{
@@ -508,10 +508,10 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 			
 			//if current position is part of expression, based on last token find
 			// the type of auto completion required
-			if(isExprPart || contentType == ParserContentType.FM_EXPRESSION)
+			if(isExprPart || contentType == PrefixExpressionContentType.FM_EXPRESSION)
 			{
 				Matcher matcher = LAST_TOKEN.matcher(curVal);
-				contentType = ParserContentType.FM_EXPRESSION;
+				contentType = PrefixExpressionContentType.FM_EXPRESSION;
 				
 				if(matcher.find())
 				{
@@ -520,7 +520,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 					if(curVal.startsWith("attr."))
 					{
 						curVal = curVal.substring("attr.".length());
-						contentType = ParserContentType.ATTRIBUTE;
+						contentType = PrefixExpressionContentType.ATTRIBUTE;
 					}
 				}
 				else
@@ -532,7 +532,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		
 		curVal = StringUtils.isBlank(curVal) ? null : curVal.trim();
 		
-		if(contentType == ParserContentType.FM_EXPRESSION)
+		if(contentType == PrefixExpressionContentType.FM_EXPRESSION)
 		{
 			String complText = null, doc = null;
 			

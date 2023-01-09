@@ -23,7 +23,7 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.util.ValidateException;
 
 /**
@@ -72,7 +72,7 @@ public class RemoveStep extends AbstractStep
 		if(StringUtils.isNotBlank(expression))
 		{
 			exeLogger.debug("Removing data using expression: {}", expression);
-			ExpressionFactory.getExpressionFactory().removeByExpression(context, expression);	
+			PrefixExpressionFactory.getExpressionFactory().removeByExpression(context, expression);	
 		}
 	}
 	

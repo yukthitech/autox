@@ -65,19 +65,63 @@ public class UiSetValueStep extends AbstractParentUiStep
 	private boolean pressEnterAtEnd = false;
 
 	/**
-	 * Press Enter sets the key value as enter for the web element.
-	 * 
-	 * @param context
-	 *            current Automation context.
-	 * @param exeLogger
-	 *            logger.
+	 * Sets the html locator of the form or container (like DIV) enclosing the
+	 * input elements.
+	 *
+	 * @param locator
+	 *            the new html locator of the form or container (like DIV)
+	 *            enclosing the input elements
 	 */
-	private void pressEnter(AutomationContext context, IExecutionLogger exeLogger)
+	public void setLocator(String locator)
 	{
-		WebElement webElement = UiAutomationUtils.findElement(driverName, parentElement, locator);
-		webElement.sendKeys(Keys.ENTER);
+		this.locator = locator;
+	}
 
-		logger.debug("Successfully enter key is pressed");
+	/**
+	 * Sets the value to be filled.
+	 *
+	 * @param value the new value to be filled
+	 */
+	public void setValue(String value)
+	{
+		this.value = value;
+	}
+
+
+	/**
+	 * Sets value for press enter at the end.
+	 * 
+	 * @param pressEnterAtEnd
+	 *            the new press enter at the end.
+	 */
+	public void setPressEnterAtEnd(boolean pressEnterAtEnd)
+	{
+		this.pressEnterAtEnd = pressEnterAtEnd;
+	}
+	
+	public static boolean setUiValue(AutomationContext context, String driver, String parentElement, String locator, String value, boolean pressEnter)
+	{
+		if(value == null)
+		{
+			value = "";
+		}
+		
+		if(!UiAutomationUtils.populateField(driver, parentElement, locator, value))
+		{
+			logger.error("Failed to fill element '{}' with value - {}", getLocatorWithParent(parentElement, locator), value);
+			return false;
+		}
+
+		if(pressEnter)
+		{
+			logger.debug( "User has provided enter key to be pressed");
+			WebElement webElement = UiAutomationUtils.findElement(driver, parentElement, locator);
+			webElement.sendKeys(Keys.ENTER);
+
+			logger.debug("Successfully enter key is pressed");
+		}
+		
+		return true;
 	}
 
 	/**
@@ -92,90 +136,12 @@ public class UiSetValueStep extends AbstractParentUiStep
 	{
 		logger.debug("Populating field {} with value - {}", getLocatorWithParent(locator), value);
 		
-		if(value == null)
+		if(!setUiValue(context, driverName, parentElement, locator, value, pressEnterAtEnd))
 		{
-			value = "";
-		}
-		
-		if(!UiAutomationUtils.populateField(driverName, parentElement, locator, value))
-		{
-			logger.error("Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
 			throw new TestCaseFailedException(this, "Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
 		}
-
-		if(pressEnterAtEnd)
-		{
-			logger.debug( "User has provided enter key to be pressed");
-			pressEnter(context, logger);
-		}
 	}
 
-	/**
-	 * Gets the html locator of the form or container (like DIV) enclosing the
-	 * input elements.
-	 *
-	 * @return the html locator of the form or container (like DIV) enclosing
-	 *         the input elements
-	 */
-	public String getLocator()
-	{
-		return locator;
-	}
-
-	/**
-	 * Sets the html locator of the form or container (like DIV) enclosing the
-	 * input elements.
-	 *
-	 * @param locator
-	 *            the new html locator of the form or container (like DIV)
-	 *            enclosing the input elements
-	 */
-	public void setLocator(String locator)
-	{
-		this.locator = locator;
-	}
-
-	/**
-	 * Gets the value to be filled.
-	 *
-	 * @return the value to be filled
-	 */
-	public String getValue()
-	{
-		return value;
-	}
-
-	/**
-	 * Sets the value to be filled.
-	 *
-	 * @param value the new value to be filled
-	 */
-	public void setValue(String value)
-	{
-		this.value = value;
-	}
-
-	/**
-	 * Gets press enter at end.
-	 * 
-	 * @return boolean value of pressEnterAtTheEnd.
-	 */
-	public boolean getPressEnterAtEnd()
-	{
-		return pressEnterAtEnd;
-	}
-
-	/**
-	 * Sets value for press enter at the end.
-	 * 
-	 * @param pressEnterAtEnd
-	 *            the new press enter at the end.
-	 */
-	public void setPressEnterAtEnd(boolean pressEnterAtEnd)
-	{
-		this.pressEnterAtEnd = pressEnterAtEnd;
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

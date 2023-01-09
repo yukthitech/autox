@@ -38,7 +38,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Mongo query related utils.
  * @author akiran
  */
-public class MongoQuryUtils
+public class MongoQueryUtils
 {
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	
@@ -53,7 +53,7 @@ public class MongoQuryUtils
 	 * @return result
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Map<String, Object> execute(AutomationContext context, IExecutionLogger exeLogger, String mongoResourceName, Object query)
+	public static Map<String, Object> execute(AutomationContext context, String mongoResourceName, Object query, boolean replaceExpressions)
 	{
 		MongoPluginSession mongoSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
 		MongoResource mongoResource = mongoSession.getMongoResource(mongoResourceName);
@@ -63,6 +63,7 @@ public class MongoQuryUtils
 			throw new InvalidStateException("No Mongo resource found with specified name - {}", mongoResourceName);
 		}
 		
+		IExecutionLogger exeLogger = context.getExecutionLogger();
 		exeLogger.debug(false, "On mongo-resource '{}' executing query: \n <code class='JSON'>{}</code>", mongoResourceName, query);
 
 		Map<String, Object> queryMap = null;
@@ -88,8 +89,10 @@ public class MongoQuryUtils
 					query, query.getClass().getName());
 		}
 		
-		
-		queryMap = AutomationUtils.replaceExpressions("mongoQuery", context, queryMap);
+		if(replaceExpressions)
+		{
+			queryMap = AutomationUtils.replaceExpressions("mongoQuery", context, queryMap);
+		}
 		
 		MongoClient client = mongoResource.getMongoClient();
 		MongoDatabase mongoDatabase = client.getDatabase(mongoResource.getDbName());
@@ -110,7 +113,7 @@ public class MongoQuryUtils
 		return result;
 	}
 
-	public static Object executeJs(AutomationContext context, IExecutionLogger exeLogger, String mongoResourceName, String script)
+	public static Object executeJs(AutomationContext context, String mongoResourceName, String script)
 	{
 		MongoPluginSession mongoSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
 		MongoResource mongoResource = mongoSession.getMongoResource(mongoResourceName);
@@ -120,6 +123,7 @@ public class MongoQuryUtils
 			throw new InvalidStateException("No Mongo resource found with specified name - {}", mongoResourceName);
 		}
 		
+		IExecutionLogger exeLogger = context.getExecutionLogger();
 		exeLogger.debug(false, "On mongo-resource '{}' executing query: \n <code class='JSON'>{}</code>", mongoResourceName, script);
 
 		MongoClient client = mongoResource.getMongoClient();

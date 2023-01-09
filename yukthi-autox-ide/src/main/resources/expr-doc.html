@@ -107,6 +107,9 @@
 									<td class="doc_heading" style="width: 30px;"> ${param?index + 1} </td>
 									<td>
 										${param.name}
+										<#if param.mandatory>
+											<span style="color: red; font-weight: bold;">(required)</span>
+										</#if>
 									</td>
 									<td>
 										${param.type}

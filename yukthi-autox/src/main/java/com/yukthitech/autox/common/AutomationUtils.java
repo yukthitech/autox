@@ -26,7 +26,10 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,6 +50,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
@@ -58,7 +62,8 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.prefix.PrefixExpressionContext;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
@@ -168,7 +173,7 @@ public class AutomationUtils
 		if(matcher.matches())
 		{
 			String valueExpr = matcher.group(1);
-			return ExpressionFactory.getExpressionFactory().parseExpression(context, valueExpr);
+			return PrefixExpressionFactory.getExpressionFactory().parseExpression(context, valueExpr);
 		}
 		
 		return FreeMarkerMethodManager.replaceExpressions(templateName, context, templateStr);
@@ -339,7 +344,7 @@ public class AutomationUtils
 				if(param != null && param.sourceType() == SourceType.EXPRESSION)
 				{
 					Object result = mapObjects(context, field.get(object), val -> {
-						return ExpressionFactory.getExpressionFactory().parseExpression(context, val);
+						return PrefixExpressionFactory.getExpressionFactory().parseExpression(context, val);
 					});
 					
 					if(result != null && !Object.class.equals(param.expectedType()))
@@ -1000,5 +1005,40 @@ public class AutomationUtils
 		
 		//in all other cases follow standard comparison
 		return Objects.equals(val1, val2);
+	}
+
+	public static String getStringValue(PrefixExpressionContext parserContext, String expression) throws Exception
+	{
+		if("$".equals(expression.trim()))
+		{
+			Object curVal = parserContext.getCurrentValue();
+			
+			if(curVal == null)
+			{
+				return null;
+			}
+			
+			if(curVal instanceof Clob)
+			{
+				Clob clob = (Clob) curVal;
+				return IOUtils.toString(clob.getAsciiStream(), Charset.defaultCharset());
+			}
+			
+			if(curVal instanceof Blob)
+			{
+				Blob clob = (Blob) curVal;
+				return IOUtils.toString(clob.getBinaryStream(), Charset.defaultCharset());
+			}
+
+			if(curVal instanceof byte[])
+			{
+				byte[] byteArr = (byte[]) curVal;
+				return IOUtils.toString(byteArr, Charset.defaultCharset().name());
+			}
+
+			return curVal.toString().trim();
+		}
+		
+		return expression.trim();
 	}
 }
