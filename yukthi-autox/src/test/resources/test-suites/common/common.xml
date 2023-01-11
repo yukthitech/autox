@@ -8,6 +8,9 @@
 		<s:sql-ddl-query dataSourceName="dataSource" ignoreErrors="true">
 			<query>DROP TABLE LOB_TABLE</query>
 		</s:sql-ddl-query>
+		<s:sql-ddl-query dataSourceName="dataSource" ignoreErrors="true">
+			<query>DROP TABLE APP_ATTR</query>
+		</s:sql-ddl-query>
 
 		<s:sql-ddl-query dataSourceName="dataSource">
 			<query>
@@ -27,6 +30,16 @@
 					L_TEXT VARCHAR(20),
 					BDATA	BLOB,
 					CDATA	LONGTEXT
+				)
+			</query>
+		</s:sql-ddl-query>
+
+		<s:sql-ddl-query dataSourceName="dataSource">
+			<query>
+				CREATE TABLE APP_ATTR
+				(
+					NAME	  VARCHAR(30),
+					VALUE  VARCHAR(100)
 				)
 			</query>
 		</s:sql-ddl-query>

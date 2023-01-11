@@ -18,6 +18,7 @@ package com.yukthitech.autox.plugin.mongo;
 import java.util.Map;
 
 import com.yukthitech.autox.AbstractStep;
+import com.yukthitech.autox.Attributable;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -39,13 +40,13 @@ public class MongoQueryStep extends AbstractStep
 	/**
 	 * Query to execute.
 	 */
-	@Param(description = "Query to execute. Can be json string or a map object.", sourceType = SourceType.EXPRESSION)
+	@Param(description = "Query to execute. Can be json string or a map object.", sourceType = SourceType.EXPRESSION, attributable = Attributable.FALSE)
 	private Object query;
 
 	/**
 	 * Mongo Resource to be used for query execution.
 	 */
-	@Param(description = "Mongo Resource to be used for query execution.")
+	@Param(description = "Mongo Resource to be used for query execution.", required = false)
 	private String mongoResourceName;
 
 	/**

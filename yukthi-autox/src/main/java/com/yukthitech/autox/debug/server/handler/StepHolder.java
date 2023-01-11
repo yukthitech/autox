@@ -20,7 +20,7 @@ import java.util.List;
 
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
-import com.yukthitech.autox.test.CustomUiLocator;
+import com.yukthitech.autox.test.CustomPrefixExpression;
 import com.yukthitech.autox.test.Function;
 
 public class StepHolder implements IStepContainer
@@ -33,7 +33,9 @@ public class StepHolder implements IStepContainer
 	/**
 	 * Custom ui locators to reload.
 	 */
-	private List<CustomUiLocator> customUiLocators = new ArrayList<>();
+	private List<CustomPrefixExpression> customUiLocators = new ArrayList<>();
+	
+	private List<CustomPrefixExpression> customPrefixExpressions = new ArrayList<>();
 	
 	/**
 	 * Functions to reload.
@@ -63,16 +65,26 @@ public class StepHolder implements IStepContainer
 		return steps;
 	}
 	
-	public void addCustomUiLocator(CustomUiLocator locator)
+	public void addCustomUiLocator(CustomPrefixExpression locator)
 	{
 		this.customUiLocators.add(locator);
 	}
 	
-	public List<CustomUiLocator> getCustomUiLocators()
+	public List<CustomPrefixExpression> getCustomUiLocators()
 	{
 		return customUiLocators;
 	}
 	
+	public void addCustomPrefixExpression(CustomPrefixExpression prefixExpr)
+	{
+		this.customPrefixExpressions.add(prefixExpr);
+	}
+	
+	public List<CustomPrefixExpression> getCustomPrefixExpressions()
+	{
+		return customPrefixExpressions;
+	}
+
 	public void addFunction(Function function)
 	{
 		this.functions.add(function);

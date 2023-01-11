@@ -1,0 +1,36 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+
+	<custom-prefix-expression name="app">
+		<set-function>
+			<s:sql-dml-query>
+				<query>
+					INSERT INTO APP_ATTR(NAME, VALUE)
+					VALUES (?{param.context.effectiveExpression}, ?{param.context.value})
+				</query>
+			</s:sql-dml-query>
+
+			<s:log message="Inserted an entry into app attr table"/>
+		</set-function>
+
+		<get-function>
+			<s:log message="Reading an entry from app attr table"/>
+			<s:return value="sqlVal: SELECT VALUE FROM APP_ATTR WHERE NAME = ?{param.context.effectiveExpression}"/>
+		</get-function>
+	</custom-prefix-expression>
+
+	<custom-ui-locator name="srchDropDown">
+		<set-function>
+			<s:ui-click locator="id: select2-${param.context.effectiveExpression}-container"/>
+			<s:set expression="uiVal: class: select2-search__field" value="prop: param.context.value"/>
+			<s:ui-click locator="xpath: //ul[@class='select2-results__options']//li[text() = '${param.context.value}']"/>
+		</set-function>
+
+		<get-function>
+			<s:return value="uiVal: id: ${param.context.effectiveExpression}"/>
+		</get-function>
+	</custom-ui-locator>
+
+</test-file>

@@ -58,7 +58,7 @@ public class MultiDmlQueryStep extends AbstractStep
 	/**
 	 * Name of the data source to use.
 	 */
-	@Param(description = "Data source to be used for sql execution.", sourceType = SourceType.EXPRESSION)
+	@Param(description = "Data source to be used for sql execution.", sourceType = SourceType.EXPRESSION, required = false)
 	private String dataSourceName;
 	
 	/**

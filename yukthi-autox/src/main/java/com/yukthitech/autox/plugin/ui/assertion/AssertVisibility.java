@@ -35,7 +35,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiAssertVisibility", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
-public class AssertVisibility extends AbstractUiAssert
+public class AssertVisibility extends AbstractParentUiAssert
 {
 	
 	/**

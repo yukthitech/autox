@@ -68,9 +68,9 @@ public class DefaultPrefixExpressions
 					@PrefixExprParam(name = "add", type = "boolean", defaultValue = "false", 
 							description = "If true and if specified property indicates a list, during set-value instead of replacing existing element new element will be added/inserted")
 				})
-	public IPropertyPath propertyParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath propertyParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public void setValue(Object value) throws Exception
@@ -93,9 +93,9 @@ public class DefaultPrefixExpressions
 	}
 	
 	@PrefixExpression(type = "store", description = "Parses specified expression as value on/from store.", example = "store: key1")
-	public IPropertyPath storeParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath storeParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public void setValue(Object value) throws Exception
@@ -124,9 +124,9 @@ public class DefaultPrefixExpressions
 					@PrefixExprParam(name = "global", type = "boolean", defaultValue = "false", description = "During set if value is true, the attribute will be set at global level "
 							+ "(get and remove will access local attributes only)"),
 				})
-	public IPropertyPath attrParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath attrParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public void setValue(Object value) throws Exception
@@ -170,9 +170,9 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpression(type = "param", description = "Parses specified expression as parameter.", example = "param: paramName")
-	public IPropertyPath paramParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath paramParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -186,9 +186,9 @@ public class DefaultPrefixExpressions
 			params = {
 					@PrefixExprParam(name = "multi", type = "boolean", defaultValue = "false", description = "If true, list of matches will be returned"),
 				})
-	public IPropertyPath xpathParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath xpathParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public void setValue(Object value) throws Exception
@@ -243,9 +243,9 @@ public class DefaultPrefixExpressions
 	@PrefixExpression(type = "string", description = "Returns specified expression as stirng value after triming. In case of '$', current value will be converted to string. "
 			+ "In case input object Blob/Clob, string value will be extracted from it.", 
 			example = "string: str")
-	public IPropertyPath strParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath strParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -256,9 +256,9 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpression(type = "int", description = "Parses specified expression into int. In case of '$', current value's string value will be parsed.", example = "int: 10")
-	public IPropertyPath intParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath intParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -270,9 +270,9 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpression(type = "long", description = "Parses specified expression into long. In case of '$', current value's string value will be parsed.", example = "long: 10")
-	public IPropertyPath longParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath longParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -283,9 +283,9 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpression(type = "float", description = "Parses specified expression into float. In case of '$', current value's string value will be parsed.", example = "float: 10.2")
-	public IPropertyPath floatParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath floatParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -296,9 +296,9 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpression(type = "double", description = "Parses specified expression into double. In case of '$', current value's string value will be parsed.", example = "double: 10.2")
-	public IPropertyPath doubleParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath doubleParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -311,9 +311,9 @@ public class DefaultPrefixExpressions
 	@PrefixExpression(type = "boolean", description = "Parses specified expression into boolean. If expression value is true (case insensitive), then result will be true.  "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "boolean: True")
-	public IPropertyPath booleanParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath booleanParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -326,9 +326,9 @@ public class DefaultPrefixExpressions
 	@PrefixExpression(type = "date", description = "Parses specified expression into date. "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "date: 21/3/2018, date(format=MM/dd/yyy): 3/21/2018")
-	public IPropertyPath dateParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath dateParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -364,9 +364,9 @@ public class DefaultPrefixExpressions
 	@PrefixExpression(type = "list", description = "Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
 			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to list directly.", 
 			example = "list: val1, val2, val3")
-	public IPropertyPath listParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath listParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
@@ -407,9 +407,9 @@ public class DefaultPrefixExpressions
 	@PrefixExpression(type = "set", description = "Parses specified expression into set of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
 			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to set directly.", 
 			example = "set: val1, val2, val3")
-	public IPropertyPath setParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath setParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
@@ -457,9 +457,9 @@ public class DefaultPrefixExpressions
 					@PrefixExprParam(name = "desc", type = "boolean", defaultValue = "false", 
 						description = "If set to true, the sorting will be done in reverse order.")
 				})
-	public IPropertyPath sortParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath sortParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@SuppressWarnings({ "unchecked", "rawtypes"})
 			@Override
@@ -539,9 +539,9 @@ public class DefaultPrefixExpressions
 			+ "If types specified, strings will be converted to specified type. "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "map: key1 = val1, key2=val2, key3=val3")
-	public IPropertyPath mapParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath mapParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -587,9 +587,9 @@ public class DefaultPrefixExpressions
 
 	@PrefixExpression(type = "condition", description = "Evaluates specified expression as condition and resultant boolean value will be returned", 
 			example = "condition: (attr.flag == true)", contentType = PrefixExpressionContentType.FM_EXPRESSION)
-	public IPropertyPath conditionParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath conditionParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -601,9 +601,9 @@ public class DefaultPrefixExpressions
 	
 	@PrefixExpression(type = "expr", description = "Evaluates specified expression as freemarker expression and resultant value will be returned", 
 			example = "expr: today()", contentType = PrefixExpressionContentType.FM_EXPRESSION)
-	public IPropertyPath expressionParser(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath expressionParser(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -732,9 +732,9 @@ public class DefaultPrefixExpressions
 				@PrefixExprParam(name = "contextExpr", type = "String", defaultValue = "none", description = "Fmarker expression to context object for JEL (used only when jel = true)."),
 				@PrefixExprParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 			})
-	public IPropertyPath fileParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath fileParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -753,9 +753,9 @@ public class DefaultPrefixExpressions
 	@PrefixExpression(type = "bfile", description = "Parses specified expression as file path and loads it as binary data (byte array)."
 			+ "As part of 'set' the value is expected to be byte[] which will be written to specified file.", 
 			example = "bfile: /tmp/data")
-	public IPropertyPath bfileParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath bfileParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -792,9 +792,9 @@ public class DefaultPrefixExpressions
 				@PrefixExprParam(name = "contextExpr", type = "String", defaultValue = "none", description = "Fmarker expression to context object for JEL (used only when jel = true)."),
 				@PrefixExprParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 			})
-	public IPropertyPath resParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath resParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -835,9 +835,9 @@ public class DefaultPrefixExpressions
 
 	@PrefixExpression(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array).", 
 			example = "bres: /tmp/data.png")
-	public IPropertyPath bresParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath bresParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -893,9 +893,9 @@ public class DefaultPrefixExpressions
 					@PrefixExprParam(name = "javaType", type = "String",  defaultValue = "null", description = "If specified, then json will be parsed to specified java type")
 				}
 	)
-	public IPropertyPath jsonParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath jsonParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -925,9 +925,9 @@ public class DefaultPrefixExpressions
 					@PrefixExprParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 				}
 	)
-	public IPropertyPath jsonWithTypeParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath jsonWithTypeParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -942,9 +942,9 @@ public class DefaultPrefixExpressions
 	@PrefixExpression(type = "template", description = "Parses specified value for free marker expressions and returns the result.",
 			example = "template: Value=${someAttr}"
 	)
-	public IPropertyPath templateParser(PrefixExpressionContext parserContext, String expression, String exprType[])
+	public IExpressionPath templateParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception

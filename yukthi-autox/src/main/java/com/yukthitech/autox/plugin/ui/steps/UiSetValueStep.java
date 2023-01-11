@@ -46,8 +46,7 @@ public class UiSetValueStep extends AbstractParentUiStep
 	private static Logger logger = LogManager.getLogger(UiSetValueStep.class);
 
 	/**
-	 * Html locator of the form or container (like DIV) enclosing the input
-	 * elements.
+	 * Locator of the element to be populated.
 	 */
 	@Param(description = "Locator of the element to be populated", sourceType = SourceType.UI_LOCATOR)
 	private String locator;

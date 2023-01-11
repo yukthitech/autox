@@ -50,7 +50,7 @@ public class DefaultDataProvider extends AbstractDataProvider implements Validat
 	private void processDataList(Object data, List<TestCaseData> testCaseDataLst)
 	{
 		PrefixExpressionFactory expressionFactory = PrefixExpressionFactory.getExpressionFactory();
-		Object result = expressionFactory.parseExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
+		Object result = expressionFactory.getValueByExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
 		
 		if(!(result instanceof List))
 		{

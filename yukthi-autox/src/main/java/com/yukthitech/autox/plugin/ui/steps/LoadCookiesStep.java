@@ -40,7 +40,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiLoadCookies", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Loads cookies from specified file into current session cookies.")
-public class LoadCookiesStep extends AbstractParentUiStep
+public class LoadCookiesStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 	

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
@@ -36,6 +37,7 @@ import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
+import com.yukthitech.autox.test.CustomPrefixExpression;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ObjectWrapper;
@@ -58,8 +60,12 @@ public class PrefixExpressionFactory
 	/**
 	 * Available expression parsers.
 	 */
-	private Map<String, PrefixExpressionDetails> parsers = new HashMap<>();
+	private Map<String, PrefixExpressionDetails> prefixExpressions = new HashMap<>();
 	
+	private Map<String, CustomPrefixExpression> customPrefixExpressions = new HashMap<>();
+	
+	private Map<String, CustomPrefixExpression> customUiLocators = new HashMap<>();
+
 	private PrefixExpressionFactory()
 	{}
 	
@@ -130,7 +136,7 @@ public class PrefixExpressionFactory
 						throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
 					}
 					
-					if(!IPropertyPath.class.equals(method.getReturnType()))
+					if(!IExpressionPath.class.equals(method.getReturnType()))
 					{
 						throw new InvalidStateException("Expression parser method is not returning property path: {}.{}", method.getDeclaringClass().getName(), method.getName());
 					}
@@ -160,12 +166,12 @@ public class PrefixExpressionFactory
 								paramAnnot.defaultValue(), paramAnnot.required(), paramAnnot.description()));
 					}
 					
-					factory.parsers.put(parserDet.getType(), parserDet);
+					factory.prefixExpressions.put(parserDet.getType(), parserDet);
 				}
 			}
 		}
 		
-		logger.debug("Found expression parsers to be: {}", factory.parsers);
+		logger.debug("Found expression parsers to be: {}", factory.prefixExpressions);
 		PrefixExpressionFactory.expressionFactory = factory;
 	}
 	
@@ -174,6 +180,44 @@ public class PrefixExpressionFactory
 		return expressionFactory;
 	}
 	
+	public void addCustomPrefixExpression(CustomPrefixExpression expression)
+	{
+		CustomPrefixExpression existing = customPrefixExpressions.get(expression.getName());
+		
+		if(existing != null)
+		{
+			throw new InvalidStateException("Multiple custom-prefix-expressions defined with same name: {} [Location 1: {}, Location 2: {}]", 
+					expression.getName(), existing.getLocation().getName(), existing.getLineNumber(), 
+					expression.getLocation().getName(), expression.getLineNumber());
+		}
+		
+		this.customPrefixExpressions.put(expression.getName(), expression);
+	}
+	
+	public void addOrReplacePrefixExpression(CustomPrefixExpression expression)
+	{
+		this.customPrefixExpressions.put(expression.getName(), expression);
+	}
+
+	public void addCustomUiLocator(CustomPrefixExpression expression)
+	{
+		CustomPrefixExpression existing = customUiLocators.get(expression.getName());
+		
+		if(existing != null)
+		{
+			throw new InvalidStateException("Multiple custom-ui-locators defined with same name: {} [Location 1: {}, Location 2: {}]", 
+					expression.getName(), existing.getLocation().getName(), existing.getLineNumber(), 
+					expression.getLocation().getName(), expression.getLineNumber());
+		}
+		
+		this.customUiLocators.put(expression.getName(), expression);
+	}
+
+	public void addOrReplaceUiLocator(CustomPrefixExpression expression)
+	{
+		this.customUiLocators.put(expression.getName(), expression);
+	}
+
 	public static List<String> parseExpressionTokens(String expression)
 	{
 		//Parse the expression into tokens delimited by '|'
@@ -215,7 +259,7 @@ public class PrefixExpressionFactory
 		return lst;
 	}
 	
-	public Object parseExpressionString(AutomationContext context, String expression)
+	public Object getValueByExpressionString(AutomationContext context, String expression)
 	{
 		//if no prefix is used, by default use expr prefix
 		if(!isExpression(expression))
@@ -223,20 +267,20 @@ public class PrefixExpressionFactory
 			expression = "expr: " + expression;
 		}
 
-		return parseExpression(context, expression, null);
+		return getValueByExpression(context, expression, null);
 	}
 
-	public Object parseExpression(AutomationContext context, Object expressionObj)
+	public Object getValueByExpression(AutomationContext context, Object expressionObj)
 	{
-		return parseExpression(context, expressionObj, null);
+		return getValueByExpression(context, expressionObj, null);
 	}
 	
-	public Object parseExpression(AutomationContext context, Object expressionObj, Object initValue)
+	public Object getValueByExpression(AutomationContext context, Object expressionObj, Object initValue)
 	{
-		return parseExpression(context, expressionObj, new ExpressionConfig(initValue, null));
+		return getValueByExpression(context, expressionObj, new ExpressionConfig(initValue, null));
 	}
 	
-	public Object parseExpression(AutomationContext context, Object expressionObj, ExpressionConfig exprConfig)
+	public Object getValueByExpression(AutomationContext context, Object expressionObj, ExpressionConfig exprConfig)
 	{
 		if(!(expressionObj instanceof String))
 		{
@@ -265,7 +309,7 @@ public class PrefixExpressionFactory
 		//convert tokens into objects
 		for(String tokenStr : lst)
 		{
-			result = parseSingleExpression(expressionParserContext, tokenStr, expressionParsed);
+			result = getValueOfSingleExpression(expressionParserContext, tokenStr, expressionParsed);
 			
 			if(!expressionParsed.getValue())
 			{
@@ -293,7 +337,7 @@ public class PrefixExpressionFactory
 		return (matcher.find() || matcherWithType.find());
 	}
 	
-	private IPropertyPath getPropertyPath(PrefixExpressionContext context, String expression)
+	private IExpressionPath parseExpressionPath(PrefixExpressionContext context, String expression)
 	{
 		IExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		
@@ -307,14 +351,116 @@ public class PrefixExpressionFactory
 		
 		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(expression);
 		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(expression);
+		boolean customExpr = false;
 		
 		if(matcher.find())
 		{
 			exprType = matcher.group("exprType");
 			mainExpr = expression.substring(matcher.end()).trim();
+			
+			customExpr = StringUtils.isNotBlank(matcher.group("custom"));
 		}
 		else if(matcherWithType.find())
 		{
+			exprType = matcherWithType.group("exprType");
+			mainExpr = expression.substring(matcherWithType.end()).trim();
+			
+			customExpr = StringUtils.isNotBlank(matcherWithType.group("custom"));
+			
+			String type = matcherWithType.group("params");
+			exprTypeParams = type.trim().split("\\s*\\,\\s*");
+			
+			//parse parameter types
+			List<String> typeParams = new ArrayList<>();
+			Matcher keyValMatcher = null;
+			
+			for(String param : exprTypeParams)
+			{
+				keyValMatcher = IAutomationConstants.KEY_VALUE_PATTERN.matcher(param);
+				
+				if(keyValMatcher.matches())
+				{
+					context.addParameter(keyValMatcher.group("key"), keyValMatcher.group("value"));
+				}
+				else
+				{
+					typeParams.add(param);
+				}
+			}
+			
+			//Expression type params are params, which are specified in non-key-value format
+			exprTypeParams = typeParams.isEmpty() ? null : typeParams.toArray(new String[0]);
+		}
+		else
+		{
+			return null;
+		}
+		
+		if(customExpr)
+		{
+			CustomPrefixExpression customPrefixExpression = customPrefixExpressions.get(exprType);
+			
+			if(customPrefixExpression == null)
+			{
+				throw new InvalidStateException("No custom prefix expression found with name: {}", exprType);
+			}
+			
+			return new CustomExprPath(customPrefixExpression, context, mainExpr);
+		}
+		
+		PrefixExpressionDetails parser = prefixExpressions.get(exprType);
+		
+		if(parser == null)
+		{
+			throw new InvalidArgumentException("Invalid expression type '{}' specified in expression: {}", exprType, expression);
+		}
+		
+		if(exprTypeParams == null && context.getDefaultExpressionType() != null)
+		{
+			exprTypeParams = new String[] {context.getDefaultExpressionType().getName()};
+		}
+		
+		context.setCurrentExpression(parser);
+		return parser.invoke(context, mainExpr, exprTypeParams);
+	}
+	
+	public IExpressionPath parseCustomUiLocator(String expression)
+	{
+		AutomationContext automationContext = AutomationContext.getInstance();
+		PrefixExpressionContext context = new PrefixExpressionContext(automationContext, null);
+		IExecutionLogger exeLogger = automationContext.getExecutionLogger();
+		
+		exeLogger.debug("Fetching expression parser for value and parsing expression: {}", expression);
+		
+		//check if string is a reference
+		String exprType = null, mainExpr = null;
+		String exprTypeParams[] = null;
+		
+		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(expression);
+		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(expression);
+		boolean customExpr = false;
+		
+		if(matcher.find())
+		{
+			customExpr = StringUtils.isNotBlank(matcher.group("custom"));
+			
+			if(!customExpr)
+			{
+				return null;
+			}
+			
+			exprType = matcher.group("exprType");
+			mainExpr = expression.substring(matcher.end()).trim();
+		}
+		else if(matcherWithType.find())
+		{
+			customExpr = StringUtils.isNotBlank(matcher.group("custom"));
+
+			if(!customExpr)
+			{
+				return null;
+			}
+			
 			exprType = matcherWithType.group("exprType");
 			mainExpr = expression.substring(matcherWithType.end()).trim();
 			
@@ -347,25 +493,19 @@ public class PrefixExpressionFactory
 			return null;
 		}
 		
-		PrefixExpressionDetails parser = parsers.get(exprType);
+		CustomPrefixExpression customUiLocator = customUiLocators.get(exprType);
 		
-		if(parser == null)
+		if(customUiLocator == null)
 		{
-			throw new InvalidArgumentException("Invalid expression type '{}' specified in expression: {}", exprType, expression);
+			throw new InvalidStateException("No custom ui locator found with name: {}", exprType);
 		}
 		
-		if(exprTypeParams == null && context.getDefaultExpressionType() != null)
-		{
-			exprTypeParams = new String[] {context.getDefaultExpressionType().getName()};
-		}
-		
-		context.setCurrentParser(parser);
-		return parser.invoke(context, mainExpr, exprTypeParams);
+		return new CustomExprPath(customUiLocator, context, mainExpr);
 	}
-	
-	private Object parseSingleExpression(PrefixExpressionContext context, String expression, ObjectWrapper<Boolean> expressionParsed)
+
+	private Object getValueOfSingleExpression(PrefixExpressionContext context, String expression, ObjectWrapper<Boolean> expressionParsed)
 	{
-		IPropertyPath propPath = getPropertyPath(context, expression);
+		IExpressionPath propPath = parseExpressionPath(context, expression);
 		
 		if(propPath == null)
 		{
@@ -379,12 +519,12 @@ public class PrefixExpressionFactory
 		try
 		{
 			Object result = propPath.getValue();
-			PrefixExpressionDetails parser = context.getCurrentParser();
+			PrefixExpressionDetails parser = context.getCurrentExpression();
 			String exprTypeParams[] = context.getExpressionTypeParameters();
 			
 			exeLogger.debug("Execution of property expression '{}' resulted in: {} [Type: {}]", expression, result, (result != null ? result.getClass().getName() : "") );
 	
-			if(!parser.isConversionHandled() && exprTypeParams != null)
+			if(parser != null && !parser.isConversionHandled() && exprTypeParams != null)
 			{
 				if(exprTypeParams.length > 0)
 				{
@@ -435,7 +575,7 @@ public class PrefixExpressionFactory
 	public void removeByExpression(AutomationContext context, String expression, Object effectiveContext)
 	{
 		PrefixExpressionContext expressionParserContext = new PrefixExpressionContext(context, effectiveContext);
-		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
+		IExpressionPath propertyPath = parseExpressionPath(expressionParserContext, expression);
 		IExecutionLogger exeLogger = context.getExecutionLogger();
 		
 		if(propertyPath == null)
@@ -472,7 +612,7 @@ public class PrefixExpressionFactory
 	public void setExpressionValue(AutomationContext context, String expression, Object value, Object effectiveContext)
 	{
 		PrefixExpressionContext expressionParserContext = new PrefixExpressionContext(context, effectiveContext);
-		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
+		IExpressionPath propertyPath = parseExpressionPath(expressionParserContext, expression);
 		IExecutionLogger exeLogger = context.getExecutionLogger();
 		
 		if(propertyPath == null)
@@ -484,10 +624,10 @@ public class PrefixExpressionFactory
 		
 		exeLogger.debug("Setting expression '{}' as value: {}", expression, value);
 		
-		PrefixExpressionDetails parser = expressionParserContext.getCurrentParser();
+		PrefixExpressionDetails parser = expressionParserContext.getCurrentExpression();
 		String exprTypeParams[] = expressionParserContext.getExpressionTypeParameters();
 
-		if(!parser.isConversionHandled() && exprTypeParams != null)
+		if(parser != null && !parser.isConversionHandled() && exprTypeParams != null)
 		{
 			if(exprTypeParams.length > 0)
 			{
@@ -522,6 +662,6 @@ public class PrefixExpressionFactory
 	
 	public Collection<PrefixExpressionDetails> getParserDetails()
 	{
-		return parsers.values();
+		return prefixExpressions.values();
 	}
 }

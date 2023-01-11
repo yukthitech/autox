@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.plugin.ui.assertion;
 
-import org.openqa.selenium.WebElement;
-
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -25,7 +23,8 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
-import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
+import com.yukthitech.autox.plugin.ui.common.UiFreeMarkerMethods;
+import com.yukthitech.autox.test.TestCaseFailedException;
 
 /**
  * Waits for locator to be part of the page and is visible.
@@ -33,7 +32,7 @@ import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
  * @author akiran
  */
 @Executable(name = "uiAssertValue", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
-public class UiAssertValue extends AbstractUiAssert
+public class UiAssertValue extends AbstractParentUiAssert
 {
 	private static final long serialVersionUID = 1L;
 
@@ -49,6 +48,24 @@ public class UiAssertValue extends AbstractUiAssert
 	@Param(description = "Expected value of the element.")
 	private String value;
 
+	@Param(description = "If set to true, instead of value, display value will be fetched (currently non-select fields will return value itself).", required = false)
+	private boolean displayValue = false;
+
+	public void setLocator(String locator)
+	{
+		this.locator = locator;
+	}
+
+	public void setValue(String value)
+	{
+		this.value = value;
+	}
+
+	public void setDisplayValue(boolean displayValue)
+	{
+		this.displayValue = displayValue;
+	}
+	
 	/**
 	 * Execute.
 	 *
@@ -68,65 +85,25 @@ public class UiAssertValue extends AbstractUiAssert
 		}
 		
 		exeLogger.trace("Validating if locator '{}' has value - {}", getLocatorWithParent(locator), value);
-		
-		WebElement element = UiAutomationUtils.findElement(driverName, parentElement, locator);
-		String actualMessage = null;
-		
-		if("input".equals(element.getTagName().toLowerCase()))
+
+		try
 		{
-			actualMessage = element.getAttribute("value").trim();
-		}
-		else
+			String elementValue = displayValue? 
+					UiFreeMarkerMethods.uiDisplayValue(locator, parentElement, driverName) : 
+					UiFreeMarkerMethods.uiValue(locator, parentElement, driverName);
+	
+			if(!value.equals(elementValue))
+			{
+				exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator: {}", value, elementValue, getLocatorWithParent(locator));
+				throw new AutoxValidationException(this, "Expected value '{}' is not matching with actual value '{}' for locator: {}", value, elementValue, getLocatorWithParent(locator));
+			}
+		} catch (AutoxValidationException ex) 
 		{
-			actualMessage = element.getText().trim();
-		}
-
-		if(!value.equals(actualMessage))
+			throw ex;
+		} catch(Exception ex)
 		{
-			exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator: {}", value, actualMessage, getLocatorWithParent(locator));
-			throw new AutoxValidationException(this, "Expected value '{}' is not matching with actual value '{}' for locator: {}", value, actualMessage, getLocatorWithParent(locator));
+			throw new TestCaseFailedException(this, "Failed to fetch the value. Error: {}", "" + ex, ex);
 		}
-	}
-
-	/**
-	 * Gets the locator to wait for.
-	 *
-	 * @return the locator to wait for
-	 */
-	public String getLocator()
-	{
-		return locator;
-	}
-
-	/**
-	 * Sets the locator to wait for.
-	 *
-	 * @param locator
-	 *            the new locator to wait for
-	 */
-	public void setLocator(String locator)
-	{
-		this.locator = locator;
-	}
-
-	/**
-	 * Gets the value expected in the targer element.
-	 *
-	 * @return the value expected in the targer element
-	 */
-	public String getValue()
-	{
-		return value;
-	}
-
-	/**
-	 * Sets the value expected in the targer element.
-	 *
-	 * @param value the new value expected in the targer element
-	 */
-	public void setValue(String value)
-	{
-		this.value = value;
 	}
 
 	/*

@@ -22,15 +22,14 @@ import java.util.Map;
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
-import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.exec.StepsExecutor;
-import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;
+import com.yukthitech.utils.doc.Doc;
 
 /**
  * Represents a function that can be invoked as needed. 
@@ -41,23 +40,21 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	/**
 	 * Name of this group.
 	 */
-	@Param(name = "name", description = "Name of the function", required = true)
+	@Doc(value = "Name of the function", required = true)
 	private String name;
 	
 	/**
 	 * Description of the function.
 	 */
+	@Doc(value = "Description of the function")
 	@SkipParsing
-	@Param(name = "description", description = "Description of the function", required = false)
 	private String description;
 	
 	/**
 	 * Description of the return value. This should be omitted for functions which dont return any value.
 	 */
+	@Doc(value = "Return description of the function. If not specified, function is assumed will not return any value")
 	@SkipParsing
-	@Param(name = "returnDescription", 
-		description = "Return description of the function. If not specified, function is assumed will not return any value", 
-		required = false)
 	private String returnDescription;
 	
 	/**
@@ -67,16 +64,12 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	private List<FunctionParamDef> parameterDefs;
 	
 	/**
-	 * Steps for the test case.
+	 * Steps for the function.
 	 */
 	@SkipParsing
 	private List<IStep> steps = new ArrayList<>();
 	
-	/**
-	 * Params for step group execution. This are expected to be set by step-group-ref
-	 */
-	private Map<String, Object> params;
-	
+	@Doc(value = "Parent element, used internally", ignore = true)
 	@SkipParsing
 	private Object parent;
 	
@@ -151,11 +144,6 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		this.parent = parent;
 	}
 	
-	void setParams(Map<String, Object> params)
-	{
-		this.params = params;
-	}
-	
 	@Override
 	public void addStep(IStep step)
 	{
@@ -172,12 +160,12 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		return steps;
 	}
 	
-	public Object execute(AutomationContext context, IExecutionLogger logger) throws Exception
+	public static Object execute(AutomationContext context, Map<String, Object> params, Object executable, List<IStep> steps) throws Exception
 	{
 		context.pushParameters(params);
 		
 		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
-		executionStack.push(this);
+		executionStack.push(executable);
 		
 		try
 		{
@@ -193,11 +181,16 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 			throw ex;
 		} finally
 		{
-			executionStack.pop(this);
+			executionStack.pop(executable);
 			context.popParameters();
 		}
 		
 		return null;
+	}
+
+	public Object execute(AutomationContext context, Map<String, Object> params) throws Exception
+	{
+		return execute(context, params, this, steps);
 	}
 	
 	@Override

@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 
 import com.yukthitech.autox.AbstractStep;
+import com.yukthitech.autox.Attributable;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -45,7 +46,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 	/**
 	 * Query to execute.
 	 */
-	@Param(description = "Query to execute, the results will be used to create map.")
+	@Param(description = "Query to execute, the results will be used to create map.", attributable = Attributable.FALSE)
 	private String query;
 	
 	/**
@@ -65,7 +66,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 	/**
 	 * Name of the data source to use.
 	 */
-	@Param(description = "Name of the data source to be used for query execution.")
+	@Param(description = "Name of the data source to be used for query execution.", required = false)
 	private String dataSourceName;
 	
 	/**

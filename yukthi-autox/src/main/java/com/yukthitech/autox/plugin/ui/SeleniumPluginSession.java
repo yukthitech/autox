@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.NoSuchSessionException;
@@ -36,6 +37,7 @@ import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.event.EventManager;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.autox.plugin.AbstractPluginSession;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginSession, SeleniumPlugin>
@@ -80,6 +82,11 @@ public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginS
 	private WebDriver resetActiveDriver(String name) throws Exception
 	{
 		SeleniumDriverConfig driverConfig = parentPlugin.getDriverConfig(name);
+		
+		if(driverConfig == null)
+		{
+			throw new InvalidArgumentException("No driver found with specified name: {}", name);
+		}
 		
 		Class<?> driverClass = Class.forName(driverConfig.getClassName());
 		WebDriver newDriver = null;
@@ -159,7 +166,16 @@ public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginS
 	 */
 	public WebDriver getWebDriver(String name)
 	{
-		name = (name == null) ? defaultDriverName : name;
+		if(StringUtils.isBlank(name))
+		{
+			name = defaultDriverName;
+			
+			if(StringUtils.isBlank(name))
+			{
+				throw new InvalidStateException("No default driver specified");
+			}
+		}
+
 		WebDriver driver = this.drivers.get(name);
 		
 		if(driver != null)

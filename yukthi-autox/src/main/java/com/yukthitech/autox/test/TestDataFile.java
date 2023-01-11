@@ -21,6 +21,7 @@ import java.util.List;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.event.EventHandler;
 import com.yukthitech.autox.event.EventManager;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -159,11 +160,16 @@ public class TestDataFile
 		EventManager.getInstance().addEventHandler(handler);
 	}
 
-	public void addCustomUiLocator(CustomUiLocator customUiLocator)
+	public void addCustomUiLocator(CustomPrefixExpression customUiLocator)
 	{
-		context.addCustomUiLocator(customUiLocator);
+		PrefixExpressionFactory.getExpressionFactory().addCustomUiLocator(customUiLocator);
 	}
 	
+	public void addCustomPrefixExpression(CustomPrefixExpression customPrefixExpr)
+	{
+		PrefixExpressionFactory.getExpressionFactory().addCustomPrefixExpression(customPrefixExpr);
+	}
+
 	@Override
 	public String toString()
 	{

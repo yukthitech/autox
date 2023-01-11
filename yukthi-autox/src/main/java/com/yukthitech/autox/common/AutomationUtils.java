@@ -173,7 +173,7 @@ public class AutomationUtils
 		if(matcher.matches())
 		{
 			String valueExpr = matcher.group(1);
-			return PrefixExpressionFactory.getExpressionFactory().parseExpression(context, valueExpr);
+			return PrefixExpressionFactory.getExpressionFactory().getValueByExpression(context, valueExpr);
 		}
 		
 		return FreeMarkerMethodManager.replaceExpressions(templateName, context, templateStr);
@@ -344,7 +344,7 @@ public class AutomationUtils
 				if(param != null && param.sourceType() == SourceType.EXPRESSION)
 				{
 					Object result = mapObjects(context, field.get(object), val -> {
-						return PrefixExpressionFactory.getExpressionFactory().parseExpression(context, val);
+						return PrefixExpressionFactory.getExpressionFactory().getValueByExpression(context, val);
 					});
 					
 					if(result != null && !Object.class.equals(param.expectedType()))

@@ -1,0 +1,48 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="prefix-test-suite">
+		<test-case name="customPrefixTest">
+			<description>
+				Tests the functionality of custom prefix.
+			</description>
+
+			<s:set expression="c:app: test1" value="Value1"/>
+			<s:set expression="c:app: test2" value="Value2"/>
+
+			<s:assert-equals actual="c: app: test2" expected="Value2"/>
+		</test-case>
+
+		<testCase name="customUiLocators">
+			<description>Validates form filling is working</description>
+			
+			<s:ui-goto-page uri="/form.html" />
+
+			<s:ui-set-value locator="c:srchDropDown : vehicle" value="Rocket"/>
+			<s:ui-log-screen-shot name="filledForm-1.png" />
+
+			<s:ui-fill-form locator="id:sampleForm">
+				<data>
+					{
+						"name": "kranthi",
+						"id:genderDropDown": "male",
+						"address": "line1\nline2",
+						"color": ["red", "green", "blue"],
+						"c:srchDropDown:vehicle": "Boat",
+						"c:srchDropDown:ranking": "Nine"
+					}
+				</data>
+			</s:ui-fill-form>
+			
+			<s:ui-log-screen-shot name="filledForm.png" />
+							
+			<s:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
+			<s:ui-assert-value locator="c:srchDropDown: vehicle" value="boat"/>
+			<s:ui-assert-value locator="c:srchDropDown: ranking" value="9"/>
+		</testCase>
+
+	</test-suite>
+
+</test-file>

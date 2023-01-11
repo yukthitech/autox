@@ -20,7 +20,7 @@ import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.plugin.sql.steps.QueryUtils;
-import com.yukthitech.autox.prefix.IPropertyPath;
+import com.yukthitech.autox.prefix.IExpressionPath;
 import com.yukthitech.autox.prefix.PrefixExprParam;
 import com.yukthitech.autox.prefix.PrefixExpression;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
@@ -37,9 +37,9 @@ public class SqlPrefixExpressions
 				@PrefixExprParam(name = "dataSource", type = "String", defaultValue = "Default data-source", 
 					description = "Data-source on which specified query has to be executed.")
 			})
-	public IPropertyPath sqlVal(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath sqlVal(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -56,9 +56,9 @@ public class SqlPrefixExpressions
 				@PrefixExprParam(name = "dataSource", type = "String", defaultValue = "Default data-source", 
 						description = "Data-source on which specified query has to be executed.")
 			})
-	public IPropertyPath sqlColumnList(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath sqlColumnList(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -79,9 +79,9 @@ public class SqlPrefixExpressions
 				@PrefixExprParam(name = "valueColumn", type = "String", required = true,
 					description = "Mandatory Param. Value column to be used.")
 			})
-	public IPropertyPath sqlMap(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath sqlMap(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -114,9 +114,9 @@ public class SqlPrefixExpressions
 					description = "Defaults to true, which means all rows will be processed. If made false, then "
 							+ "only first row will be processed.")
 			})
-	public IPropertyPath sqlRowMaps(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath sqlRowMaps(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception

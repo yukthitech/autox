@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AbstractStep;
+import com.yukthitech.autox.Attributable;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -48,7 +49,7 @@ public class LogStep extends AbstractStep
 	/**
 	 * Logs specified message in ui.
 	 */
-	@Param(name = "message", description = "Message(s)/object(s) to log", sourceType = SourceType.EXPRESSION)
+	@Param(name = "message", description = "Message(s)/object(s) to log", sourceType = SourceType.EXPRESSION, attributable = Attributable.TRUE)
 	private List<Object> messages = new ArrayList<>();
 	
 	/**

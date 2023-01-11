@@ -40,7 +40,7 @@ import com.yukthitech.autox.test.TestCaseFailedException;
  * @author Pritam.
  */
 @Executable(name = "uiDragAndDrop", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
-public class DragAndDropStep extends AbstractUiStep
+public class DragAndDropStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 

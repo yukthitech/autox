@@ -22,21 +22,18 @@ import java.util.Map;
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.IStepIntegral;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
-import com.yukthitech.autox.context.ExecutionStack;
-import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.test.IEntryPoint;
-import com.yukthitech.autox.test.lang.steps.ReturnException;
+import com.yukthitech.autox.test.Function;
 
 /**
  * Represents event handler, invoked based on event name specified. 
  * @author akiran
  */
-public class EventHandler extends AbstractLocationBased implements IStepContainer, Cloneable, IEntryPoint
+public class EventHandler extends AbstractLocationBased implements IStepContainer, Cloneable, IStepIntegral
 {
 	/**
 	 * Name of the event to handle.
@@ -78,12 +75,6 @@ public class EventHandler extends AbstractLocationBased implements IStepContaine
 	}
 	
 	@Override
-	public String toText() 
-	{
-		return "Event Handler [" + name + "]";
-	}
-
-	@Override
 	public void addStep(IStep step)
 	{
 		steps.add(step);
@@ -102,36 +93,10 @@ public class EventHandler extends AbstractLocationBased implements IStepContaine
 	public Object execute(Map<String, Object> params) throws Exception
 	{
 		AutomationContext context = AutomationContext.getInstance();
-		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
 		IExecutionLogger logger = AutomationContext.getInstance().getExecutionLogger();
-		
-		context.pushParameters(params);
-		executionStack.push(this);
-		
-		try
-		{
-			logger.info("Executing event handler: {}", name);
+		logger.info("Executing event handler: {}", name);
 
-			StepsExecutor.execute(steps, null);
-			
-			logger.info("Successfully completed executing event handler: {}", name);
-		} catch(Exception ex)
-		{
-			//occurs during return statement execution
-			if(ex instanceof ReturnException)
-			{
-				logger.info("Successfully completed executing event handler: {}", name);
-				return ((ReturnException) ex).getValue();
-			}
-			
-			throw ex;
-		} finally
-		{
-			executionStack.pop(this);
-			context.popParameters();
-		}
-		
-		return null;
+		return Function.execute(context, params, this, steps);
 	}
 	
 	@Override

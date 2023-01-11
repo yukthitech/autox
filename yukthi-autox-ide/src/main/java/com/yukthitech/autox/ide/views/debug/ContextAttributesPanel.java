@@ -68,8 +68,11 @@ public class ContextAttributesPanel extends JPanel
 		panel.add(xpathSandboxButton);
 		xpathSandboxButton.setIcon(XPATH_SANDBOX_ICON);
 		xpathSandboxButton.addActionListener(this::onXpathSandbox);
+		xpathSandboxButton.setEnabled(false);
+		
 		debugSandboxButton.setToolTipText("Debug Sandbox");
 		debugSandboxButton.setHorizontalAlignment(SwingConstants.RIGHT);
+		debugSandboxButton.setEnabled(false);
 		
 		panel.add(debugSandboxButton);
 		debugSandboxButton.setIcon(DEBUG_SANDBOX_ICON);

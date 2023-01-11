@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.ILocationBased;
 import com.yukthitech.autox.IStackableStep;
 import com.yukthitech.autox.IStep;
+import com.yukthitech.autox.IStepIntegral;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack.StackElement;
@@ -168,16 +169,25 @@ public class LiveDebugPoint
 	{
 		List<ServerMssgExecutionPaused.StackElement> stackTrace = new ArrayList<>();
 		int index = -1;
+		ILocationBased prevStep = null;
 				
 		for(StackElement elem : ExecutionContextManager.getInstance().getExecutionStack().getStackTrace())
 		{
 			index++;
 			
-			if(index > 0 && !(elem.getElement() instanceof IStackableStep))
+			/*
+			 * Skip the step addition to stack trace in following case:
+			 * 	 Step is not a top step (Top or latest step should be always part of stack trace)
+			 *   AND current step is not stackable step (stackable step should be pushed to stack trace)
+			 *   AND prev step in integral step (When integral step is being executed, next following step should always get added)
+			 */
+			if(index > 0 && !(elem.getElement() instanceof IStackableStep) && !(prevStep instanceof IStepIntegral))
 			{
+				prevStep = elem.getElement();
 				continue;
 			}
-			
+
+			prevStep = elem.getElement();
 			stackTrace.add(new ServerMssgExecutionPaused.StackElement(elem.getLocation(), elem.getLineNumber()));
 		}
 		
@@ -253,7 +263,7 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			Object res = PrefixExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), expression);
+			Object res = PrefixExpressionFactory.getExpressionFactory().getValueByExpressionString(AutomationContext.getInstance(), expression);
 			DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(reqId, true, res, null));
 		}catch(Exception ex)
 		{

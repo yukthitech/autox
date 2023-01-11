@@ -25,8 +25,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
-import com.yukthitech.autox.test.CustomUiLocator;
-import com.yukthitech.utils.ObjectWrapper;
+import com.yukthitech.autox.prefix.IExpressionPath;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -84,14 +83,14 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") Object locator, 
 			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
-			)
+			) throws Exception
 	{
-		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
-		CustomUiLocator customUiLocator = UiAutomationUtils.getCustomUiLocator(AutomationContext.getInstance(), locator.toString(), queryWrapper);
+		IExpressionPath customUiLocator = UiAutomationUtils.getCustomUiLocator(locator.toString());
 		
 		if(customUiLocator != null)
 		{
-			return customUiLocator.getValue(queryWrapper.getValue());
+			Object res = customUiLocator.getValue();
+			return (res == null) ? null : res.toString();
 		}
 
 		WebElement element = getElementByLocator(driverName, locator, parent);
@@ -125,16 +124,15 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "locator", description = "Locator of the ui element whose display value needs to be fetched.") Object locator, 
 			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
-			)
+			) throws Exception
 	{
-		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
-		CustomUiLocator customUiLocator = UiAutomationUtils.getCustomUiLocator(AutomationContext.getInstance(), locator.toString(), queryWrapper);
+		IExpressionPath customUiLocator = UiAutomationUtils.getCustomUiLocator(locator.toString());
 		
 		if(customUiLocator != null)
 		{
-			return customUiLocator.getValue(queryWrapper.getValue());
+			Object res = customUiLocator.getValue();
+			return (res == null) ? null : res.toString();
 		}
-
 
 		WebElement element = getElementByLocator(driverName, locator, parent);
 

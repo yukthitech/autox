@@ -18,6 +18,8 @@ package com.yukthitech.autox.plugin.mongo;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.plugin.AbstractPluginSession;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class MongoPluginSession extends AbstractPluginSession<MongoPluginSession, MongoPlugin>
 {
@@ -36,8 +38,20 @@ public class MongoPluginSession extends AbstractPluginSession<MongoPluginSession
 		if(StringUtils.isBlank(name))
 		{
 			name = parentPlugin.getDefaultMongoResource();
+			
+			if(StringUtils.isBlank(name))
+			{
+				throw new InvalidStateException("No default mongo resource specified for query execution");
+			}
 		}
 		
-		return parentPlugin.getMongoResource(name);
+		MongoResource res = parentPlugin.getMongoResource(name);
+
+		if(res == null)
+		{
+			throw new InvalidArgumentException("No mongo-resource found with name: {}", name);
+		}
+		
+		return res;
 	}
 }

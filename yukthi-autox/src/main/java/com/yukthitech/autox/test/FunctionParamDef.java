@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.test;
 
+import com.yukthitech.utils.doc.Doc;
+
 /**
  * Represents definition of function parameter.
  * @author akiran
@@ -24,16 +26,19 @@ public class FunctionParamDef
 	/**
 	 * Name of the function parameter.
 	 */
+	@Doc(required = true, value = "Name of the parameter")
 	private String name;
 	
 	/**
 	 * Description of the function parameter.
 	 */
+	@Doc(required = true, value = "Description of the parameter")
 	private String description;
 	
 	/**
 	 * Flag indicating if this parameter is required or not. Default is false.
 	 */
+	@Doc(value = "Default: false. Indicates if this param is mandatory or not.")
 	private boolean required = false;
 
 	/**

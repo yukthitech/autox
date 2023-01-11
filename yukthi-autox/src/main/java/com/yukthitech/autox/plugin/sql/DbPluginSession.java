@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.plugin.AbstractPluginSession;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * DB Plugin session.
@@ -42,9 +44,23 @@ public class DbPluginSession extends AbstractPluginSession<DbPluginSession, DbPl
 	{
 		if(StringUtils.isBlank(name))
 		{
-			return parentPlugin.getDefaultDataSource();
+			DataSource res = parentPlugin.getDefaultDataSource();
+			
+			if(res == null)
+			{
+				throw new InvalidStateException("No default data source specified for query execution");
+			}
+			
+			return res;
 		}
 		
-		return parentPlugin.getDataSource(name);
+		DataSource res = parentPlugin.getDataSource(name);
+		
+		if(res == null)
+		{
+			throw new InvalidArgumentException("No data-source found with name: {}", name);
+		}
+		
+		return res;
 	}
 }

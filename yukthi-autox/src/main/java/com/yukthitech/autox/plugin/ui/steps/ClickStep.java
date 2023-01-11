@@ -50,7 +50,6 @@ public class ClickStep extends AbstractPostCheckStep
 	 */
 	@Param(description = "Locator of the element to be clicked. Out of located elements, first element will be clicked.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
-
 	
 	/**
 	 * Number of retries to happen. Default: 5

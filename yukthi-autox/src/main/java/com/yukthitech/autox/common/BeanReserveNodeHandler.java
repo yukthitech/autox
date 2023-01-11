@@ -71,7 +71,7 @@ public class BeanReserveNodeHandler implements IReserveNodeHandler
 		AutomationContext automationContext = AutomationContext.getInstance();
 		PrefixExpressionFactory exprFactory = PrefixExpressionFactory.getExpressionFactory();
 		
-		Object bean = exprFactory.parseExpression(automationContext, info.value);
+		Object bean = exprFactory.getValueByExpression(automationContext, info.value);
 		parserHandler.registerBean(info.id, bean);
 	}
 }

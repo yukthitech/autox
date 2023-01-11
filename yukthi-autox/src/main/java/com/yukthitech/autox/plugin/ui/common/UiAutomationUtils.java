@@ -35,9 +35,11 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
-import com.yukthitech.autox.test.CustomUiLocator;
-import com.yukthitech.utils.ObjectWrapper;
+import com.yukthitech.autox.prefix.IExpressionPath;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.CustomExpressionFailedException;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.exceptions.UnsupportedOperationException;
 
 /**
@@ -131,24 +133,9 @@ public class UiAutomationUtils
 		return populateField(driverName, parent, locator, value);
 	}
 	
-	public static CustomUiLocator getCustomUiLocator(AutomationContext context, String locator, ObjectWrapper<String> query)
+	public static IExpressionPath getCustomUiLocator(String locator)
 	{
-		Matcher matcher = LOCATOR_PATTERN.matcher(locator); 
-		
-		if(!matcher.matches())
-		{
-			return null;
-		}
-		
-		LocatorType locatorType = LocatorType.getLocatorType(matcher.group(1));
-		
-		if(locatorType != null)
-		{
-			return null;
-		}
-		
-		query.setValue(matcher.group(2));
-		return context.getCustomUiLocator(matcher.group(1));
+		return PrefixExpressionFactory.getExpressionFactory().parseCustomUiLocator(locator);
 	}
 	
 	/**
@@ -168,13 +155,23 @@ public class UiAutomationUtils
 	{
 		logger.trace("For field {} under parent {} setting value - {}", locator, parent, value);
 		
-		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
 		AutomationContext context = AutomationContext.getInstance();
-		CustomUiLocator customUiLocator = getCustomUiLocator(context, locator, queryWrapper);
+		IExpressionPath customUiLocator = getCustomUiLocator(locator);
 		
 		if(customUiLocator != null)
 		{
-			return customUiLocator.setValue(queryWrapper.getValue(), value);
+			try
+			{
+				customUiLocator.setValue(value);
+				return true;
+			}catch(CustomExpressionFailedException ex)
+			{
+				logger.error("Setting value by custom locator failed. Error: " + ex.getMessage());
+				return false;
+			} catch(Exception ex)
+			{
+				throw new InvalidStateException("Custom locator operation failed. Locator: " + locator, ex);
+			}
 		}
 
 		Matcher matcher = LOCATOR_PATTERN.matcher(locator); 

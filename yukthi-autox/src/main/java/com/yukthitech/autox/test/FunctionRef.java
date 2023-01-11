@@ -159,9 +159,7 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 		
 		logger.debug("Executing function '{}' with parameters: {}", name, paramValues);
 		
-		function.setParams(paramValues);
-
-		Object resVal = function.execute(context, logger);
+		Object resVal = function.execute(context, paramValues);
 		
 		if(returnAttr != null)
 		{

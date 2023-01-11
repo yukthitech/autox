@@ -28,8 +28,6 @@ import javax.swing.text.JTextComponent;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AbstractCompletionProvider;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
@@ -39,9 +37,9 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.doc.ElementInfo;
-import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.ParamInfo;
+import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
@@ -55,13 +53,13 @@ import com.yukthitech.autox.prefix.PrefixExpressionContentType;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
-import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.beans.BeanProperty;
+import com.yukthitech.utils.beans.BeanPropertyInfo;
+import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class XmlCompletionProvider extends AbstractCompletionProvider implements IIdeCompletionProvider
 {
-	private static Logger logger = LogManager.getLogger(XmlCompletionProvider.class);
-	
 	private static Pattern ALPHA_NUMERIC_ONLY = Pattern.compile("\\w*");
 	
 	private static Pattern EXPR_PREFIX_PATTERN = Pattern.compile("^\\s*(\\w+)\\s*\\:");
@@ -76,8 +74,6 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 	
 	private FileEditor fileEditor;
 	
-	private IdeContext ideContext;
-	
 	private List<Completion> curCompletions;
 	
 	/**
@@ -89,19 +85,19 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 	{
 		this.project = project;
 		this.fileEditor = fileEditor;
-		this.ideContext = ideContext;
 	}
 	
 	private String getElementReplacementText(StepInfo step, XmlFileLocation location)
 	{
 		StringBuilder builder = new StringBuilder();
 		String nodeName = null;
+		String prefix = location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI);
 		
 		if(location.getCurrentToken() == null)
 		{
 			nodeName = step.getNameWithHyphens();
 			builder.append("<")
-				.append(location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI))
+				.append(prefix)
 				.append(":")
 				.append(nodeName)
 				.append(" ");
@@ -110,7 +106,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		{
 			nodeName = step.getNameWithHyphens().startsWith(location.getName()) ? step.getNameWithHyphens() : step.getName();
 			builder
-				.append(location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI))
+				.append(prefix)
 				.append(":")
 				.append(nodeName)
 				.append(" ");
@@ -131,6 +127,10 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 			return builder.toString();
 		}
 		
+		boolean hasChildElem = CollectionUtils.isNotEmpty(step.getChildElements());
+		List<ParamInfo> elemParams = new ArrayList<>();
+		boolean firstParam = true;
+		
 		if(step.getParams() != null)
 		{
 			for(ParamInfo param : step.getParams())
@@ -139,7 +139,20 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 				{
 					if(param.isAttributable())
 					{
-						builder.append(param.getName()).append("=\"\" ");
+						if(firstParam)
+						{
+							builder.append(param.getName()).append("=\"###CUR###\" ");
+							firstParam = false;
+						}
+						else
+						{
+							builder.append(param.getName()).append("=\"\" ");
+						}
+					}
+					else
+					{
+						elemParams.add(param);
+						hasChildElem = true;
 					}
 				}
 			}
@@ -147,14 +160,34 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		
 		builder.deleteCharAt(builder.length() - 1);
 		
-		if(CollectionUtils.isEmpty(step.getChildElements()))
+		if(!hasChildElem)
 		{
 			builder.append("/>");
 			return builder.toString();
 		}
 		
-		builder.append(">").append("\n").append(location.getIndentation());
-		builder.append("</").append(location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI)).append(":").append(nodeName).append(">");
+		builder.append(">").append("\n");
+		
+		String subElemIndent = location.getIndentation() + "\t";
+		
+		for(ParamInfo param : elemParams) 
+		{
+			builder.append(subElemIndent).append("<").append(param.getName()).append(">\n");
+			
+			if(firstParam)
+			{
+				builder.append(subElemIndent).append("\t###CUR###\n");
+				firstParam = false;
+			}
+			else
+			{
+				builder.append(subElemIndent).append("\t\n");
+			}
+			
+			builder.append(subElemIndent).append("</").append(param.getName()).append(">\n");
+		}
+		
+		builder.append(location.getIndentation()).append("</").append(prefix).append(":").append(nodeName).append(">");
 		
 		return builder.toString();
 	}
@@ -184,7 +217,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		{
 			for(ParamInfo param : step.getParams())
 			{
-				if(param.isMandatory())
+				if(param.isMandatory() && param.isAttributable())
 				{
 					builder.append(param.getName()).append("=\"\" ");
 				}
@@ -229,6 +262,87 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		}
 		
 		builder.append(">").append("</").append(nodeName).append(">");
+		
+		return builder.toString();
+	}
+
+	private String getPropReplacementText(BeanProperty prop, String nameWithHyphens, XmlFileLocation location)
+	{
+		StringBuilder builder = new StringBuilder();
+		String nodeName = null;
+		
+		if(location.getCurrentToken() == null)
+		{
+			nodeName = nameWithHyphens;
+			builder.append("<").append(nodeName);
+		}
+		else
+		{
+			nodeName = nameWithHyphens.startsWith(location.getName()) ? nameWithHyphens : prop.getName();
+			builder.append(nodeName);
+			
+			if(builder.toString().startsWith(location.getCurrentToken()))
+			{
+				builder.delete(0, location.getCurrentToken().length());
+			}
+		}
+		
+		if(XMLUtil.isAttributeType(prop.getType()))
+		{
+			if(!prop.isKeyProperty() || StringUtils.isEmpty(prop.getKeyName()))
+			{
+				builder.append(">").append("</").append(nodeName).append(">");
+				return builder.toString();
+			}
+			
+			builder.append(" ").append(prop.getKeyName()).append("=\"\" ");
+			builder.append(">").append("</").append(nodeName).append(">");
+			return builder.toString();
+		}
+		
+		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
+		BeanPropertyInfo beanPropertyInfo = beanInfoFactory.getBeanPropertyInfo(prop.getType());
+		boolean subElemFound = false;
+		boolean firstAttr = true;
+		
+		for(BeanProperty sprop : beanPropertyInfo.getProperties())
+		{
+			if(sprop.isIgnored())
+			{
+				continue;
+			}
+			
+			if(!XMLUtil.isAttributeType(sprop.getType()) || sprop.hasGroup(IAutomationConstants.GROUP_ELEMENT))
+			{
+				subElemFound = true;
+				continue;
+			}
+			
+			if(!sprop.isMandatory())
+			{
+				continue;
+			}
+			
+			if(firstAttr)
+			{
+				builder.append(" ").append(sprop.getName()).append("=\"###CUR###\"");
+				firstAttr = false;
+			}
+			else
+			{
+				builder.append(" ").append(sprop.getName()).append("=\"\"");
+			}
+		}
+		
+		//if no property found, which can be subelement of current element, self close the tag
+		if(!subElemFound)
+		{
+			builder.append("/>");
+			return builder.toString();
+		}
+
+		builder.append(">").append("\n").append(location.getIndentation());
+		builder.append("</").append(nodeName).append(">");
 		
 		return builder.toString();
 	}
@@ -333,6 +447,35 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 			return completions;
 		}
 		
+		//Check for bean properties
+		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
+		BeanPropertyInfo beanPropertyInfo = beanInfoFactory.getBeanPropertyInfo(parentElement.getElementType());
+		Set<String> childNames = parentElement.getChildNames();
+		
+		for(BeanProperty prop : beanPropertyInfo.getProperties())
+		{
+			if(prop.isReadOnly() || prop.isIgnored() || prop.hasGroup(IAutomationConstants.GROUP_ATTRIBUTE))
+			{
+				continue;
+			}
+			
+			String name = prop.getName();
+			
+			if(childNames.contains(name) && !prop.isMultiValued())
+			{
+				continue;
+			}
+			
+			String nameWithHyphens = name.replaceAll("([A-Z])", "-$1").toLowerCase();
+			
+			if(curToken != null && !name.toLowerCase().startsWith(curToken) && !nameWithHyphens.startsWith(curToken))
+			{
+				continue;
+			}
+			
+			completions.add( new IdeShortHandCompletion(this, nameWithHyphens, getPropReplacementText(prop, nameWithHyphens, location), name, prop.getDescription()) );
+		}
+		
 		return completions;
 	}
 
@@ -352,8 +495,6 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		
 		if(params != null)
 		{
-			Class<?> paramType = null;
-			
 			for(ParamInfo param : params)
 			{
 				if(elem.getAttribute(param.getName()) != null)
@@ -361,16 +502,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 					continue;
 				}
 				
-				try
-				{
-					paramType = CommonUtils.getClass(param.getType());
-				}catch(Exception ex)
-				{
-					logger.warn("Failed to determine type of attribute '{}' of element: {}. Type String: {}", param.getName(), elem.getName(), param.getType());
-					continue;
-				}
-				
-				if(param.getSourceType() == SourceType.NONE && !XMLUtil.isSupportedAttributeClass(paramType))
+				if(param.getSourceType() == SourceType.NONE && !param.isAttributable())
 				{
 					continue;
 				}
@@ -393,8 +525,41 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 					completions.add( new IdeShortHandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
 				}
 			}
+			
+			return completions;
 		}
 		
+		//check for bean properties
+		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
+		BeanPropertyInfo beanPropertyInfo = beanInfoFactory.getBeanPropertyInfo(elem.getElementType());
+		Set<String> childNames = elem.getChildNames();
+		
+		for(BeanProperty prop : beanPropertyInfo.getProperties())
+		{
+			if(prop.isReadOnly() || prop.isIgnored() || !XMLUtil.isSupportedAttributeClass(prop.getType())
+					|| prop.hasGroup(IAutomationConstants.GROUP_ELEMENT))
+			{
+				continue;
+			}
+			
+			String name = prop.getName();
+			
+			if(childNames.contains(name))
+			{
+				continue;
+			}
+			
+			if(StringUtils.isNotBlank(prefix) && !name.startsWith(prefix))
+			{
+				continue;
+			}
+			
+			name = StringUtils.isNotBlank(prefix) ? name.substring(prefix.length()) : name;
+			String attrCompletion = location.isFullElementGeneration() ? name + "=\"###CUR###\"" : name;
+			
+			completions.add( new IdeShortHandCompletion(this, prop.getName(), attrCompletion, prop.getName(), prop.getDescription()) );
+		}
+
 		return completions;
 	}
 

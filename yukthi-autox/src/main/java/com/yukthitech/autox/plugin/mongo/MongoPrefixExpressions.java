@@ -20,7 +20,7 @@ import java.util.Map;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.ContextMap;
-import com.yukthitech.autox.prefix.IPropertyPath;
+import com.yukthitech.autox.prefix.IExpressionPath;
 import com.yukthitech.autox.prefix.PrefixExprParam;
 import com.yukthitech.autox.prefix.PrefixExpression;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
@@ -42,9 +42,9 @@ public class MongoPrefixExpressions
 			@PrefixExprParam(name = "jel", type = "boolean", defaultValue = "false", 
 				description = "If set to true, instead of standard json parsing, query will be processed as JEL Json.")
 		})
-	public IPropertyPath mongo(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath mongo(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -69,9 +69,9 @@ public class MongoPrefixExpressions
 			@PrefixExprParam(name = "resource", type = "String", defaultValue = "Default mongo-resource", 
 				description = "Mongo-resource on which specified query has to be executed.")
 		})
-	public IPropertyPath mongoJs(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath mongoJs(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public Object getValue() throws Exception

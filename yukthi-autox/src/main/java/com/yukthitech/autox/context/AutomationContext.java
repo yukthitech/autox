@@ -32,7 +32,6 @@ import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.storage.PersistenceStorage;
-import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -89,11 +88,6 @@ public class AutomationContext
 	 * The test suite parser handler.
 	 */
 	private TestSuiteParserHandler testSuiteParserHandler;
-	
-	/**
-	 * Custom ui locators.
-	 */
-	private Map<String, CustomUiLocator> customUiLocators = new HashMap<>();
 	
 	/**
 	 * Test suite group being executed.
@@ -532,26 +526,6 @@ public class AutomationContext
 		this.testSuiteParserHandler = testSuiteParserHandler;
 	}
 
-	public void addCustomUiLocator(CustomUiLocator locator)
-	{
-		if(customUiLocators.containsKey(locator.getName()))
-		{
-			throw new InvalidArgumentException("A custom ui locator with specified name already exist: %s", locator.getName());
-		}
-		
-		this.customUiLocators.put(locator.getName(), locator);
-	}
-	
-	public void addOrReplaceCustomUiLocator(CustomUiLocator locator)
-	{
-		this.customUiLocators.put(locator.getName(), locator);
-	}
-
-	public CustomUiLocator getCustomUiLocator(String name)
-	{
-		return this.customUiLocators.get(name);
-	}
-	
 	public String getOverridableProp(String name)
 	{
 		String val = System.getProperty(name);

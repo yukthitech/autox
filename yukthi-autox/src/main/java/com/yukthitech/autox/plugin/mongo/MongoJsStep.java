@@ -16,6 +16,7 @@
 package com.yukthitech.autox.plugin.mongo;
 
 import com.yukthitech.autox.AbstractStep;
+import com.yukthitech.autox.Attributable;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -36,13 +37,13 @@ public class MongoJsStep extends AbstractStep
 	/**
 	 * Script to be executed. If the execution ends with a return statement, the same will be considered as output of this script, if not null.
 	 */
-	@Param(description = "Script to be executed.")
+	@Param(description = "Script to be executed.", attributable = Attributable.FALSE)
 	private String script;
 
 	/**
 	 * Mongo Resource to be used for query execution.
 	 */
-	@Param(description = "Mongo Resource to be used for query execution.")
+	@Param(description = "Mongo Resource to be used for query execution.", required = false)
 	private String mongoResourceName;
 
 	/**

@@ -44,7 +44,7 @@ public class PrefixExpressionContext
 	/**
 	 * Current parser in use.
 	 */
-	private PrefixExpressionDetails currentParser;
+	private PrefixExpressionDetails currentExpression;
 	
 	/**
 	 * Parameters passed to expression.
@@ -151,19 +151,19 @@ public class PrefixExpressionContext
 	 *
 	 * @return the current parser in use
 	 */
-	public PrefixExpressionDetails getCurrentParser()
+	public PrefixExpressionDetails getCurrentExpression()
 	{
-		return currentParser;
+		return currentExpression;
 	}
 
 	/**
 	 * Sets the current parser in use.
 	 *
-	 * @param currentParser the new current parser in use
+	 * @param currentExpression the new current parser in use
 	 */
-	void setCurrentParser(PrefixExpressionDetails currentParser)
+	void setCurrentExpression(PrefixExpressionDetails currentExpression)
 	{
-		this.currentParser = currentParser;
+		this.currentExpression = currentExpression;
 	}
 	
 	/**
@@ -193,5 +193,10 @@ public class PrefixExpressionContext
 	public String getParameter(String name)
 	{
 		return parameters.get(name.toLowerCase());
+	}
+	
+	public Map<String, String> getParameters()
+	{
+		return parameters;
 	}
 }

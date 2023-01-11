@@ -24,32 +24,47 @@ import javax.swing.border.EmptyBorder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.ide.state.PersistableState;
 import com.yukthitech.swing.EscapableDialog;
 import javax.swing.JCheckBox;
 
+@PersistableState(directState = true, fields = true)
 @Component
 public class RegexSandboxDialog extends EscapableDialog
 {
 	private static final long serialVersionUID = 1L;
 	
+	private static final Pattern GRP_NAME_PATTERN = Pattern.compile("\\?\\<(\\w+)\\>");
+	
 	private final JPanel pnl1 = new JPanel();
 	private final JLabel lblNewLabel = new JLabel("Regular Exp:");
+	
+	@PersistableState
 	private final JTextField fldRegex = new JTextField();
 	private final JLabel lblNewLabel_1 = new JLabel("Test Content:");
 	private final JScrollPane scrollPane = new JScrollPane();
-	private final JTextArea fldContent = new JTextArea();
+	
+	@PersistableState
+	private final JTextArea fldTestContent = new JTextArea();
 	private final JPanel panel = new JPanel();
-	private final JButton btnFind = new JButton("Find");
-	private final JButton btnMatch = new JButton("Match");
+	private final JButton btnFind = new JButton("Find All");
+	
+	private final JButton btnMatch = new JButton("Check for Match");
 	private final JLabel lblNewLabel_2 = new JLabel("Output:");
 	private final JScrollPane scrollPane_1 = new JScrollPane();
 	private final JTextArea fldOutput = new JTextArea();
 	private final JButton replaceBut = new JButton("Replace Matches");
 	private final JLabel lblNewLabel_3 = new JLabel("Replace With:");
 	private final JScrollPane scrollPane_2 = new JScrollPane();
+
+	@PersistableState
 	private final JTextArea replaceWithFld = new JTextArea();
 	private final JPanel panel_1 = new JPanel();
+	
+	@PersistableState
 	private final JCheckBox caseSensitiveCbox = new JCheckBox("Case Sensitive");
+	
+	@PersistableState
 	private final JCheckBox multiLineCbox = new JCheckBox("Match Multi Line");
 
 	/**
@@ -111,10 +126,10 @@ public class RegexSandboxDialog extends EscapableDialog
 		gbc_scrollPane.gridx = 1;
 		gbc_scrollPane.gridy = 2;
 		pnl1.add(scrollPane, gbc_scrollPane);
-		fldContent.setTabSize(3);
-		fldContent.setRows(4);
+		fldTestContent.setTabSize(3);
+		fldTestContent.setRows(4);
 		
-		scrollPane.setViewportView(fldContent);
+		scrollPane.setViewportView(fldTestContent);
 		
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
@@ -143,6 +158,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		gbc_panel.gridy = 4;
 		pnl1.add(panel, gbc_panel);
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		btnFind.setToolTipText("Finds all matches of regex in test content");
 		
 		btnFind.addActionListener(new ActionListener() 
 		{
@@ -153,6 +169,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		});
 		
 		panel.add(btnFind);
+		btnMatch.setToolTipText("Checks if test content fully matches with regex");
 		
 		btnMatch.addActionListener(new ActionListener() 
 		{
@@ -163,6 +180,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		});
 		
 		panel.add(btnMatch);
+		replaceBut.setToolTipText("Replaces regex in test-content with replace-with content.");
 		
 		panel.add(replaceBut);
 		
@@ -194,7 +212,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		scrollPane_1.setViewportView(fldOutput);
 	}
 	
-	private void addOutput(Matcher matcher, StringBuilder output)
+	private void addOutput(String patternStr, Matcher matcher, StringBuilder output)
 	{
 		output.append("Match [Index: " + matcher.start() + "]");
 		output.append("\n\tMatched Content: " + matcher.group(0));
@@ -205,6 +223,15 @@ public class RegexSandboxDialog extends EscapableDialog
 		{
 			output.append("\n\tGroup-" + i + ": " + matcher.group(i));
 		}
+		
+		Matcher grpNameMatcher = GRP_NAME_PATTERN.matcher(patternStr);
+		
+		while(grpNameMatcher.find())
+		{
+			String grpName = grpNameMatcher.group(1);
+			
+			output.append("\n\tGroup [" + grpName + "]: " + matcher.group(grpName));
+		}
 
 		output.append("\n\n");
 	}
@@ -214,7 +241,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		fldOutput.setText("");
 		
 		String patternStr = fldRegex.getText();
-		String content = fldContent.getText();
+		String content = fldTestContent.getText();
 		
 		if(StringUtils.isEmpty(patternStr))
 		{
@@ -250,7 +277,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		{
 			while(matcher.find())
 			{
-				addOutput(matcher, output);
+				addOutput(patternStr, matcher, output);
 			}
 			
 			if(output.length() == 0)
@@ -281,7 +308,7 @@ public class RegexSandboxDialog extends EscapableDialog
 		{
 			if(matcher.matches())
 			{
-				addOutput(matcher, output);
+				addOutput(patternStr, matcher, output);
 			}
 			else
 			{

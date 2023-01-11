@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.Attributable;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.ccg.xml.XMLUtil;
@@ -99,13 +100,15 @@ public class ParamInfo implements Comparable<ParamInfo>
 		this.attrName = paramAnnot.attrName();
 		this.defaultValue = paramAnnot.defaultValue();
 		
-		Type genericType = field.getType();
+		Type genericType = field.getGenericType();
 		
 		if(genericType instanceof Class)
 		{
 			Class<?> cls = (Class<?>) genericType; 
 			type = cls.getName();
-			attributable = Object.class.equals(cls) || XMLUtil.isSupportedAttributeClass((Class<?>) genericType);
+			
+			attributable = (Object.class.equals(cls) || XMLUtil.isSupportedAttributeClass(cls))
+					&& (paramAnnot.attributable() == Attributable.DEFAULT || paramAnnot.attributable() == Attributable.TRUE);
 		}
 		else if(genericType instanceof ParameterizedType)
 		{
@@ -120,6 +123,9 @@ public class ParamInfo implements Comparable<ParamInfo>
 			}
 			
 			builder.append(">");
+			
+			type = builder.toString();
+			attributable = (paramAnnot.attributable() == Attributable.TRUE);
 		}
 		else
 		{

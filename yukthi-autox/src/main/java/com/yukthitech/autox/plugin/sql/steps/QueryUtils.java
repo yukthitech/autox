@@ -38,7 +38,6 @@ import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -84,11 +83,9 @@ public class QueryUtils
 		{
 			expression = matcher.group(1);
 			
-			if(IAutomationConstants.EXPRESSION_PATTERN.matcher(expression).find() ||
-					IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(expression).find()
-					)
+			if(PrefixExpressionFactory.isExpression(expression))
 			{
-				value = PrefixExpressionFactory.getExpressionFactory().parseExpression(context, expression);
+				value = PrefixExpressionFactory.getExpressionFactory().getValueByExpression(context, expression);
 			}
 			else
 			{
@@ -152,7 +149,7 @@ public class QueryUtils
 		}
 		
 		context.setAttribute(attrName, transformDetails);
-		return PrefixExpressionFactory.getExpressionFactory().parseExpression(context, expression);
+		return PrefixExpressionFactory.getExpressionFactory().getValueByExpression(context, expression);
 	}
 	
 	private static <T> T executeFetch(AutomationContext context, String dataSourceName, String query, ResultSetHandler<T> handler) throws SQLException

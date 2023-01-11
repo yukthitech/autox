@@ -23,6 +23,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.common.UiFreeMarkerMethods;
+import com.yukthitech.autox.test.TestCaseFailedException;
 
 /**
  * Waits for locator to be part of the page and is visible.
@@ -87,12 +88,18 @@ public class UiGetValueStep extends AbstractParentUiStep
 	{
 		exeLogger.trace("Fetching ui element value for locator - {} [Display Value Flag: {}]", getLocatorWithParent(locator), displayValue);
 		
-		String elementValue = displayValue? 
-				UiFreeMarkerMethods.uiDisplayValue(locator, parentElement, driverName) : 
-				UiFreeMarkerMethods.uiValue(locator, parentElement, driverName);
-		
-		exeLogger.debug("Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
-		context.setAttribute(name, elementValue);
+		try
+		{
+			String elementValue = displayValue? 
+					UiFreeMarkerMethods.uiDisplayValue(locator, parentElement, driverName) : 
+					UiFreeMarkerMethods.uiValue(locator, parentElement, driverName);
+			
+			exeLogger.debug("Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
+			context.setAttribute(name, elementValue);
+		}catch(Exception ex)
+		{
+			throw new TestCaseFailedException(this, "Failed to fetch the value. Error: {}", "" + ex, ex);
+		}
 	}
 
 	/* (non-Javadoc)

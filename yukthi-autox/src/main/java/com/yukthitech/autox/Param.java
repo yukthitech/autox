@@ -71,4 +71,10 @@ public @interface Param
 	 * @return
 	 */
 	public Class<?> expectedType() default Object.class;
+	
+	/**
+	 * Flag indicating if this param can be specified as attribute.
+	 * @return
+	 */
+	public Attributable attributable() default Attributable.DEFAULT;
 }

@@ -36,7 +36,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  */
 @Executable(name = "uiExecuteJs", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, 
 	message = "Can be used to execute js code. If the result needs to be set on context, from js code 'return' should be used to return approp value.")
-public class UiExecuteJsStep extends AbstractParentUiStep
+public class UiExecuteJsStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 

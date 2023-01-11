@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.DbUtils;
 
 import com.yukthitech.autox.AbstractStep;
+import com.yukthitech.autox.Attributable;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -46,13 +47,13 @@ public class DdlQueryStep extends AbstractStep
 	/**
 	 * Ddl query to execute.
 	 */
-	@Param(description = "DDL query to execute")
+	@Param(description = "DDL query to execute", attributable = Attributable.FALSE)
 	private String query;
 	
 	/**
 	 * Name of the data source to use.
 	 */
-	@Param(description = "Data source to be used for sql execution.")
+	@Param(description = "Data source to be used for sql execution.", required = false)
 	private String dataSourceName;
 	
 	@Param(description = "If set to true, exceptions during query execution will be ignored. Helpful to rest the db without assuming initial state.")

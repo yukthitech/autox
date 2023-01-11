@@ -147,7 +147,7 @@ public class DebugFlowManager
 		{
 			try
 			{
-				Object res = PrefixExpressionFactory.getExpressionFactory().parseExpressionString(AutomationContext.getInstance(), point.getCondition());
+				Object res = PrefixExpressionFactory.getExpressionFactory().getValueByExpressionString(AutomationContext.getInstance(), point.getCondition());
 				
 				//if condition is not evaluated as true
 				if(!"true".equalsIgnoreCase("" + res))

@@ -62,7 +62,7 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	public void addStepDataList(Object data)
 	{
 		PrefixExpressionFactory expressionFactory = PrefixExpressionFactory.getExpressionFactory();
-		Object result = expressionFactory.parseExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
+		Object result = expressionFactory.getValueByExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
 		
 		if(!(result instanceof List))
 		{

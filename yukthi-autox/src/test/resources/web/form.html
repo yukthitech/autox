@@ -1,6 +1,26 @@
 <html>
 	<head>
 		<script type="text/javascript" src="index.js"></script>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<!------ Include the above in your HEAD tag ---------->
+		
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>		
+		
+		<style>
+			td
+			{
+				padding: 10px;
+			}
+			
+			table
+			{
+				margin-left: 30px;
+			}
+		</style>
 	</head>
 	<body>
 		<div id="sampleForm">
@@ -41,10 +61,55 @@
 					</td>
 				</tr>
 
+				<tr>
+					<td>Vehicle:</td>
+					<td>
+				        <select id="vehicle" class="form-control select2">
+				           <option>Select</option> 
+				           <option value="car">Car</option> 
+				           <option value="bike">Bike</option> 
+				           <option value="scooter">Scooter</option> 
+				           <option value="cycle">Cycle</option> 
+				           <option value="horse">Horse</option>
+				           <option value="train">Train</option>
+				           <option value="plane">Plane</option>
+				           <option value="chopper">Chopper</option>
+				           <option value="ship">Ship</option>
+				           <option value="boat">Boat</option>
+				           <option value="rocket">Rocket</option> 
+				        </select>
+						<script>
+						    $('.select2').select2();
+						</script>
+					</td>
+				</tr>
+
+				<tr>
+					<td>Ranking:</td>
+					<td>
+				        <select id="ranking" class="form-control">
+				           <option>Select</option> 
+				           <option value="1">One</option> 
+				           <option value="2">Two</option> 
+				           <option value="3">Three</option> 
+				           <option value="4">Four</option> 
+				           <option value="5">Five</option>
+				           <option value="6">Six</option>
+				           <option value="7">Seven</option>
+				           <option value="8">Eight</option>
+				           <option value="9">Nine</option>
+				           <option value="10">Ten</option>
+				        </select>
+						<script>
+						    $('#ranking').select2();
+						</script>
+					</td>
+				</tr>
 			</table>
 		</div>
 		<br/><br/>
 		
 		<a id="downloadLink" href="Exercise1.png" download>Download</a>
+		
 	</body>
 </html>

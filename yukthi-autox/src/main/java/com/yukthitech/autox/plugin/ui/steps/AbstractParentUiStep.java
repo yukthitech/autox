@@ -15,20 +15,16 @@
  */
 package com.yukthitech.autox.plugin.ui.steps;
 
-import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Param;
 
 /**
- * Base abstract class for ui steps, which will hold optional parent element.
+ * Base abstract class for ui steps with optional parent element.
  * @author akiran
  */
-public abstract class AbstractParentUiStep extends AbstractStep
+public abstract class AbstractParentUiStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
-	@Param(description = "Name of the driver to be used for the step. Defaults to default driver.", required = false)
-	protected String driverName;
-	
 	/**
 	 * Name of the parent element under which locator needs to be searched. If not specified, fetches globally.
 	 */
@@ -43,11 +39,6 @@ public abstract class AbstractParentUiStep extends AbstractStep
 	public void setParentElement(String parentElement)
 	{
 		this.parentElement = parentElement;
-	}
-	
-	public void setDriverName(String driverName)
-	{
-		this.driverName = driverName;
 	}
 	
 	/**

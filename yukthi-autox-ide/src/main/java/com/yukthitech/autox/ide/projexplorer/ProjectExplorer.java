@@ -244,11 +244,16 @@ public class ProjectExplorer extends JPanel
 				if(treeNode instanceof FileTreeNode)
 				{
 					FileTreeNode fileNode = (FileTreeNode) treeNode;
+					boolean treeHasFocus = tree.hasFocus();
 					
 					if(editorSyncButton.isSelected())
 					{
 						fileEditorTabbedPane.selectProjectFile(fileNode.getProject(), fileNode.getFile());
-						tree.requestFocus();
+						
+						if(treeHasFocus)
+						{
+							tree.requestFocus();
+						}
 					}
 				}
 			}

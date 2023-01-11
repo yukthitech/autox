@@ -5,13 +5,11 @@
 	
 	<test-suite name="">
 		<test-case name="">
-			<description></description>
-
-			<wrap:steps>
-			</wrap:steps>
-
-			<wrap:validations>
-			</wrap:validations>
+			<description>
+				
+			</description>
+			
+			
 		</test-case>
 	</test-suite>
 

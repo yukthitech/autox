@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.plugin.rest.steps;
 
+import com.yukthitech.autox.Attributable;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -37,7 +38,8 @@ public abstract class AbstractRestWithBodyStep<T extends RestRequestWithBody<T>>
 	/**
 	 * Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.
 	 */
-	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.", required = false, sourceType = SourceType.EXPRESSION)
+	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.", 
+			required = false, sourceType = SourceType.EXPRESSION, attributable = Attributable.FALSE)
 	private Object body;
 	
 	/**

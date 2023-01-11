@@ -30,7 +30,8 @@ import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.debug.server.LiveDebugPoint;
-import com.yukthitech.autox.test.CustomUiLocator;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.CustomPrefixExpression;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
@@ -78,15 +79,26 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 		
 		if(CollectionUtils.isNotEmpty(stepHolder.getCustomUiLocators()))
 		{
-			for(CustomUiLocator customUiLocator : stepHolder.getCustomUiLocators())
+			for(CustomPrefixExpression customUiLocator : stepHolder.getCustomUiLocators())
 			{
 				logger.debug("Reloading custom-ui-locator: {}", customUiLocator.getName());
-				automationContext.addOrReplaceCustomUiLocator(customUiLocator);
+				PrefixExpressionFactory.getExpressionFactory().addOrReplaceUiLocator(customUiLocator);
 			}
 			
 			reloadingDone = true;
 		}
 		
+		if(CollectionUtils.isNotEmpty(stepHolder.getCustomPrefixExpressions()))
+		{
+			for(CustomPrefixExpression customPrefixExpr : stepHolder.getCustomPrefixExpressions())
+			{
+				logger.debug("Reloading custom-prefix-expression: {}", customPrefixExpr.getName());
+				PrefixExpressionFactory.getExpressionFactory().addOrReplacePrefixExpression(customPrefixExpr);
+			}
+			
+			reloadingDone = true;
+		}
+
 		if(CollectionUtils.isNotEmpty(stepHolder.getFunctions()))
 		{
 			String targetTestSuiteName = steps.getTargetTestSuite();

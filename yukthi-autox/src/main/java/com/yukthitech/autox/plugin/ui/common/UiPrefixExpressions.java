@@ -16,7 +16,7 @@
 package com.yukthitech.autox.plugin.ui.common;
 
 import com.yukthitech.autox.plugin.ui.steps.UiSetValueStep;
-import com.yukthitech.autox.prefix.IPropertyPath;
+import com.yukthitech.autox.prefix.IExpressionPath;
 import com.yukthitech.autox.prefix.PrefixExprParam;
 import com.yukthitech.autox.prefix.PrefixExpression;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
@@ -42,9 +42,9 @@ public class UiPrefixExpressions
 			 description = "If set to true, instead of value, display value will be fetched (currently non-select fields will return value itself).")
 
 		})
-	public IPropertyPath uiVal(PrefixExpressionContext parserContext, String expression)
+	public IExpressionPath uiVal(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IPropertyPath()
+		return new IExpressionPath()
 		{
 			@Override
 			public void setValue(Object value) throws Exception

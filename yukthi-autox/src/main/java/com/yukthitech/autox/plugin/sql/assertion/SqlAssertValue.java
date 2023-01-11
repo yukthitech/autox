@@ -181,7 +181,7 @@ public class SqlAssertValue extends AbstractValidation
 
 					if(convertExpression != null)
 					{
-						res = PrefixExpressionFactory.getExpressionFactory().parseExpression(context, convertExpression, res);
+						res = PrefixExpressionFactory.getExpressionFactory().getValueByExpression(context, convertExpression, res);
 					}
 					
 					return res;

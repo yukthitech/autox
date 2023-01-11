@@ -154,7 +154,7 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 				prop = "prop: " + prop;
 			}
 			
-			Object value = exprFactory.parseExpression(automationContext, info.value);
+			Object value = exprFactory.getValueByExpression(automationContext, info.value);
 			exprFactory.setExpressionValue(automationContext, prop, value, bean);
 		}
 		
