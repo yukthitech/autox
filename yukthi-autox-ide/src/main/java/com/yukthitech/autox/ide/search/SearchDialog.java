@@ -30,15 +30,15 @@ import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.search.xml.XmlElement;
 import com.yukthitech.autox.ide.state.PersistableState;
-import com.yukthitech.swing.EscapableDialog;
+import com.yukthitech.autox.ide.swing.IdeDialogPanel;
 import com.yukthitech.swing.HtmlPanel;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.doc.ClassDoc;
 import com.yukthitech.utils.doc.DocInfoGenerator;
 
 @Component
-@PersistableState(fields = true)
-public class SearchDialog extends EscapableDialog
+@PersistableState(directState = true, fields = true)
+public class SearchDialog extends IdeDialogPanel
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -60,11 +60,12 @@ public class SearchDialog extends EscapableDialog
 	
 	public SearchDialog()
 	{
-		setTitle("File Search");
-		setBounds(100, 100, 521, 328);
-		getContentPane().setLayout(new BorderLayout());
+		super.setTitle("File Search");
+		super.setDialogBounds(100, 100, 521, 328);
+		
+		setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		
 		contentPanel.add(tabbedPane, BorderLayout.CENTER);
@@ -94,6 +95,7 @@ public class SearchDialog extends EscapableDialog
 	{
 		textSearchPanel.resetForDisplay();
 		xmlSearchPanel.resetForDisplay();
-		super.setVisible(true);
+		
+		super.displayInDialog();
 	}
 }

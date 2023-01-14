@@ -103,10 +103,16 @@ public class FileEditorTokenFactory extends TokenMakerFactory
 
 		public Token getTokenList(Segment text, int initialTokenType, int startOffset)
 		{
-			Token res = actualTokenMaker.getTokenList(text, initialTokenType, startOffset);
-			res = fileManager.subtokenize(res);
-			
-			return res;
+			try
+			{
+				Token res = actualTokenMaker.getTokenList(text, initialTokenType, startOffset);
+				res = fileManager.subtokenize(res);
+				
+				return res;
+			}catch(RuntimeException ex)
+			{
+				throw ex;
+			}
 		}
 
 		public boolean isIdentifierChar(int languageIndex, char ch)

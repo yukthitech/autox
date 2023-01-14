@@ -16,6 +16,7 @@
 package com.yukthitech.autox.ide;
 
 import java.awt.Color;
+import java.awt.Font;
 
 import org.apache.commons.text.WordUtils;
 
@@ -23,6 +24,8 @@ import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 public interface IIdeConstants
 {
+	Font DEFAULT_FONT = new Font("Consolas", Font.PLAIN, 13);
+	
 	public String ELEMENT_TYPE_STEP = "$";
 	
 	public FreeMarkerEngine FREE_MARKER_ENGINE = new FreeMarkerEngine();

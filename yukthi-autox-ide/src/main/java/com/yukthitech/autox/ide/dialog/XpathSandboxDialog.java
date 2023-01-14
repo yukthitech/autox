@@ -16,6 +16,7 @@
 package com.yukthitech.autox.ide.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -28,7 +29,6 @@ import java.nio.charset.Charset;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -49,12 +49,13 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.ide.state.PersistableState;
+import com.yukthitech.autox.ide.swing.IdeDialogPanel;
 import com.yukthitech.utils.CommonUtils;
 
-import java.awt.FlowLayout;
-
 @Component
-public class XpathSandboxDialog extends JDialog
+@PersistableState(directState = true, fields = false)
+public class XpathSandboxDialog extends IdeDialogPanel
 {
 	private static final long serialVersionUID = 1L;
 
@@ -99,11 +100,14 @@ public class XpathSandboxDialog extends JDialog
 			throw new IllegalStateException("An error occurred while loading help content", ex);
 		}
 
-		setTitle("JXPath Sandbox");
-		setBounds(100, 100, 958, 597);
-		getContentPane().setLayout(new BorderLayout());
+		super.setTitle("JXPath Sandbox");
+		super.setDialogBounds(100, 100, 958, 597);
+		
+		setLayout(new BorderLayout());
+		
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		add(contentPanel, BorderLayout.CENTER);
+		
 		contentPanel.setLayout(new BorderLayout(0, 0));
 
 		contentPanel.add(tabbedPane, BorderLayout.CENTER);
@@ -391,7 +395,7 @@ public class XpathSandboxDialog extends JDialog
 
 	public void display()
 	{
-		super.setVisible(true);
+		super.displayInDialog();
 	}
 
 	public void display(String attrName, String value)
@@ -420,6 +424,6 @@ public class XpathSandboxDialog extends JDialog
 		contextJsonFld.setText(formattedJson);
 		xpathFld.setText("/attr/" + attrName);
 		
-		super.setVisible(true);
+		this.display();
 	}
 }

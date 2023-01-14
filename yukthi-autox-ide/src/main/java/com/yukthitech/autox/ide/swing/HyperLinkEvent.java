@@ -13,17 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.swing;
+package com.yukthitech.autox.ide.swing;
 
 /**
- * Listener to listen hyper link click events.
+ * Hyper link click event object. 
  * @author akiran
  */
-public interface IHperLinkListener
+public class HyperLinkEvent
 {
 	/**
-	 * Invoked when hyper link is clicked.
-	 * @param event
+	 * Href of the hyperlink.
 	 */
-	public void onClick(HyperLinkEvent event);
+	private String href;
+
+	/**
+	 * Instantiates a new hyper link event.
+	 *
+	 * @param href the href
+	 */
+	public HyperLinkEvent(String href)
+	{
+		this.href = href;
+	}
+	
+	/**
+	 * Gets the href of the hyperlink.
+	 *
+	 * @return the href of the hyperlink
+	 */
+	public String getHref()
+	{
+		return href;
+	}
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.swing;
+package com.yukthitech.autox.ide.swing;
 
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;

@@ -18,7 +18,10 @@ package com.yukthitech.autox.ide.xmlfile;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenImpl;
+
+import com.yukthitech.utils.ObjectWrapper;
 
 public class RtaTokenBuilder
 {
@@ -56,13 +59,13 @@ public class RtaTokenBuilder
 		if(startOffset > lastHeadOffset)
 		{
 			gap = lastHeadOffset - this.offset;
-			resTokens.add(new TokenImpl(text, this.lastHeadOffset, startOffset - 1, docOffset + gap, source.getType(), source.getLanguageIndex()));
+			resTokens.add(new IdeTokenImpl(text, this.lastHeadOffset, startOffset - 1, docOffset + gap, source.getType(), source.getLanguageIndex()));
 		}
 		
 		//add sub token
 		gap = startOffset - this.offset;
 		
-		TokenImpl subtoken = new TokenImpl(text, startOffset, endOffset - 1, docOffset + gap, source.getType(), source.getLanguageIndex());
+		TokenImpl subtoken = new IdeTokenImpl(text, startOffset, endOffset - 1, docOffset + gap, source.getType(), source.getLanguageIndex());
 		resTokens.add(subtoken);
 		
 		//update the last offsets
@@ -75,7 +78,7 @@ public class RtaTokenBuilder
 		{
 			int gap = lastHeadOffset - this.offset;
 			
-			TokenImpl tailToken = new TokenImpl(text, this.lastHeadOffset, endOffset - 1, docOffset + gap, source.getType(), source.getLanguageIndex());
+			TokenImpl tailToken = new IdeTokenImpl(text, this.lastHeadOffset, endOffset - 1, docOffset + gap, source.getType(), source.getLanguageIndex());
 			resTokens.add(tailToken);
 			
 			tailToken.setNextToken(source.getNextToken());
@@ -87,7 +90,7 @@ public class RtaTokenBuilder
 		return !resTokens.isEmpty();
 	}
 	
-	public TokenImpl toToken()
+	public TokenImpl toToken(ObjectWrapper<Token> tailToken)
 	{
 		TokenImpl head = null;
 		TokenImpl cur = null;
@@ -103,6 +106,10 @@ public class RtaTokenBuilder
 			cur.setNextToken(token);
 			cur = token;
 		}
+		
+		//to last token attach next token from source
+		cur.setNextToken(source.getNextToken());
+		tailToken.setValue(cur);
 		
 		return head;
 	}

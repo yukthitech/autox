@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -25,12 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.state.PersistableState;
-import com.yukthitech.swing.EscapableDialog;
-import javax.swing.JCheckBox;
+import com.yukthitech.autox.ide.swing.IdeDialogPanel;
 
 @PersistableState(directState = true, fields = true)
 @Component
-public class RegexSandboxDialog extends EscapableDialog
+public class RegexSandboxDialog extends IdeDialogPanel
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -73,13 +73,15 @@ public class RegexSandboxDialog extends EscapableDialog
 	public RegexSandboxDialog()
 	{
 		setTitle("Regular Expression Sandbox");
+		
 		fldRegex.setFont(new Font("Tahoma", Font.BOLD, 12));
 		fldRegex.setMargin(new Insets(5, 5, 5, 5));
 		fldRegex.setColumns(10);
-		setBounds(100, 100, 749, 448);
-		getContentPane().setLayout(new BorderLayout());
+		super.setDialogBounds(100, 100, 749, 448);
+		setLayout(new BorderLayout());
 		pnl1.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(pnl1, BorderLayout.CENTER);
+		add(pnl1, BorderLayout.CENTER);
+		
 		GridBagLayout gbl_pnl1 = new GridBagLayout();
 		gbl_pnl1.columnWidths = new int[]{0, 0, 0};
 		gbl_pnl1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
@@ -321,6 +323,6 @@ public class RegexSandboxDialog extends EscapableDialog
 	
 	public void display()
 	{
-		super.setVisible(true);
+		super.displayInDialog();
 	}
 }

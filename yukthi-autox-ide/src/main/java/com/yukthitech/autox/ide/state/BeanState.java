@@ -34,6 +34,7 @@ import javax.swing.JTextField;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
+import com.yukthitech.autox.ide.swing.IdeDialogPanel;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -68,6 +69,7 @@ public class BeanState implements Serializable
 	static
 	{
 		register(Window.class, Rectangle.class, "bounds", (wind, bounds) -> wind.setBounds(bounds), wind -> wind.getBounds());
+		register(IdeDialogPanel.class, Rectangle.class, "dialogBounds", (pnl, bounds) -> pnl.setDialogBounds(bounds), pnl -> pnl.getDialogBounds());
 		
 		register(JTextField.class, String.class, "value", (fld, txt) -> fld.setText(txt), fld -> fld.getText());
 		register(JTextArea.class, String.class, "value", (fld, txt) -> fld.setText(txt), fld -> fld.getText());

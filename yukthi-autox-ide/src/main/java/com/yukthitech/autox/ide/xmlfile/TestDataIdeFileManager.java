@@ -36,6 +36,7 @@ import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.ObjectWrapper;
 
 /**
  * Ide file manager for test-data files.
@@ -251,26 +252,32 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 		}
 	}
 	
-	private Token subtokenizeText(Token token)
+	private Token subtokenizeText(Token token, ObjectWrapper<Token> tailToken)
 	{
-		TokenImpl tokenImpl = (TokenImpl) token;
-		String content = token.getLexeme();
-		
-		RtaTokenBuilder tokenBuilder = new RtaTokenBuilder(tokenImpl);
-		int tokenStart = token.getTextOffset();
-		
-		TestDataFileTokenizer.parse(content, tokenStart, xmlToken -> 
+		try
 		{
-			tokenBuilder.addSubtoken(xmlToken.startOffset, xmlToken.endOffset);
-		});
-		
-		if(!tokenBuilder.hasSubtokens())
+			TokenImpl tokenImpl = (TokenImpl) token;
+			String content = token.getLexeme();
+			
+			RtaTokenBuilder tokenBuilder = new RtaTokenBuilder(tokenImpl);
+			int tokenStart = token.getTextOffset();
+			
+			TestDataFileTokenizer.parse(content, tokenStart, xmlToken -> 
+			{
+				tokenBuilder.addSubtoken(xmlToken.startOffset, xmlToken.endOffset);
+			});
+			
+			if(!tokenBuilder.hasSubtokens())
+			{
+				return token;
+			}
+			
+			tokenBuilder.appendTailToken();
+			return tokenBuilder.toToken(tailToken);
+		}catch(RuntimeException ex)
 		{
-			return token;
+			throw ex;
 		}
-		
-		tokenBuilder.appendTailToken();
-		return tokenBuilder.toToken();
 	}
 	
 	public static void printTokenTree(Token token)
@@ -317,7 +324,8 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 			
 			if(TEXT_TOKEN_TYPES.contains(curToken.getType()))
 			{
-				Token newToken = subtokenizeText(curToken);
+				ObjectWrapper<Token> tailToken = new ObjectWrapper<>();
+				Token newToken = subtokenizeText(curToken, tailToken);
 				
 				//if no change in cur token
 				if(newToken == curToken)
@@ -338,7 +346,10 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 					((TokenImpl) prevToken).setNextToken(newToken);
 				}
 				
-				curToken = newToken;
+				//move to the end of newly created sub token list
+				prevToken = tailToken.getValue();
+				curToken = prevToken.getNextToken();
+				continue;
 			}
 			
 			prevToken = curToken;

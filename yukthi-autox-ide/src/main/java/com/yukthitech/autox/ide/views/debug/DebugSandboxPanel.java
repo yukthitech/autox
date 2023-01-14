@@ -47,9 +47,9 @@ import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.common.ServerMssgEvalExprResult;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.swing.HyperLinkEvent;
+import com.yukthitech.autox.ide.swing.HyperLinkEvent;
+import com.yukthitech.autox.ide.swing.YukthiHtmlPane;
 import com.yukthitech.swing.IconButton;
-import com.yukthitech.swing.YukthiHtmlPane;
 import com.yukthitech.utils.CommonUtils;
 
 public class DebugSandboxPanel extends JPanel

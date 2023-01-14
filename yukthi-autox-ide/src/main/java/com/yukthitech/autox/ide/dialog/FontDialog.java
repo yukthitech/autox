@@ -18,6 +18,7 @@ package com.yukthitech.autox.ide.dialog;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
@@ -40,7 +41,6 @@ import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -48,6 +48,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -58,25 +59,27 @@ import javax.swing.event.ListSelectionListener;
 
 import org.springframework.stereotype.Service;
 
-import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.swing.SearchableList;
+import com.yukthitech.autox.ide.IIdeConstants;
+import com.yukthitech.autox.ide.state.PersistableState;
+import com.yukthitech.autox.ide.swing.IdeDialogPanel;
+import com.yukthitech.autox.ide.swing.SearchableList;
 import com.yukthitech.utils.CaseInsensitiveComparator;
-import javax.swing.ListSelectionModel;
 
 @Service
-public class FontDialog extends JDialog
+@PersistableState
+public class FontDialog extends IdeDialogPanel
 {
 	private static final long serialVersionUID = 1L;
 
-	private static class FontCellRenderer extends JLabel implements ListCellRenderer<Font>
+	private static class FontCellRenderer extends JLabel implements ListCellRenderer<FontWrapper>
 	{
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public Component getListCellRendererComponent(JList<? extends Font> list, Font value, int index, boolean isSelected, boolean cellHasFocus)
+		public Component getListCellRendererComponent(JList<? extends FontWrapper> list, FontWrapper value, int index, boolean isSelected, boolean cellHasFocus)
 		{
-			super.setFont(value);
-			super.setText(value.getName());
+			super.setFont(value.font);
+			super.setText(value.font.getName());
 			super.setOpaque(true);
 			
 			if(isSelected)
@@ -93,13 +96,58 @@ public class FontDialog extends JDialog
 			return this;
 		}
 	}
+	
+	private static class FontWrapper
+	{
+		private Font font;
+
+		public FontWrapper(Font font)
+		{
+			this.font = font;
+		}
+		
+		public String getName()
+		{
+			return font.getName();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj)
+		{
+			if(obj == this)
+			{
+				return true;
+			}
+
+			if(!(obj instanceof FontDialog.FontWrapper))
+			{
+				return false;
+			}
+
+			FontDialog.FontWrapper other = (FontDialog.FontWrapper) obj;
+			return font.getName().equals(other.font.getName());
+		}
+
+		/* (non-Javadoc)
+		 * @see java.lang.Object#hashcode()
+		 */
+		@Override
+		public int hashCode()
+		{
+			return font.getName().hashCode();
+		}
+		
+	}
 
 	private final JPanel contentPanel = new JPanel();
 	private final JLabel lblFont = new JLabel("Font: ");
 	private final JLabel lblSize = new JLabel("Size:");
 	private final JScrollPane scrollPane = new JScrollPane();
-	private final JList<Font> fldFontLst = new SearchableList<Font>(this::searchFont);
-	private DefaultListModel<Font> fontListModel = new DefaultListModel<>();
+	private final JList<FontWrapper> fldFontLst = new SearchableList<FontWrapper>(this::searchFont);
+	private DefaultListModel<FontWrapper> fontListModel = new DefaultListModel<>();
 
 	private final JPanel panel = new JPanel();
 	private final JCheckBox chckbxBold = new JCheckBox("Bold");
@@ -109,7 +157,7 @@ public class FontDialog extends JDialog
 
 	private Font resFont = null;
 	
-	private TreeMap<String, Font> fontMap = new TreeMap<String, Font>(new CaseInsensitiveComparator());
+	private TreeMap<String, FontWrapper> fontMap = new TreeMap<String, FontWrapper>(new CaseInsensitiveComparator());
 
 	/**
 	 * Create the dialog.
@@ -118,7 +166,9 @@ public class FontDialog extends JDialog
 	{
 		super.setModalityType(ModalityType.APPLICATION_MODAL);
 
-		setTitle("Font Dialog");
+		super.setTitle("Font Dialog");
+		super.setDialogBounds(100, 100, 450, 490);
+
 		fldSize.addFocusListener(new FocusAdapter()
 		{
 			@Override
@@ -127,11 +177,11 @@ public class FontDialog extends JDialog
 				fontChanged(false);
 			}
 		});
+		
 		fldSize.setColumns(10);
-		setBounds(100, 100, 450, 490);
-		getContentPane().setLayout(new BorderLayout());
+		setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
 		gbl_contentPanel.columnWidths = new int[] { 0, 0, 0 };
 		gbl_contentPanel.rowHeights = new int[] { 0, 0, 0, 0, 0 };
@@ -215,7 +265,7 @@ public class FontDialog extends JDialog
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+			add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("OK");
 				okButton.addActionListener(new ActionListener()
@@ -229,12 +279,11 @@ public class FontDialog extends JDialog
 							return;
 						}
 
-						FontDialog.this.setVisible(false);
+						FontDialog.this.closeDialog();
 					}
 				});
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
@@ -242,7 +291,7 @@ public class FontDialog extends JDialog
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						FontDialog.this.setVisible(false);
+						FontDialog.this.closeDialog();
 					}
 				});
 				cancelButton.setActionCommand("Cancel");
@@ -258,21 +307,22 @@ public class FontDialog extends JDialog
 	private void loadFonts()
 	{
 		String fontNames[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-		List<Font> fonts = new ArrayList<Font>();
+		List<FontWrapper> fonts = new ArrayList<>();
 		Font font = null;
 		
 		for(String name : fontNames)
 		{
 			font = new Font(name, Font.PLAIN, 16);
+			FontWrapper wrapper = new FontWrapper(font);
 			
-			fontMap.put(name, font);
-			fonts.add(font);
+			fontMap.put(name, wrapper);
+			fonts.add(wrapper);
 		}
 
-		Collections.sort(fonts, new Comparator<Font>()
+		Collections.sort(fonts, new Comparator<FontWrapper>()
 		{
 			@Override
-			public int compare(Font o1, Font o2)
+			public int compare(FontWrapper o1, FontWrapper o2)
 			{
 				return o1.getName().compareTo(o2.getName());
 			}
@@ -283,7 +333,7 @@ public class FontDialog extends JDialog
 
 	private Font fontChanged(boolean showErr)
 	{
-		Font font = fldFontLst.getSelectedValue();
+		FontWrapper font = fldFontLst.getSelectedValue();
 
 		if(font == null)
 		{
@@ -294,7 +344,7 @@ public class FontDialog extends JDialog
 			return null;
 		}
 
-		String fontName = font.getFamily();
+		String fontName = font.getName();
 		int flags = Font.PLAIN;
 
 		if(chckbxBold.isSelected())
@@ -330,40 +380,41 @@ public class FontDialog extends JDialog
 			return null;
 		}
 
-		font = new Font(fontName, flags, size);
-		lblSample.setFont(font);
+		Font newFont = new Font(fontName, flags, size);
+		lblSample.setFont(newFont);
 		lblSample.setText("AbcZ.. abcz... 0123");
 
-		return font;
+		return newFont;
 	}
 
 	public Font display(Font font)
 	{
-		IdeUtils.centerOnScreen(this);
-		
-		if(font != null)
+		if(font == null)
 		{
-			Font cachedFont = fontMap.get(font.getName());
-			
-			if(cachedFont != null)
-			{
-				fldFontLst.setSelectedValue(font, true);
-			}
-			
-			chckbxBold.setSelected(font.isBold());
-			chckbxItalic.setSelected(font.isItalic());
-			
-			fldSize.setText("" + font.getSize());
+			//set default font used for RSyntaxTextarea
+			font = IIdeConstants.DEFAULT_FONT;
 		}
 		
-		super.setVisible(true);
+		FontWrapper cachedFont = fontMap.get(font.getName());
+		
+		if(cachedFont != null)
+		{
+			fldFontLst.setSelectedValue(cachedFont, true);
+		}
+		
+		chckbxBold.setSelected(font.isBold());
+		chckbxItalic.setSelected(font.isItalic());
+		
+		fldSize.setText("" + font.getSize());
+		
+		super.displayInDialog();
 
 		return resFont;
 	}
 	
-	private Font searchFont(String name)
+	private FontWrapper searchFont(String name)
 	{
-		Entry<String, Font> entry = fontMap.ceilingEntry(name);
+		Entry<String, FontWrapper> entry = fontMap.ceilingEntry(name);
 		
 		if(entry == null)
 		{

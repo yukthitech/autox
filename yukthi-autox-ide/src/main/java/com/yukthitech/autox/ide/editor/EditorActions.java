@@ -40,6 +40,7 @@ public class EditorActions
 	@Autowired
 	private ApplicationContext applicationContext;
 	
+	@Autowired
 	private FindAndReplaceDialog findAndReplaceDialog;
 	
 	private GotoLineDialog gotoLineDialog;
@@ -48,13 +49,10 @@ public class EditorActions
 	
 	private void init()
 	{
-		if(findAndReplaceDialog != null)
+		if(gotoLineDialog != null)
 		{
 			return;
 		}
-		
-		findAndReplaceDialog = new FindAndReplaceDialog( (Frame) IdeUtils.getCurrentWindow() );
-		IdeUtils.autowireBean(applicationContext, findAndReplaceDialog);
 		
 		gotoLineDialog = new GotoLineDialog( (Frame) IdeUtils.getCurrentWindow() );
 		IdeUtils.autowireBean(applicationContext, gotoLineDialog);
@@ -70,14 +68,6 @@ public class EditorActions
 	public void findAndReplace()
 	{
 		init();
-		
-		FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
-		
-		if(editor == null)
-		{
-			return;
-		}
-
 		findAndReplaceDialog.display();
 	}
 	

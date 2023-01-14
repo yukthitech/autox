@@ -29,6 +29,7 @@ import javax.swing.JToggleButton;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.dialog.FontDialog;
 import com.yukthitech.autox.ide.events.IdeOpeningEvent;
 import com.yukthitech.autox.ide.layout.Action;
@@ -147,6 +148,47 @@ public class IdeSettingsManager
 		ideStateManager.saveState(ideState);
 	}
 	
+	public void changeFontSize(boolean increment)
+	{
+		IdeState ideState = ideStateManager.getState();
+		IdeSettings ideSettings = ideState.getIdeSettings();
+		
+		Font newFont = ideSettings.getEditorFont();
+		
+		if(newFont == null)
+		{
+			newFont = IIdeConstants.DEFAULT_FONT;
+		}
+		
+		int size = newFont.getSize();
+		int actSize = size;
+		
+		if(increment)
+		{
+			size++;
+		}
+		else
+		{
+			size--;
+			
+			if(size <= 8)
+			{
+				size = 8;
+			}
+		}
+		
+		if(size == actSize)
+		{
+			return;
+		}
+
+		newFont = new Font(newFont.getName(), newFont.getStyle(), size);
+		ideSettings.setEditorFont(newFont);
+		ideEventManager.raiseAsyncEvent(new IdeSettingChangedEvent(ideSettings));
+		
+		ideStateManager.saveState(ideState);
+	}
+
 	@Action
 	public void toogleWordWrap()
 	{

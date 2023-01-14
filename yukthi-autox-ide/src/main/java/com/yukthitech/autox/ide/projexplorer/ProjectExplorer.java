@@ -950,7 +950,7 @@ public class ProjectExplorer extends JPanel
 		Project project = fileNode.getProject();
 		
 		//ignore files which are outside test suite folders
-		if(!project.isTestSuiteFolderFile(file))
+		if(!project.isTestSuiteFolderFile(file) && !file.equals(project.getAppPropertyFile()))
 		{
 			return;
 		}

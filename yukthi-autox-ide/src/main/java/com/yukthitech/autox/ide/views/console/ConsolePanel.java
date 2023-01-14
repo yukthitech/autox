@@ -18,11 +18,14 @@ package com.yukthitech.autox.ide.views.console;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,11 +53,11 @@ import com.yukthitech.autox.ide.exeenv.ConsoleContentAddedEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentActivationEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
+import com.yukthitech.autox.ide.services.GlobalStateManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
-import com.yukthitech.swing.HyperLinkEvent;
+import com.yukthitech.autox.ide.swing.HyperLinkEvent;
+import com.yukthitech.autox.ide.swing.YukthiHtmlPane;
 import com.yukthitech.swing.IconButton;
-import com.yukthitech.swing.YukthiHtmlPane;
-import java.awt.FlowLayout;
 
 @Component
 public class ConsolePanel extends JPanel implements IViewPanel
@@ -75,6 +78,9 @@ public class ConsolePanel extends JPanel implements IViewPanel
 
 	@Autowired
 	private FileActions fileAction;
+	
+	@Autowired
+	private GlobalStateManager globalStateManager;
 
 	//private JTabbedPane parentTabbedPane;
 
@@ -141,6 +147,16 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		scrollPane.setViewportView(consoleDisplayArea);
 		
 		consoleDisplayArea.addHyperLinkListener(this::onHyperLinkClick);
+		
+		consoleDisplayArea.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusGained(FocusEvent e)
+			{
+				consoleDisplayArea.getCaret().setVisible(true);
+				globalStateManager.focusGained(consoleDisplayArea);
+			}
+		});
 	}
 
 	@IdeEventHandler

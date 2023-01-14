@@ -13,36 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.swing;
+package com.yukthitech.autox.ide.events;
+
+import javax.swing.text.JTextComponent;
+
+import com.yukthitech.autox.ide.services.IIdeEvent;
 
 /**
- * Hyper link click event object. 
- * @author akiran
+ * Invoked when focus is changed by new component 
+ * @author akranthikiran
  */
-public class HyperLinkEvent
+public class ActiveComponentChangedEvent implements IIdeEvent
 {
-	/**
-	 * Href of the hyperlink.
-	 */
-	private String href;
+	private JTextComponent activeComponent;
 
-	/**
-	 * Instantiates a new hyper link event.
-	 *
-	 * @param href the href
-	 */
-	public HyperLinkEvent(String href)
+	public ActiveComponentChangedEvent(JTextComponent activeComponent)
 	{
-		this.href = href;
+		this.activeComponent = activeComponent;
 	}
 	
-	/**
-	 * Gets the href of the hyperlink.
-	 *
-	 * @return the href of the hyperlink
-	 */
-	public String getHref()
+	public JTextComponent getActiveComponent()
 	{
-		return href;
+		return activeComponent;
 	}
 }

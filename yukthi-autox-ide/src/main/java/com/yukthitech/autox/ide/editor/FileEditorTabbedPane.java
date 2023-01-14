@@ -193,7 +193,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	}
 	
 	@IdeEventHandler
-	private void onIdeSettingsChanged(IdeSettingChangedEvent event)
+	private synchronized void onIdeSettingsChanged(IdeSettingChangedEvent event)
 	{
 		changeEditorSettings(event.getIdeSettings());
 	}
@@ -208,7 +208,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			tabs.forEach(tab -> 
 			{
 				FileEditor editor = tab.getFileEditor();
-				editor.setCaretPosition(editor.getCaretPosition());
+				editor.scrollToCaretPosition();
 			});
 		}
 		
@@ -273,17 +273,20 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			return;
 		}
 		
-		for(FileEditor editor : pathToEditor.values())
+		synchronized(pathToEditor)
 		{
-			if(font != null)
+			for(FileEditor editor : pathToEditor.values())
 			{
-				editor.setEditorFont(editorFont);
-				editor.setEnableTextWrapping(enableTextWrapping);
-			}
-			
-			if(wrap != null)
-			{
-				editor.setEnableTextWrapping(wrap);
+				if(font != null)
+				{
+					editor.setEditorFont(editorFont);
+					editor.setEnableTextWrapping(enableTextWrapping);
+				}
+				
+				if(wrap != null)
+				{
+					editor.setEnableTextWrapping(wrap);
+				}
 			}
 		}
 	}
@@ -344,8 +347,11 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			return null;
 		}
 
-		FileEditor fileEditor = pathToEditor.get(canonicalPath);
-		return fileEditor;
+		synchronized(pathToEditor)
+		{
+			FileEditor fileEditor = pathToEditor.get(canonicalPath);
+			return fileEditor;
+		}
 	}
 	
 	public FileEditor getFileEditor(File file)
@@ -360,8 +366,11 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			throw new InvalidStateException("An exception occurred while fetching cannonical path of file: {}", file.getPath(), ex);
 		}
 		
-		FileEditor fileEditor = pathToEditor.get(canonicalPath);
-		return fileEditor;
+		synchronized(pathToEditor)
+		{
+			FileEditor fileEditor = pathToEditor.get(canonicalPath);
+			return fileEditor;
+		}
 	}
 
 	public FileEditor openProjectFile(Project project, File file)
@@ -392,41 +401,44 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			return null;
 		}
 
-		FileEditor fileEditor = pathToEditor.get(canonicalPath);
-		
-		if(fileEditor != null)
+		synchronized(pathToEditor)
 		{
-			logger.trace("Selecting existing tab for file: {}", canonicalPath);
+			FileEditor fileEditor = pathToEditor.get(canonicalPath);
+			
+			if(fileEditor != null)
+			{
+				logger.trace("Selecting existing tab for file: {}", canonicalPath);
+				super.setSelectedComponent(fileEditor);
+				return fileEditor;
+			}
+			
+			logger.trace("Opening new tab for file: {}", canonicalPath);
+			
+			int nextTabIndex = super.getTabCount();
+			
+			fileEditor = new FileEditor(project, file);
+			IdeUtils.autowireBean(applicationContext, fileEditor);
+			
+			if(editorFont != null)
+			{
+				fileEditor.setEditorFont(editorFont);
+			}
+			
+			fileEditor.setEnableTextWrapping(enableTextWrapping);
+			
+			FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
+			IdeUtils.autowireBean(applicationContext, fileEditorTab);
+			
+			fileEditor.setFileEditorTab(fileEditorTab);
+			
+			addTab(file.getName(), null, fileEditor);
+			super.setTabComponentAt(nextTabIndex, fileEditorTab);
+			
+			pathToEditor.put(canonicalPath, fileEditor);
+			
 			super.setSelectedComponent(fileEditor);
 			return fileEditor;
 		}
-		
-		logger.trace("Opening new tab for file: {}", canonicalPath);
-		
-		int nextTabIndex = super.getTabCount();
-		
-		fileEditor = new FileEditor(project, file);
-		IdeUtils.autowireBean(applicationContext, fileEditor);
-		
-		if(editorFont != null)
-		{
-			fileEditor.setEditorFont(editorFont);
-		}
-		
-		fileEditor.setEnableTextWrapping(enableTextWrapping);
-		
-		FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
-		IdeUtils.autowireBean(applicationContext, fileEditorTab);
-		
-		fileEditor.setFileEditorTab(fileEditorTab);
-		
-		addTab(file.getName(), null, fileEditor);
-		super.setTabComponentAt(nextTabIndex, fileEditorTab);
-		
-		pathToEditor.put(canonicalPath, fileEditor);
-		
-		super.setSelectedComponent(fileEditor);
-		return fileEditor;
 	}
 	
 	public void selectProjectFile(Project project, File file)
@@ -457,12 +469,15 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			return;
 		}
 
-		FileEditor fileEditor = pathToEditor.get(canonicalPath);
-		
-		if(fileEditor != null)
+		synchronized(pathToEditor)
 		{
-			//logger.debug("Selecting existing tab for file: {}", canonicalPath);
-			super.setSelectedComponent(fileEditor);
+			FileEditor fileEditor = pathToEditor.get(canonicalPath);
+			
+			if(fileEditor != null)
+			{
+				//logger.debug("Selecting existing tab for file: {}", canonicalPath);
+				super.setSelectedComponent(fileEditor);
+			}
 		}
 	}
 
@@ -598,12 +613,17 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	
 	private void closeFileAtIndex(int index) throws IOException
 	{
-		FileEditorTab fileEditorTab = (FileEditorTab)super.getTabComponentAt(index); 
-		File file = fileEditorTab.getFile();
-		super.removeTabAt(index);
-		
-		String canonicalPath = file.getCanonicalPath();
-		pathToEditor.remove(canonicalPath);
+		synchronized(pathToEditor)
+		{
+			FileEditorTab fileEditorTab = (FileEditorTab)super.getTabComponentAt(index); 
+			File file = fileEditorTab.getFile();
+			super.removeTabAt(index);
+			
+			fileEditorTab.getFileEditor().editorClosed();
+			
+			String canonicalPath = file.getCanonicalPath();
+			pathToEditor.remove(canonicalPath);
+		}
 	}
 	
 	@Action
@@ -810,13 +830,20 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			{
 				logger.debug("As the file does not exist anymore, closing tab with file: [old path: {}, Modified Path: {}]", tab.getFile().getPath(), relativeFile.getPath());
 				
-				pathToEditor.remove(tab.getFile().getPath());
-				super.remove(tab.getFileEditor());
+				synchronized(pathToEditor)
+				{
+					pathToEditor.remove(tab.getFile().getPath());
+					super.remove(tab.getFileEditor());
+				}
+				
 				continue;
 			}
 			
-			relativePath = IdeFileUtils.getCanonicalPath(relativeFile);
-			pathToEditor.put(relativePath, tab.getFileEditor());
+			synchronized(pathToEditor)
+			{
+				relativePath = IdeFileUtils.getCanonicalPath(relativeFile);
+				pathToEditor.put(relativePath, tab.getFileEditor());
+			}
 			
 			tab.setFile(relativeFile);
 			tab.getFileEditor().setFile(relativeFile);
@@ -841,8 +868,11 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			logger.debug("Closing file from folder being removed: [Path: {}]", 
 					tab.getFile().getPath());
 			
-			pathToEditor.remove(tab.getFile().getPath());
-			super.remove(tab.getFileEditor());
+			synchronized(pathToEditor)
+			{
+				pathToEditor.remove(tab.getFile().getPath());
+				super.remove(tab.getFileEditor());
+			}
 		}
 	}
 }

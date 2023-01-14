@@ -54,6 +54,7 @@ import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.services.IdeStateManager;
+import com.yukthitech.autox.ide.swing.IdeDialogPanel;
 import com.yukthitech.autox.ide.views.console.ConsolePanel;
 import com.yukthitech.autox.ide.views.debug.DebugPanel;
 import com.yukthitech.autox.ide.views.search.SearchResultPanel;
@@ -157,6 +158,8 @@ public class AutoxIDE extends JFrame
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-autox-context.xml");
 		
 		AutoxIDE ide = (AutoxIDE) context.getBean(AutoxIDE.class);
+		IdeDialogPanel.setMainAppWindow(ide);
+		
 		ide.initIde();
 	}
 	

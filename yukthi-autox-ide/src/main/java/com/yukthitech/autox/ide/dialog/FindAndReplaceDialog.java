@@ -19,50 +19,65 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.editor.FileEditor;
-import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
+import com.yukthitech.autox.ide.events.ActiveComponentChangedEvent;
+import com.yukthitech.autox.ide.services.GlobalStateManager;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
+import com.yukthitech.autox.ide.state.PersistableState;
+import com.yukthitech.autox.ide.swing.IdeDialogPanel;
 
-@Service
-public class FindAndReplaceDialog extends JDialog
+@Component
+@PersistableState(directState = true, fields = true)
+public class FindAndReplaceDialog extends IdeDialogPanel
 {
 	private static final long serialVersionUID = 1L;
 
 	private final JPanel contentPanel = new JPanel();
 	private final JLabel lblFind = new JLabel("Find: ");
+	
+	@PersistableState
 	private final JTextField fldFindStr = new JTextField();
 	private final JLabel lblReplaceWith = new JLabel("Replace With: ");
+	
+	@PersistableState
 	private final JTextField fldReplaceStr = new JTextField();
+	
 	private final JPanel panel_1 = new JPanel();
+	
+	@PersistableState
 	private final JCheckBox chckbxCaseSensitive = new JCheckBox("Case Sensitive");
+	
+	@PersistableState
 	private final JCheckBox chckbxWrapSearch = new JCheckBox("Wrap Search");
+	
+	@PersistableState
 	private final JCheckBox chckbxRegularExpression = new JCheckBox("Regular Expression");
+	
 	private final JPanel panel_2 = new JPanel();
 	private final JLabel lblStatus = new JLabel("");
 	private final JPanel panel_3 = new JPanel();
@@ -71,31 +86,39 @@ public class FindAndReplaceDialog extends JDialog
 	private final JPanel panel_4 = new JPanel();
 	private final JButton btnReplace = new JButton("Replace");
 	private final JButton btnReplaceAll = new JButton("Replace All");
+	
+	@PersistableState
 	private final JCheckBox chckbxReverseDirection = new JCheckBox("Reverse Direction");
 
 	@Autowired
-	private FileEditorTabbedPane fileEditorTabbedPane;
+	private GlobalStateManager globalStateManager;
+	
 	private final JPanel panelRegex = new JPanel();
+	
+	@PersistableState
 	private final JCheckBox chckbxCaseInsensitive = new JCheckBox("Case Insensitive");
+	
+	@PersistableState
 	private final JCheckBox chckbxMultiLined = new JCheckBox("Multi line");
+	
+	@PersistableState
 	private final JCheckBox chckbxDotAll = new JCheckBox("Dot All");
 
 	/**
 	 * Create the dialog.
 	 */
-	public FindAndReplaceDialog(Frame frame)
+	public FindAndReplaceDialog()
 	{
-		super(frame);
+		super.setTitle("Find & Replace");
+		super.setDialogBounds(100, 100, 327, 425);
 
 		fldReplaceStr.setToolTipText("Replacement string");
 		fldReplaceStr.setColumns(10);
 		fldFindStr.setToolTipText("String/Expression to be searched");
 		fldFindStr.setColumns(20);
-		setTitle("Find & Replace");
-		setBounds(100, 100, 327, 425);
-		getContentPane().setLayout(new BorderLayout());
+		setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
 		gbl_contentPanel.columnWidths = new int[] { 0, 0, 0 };
 		gbl_contentPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
@@ -295,7 +318,7 @@ public class FindAndReplaceDialog extends JDialog
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+			add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton closeButton = new JButton("Close");
 				closeButton.setActionCommand("Cancel");
@@ -303,29 +326,27 @@ public class FindAndReplaceDialog extends JDialog
 				closeButton.addActionListener(this::close);
 			}
 		}
+	}
+	
+	@IdeEventHandler
+	private void manageFunctions(ActiveComponentChangedEvent e)
+	{
+		JTextComponent component = globalStateManager.getActiveComponent();
+		boolean isTextField = (component != null);
+		boolean isFileEditor = (component instanceof RSyntaxTextArea);
 		
-		super.getRootPane().registerKeyboardAction(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				FindAndReplaceDialog.this.dispatchEvent(new WindowEvent(FindAndReplaceDialog.this, WindowEvent.WINDOW_CLOSING));
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
-		super.getRootPane().registerKeyboardAction(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				find(e);
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		fldReplaceStr.setEnabled(isFileEditor);
+		
+		btnFind.setEnabled(isTextField);
+		btnReplace.setEnabled(isFileEditor);
+		btnReplaceAll.setEnabled(isFileEditor);
+		btnReplaceFind.setEnabled(isFileEditor);
 	}
 
 	public void display()
 	{
-		FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
+		JTextComponent editor = globalStateManager.getActiveComponent();
 
 		if(editor == null)
 		{
@@ -342,7 +363,8 @@ public class FindAndReplaceDialog extends JDialog
 		fldFindStr.selectAll();
 		fldFindStr.requestFocus();
 		fldReplaceStr.setText("");
-		this.setVisible(true);
+		
+		super.displayInDialog();
 	}
 
 	private FindCommand buildCommand()
@@ -375,16 +397,8 @@ public class FindAndReplaceDialog extends JDialog
 
 	private void execute(FindOperation op)
 	{
-		FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
-
-		if(editor == null)
-		{
-			JOptionPane.showMessageDialog(this, "No active file editor found.");
-			return;
-		}
-
 		FindCommand command = buildCommand();
-		String res = editor.executeFindOperation(command, op);
+		String res = executeFindOperation(command, op);
 
 		lblStatus.setText("<html><body>" + res + "</body></html>");
 	}
@@ -411,6 +425,264 @@ public class FindAndReplaceDialog extends JDialog
 
 	private void close(ActionEvent e)
 	{
-		setVisible(false);
+		super.closeDialog();
+	}
+
+	private int getCaretPositionForFind(JTextComponent syntaxTextArea, FindCommand command)
+	{
+		int curPos = syntaxTextArea.getCaretPosition();
+		
+		if(syntaxTextArea.getSelectedText() != null && syntaxTextArea.getSelectedText().length() > 0)
+		{
+			curPos = command.isReverseDirection() ? syntaxTextArea.getSelectionStart() : syntaxTextArea.getSelectionEnd();
+		}
+		
+		return curPos;
+	}
+	
+	/**
+	 * Finds the string that needs to be used as replacement string.
+	 * @param command command in use
+	 * @param content current content
+	 * @param range range being replaced
+	 * @return string to be used for replacement.
+	 */
+	private String findReplaceString(FindCommand command, String content, int range[])
+	{
+		if(!command.isRegularExpression())
+		{
+			return command.getReplaceWith();
+		}
+		
+		//extract the string that needs to be replaced
+		String targetStr = content.substring(range[0], range[1]);
+		
+		//in obtained string replace the pattern, this will ensure $ expressions of regex is respected
+		Pattern pattern = (command.getRegexOptions() == 0) ? Pattern.compile(command.getSearchString()) :
+			Pattern.compile(command.getSearchString(), command.getRegexOptions());
+		Matcher matcher = pattern.matcher(targetStr);
+		StringBuffer buff = new StringBuffer();
+		
+		while(matcher.find())
+		{
+			matcher.appendReplacement(buff, command.getReplaceWith());
+		}
+		
+		matcher.appendTail(buff);
+		return buff.toString();
+	}
+	
+	private int[] find(FindCommand command, int startPos, int curPos, boolean wrapped, String fullText)
+	{
+		int idx = 0;
+		
+		if(command.isRegularExpression())
+		{
+			Pattern pattern = (command.getRegexOptions() == 0) ? Pattern.compile(command.getSearchString()) :
+				Pattern.compile(command.getSearchString(), command.getRegexOptions());
+			
+			Matcher matcher = pattern.matcher(fullText);
+			
+			if(command.isReverseDirection())
+			{
+				int region[] = null;
+				
+				while(matcher.find())
+				{
+					if(matcher.end() > curPos)
+					{
+						break;
+					}
+					
+					region = new int[] {matcher.start(), matcher.end()};
+				}
+				
+				if(wrapped && region[0] < startPos)
+				{
+					return null;
+				}
+				
+				return region;
+			}
+			else
+			{
+				if(!matcher.find(curPos))
+				{
+					return null;
+				}
+				
+				if(wrapped && matcher.end() > startPos)
+				{
+					return null;
+				}
+				
+				return new int[] {matcher.start(), matcher.end()};
+			}
+		}
+		
+		fullText = command.isCaseSensitive() ? fullText : fullText.toLowerCase();
+		
+		String searchStr = command.getSearchString();
+		searchStr = command.isCaseSensitive() ? searchStr : searchStr.toLowerCase();
+		
+		if(command.isReverseDirection())
+		{
+			if(curPos > 0)
+			{
+				curPos = curPos - 1;
+				idx = fullText.lastIndexOf(searchStr, curPos);
+			}
+			else
+			{
+				idx = -1;
+			}
+		}
+		else
+		{
+			idx = fullText.indexOf(searchStr, curPos);
+		}
+
+		if(idx < 0)
+		{
+			if(command.isWrapSearch())
+			{
+				if(wrapped)
+				{
+					return null;
+				}
+				
+				int resetPos = command.isReverseDirection() ? fullText.length() : 0;
+				return find(command, startPos, resetPos, true, fullText);
+			}
+			
+			return null;
+		}
+
+		return new int[] {idx, idx + command.getSearchString().length()};
+	}
+	
+	public synchronized String executeFindOperation(FindCommand command, FindOperation op)
+	{
+		JTextComponent focusedFld = globalStateManager.getActiveComponent();
+		
+		if(focusedFld == null)
+		{
+			return null;
+		}
+		
+		//String fullText = focusedFld.getText();
+		Document doc = focusedFld.getDocument();
+		String fullText = null;
+		
+		try
+		{
+			fullText = doc.getText(0, doc.getLength());
+		}catch(BadLocationException ex)
+		{
+			//logger.err
+			ex.printStackTrace();
+			return "";
+		}
+		
+		int startPos = getCaretPositionForFind(focusedFld, command);
+		
+		if(op == FindOperation.FIND)
+		{
+			int range[] = find(command, startPos, getCaretPositionForFind(focusedFld, command), false, fullText);
+			
+			if(range == null)
+			{
+				return "Search string not found.";
+			}
+			
+			focusedFld.select(range[0], range[1]);
+			return "";
+		}
+		
+		if(!(focusedFld instanceof RSyntaxTextArea))
+		{
+			return "";
+		}
+		
+		RSyntaxTextArea syntaxTextArea = (RSyntaxTextArea) focusedFld;
+		
+		switch(op)
+		{
+			case REPLACE:
+			{
+				if(focusedFld.getSelectedText().length() <= 0)
+				{
+					return "No text is selected to replace";
+				}
+				
+				int range[] = new int[] {focusedFld.getSelectionStart(), focusedFld.getSelectionEnd()};
+				
+				//If pattern find replace string
+				
+				syntaxTextArea.replaceRange(
+						findReplaceString(command, fullText, range), 
+						range[0], range[1]);
+				focusedFld.setCaretPosition(range[0] + command.getReplaceWith().length());
+				break;
+			}
+			case REPLACE_AND_FIND:
+			{
+				if(focusedFld.getSelectedText() == null || focusedFld.getSelectedText().length() <= 0)
+				{
+					return "No text is selected to replace";
+				}
+				
+				int range[] = new int[] {focusedFld.getSelectionStart(), focusedFld.getSelectionEnd()};
+				
+				String repString = findReplaceString(command, fullText, range);
+				
+				syntaxTextArea.replaceRange(repString, range[0], range[1]);
+				focusedFld.setCaretPosition(range[0] + repString.length());
+				
+				fullText = focusedFld.getText();
+				
+				range = find(command, startPos, getCaretPositionForFind(focusedFld, command), false, fullText);
+				
+				if(range == null)
+				{
+					return "Search string not found.";
+				}
+				
+				focusedFld.select(range[0], range[1]);
+				break;
+			}
+			default:
+			{
+				int count = 0;
+				
+				syntaxTextArea.beginAtomicEdit();
+				
+				try
+				{
+					while(true)
+					{
+						int range[] = find(command, startPos, getCaretPositionForFind(focusedFld, command), false, fullText);
+						
+						if(range == null)
+						{
+							break;
+						}
+						
+						count++;
+						syntaxTextArea.replaceRange(command.getReplaceWith(), range[0], range[1]);
+						focusedFld.setCaretPosition(range[0] + command.getReplaceWith().length());
+						
+						fullText = focusedFld.getText();
+					}
+				}finally
+				{
+					syntaxTextArea.endAtomicEdit();
+				}
+				
+				return count + " occurrences are replaced.";
+			}
+		}
+		
+		return "";
 	}
 }
