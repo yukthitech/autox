@@ -15,7 +15,7 @@
  */
 package com.yukthitech.autox.plugin.ui.steps;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -94,7 +94,7 @@ public class DragAndDropStep extends AbstractParentUiStep
 		try
 		{
 			SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
-			seleniumSession.getWebDriver(driverName).manage().timeouts().implicitlyWait(10000, TimeUnit.MILLISECONDS);
+			seleniumSession.getWebDriver(driverName).manage().timeouts().implicitlyWait(Duration.ofMillis(10000));
 			
 			Thread.sleep(2000);
 			

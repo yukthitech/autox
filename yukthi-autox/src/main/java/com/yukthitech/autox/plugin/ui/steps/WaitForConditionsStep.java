@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.ui.steps;
 
+import java.time.Duration;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -54,7 +56,9 @@ public class WaitForConditionsStep extends BaseConditions
 			{
 				exeLogger.debug("Waiting for condition: {}", condition);
 				
-				WebDriverWait wait = new WebDriverWait(driver, condition.timeOutInSec, condition.timeGapMillis);
+				WebDriverWait wait = new WebDriverWait(driver, 
+						Duration.ofSeconds(condition.timeOutInSec), 
+						Duration.ofMillis(condition.timeGapMillis));
 				wait.until(condition.condition);
 			}
 		} catch(Exception ex)

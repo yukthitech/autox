@@ -66,6 +66,9 @@ public class ClickStep extends AbstractPostCheckStep
 	@Param(description = "Flag to enforce clicking using js instead of selenium", required = false)
 	private boolean clickByJs = false;
 	
+	@Param(description = "Default: true. When true, if click by selenium fails, js code will be tried to click the locator.", required = false)
+	private boolean tryJsOnError = true;
+	
 	/**
 	 * Sets the number of retries to happen. Default: 5.
 	 *
@@ -90,6 +93,20 @@ public class ClickStep extends AbstractPostCheckStep
 	{
 		this.clickByJs = clickByJs;
 	}
+	
+	public void setTryJsOnError(boolean tryJsOnError)
+	{
+		this.tryJsOnError = tryJsOnError;
+	}
+	
+	private boolean clickWithJs(WebElement webElement, AutomationContext context, IExecutionLogger exeLogger)
+	{
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
+
+		((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
+		return doPostCheck(context, exeLogger, "Post Click");
+	}
 
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
@@ -98,7 +115,7 @@ public class ClickStep extends AbstractPostCheckStep
 
 		try
 		{
-			AtomicInteger clickedAtleastOnce = new AtomicInteger(0);
+			AtomicInteger clickedAtleastOnce = new AtomicInteger(-1);
 			
 			UiAutomationUtils.validateWithWait(() -> 
 			{
@@ -111,6 +128,8 @@ public class ClickStep extends AbstractPostCheckStep
 						exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
 						throw new IllegalArgumentException("Failed to find element with locator: " + getLocatorWithParent(locator));
 					}
+					
+					clickedAtleastOnce.incrementAndGet();
 
 					//if at least once button is clicked
 					if(clickedAtleastOnce.get() > 0)
@@ -129,12 +148,7 @@ public class ClickStep extends AbstractPostCheckStep
 						if(clickByJs)
 						{
 							exeLogger.debug("As per config clicking the target element using js..");
-
-							SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
-							WebDriver driver = seleniumSession.getWebDriver(driverName);
-
-							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
-							return doPostCheck(context, exeLogger, "Post Click");
+							return clickWithJs(webElement, context, exeLogger);
 						}
 						else
 						{
@@ -143,23 +157,17 @@ public class ClickStep extends AbstractPostCheckStep
 					}catch(RuntimeException ex)
 					{
 						//if second click is also resulted in error, try js way of clicking.
-						if(clickedAtleastOnce.get() > 0)
+						if(tryJsOnError && clickedAtleastOnce.get() > 0)
 						{
 							exeLogger.debug(
 									"Click element failed with error twice or more than twice. So trying to click the element using JS. Error: {} "
 									, "" + ex);
 							
-							SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
-							WebDriver driver = seleniumSession.getWebDriver(driverName);
-
-							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
-							return doPostCheck(context, exeLogger, "Post Click");
+							return clickWithJs(webElement, context, exeLogger);
 						}
 						
 						throw ex;
 					}
-					
-					clickedAtleastOnce.incrementAndGet();
 					
 					//after click check the post-check and return result approp
 					return doPostCheck(context, exeLogger, "Post Click");
