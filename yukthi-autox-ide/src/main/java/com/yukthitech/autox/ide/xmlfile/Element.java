@@ -42,6 +42,7 @@ import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
@@ -59,6 +60,13 @@ public class Element implements INode
 	private static final Pattern DOLLAR_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
 	
 	private static DefaultParserHandler defaultParserHandler = new DefaultParserHandler();
+	
+	private static final Map<String, String> COND_TOKEN_TO_ERROR = CommonUtils.toMap(
+			">", "Greater than (>) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
+			"<", "Lesser than (>) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead",
+			"&gt;", "Greater than (&gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
+			"&lt;", "Lesser than (&lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead"
+		);
 	
 	private Element parentElement;
 	
@@ -1019,24 +1027,38 @@ public class Element implements INode
 		
 		ParamInfo paramInfo = stepInfo.getParam(propName);
 		
-		if(paramInfo != null && paramInfo.getSourceType() == SourceType.CONDITION)
+		if(paramInfo != null)
 		{
-			parseConditionText(propName, location, new TextContent(text), collector);
+			if(paramInfo.getSourceType() == SourceType.CONDITION)
+			{
+				parseConditionText(propName, location, new TextContent(text), collector);
+			}
+			else if(paramInfo.getSourceType() == SourceType.EXPRESSION)
+			{
+				parseExpressionText(propName, location, new TextContent(text), collector);
+			}
 		}
 		
 		collectReferences(location, text, collector);
 	}
 	
+	private void parseExpressionText(String propName, LocationRange location, TextContent text, FileParseCollector collector)
+	{
+		String textStr = text.getText();
+		String exprType = PrefixExpressionFactory.getExpressionType(textStr);
+		
+		if("attr".equals(exprType) && (textStr.contains(".") || textStr.contains("[")))
+		{
+			collector.addMessage(new FileParseMessage(MessageType.WARNING, "Dot(.)/Property-bracket([]) in attribute expression is potential error. Use 'prop:' for accessing property", 
+					location.getStartLineNumber(), 
+					location.getStartOffset(), 
+					location.getEndOffset()));
+		}
+	}
+
 	private void parseConditionText(String propName, LocationRange location, TextContent text, FileParseCollector collector)
 	{
-		Map<String, String> tokenToError = CommonUtils.toMap(
-			">", "Greater than (>) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
-			"<", "Lesser than (>) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead",
-			"&gt;", "Greater than (&gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
-			"&lt;", "Lesser than (&lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead"
-		);
-		
-		for(Map.Entry<String, String> tokenEntry : tokenToError.entrySet())
+		for(Map.Entry<String, String> tokenEntry : COND_TOKEN_TO_ERROR.entrySet())
 		{
 			int idx = text.indexOf(tokenEntry.getKey());
 

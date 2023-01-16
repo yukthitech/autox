@@ -337,6 +337,36 @@ public class PrefixExpressionFactory
 		return (matcher.find() || matcherWithType.find());
 	}
 	
+	public static String getExpressionType(String str)
+	{
+		str = str.trim();
+
+		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(str);
+		Matcher matcherWithParams = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(str);
+		
+		String custPrefix = null;
+		String exprType = null;
+		
+		if(matcher.find())
+		{
+			custPrefix = matcher.group("custom");
+			exprType = matcher.group("exprType");
+		}
+
+		if(matcherWithParams.find())
+		{
+			custPrefix = matcherWithParams.group("custom");
+			exprType = matcherWithParams.group("exprType");
+		}
+		
+		if(custPrefix != null)
+		{
+			return custPrefix;
+		}
+		
+		return exprType;
+	}
+
 	private IExpressionPath parseExpressionPath(PrefixExpressionContext context, String expression)
 	{
 		IExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
