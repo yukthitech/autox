@@ -34,6 +34,8 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.swing.ImageIcon;
@@ -99,6 +101,8 @@ public class FileEditor extends JPanel
 	private static ImageIcon ERROR_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark-error.svg", 16);
 	
 	private static ImageIcon WARN_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark-warn.svg", 16);
+	
+	private static Pattern STARTING_WORD = Pattern.compile("^(\\w+)");
 	
 	private static GutterPopup gutterPopup = new GutterPopup();
 	
@@ -1005,6 +1009,20 @@ public class FileEditor extends JPanel
 	 */
 	public String getCursorWord()
 	{
+		String selectedText = syntaxTextArea.getSelectedText();
+		
+		if(selectedText != null)
+		{
+			Matcher matcher = STARTING_WORD.matcher(selectedText);
+			
+			if(!matcher.find())
+			{
+				return null;
+			}
+			
+			return matcher.group(1);
+		}
+		
 		try
 		{
 			int line = syntaxTextArea.getCaretLineNumber();
@@ -1019,6 +1037,7 @@ public class FileEditor extends JPanel
 			
 			String lineText = syntaxTextArea.getText(lineStart, (lineEnd - lineStart) + 1);
 			int pos = syntaxTextArea.getCaretOffsetFromLineStart();
+			
 			char ch[] = lineText.toCharArray();
 			
 			int st = -1;
