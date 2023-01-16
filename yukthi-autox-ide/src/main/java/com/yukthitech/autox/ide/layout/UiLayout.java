@@ -50,6 +50,12 @@ public class UiLayout
 	private Map<String, Menu> nameToPopup = new HashMap<>();
 	
 	/**
+	 * Standard console line pattern expected. If not matched, should be assumed
+	 * to be continuation of previous line.
+	 */
+	private ConsoleLinePattern standardConsoleLinePattern;
+	
+	/**
 	 * Console line patterns for console text rendering.
 	 */
 	private List<ConsoleLinePattern> consoleLinePatterns = new ArrayList<>();
@@ -110,6 +116,16 @@ public class UiLayout
 		return this.nameToPopup.get(name);
 	}
 	
+	public ConsoleLinePattern getStandardConsoleLinePattern()
+	{
+		return standardConsoleLinePattern;
+	}
+
+	public void setStandardConsoleLinePattern(ConsoleLinePattern standardConsoleLinePattern)
+	{
+		this.standardConsoleLinePattern = standardConsoleLinePattern;
+	}
+
 	public void addConsoleLinePattern(ConsoleLinePattern pattern)
 	{
 		this.consoleLinePatterns.add(pattern);

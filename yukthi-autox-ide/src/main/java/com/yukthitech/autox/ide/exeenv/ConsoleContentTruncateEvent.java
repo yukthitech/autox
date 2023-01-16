@@ -13,33 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.rest;
+package com.yukthitech.autox.ide.exeenv;
 
-public class Header
+import com.yukthitech.autox.ide.services.IIdeEvent;
+
+/**
+ * Raised when content has to be truncated from env console.
+ * @author akranthikiran
+ */
+public class ConsoleContentTruncateEvent implements IIdeEvent
 {
-	public String name;
-	public String value;
+	private ExecutionEnvironment executionEnvironment;
 	
-	public Header(String name, String value)
+	/**
+	 * Number of lines to be truncated.
+	 */
+	private int lines;
+
+	public ConsoleContentTruncateEvent(ExecutionEnvironment executionEnvironment, int lines)
 	{
-		this.name = name;
-		this.value = value;
+		this.executionEnvironment = executionEnvironment;
+		this.lines = lines;
 	}
-	public String getName()
+
+	public ExecutionEnvironment getExecutionEnvironment()
 	{
-		return name;
+		return executionEnvironment;
 	}
-	public void setName(String name)
+
+	public int getLines()
 	{
-		this.name = name;
+		return lines;
 	}
-	public String getValue()
-	{
-		return value;
-	}
-	public void setValue(String value)
-	{
-		this.value = value;
-	}
-	
 }

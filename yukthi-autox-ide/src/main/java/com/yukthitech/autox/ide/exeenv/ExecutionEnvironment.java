@@ -23,15 +23,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.yukthitech.autox.debug.client.DebugClient;
 import com.yukthitech.autox.debug.client.IMessageCallback;
@@ -64,13 +68,22 @@ public class ExecutionEnvironment
 {
 	private static Logger logger = LogManager.getLogger(ExecutionEnvironment.class);
 	
+	@Autowired
+	private UiLayout uiLayout;
+	
+	@Value("${console.lines.maxCount}")
+	private int maxLines;
+	
+	@Value("${console.lines.truncateSize}")
+	private int truncateLength;
+
 	private ExecutionType executionType;
 
 	private String name;
 
 	private Process process;
 
-	private StringBuilder consoleHtml = new StringBuilder();
+	private LinkedList<String> consoleHtml = new LinkedList<>();
 
 	private boolean terminated = false;
 
@@ -84,30 +97,45 @@ public class ExecutionEnvironment
 	
 	private Project project;
 	
-	private UiLayout uiLayout;
-	
 	private String extraArgs[];
 	
 	private IdeEventManager ideEventManager;
 	
 	private Map<String, ServerMssgExecutionPaused> pausedThreads = new LinkedHashMap<>();
 	
-	private String activeThreadId; 
+	private String activeThreadId;
+	
+	/**
+	 * Pattern used for last line in console.
+	 */
+	private ConsoleLinePattern lastLinePattern;
+	
+	private int debugPort;
+	
+	private ExecuteCommand command;
+	
+	private String initialMessage;
 	
 	ExecutionEnvironment(ExecuteCommand command, String envName, Process process, int debugPort, File reportFolder, 
-			String initialMessage, UiLayout uiLayout, String extraArgs[])
+			String initialMessage, String extraArgs[])
 	{
 		this.executionType = command.getExecutionType();
 		this.project = command.getProject();
+		this.debugPort = debugPort;
+		this.command = command;
+		this.initialMessage = initialMessage;
 		
 		this.name = envName;
 		this.process = process;
 		this.reportFolder = reportFolder;
-		this.uiLayout = uiLayout;
 		this.extraArgs = extraArgs;
 		this.ideEventManager = SpringServiceProvider.getService(IdeEventManager.class);
 		this.debugEnv = (debugPort > 0);
-		
+	}
+	
+	@PostConstruct
+	private void init()
+	{
 		logOnConsole(initialMessage);
 
 		Thread outputThread = new Thread()
@@ -148,6 +176,7 @@ public class ExecutionEnvironment
 			}, 1);
 		}
 	}
+	
 	
 	/**
 	 * This is expected to be called by {@link ExecutionEnvironmentManager}.
@@ -272,8 +301,18 @@ public class ExecutionEnvironment
 
 	private synchronized void appenConsoleHtml(String html)
 	{
-		consoleHtml.append(html);
+		consoleHtml.add(html);
 		ideEventManager.raiseAsyncEvent(new ConsoleContentAddedEvent(this, html));
+		
+		if(consoleHtml.size() > maxLines)
+		{
+			for(int i = 0; i < truncateLength; i++)
+			{
+				consoleHtml.removeFirst();
+			}
+			
+			ideEventManager.raiseAsyncEvent(new ConsoleContentTruncateEvent(this, truncateLength));
+		}
 	}
 
 	private void logOnConsole(String lineText)
@@ -287,27 +326,41 @@ public class ExecutionEnvironment
 		lineText = lineText.replace("\n", "<br/>");
 
 		String lineHtml = null;
-		
 		String color = null;
+		ConsoleLinePattern stdPattern = uiLayout.getStandardConsoleLinePattern();
 		
-		for(ConsoleLinePattern linePattern : uiLayout.getConsoleLinePatterns())
+		if(lastLinePattern == null)
 		{
-			if(linePattern.getPattern().matcher(lineText).find())
+			lastLinePattern = stdPattern;
+		}
+		
+		//if line has standard pattern of log line
+		if(stdPattern.getPattern().matcher(lineText).find())
+		{
+			ConsoleLinePattern matchingPattern = null;
+			
+			//check for specific pattern for line style
+			for(ConsoleLinePattern linePattern : uiLayout.getConsoleLinePatterns())
 			{
-				color = linePattern.getColor();
-				break;
+				if(linePattern.getPattern().matcher(lineText).find())
+				{
+					matchingPattern = linePattern;
+					break;
+				}
 			}
+			
+			matchingPattern = (matchingPattern == null) ? stdPattern : matchingPattern;
+			color = matchingPattern.getColor();
+			lastLinePattern = matchingPattern;
 		}
-		
-		if(color == null)
-		{
-			lineHtml = "<div>" + lineText + "</div>";
-		}
+		//if standard line pattern is not matched, follow the style of last line
 		else
 		{
-			lineHtml = String.format("<div style=\"color:%s;\">%s</div>", color, lineText);
+			color = lastLinePattern.getColor();
 		}
-
+		
+		
+		lineHtml = String.format("<div style=\"color:%s;\">%s</div>", color, lineText);
 		appenConsoleHtml(lineHtml);
 	}
 	
@@ -342,7 +395,7 @@ public class ExecutionEnvironment
 			}
 
 			logger.debug("Sending env termination event...");
-			appenConsoleHtml("<div>Process exited with code: " + code + "</div>");
+			logOnConsole("Process exited with code: " + code);
 
 			synchronized(this)
 			{
@@ -373,9 +426,13 @@ public class ExecutionEnvironment
 
 	public StringBuilder getConsoleHtml()
 	{
-		return consoleHtml;
+		StringBuilder builder = new StringBuilder();
+		
+		consoleHtml.forEach(line -> builder.append(line));
+		
+		return builder;
 	}
-
+	
 	public void stop()
 	{
 		process.destroyForcibly();
@@ -403,7 +460,7 @@ public class ExecutionEnvironment
 
 	public synchronized void clearConsole()
 	{
-		consoleHtml.setLength(0);
+		consoleHtml.clear();
 	}
 	
 	public boolean isReportFileAvailable()

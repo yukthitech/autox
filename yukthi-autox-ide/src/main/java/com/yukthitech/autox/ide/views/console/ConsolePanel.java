@@ -50,6 +50,7 @@ import com.yukthitech.autox.ide.IViewPanel;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.exeenv.ConsoleContentAddedEvent;
+import com.yukthitech.autox.ide.exeenv.ConsoleContentTruncateEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentActivationEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
@@ -206,6 +207,25 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		btnOpenReport.setEnabled(repFile);
 	}
 
+	@IdeEventHandler
+	public void onConsoleContentTruncate(ConsoleContentTruncateEvent event)
+	{
+		if(activeEnvironment != event.getExecutionEnvironment())
+		{
+			return;
+		}
+		
+		HTMLDocument htmlDoc = (HTMLDocument) consoleDisplayArea.getDocument();
+		Element bodyElement = htmlDoc.getElement("body");
+
+		int count = event.getLines();
+		
+		for(int i = 0; i < count && bodyElement.getElementCount() > 1; i++)
+		{
+			htmlDoc.removeElement(bodyElement.getElement(0));
+		}
+	}
+
 	@Override
 	public void setParent(JTabbedPane parentTabPane)
 	{
@@ -263,11 +283,10 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	{
 		HTMLDocument htmlDoc = (HTMLDocument) consoleDisplayArea.getDocument();
 		Element element = htmlDoc.getElement("body");
-
+		
 		try
 		{
 			htmlDoc.insertBeforeEnd(element, injectLinks(content));
-
 			moveToEnd();
 			
 			/*

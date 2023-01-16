@@ -16,7 +16,6 @@
 package com.yukthitech.autox.ide.exeenv;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,11 +27,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.AutomationLauncher;
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.exeenv.debug.DebugPointsChangedEvent;
-import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.autox.ide.services.IdeEventManager;
@@ -52,7 +52,7 @@ public class ExecutionEnvironmentManager
 	private IdeEventManager ideEventManager;
 	
 	@Autowired
-	private UiLayout uiLayout;
+	private ApplicationContext applicationContext;
 	
 	private ExecutionEnvironment activeEnvironment;
 	
@@ -137,7 +137,8 @@ public class ExecutionEnvironmentManager
 		try
 		{
 			ExecutionEnvironment env = new ExecutionEnvironment(executeCommand, envName, builder.start(), debugPort, 
-					reportFolder, initMssg.toString(), uiLayout, extraArgs);
+					reportFolder, initMssg.toString(), extraArgs);
+			IdeUtils.autowireBean(applicationContext, env);
 			
 			synchronized(runningEnvironments)
 			{
@@ -147,7 +148,7 @@ public class ExecutionEnvironmentManager
 			ideEventManager.raiseAsyncEvent(new EnvironmentStartedEvent(env));
 			
 			return env;
-		}catch(IOException ex)
+		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while starting autox process", ex);
 		}

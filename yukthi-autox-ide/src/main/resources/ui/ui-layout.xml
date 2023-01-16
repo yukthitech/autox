@@ -1,11 +1,11 @@
 <layout xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	
+	<standard-console-line-pattern pattern="^\s*\w+\s+\d+\-\d+-\d+" color="#000000"/>
+	
 	<wrap:console-line-patterns>
 		<console-line-pattern pattern="^\s*ERROR" color="#FF0080"/>
-		<console-line-pattern pattern=".*Exception.*" color="#FF0080"/>
-		<console-line-pattern pattern="^\s*at [\w\.\$]+\(" color="#FF0080"/>
-		
 		<console-line-pattern pattern="^\s*WARN" color="#B5E61D"/>
-		
+		<console-line-pattern pattern="^\s*INFO" color="#B5E61D"/>
 		<console-line-pattern pattern="^\s*TRACE" color="#B4B4B4"/>
 	</wrap:console-line-patterns>
 
