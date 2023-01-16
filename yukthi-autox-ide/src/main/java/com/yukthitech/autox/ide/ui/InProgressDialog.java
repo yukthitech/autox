@@ -17,6 +17,7 @@ package com.yukthitech.autox.ide.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.swing.JDialog;
@@ -26,9 +27,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.ide.IdeUtils;
@@ -40,12 +38,10 @@ public class InProgressDialog extends JDialog
 	
 	private static InProgressDialog instance = new InProgressDialog();
 	
-	private static Logger logger = LogManager.getLogger(InProgressDialog.class);
-	
 	private final JPanel contentPanel = new JPanel();
 	private final JLabel lblPleaseWait = new JLabel("Please Wait! Work in Progress...");
 	private final JLabel lblSubMessage = new JLabel("");
-
+	
 	/**
 	 * Create the dialog.
 	 */
@@ -74,11 +70,12 @@ public class InProgressDialog extends JDialog
 		lblSubMessage.setText(mssg);
 	}
 	
-	public synchronized <T> T display(String message, final Supplier<T> jobToExecute)
+	public synchronized <T> T display(String message, final Supplier<T> jobToExecute, Consumer<Exception> errorHandler)
 	{
 		lblPleaseWait.setText(message);
 		
 		ObjectWrapper<T> resWrapper = new ObjectWrapper<>();
+		ObjectWrapper<Exception> exWrapper = new ObjectWrapper<>();
 
 		IdeUtils.execute(new Runnable()
 		{
@@ -98,7 +95,8 @@ public class InProgressDialog extends JDialog
 					resWrapper.setValue(res);
 				}catch(Exception ex)
 				{
-					logger.error("An error occurred while executing in-progress action", ex);
+					exWrapper.setValue(ex);
+					//logger.error("An error occurred while executing in-progress action", ex);
 				}
 				
 				//post operation close the dialog
@@ -109,10 +107,15 @@ public class InProgressDialog extends JDialog
 		IdeUtils.centerOnScreen(this);
 		super.setVisible(true);
 		
+		if(exWrapper.getValue() != null)
+		{
+			errorHandler.accept(exWrapper.getValue());
+		}
+		
 		return resWrapper.getValue();
 	}
 	
-	public synchronized void display(String message, final Runnable jobToExecute)
+	public synchronized void display(String message, final Runnable jobToExecute, Consumer<Exception> errorHandler)
 	{
 		Supplier<Object> wrapper = () -> 
 		{
@@ -120,7 +123,12 @@ public class InProgressDialog extends JDialog
 			return null;
 		};
 		
-		display(message, wrapper);
+		display(message, wrapper, errorHandler);
+	}
+
+	public synchronized void display(String message, final Runnable jobToExecute)
+	{
+		display(message, jobToExecute, null);
 	}
 	
 	public synchronized static InProgressDialog getInstance()

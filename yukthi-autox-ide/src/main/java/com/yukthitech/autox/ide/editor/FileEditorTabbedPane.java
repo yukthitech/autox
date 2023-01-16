@@ -45,7 +45,6 @@ import org.springframework.stereotype.Component;
 import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.MaximizableTabbedPane;
-import com.yukthitech.autox.ide.actions.ProjectActions;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.events.ActiveFileChangedEvent;
@@ -59,6 +58,7 @@ import com.yukthitech.autox.ide.model.IdeSettings;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
+import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.autox.ide.services.IdeSettingChangedEvent;
 import com.yukthitech.swing.MessageDialog;
@@ -81,7 +81,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	private ApplicationContext applicationContext;
 	
 	@Autowired
-	private ProjectActions projectActions;
+	private ProjectManager projectManager;
 	
 	private Map<String, FileEditor> pathToEditor = new HashMap<>();
 	
@@ -146,7 +146,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		
 		for(ProjectState projState : state.getOpenProjects())
 		{
-			Project proj = projectActions.openExistingProject(projState.getPath());
+			Project proj = projectManager.getProjectWithPath(projState.getPath());
 			
 			if(proj == null)
 			{

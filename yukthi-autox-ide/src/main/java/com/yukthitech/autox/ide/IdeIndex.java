@@ -19,23 +19,42 @@ import java.util.TreeSet;
 
 import org.springframework.stereotype.Service;
 
+import com.yukthitech.autox.ide.model.Project;
+
 @Service
 public class IdeIndex
 {
 	private TreeSet<FileDetails> files = new TreeSet<>();
 	
-	public void cleanFileIndex()
+	public synchronized void cleanFileIndex()
 	{
 		files.clear();
 	}
 	
-	public void addFile(FileDetails file)
+	public synchronized void addFile(FileDetails file)
 	{
 		files.add(file);
 	}
 	
-	public TreeSet<FileDetails> getFiles()
+	public synchronized TreeSet<FileDetails> getFiles()
 	{
 		return files;
+	}
+	
+	public synchronized void removeProjectFiles(Project project)
+	{
+		TreeSet<FileDetails> updatedIndex = new TreeSet<>();
+		
+		files.forEach(fileDet -> 
+		{
+			if(project.equals(fileDet.getProject()))
+			{
+				return;
+			}
+			
+			updatedIndex.add(fileDet);
+		});
+		
+		this.files = updatedIndex;
 	}
 }

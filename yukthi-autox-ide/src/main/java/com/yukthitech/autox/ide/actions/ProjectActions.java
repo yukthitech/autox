@@ -19,6 +19,7 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,10 +81,21 @@ public class ProjectActions
 			}
 		});
 	}
-
-	public Project openExistingProject(String path)
+	
+	private void openProject(String projectPath, String openMssg)
 	{
-		return projectManager.openProject(path);
+		InProgressDialog.getInstance().display(openMssg, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				projectManager.openProject(projectPath);
+			}
+		}, 
+		ex -> 
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), ex.getMessage(), "Project Open Error", JOptionPane.ERROR_MESSAGE);
+		});
 	}
 
 	@Action
@@ -93,14 +105,7 @@ public class ProjectActions
 		
 		if(project != null)
 		{
-			InProgressDialog.getInstance().display("Opening new project. Please wait...", new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					projectManager.openProject(project.getProjectFilePath());
-				}
-			});
+			openProject(project.getProjectFilePath(), "Opening new project. Please wait...");
 		}
 	}
 
@@ -109,14 +114,7 @@ public class ProjectActions
 	{
 		if(projectChooser.showOpenDialog(IdeUtils.getCurrentWindow()) == JFileChooser.APPROVE_OPTION)
 		{
-			InProgressDialog.getInstance().display("Opening project. Please wait...", new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					projectManager.openProject(projectChooser.getSelectedFile().getPath());					
-				}
-			});
+			openProject(projectChooser.getSelectedFile().getPath(), "Opening project. Please wait...");
 		}
 	}
 

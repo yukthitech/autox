@@ -83,8 +83,6 @@ public class ProjectManager
 				{
 					openProject(project.getPath());
 				}
-				
-				projectExplorer.loadFilesToIndex();
 			}
 		});
 	}
@@ -97,32 +95,29 @@ public class ProjectManager
 	{
 		logger.debug("Loading project at path: {}", path);
 		
-		Project existingProj = projects.stream()
-				.filter(proj -> proj.getProjectFilePath().equals(path))
-				.findFirst()
-				.orElse(null);
-		
-		if(existingProj != null)
-		{
-			return existingProj;
-		}
-		
 		Project project = Project.load(path);
 		
 		if(project == null)
 		{
-			logger.debug("Failed to load project from path: " + path);
-			return null;
+			throw new InvalidStateException("Failed to load project from path: " + path);
 		}
 		
 		if(projects.contains(project))
 		{
-			throw new InvalidStateException("A project specified name is already open: {}", project.getName());
+			throw new InvalidStateException("A project with specified name is already open: {}", project.getName());
 		}
 
 		projects.add(project);
 		projectExplorer.openProject(project);
 		return project;
+	}
+	
+	public Project getProjectWithPath(String path)
+	{
+		return projects.stream()
+				.filter(proj -> proj.getProjectFilePath().equals(path))
+				.findFirst()
+				.orElse(null);
 	}
 
 	public void deleteProject(Project project, boolean deleteContent)

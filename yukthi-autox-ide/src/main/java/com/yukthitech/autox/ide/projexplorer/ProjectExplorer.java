@@ -482,9 +482,11 @@ public class ProjectExplorer extends JPanel
 	 */
 	public synchronized void openProject(Project project)
 	{
-		projectTreeModel.addProject(new ProjectTreeNode(project.getName(), this, project));
+		ProjectTreeNode projectTreeNode = new ProjectTreeNode(project.getName(), this, project);
+		projectTreeModel.addProject(projectTreeNode);
 		
 		initDocs(project);
+		indexFilesFromNode(projectTreeNode);
 		
 		logger.debug("Adding project {} to project tree", project.getName());
 	}
@@ -782,7 +784,7 @@ public class ProjectExplorer extends JPanel
 		//projectTreeModel.reload(node);
 		//projectTreeModel.nodeChanged(node);
 		
-		loadFilesToIndex();
+		indexFilesFromNode(node);
 	}
 	
 	public void newFilesAdded(List<File> files)
@@ -917,31 +919,8 @@ public class ProjectExplorer extends JPanel
 		activeTreeNode.reload(true);
 		projectTreeModel.reload(activeTreeNode);
 		
-		loadFilesToIndex();
+		indexFilesFromNode(activeTreeNode);
 		return activeTreeNode;
-	}
-
-	
-	public void reloadActiveNodeParent()
-	{
-		if(activeTreeNode == null)
-		{
-			return;
-		}
-		
-		Object parentNodeObj = activeTreeNode.getParent();
-		
-		if(!(parentNodeObj instanceof BaseTreeNode))
-		{
-			return;
-		}
-		
-		BaseTreeNode parentNode = (BaseTreeNode) parentNodeObj;
-		
-		parentNode.reload(true);
-		projectTreeModel.reload(parentNode);
-		
-		loadFilesToIndex();
 	}
 	
 	void checkFile(FileTreeNode fileNode)
@@ -982,22 +961,12 @@ public class ProjectExplorer extends JPanel
 		return projectTreeModel;
 	}
 	
-	public void loadFilesToIndex()
-	{
-		ideIndex.cleanFileIndex();
-		
-		for(ProjectTreeNode projNode : projectTreeModel.getProjectNodes())
-		{
-			loadFilesFromNode(projNode, projNode);
-		}
-	}
-	
-	private void loadFilesFromNode(ProjectTreeNode projNode, BaseTreeNode node)
+	private void indexFilesFromNode(BaseTreeNode node)
 	{
 		if(node instanceof FileTreeNode)
 		{
-			File file = ((FileTreeNode) node).getFile();
-			ideIndex.addFile( new FileDetails(file, projNode.getProject()) );
+			FileTreeNode fileTreeNode = (FileTreeNode) node;
+			ideIndex.addFile( new FileDetails(fileTreeNode.getFile(), fileTreeNode.getProject()) );
 			return;
 		}
 		
@@ -1010,7 +979,7 @@ public class ProjectExplorer extends JPanel
 		
 		for(BaseTreeNode cnode : childNodes)
 		{
-			loadFilesFromNode(projNode, cnode);
+			indexFilesFromNode(cnode);
 		}
 	}
 	
@@ -1018,6 +987,7 @@ public class ProjectExplorer extends JPanel
 	{
 		projectTreeModel.deleteProject(project);
 		fileEditorTabbedPane.filePathRemoved(project.getBaseFolder());
+		ideIndex.removeProjectFiles(project);
 	}
 	
 	public BaseTreeNode getActiveNode()

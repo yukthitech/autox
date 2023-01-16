@@ -148,7 +148,7 @@ public class FileSearchService
 		Integer res = InProgressDialog.getInstance().display("Replace operation in progress", () -> 
 		{
 			return op.replaceAll(fileEditorTabbedPane);
-		});
+		}, null);
 		
 		return (res == null) ? -1 : res;
 	}
