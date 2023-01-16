@@ -99,7 +99,8 @@ public class AutomationUtils
 	
 	static
 	{
-		objectMapperWithType.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
+		objectMapperWithType.activateDefaultTyping(objectMapperWithType.getPolymorphicTypeValidator(), 
+				DefaultTyping.NON_FINAL, As.PROPERTY);
 	}
 	
 	/**

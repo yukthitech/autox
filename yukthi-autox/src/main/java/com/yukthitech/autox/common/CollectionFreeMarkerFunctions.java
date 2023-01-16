@@ -28,6 +28,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -37,6 +38,107 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  */
 public class CollectionFreeMarkerFunctions
 {
+	@FreeMarkerMethod(
+			description = "Creates a new list with specified values",
+			returnDescription = "newly created list"
+			)
+	public static List<Object> newList(
+			@FmParam(name = "values", description = "Initial values to be set") Object... values)
+	{
+		List<Object> lst = new ArrayList<>();
+		
+		if(values != null && values.length > 0)
+		{
+			lst.addAll(Arrays.asList(values));
+		}
+		
+		return lst;
+	}
+
+	@FreeMarkerMethod(
+			description = "Creates a new map with specified values",
+			returnDescription = "newly created map"
+			)
+	public static Map<Object, Object> newMap(
+			@FmParam(name = "keyValues", description = "Initial key-value pairs to be set") Object... keyValues)
+	{
+		return CommonUtils.toMap(keyValues);
+	}
+
+	@FreeMarkerMethod(
+			description = "Creates a new sorted map with specified values",
+			returnDescription = "newly created map"
+			)
+	public static Map<Object, Object> newSortedMap(
+			@FmParam(name = "keyValues", description = "Initial key-value pairs to be set") Object... keyValues)
+	{
+		return CommonUtils.toSortedMap(keyValues);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Adds specified values to the specified collection",
+			returnDescription = "Input collection post modification"
+			)
+	public static Collection<Object> addToCol(
+			@FmParam(name = "collection", description = "Collection to be modified") Collection<Object> collection, 
+			@FmParam(name = "values", description = "Values to add") Object... values)
+	{
+		if(values != null)
+		{
+			collection.addAll(Arrays.asList(values));
+		}
+		
+		return collection;
+	}
+
+	@FreeMarkerMethod(
+			description = "Removes specified values from the specified collection",
+			returnDescription = "Input collection post modification"
+			)
+	public static Collection<Object> removeFromCol(
+			@FmParam(name = "collection", description = "Collection to be modified") Collection<Object> collection, 
+			@FmParam(name = "values", description = "Values to remove") Object... values)
+	{
+		if(values != null)
+		{
+			collection.removeAll(Arrays.asList(values));
+		}
+		
+		return collection;
+	}
+
+	@FreeMarkerMethod(
+			description = "Adds specified key-values to the specified map",
+			returnDescription = "Input map post modification"
+			)
+	public static Map<Object, Object> addToMap(
+			@FmParam(name = "map", description = "Map to be modified") Map<Object, Object> map, 
+			@FmParam(name = "keyValues", description = "Key-value pairs to add") Object... keyValues)
+	{
+		if(keyValues != null)
+		{
+			map.putAll(CommonUtils.toMap(keyValues));
+		}
+		
+		return map;
+	}
+
+	@FreeMarkerMethod(
+			description = "Removes specified keys from the specified map",
+			returnDescription = "Input collection post modification"
+			)
+	public static Map<Object, Object> removeFromMap(
+			@FmParam(name = "map", description = "Map to be modified") Map<Object, Object> map, 
+			@FmParam(name = "keys", description = "Keys to remove") Object... keys)
+	{
+		if(keys != null)
+		{
+			Arrays.asList(keys).forEach(key -> map.remove(key));
+		}
+		
+		return map;
+	}
+	
 	@FreeMarkerMethod(
 			description = "Converts specified list into set.",
 			returnDescription = "Converted set."

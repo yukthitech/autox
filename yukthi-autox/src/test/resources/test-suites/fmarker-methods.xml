@@ -1,0 +1,26 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="fmarker-methods">
+		<test-case name="collectionMethods">
+			<description>
+				Test collections related fmarker methods.
+			</description>
+
+			<s:assert-equals actual="expr: addToCol(newList('a', 'b', 'c', 'd'), '1', '2', '3')" 
+				expected="list: a, b, c, d, 1, 2, 3"/>
+			<s:assert-equals actual="expr: removeFromCol(newList('a', 'b', 'c', 'd'), 'c', 'b')" 
+				expected="list: a, d"/>
+				
+			<s:assert-equals actual="expr: addToMap(newMap('a', '1', 'b', '2'), 'c', '3', 'd', '4')" 
+				expected="map: a=1, b=2, c=3, d=4"/>
+			<s:assert-equals actual="expr: addToMap(newSortedMap('a', '1', 'b', '2'), 'c', '3', 'd', '4')" 
+				expected="map: a=1, b=2, c=3, d=4"/>
+			<s:assert-equals actual="expr: removeFromMap(newMap('a', '1', 'b', '2', 'c', '3', 'd', '4'), 'b', 'd')" 
+				expected="map: a=1, c=3"/>
+		</test-case>
+	</test-suite>
+
+</test-file>

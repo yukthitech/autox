@@ -122,7 +122,15 @@ public class StepsExecutor
 			stepListeners.get().stepErrored(step, ex);
 			String stackTrace = executionStack.toStackTrace();
 			
-			logger.error("An error occurred with message at stack trace: \n{}", stackTrace, ex);
+			if(ex instanceof AutoxValidationException)
+			{
+				logger.error("Validation error occurred during step execution. Error: {}\n{}", ex.toString(), stackTrace);
+			}
+			else
+			{
+				logger.error("An error occurred with message at stack trace: \n{}", stackTrace, ex);				
+			}
+			
 			exeLogger.error("Execution result in error: \n{}.\nStack Trace:{}", CommonUtils.getRootCauseMessages(ex), stackTrace);
 			
 			throw new HandledException(ex);

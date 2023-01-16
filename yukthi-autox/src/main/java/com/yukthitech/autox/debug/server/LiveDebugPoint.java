@@ -45,6 +45,7 @@ import com.yukthitech.autox.debug.common.ServerMssgEvalExprResult;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
 import com.yukthitech.autox.debug.common.ServerMssgStepExecuted;
+import com.yukthitech.autox.exec.HandledException;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -251,9 +252,17 @@ public class LiveDebugPoint
 			StepsExecutor.execute(steps, null);
 			
 			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, true, getContextAttr(), null));
-		}catch(Exception ex)
+		} catch(Exception ex)
 		{
-			logger.error("An error occurred during dynamic step execution", ex);
+			if(ex instanceof HandledException)
+			{
+				logger.error("An error occurred during dynamic step execution: {}", ex.toString());
+			}
+			else
+			{
+				logger.error("An error occurred during dynamic step execution", ex);
+			}
+			
 			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, false, getContextAttr(), 
 					"An error occurred during dynamic step execution:\n  " + ex));
 		}
