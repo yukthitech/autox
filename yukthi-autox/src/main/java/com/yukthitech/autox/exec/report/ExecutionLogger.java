@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -350,7 +350,7 @@ public class ExecutionLogger implements IExecutionLogger
 		
 		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
 
-		logger.debug(finalMssg);
+		logger.log(logLevel.getLog4jLevel(), finalMssg);
 		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
 	}
 	

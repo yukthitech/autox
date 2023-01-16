@@ -25,8 +25,8 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -324,7 +324,6 @@ public class ReportDataManager
 		return (totalCount == successCount);
 	}
 	
-	@SuppressWarnings("deprecation")
 	private ReportLogFile generateMonitorHtml(Executor executor, ExecutorDetails executorDetails, String name, ReportLogFile logFile)
 	{
 		try

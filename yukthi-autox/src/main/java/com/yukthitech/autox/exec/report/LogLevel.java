@@ -15,31 +15,36 @@
  */
 package com.yukthitech.autox.exec.report;
 
+import org.apache.logging.log4j.Level;
+
 /**
  * Logging levels.
  * @author akiran
  */
 public enum LogLevel
 {
-	TRACE("  TRACE"), 
-	DEBUG("  DEBUG"), 
-	WARN("   WARN"),
-	ERROR("  ERROR"),
-	INFO("  INFO"),
+	TRACE("  TRACE", Level.TRACE), 
+	DEBUG("  DEBUG", Level.DEBUG), 
+	WARN("   WARN", Level.WARN),
+	ERROR("  ERROR", Level.ERROR),
+	INFO("  INFO", Level.INFO),
 	
 	/**
 	 * Log level which would add messages to summary report.
 	 */
-	SUMMARY("SUMMARY");
+	SUMMARY("SUMMARY", Level.INFO);
 	
 	/**
 	 * Padding string for this level.
 	 */
 	private String paddedString;
+	
+	private Level log4jLevel;
 
-	private LogLevel(String paddedString)
+	private LogLevel(String paddedString, Level log4jLevel)
 	{
 		this.paddedString = paddedString;
+		this.log4jLevel = log4jLevel;
 	}
 	
 	/**
@@ -50,5 +55,10 @@ public enum LogLevel
 	public String getPaddedString()
 	{
 		return paddedString;
+	}
+	
+	public Level getLog4jLevel()
+	{
+		return log4jLevel;
 	}
 }
