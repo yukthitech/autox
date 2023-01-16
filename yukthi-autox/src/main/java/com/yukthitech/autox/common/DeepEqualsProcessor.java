@@ -18,6 +18,8 @@ package com.yukthitech.autox.common;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.beanutils.PropertyUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -27,7 +29,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Utility to compare 2 objects deeply.
  * @author akiran
  */
-public class DeepEqualsUtil
+public class DeepEqualsProcessor
 {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
@@ -35,22 +37,29 @@ public class DeepEqualsUtil
 	
 	private String pathFailed;
 	
-	private DeepEqualsUtil(boolean ignoreExtraProperties)
+	private IExecutionLogger logger;
+	
+	/**
+	 * In case specified, in case of errors, list path will
+	 * include any of these available keys.
+	 */
+	private List<String> listKeys;
+	
+	private DeepEqualsProcessor(boolean ignoreExtraProperties, AutomationContext context)
 	{
 		this.ignoreExtraProperties = ignoreExtraProperties;
+		this.logger = context.getExecutionLogger();
+	}
+	
+	public DeepEqualsProcessor setListKeys(List<String> listKeys)
+	{
+		this.listKeys = listKeys;
+		return this;
 	}
 
-	/**
-	 * Deep compare actual and expected objects.
-	 * @param actual actual object
-	 * @param expected expected object
-	 * @param ignoreExtraProperties flag indicating if extra properties of 
-	 * @param context
-	 * @param exeLogger
-	 * @return
-	 */
-	public static String deepCompare(Object actual, Object expected, boolean ignoreExtraProperties, AutomationContext context, IExecutionLogger exeLogger)
+	public static DeepEqualsProcessor newProcessor(boolean ignoreExtraProperties, AutomationContext context)
 	{
+		/*
 		//if both are null
 		if(actual == null && expected == null)
 		{
@@ -62,16 +71,26 @@ public class DeepEqualsUtil
 		{
 			return "$";
 		}
+		*/
 		
+
+		DeepEqualsProcessor instance = new DeepEqualsProcessor(ignoreExtraProperties, context);
+		//boolean compareRes = instance.deepCompare(actualJson, expectedJson, "$");
+		
+		//return compareRes ? null : instance.pathFailed;
+		return instance;
+	}
+	
+	public String deepCompare(Object actual, Object expected)
+	{
 		Object actualJson = toJsonObject(actual);
 		Object expectedJson = toJsonObject(expected);
-
-		DeepEqualsUtil instance = new DeepEqualsUtil(ignoreExtraProperties);
-		boolean compareRes = instance.deepCompare(actualJson, expectedJson, "$", context, exeLogger);
 		
-		return compareRes ? null : instance.pathFailed;
+		boolean compareRes = deepCompare(actualJson, expectedJson, "$");
+		
+		return compareRes ? null : this.pathFailed;
 	}
-
+	
 	/**
 	 * Converts input object into map of maps using json.
 	 * @param obj
@@ -89,7 +108,7 @@ public class DeepEqualsUtil
 		}
 	}
 	
-	private boolean deepCompare(Map<String, Object> actual, Map<String, Object> expected, String propPath, AutomationContext context, IExecutionLogger logger)
+	private boolean deepCompare(Map<String, Object> actual, Map<String, Object> expected, String propPath)
 	{
 		if(!ignoreExtraProperties)
 		{
@@ -110,7 +129,7 @@ public class DeepEqualsUtil
 			expectedVal = expected.get(key);
 			actualVal = actual.get(key);
 			
-			if(!deepCompare(actualVal, expectedVal, propPath + "." + key, context, logger))
+			if(!deepCompare(actualVal, expectedVal, propPath + "." + key))
 			{
 				return false;
 			}
@@ -137,8 +156,36 @@ public class DeepEqualsUtil
 
 		return true;
 	}
+	
+	private String listIndex(int index, Object val)
+	{
+		if(listKeys == null || !(val instanceof Map))
+		{
+			return "[" + index + "]";
+		}
+		
+		for(String key : listKeys)
+		{
+			Object lstVal = null;
+			
+			try
+			{
+				lstVal = PropertyUtils.getProperty(val, key);
+			}catch(Exception ex)
+			{
+				//assume the property that does not exist
+			}
+			
+			if(lstVal != null)
+			{
+				return String.format("[%s@%s=%s]", index, key, lstVal);
+			}
+		}
+		
+		return "[" + index + "]";
+	}
 
-	private boolean deepCompare(List<Object> actual, List<Object> expected, String propPath, AutomationContext context, IExecutionLogger logger)
+	private boolean deepCompare(List<Object> actual, List<Object> expected, String propPath)
 	{
 		if(!ignoreExtraProperties)
 		{
@@ -170,7 +217,7 @@ public class DeepEqualsUtil
 			expectedVal = expected.get(i);
 			actualVal = actual.get(i);
 			
-			if(!deepCompare(actualVal, expectedVal, propPath + "[" + i + "]", context, logger))
+			if(!deepCompare(actualVal, expectedVal, propPath + listIndex(i, expectedVal)))
 			{
 				return false;
 			}
@@ -180,7 +227,7 @@ public class DeepEqualsUtil
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean deepCompare(Object actual, Object expected, String propPath, AutomationContext context, IExecutionLogger logger)
+	private boolean deepCompare(Object actual, Object expected, String propPath)
 	{
 		//if both are null
 		if(actual == null && expected == null)
@@ -209,12 +256,12 @@ public class DeepEqualsUtil
 		
 		if(actual instanceof Map)
 		{
-			return deepCompare((Map<String, Object>) actual, (Map<String, Object>) expected, propPath, context, logger);
+			return deepCompare((Map<String, Object>) actual, (Map<String, Object>) expected, propPath);
 		}
 		
 		if(actual instanceof List)
 		{
-			return deepCompare((List<Object>) actual, (List<Object>) expected, propPath, context, logger);
+			return deepCompare((List<Object>) actual, (List<Object>) expected, propPath);
 		}
 
 		boolean res = AutomationUtils.equals(actual, expected);

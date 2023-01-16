@@ -15,6 +15,11 @@
  */
 package com.yukthitech.autox.test.assertion;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
@@ -22,7 +27,7 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.common.DeepEqualsUtil;
+import com.yukthitech.autox.common.DeepEqualsProcessor;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
@@ -62,6 +67,9 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	
 	@Param(description = "Failed path, if any, will be set on context with this attribute. Default: failedPath", attrName = true, defaultValue = "failedPath", required = false)
 	private String failedPathAttr = "failedPath";
+	
+	@Param(description = "Comma separated key names that can be used to identify list objects in error paths.", required = false)
+	private String listKeys;
 
 	/**
 	 * Sets the expected value in comparison..
@@ -97,6 +105,11 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	{
 		this.failedPathAttr = failedPathAttr;
 	}
+	
+	public void setListKeys(String listKeys)
+	{
+		this.listKeys = listKeys;
+	}
 
 	/**
 	 * Gets the type.
@@ -113,6 +126,18 @@ public class AssertDeepEqualsStep extends AbstractValidation
 		
 		return val.getClass();
 	}
+	
+	private List<String> parseListKeys()
+	{
+		if(StringUtils.isBlank(listKeys))
+		{
+			return null;
+		}
+		
+		String listKeys = this.listKeys.trim();
+		
+		return Arrays.asList(listKeys.split("\\s*\\,\\s*"));
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
@@ -124,7 +149,10 @@ public class AssertDeepEqualsStep extends AbstractValidation
 				actual, getType(actual),
 				ignoreExtraProperties);
 		
-		String diffPath = DeepEqualsUtil.deepCompare(this.actual, this.expected, ignoreExtraProperties, context, exeLogger);
+		String diffPath = DeepEqualsProcessor.newProcessor(ignoreExtraProperties, context)
+				.setListKeys(parseListKeys())
+				.deepCompare(this.actual, this.expected);
+		
 		boolean isEqual = (diffPath == null);
 		
 		context.setAttribute(failedPathAttr, diffPath);

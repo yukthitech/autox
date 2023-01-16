@@ -14,6 +14,7 @@
 						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
 				</s:sql-dml-query>
+
 			</wrap:steps>
 		
 			<s:sql-assert dataSourceName="dataSource">

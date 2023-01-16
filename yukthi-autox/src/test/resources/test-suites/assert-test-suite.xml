@@ -179,5 +179,56 @@
 			
 		</testCase>
 
+		<testCase name="assertDeepEquals-path">
+			<description>
+				Validates assert deep equals work properly
+			</description>
+		
+			<s:set expression="attr1">
+				<value>json:
+					{
+						"lst1": [
+							{"name": "emp1", "age": 20},
+							{"name": "emp2", "age": 22}
+						],
+						
+						"lst2": [
+							{"name": "emp1", "age": 20},
+							{"name": "emp2", "age": 22}
+						]
+					}
+				</value>
+			</s:set>
+		
+			<s:set expression="attr2">
+				<value>json:
+					{
+						"lst1": [
+							{"name": "emp1", "age": 20},
+							{"name": "emp2", "age": 23}
+						],
+						
+						"lst2": [
+							{"name": "emp1", "age": 20},
+							{"name": "emp2", "age": 22}
+						]
+					}
+				</value>
+			</s:set>
+
+			<s:try>
+				<s:assert-deep-equals actual="attr: attr1" expected="attr: attr2" failedPathAttr="failedPath"/>
+			</s:try>
+			<s:catch errorAttr="ex"/>
+			
+			<s:assert-equals actual="attr: failedPath" expected="$.lst1[1].age"/>
+			
+			<s:try>
+				<s:assert-deep-equals actual="attr: attr1" expected="attr: attr2" failedPathAttr="failedPath" listKeys=" id, name , key  "/>
+			</s:try>
+			<s:catch errorAttr="ex"/>
+				
+			<s:assert-equals actual="attr: failedPath" expected="$.lst1[1@name=emp2].age"/>
+		</testCase>
 	</testSuite>
 </testData>
