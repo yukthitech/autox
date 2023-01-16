@@ -231,7 +231,7 @@ public class TestCaseExecutor extends Executor
 		if(testCaseData != null)
 		{
 			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName(), testCaseData.getValue());
-			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName() + ".name", testCaseData.getName());
+			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName() + "$name", testCaseData.getName());
 		}
 
 		AutomationContext.getInstance().startLogMonitoring();

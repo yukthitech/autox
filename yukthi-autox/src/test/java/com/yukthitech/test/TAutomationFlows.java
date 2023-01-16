@@ -135,7 +135,7 @@ public class TAutomationFlows extends BaseTestCases
 				"-tsf", "./src/test/resources/new-test-suites/session-events",
 				"-rf", "./output/session-events", 
 				"-prop", "./src/test/resources/app.properties", 
-				//"--report-opening-disabled", "true",
+				"--report-opening-disabled", "true",
 				//"-ts", "ml-rest-sessions"
 				//"-tc", "dataProviderOnFetchIndependentCtx"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
