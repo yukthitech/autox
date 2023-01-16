@@ -737,6 +737,12 @@ public class Element implements INode
 		{
 			return;
 		}
+		
+		//start location would be null, when node is not closed properly
+		if(startLocation == null)
+		{
+			return;
+		}
 
 		collector.addMessage(
 				new FileParseMessage(MessageType.ERROR, 

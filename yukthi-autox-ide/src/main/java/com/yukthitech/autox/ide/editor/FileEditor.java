@@ -27,6 +27,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -50,6 +52,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.AutoCompletionEvent;
+import org.fife.ui.autocomplete.AutoCompletionEvent.Type;
+import org.fife.ui.autocomplete.AutoCompletionListener;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.rsyntaxtextarea.LinkGeneratorResult;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
@@ -79,6 +84,7 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.GlobalStateManager;
 import com.yukthitech.autox.ide.services.IdeEventManager;
+import com.yukthitech.autox.ide.services.IdeSettingsManager;
 import com.yukthitech.autox.ide.xmlfile.IndexRange;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
@@ -197,6 +203,11 @@ public class FileEditor extends JPanel
 	
 	private AutoCompletion autoCompletion;
 	
+	private boolean autoCompltetionTriggered = false;
+	
+	@Autowired
+	private IdeSettingsManager ideSettingsManager;
+	
 	public FileEditor(Project project, File file)
 	{
 		scrollPane = new RTextScrollPane(new RSyntaxTextArea());
@@ -307,6 +318,25 @@ public class FileEditor extends JPanel
 			@Override
 			public void keyReleased(KeyEvent e)
 			{
+				//if auto completion was triggered but closed because of typing
+				if(autoCompltetionTriggered && !autoCompletion.isPopupVisible())
+				{
+					char ch = e.getKeyChar();
+					int code = e.getKeyCode();
+				
+					//chek if char can be continue auto-trigger, if so display auto complete again
+					if(Character.isJavaIdentifierStart(ch) || ch == '-' || code == KeyEvent.VK_BACK_SPACE)
+					{
+						autoCompletion.doCompletion();
+					}
+
+					//if non-word chars are typed closed auto trigger
+					
+					//Also when word chars are used close trigger part, so that if 
+					// auto completions are displayed with current change, then only the redisplay gets enabled
+					autoCompltetionTriggered = false;
+				}
+		
 				fileContentChanged(false);
 			}
 		});
@@ -321,7 +351,6 @@ public class FileEditor extends JPanel
 			}
 		});
 
-		/*
 		syntaxTextArea.addMouseWheelListener(new MouseWheelListener()
 		{
 			@Override
@@ -335,7 +364,8 @@ public class FileEditor extends JPanel
 					
 					if(scrollBar != null)
 					{
-						int val = scrollBar.getValue() + amount;
+						int lineHeight = syntaxTextArea.getFontMetrics(syntaxTextArea.getFont()).getHeight();
+						int val = scrollBar.getValue() + lineHeight * 2 * amount;
 						scrollBar.setValue(val);
 					}
 					
@@ -344,13 +374,12 @@ public class FileEditor extends JPanel
 				
 				IdeUtils.executeConsolidatedJob("editor.changeFontSize", () -> 
 				{
-					ideSettingsManager.changeFontSize(amount > 0);	
+					ideSettingsManager.changeFontSize(amount < 0);	
 				}, 10);
 				
 				e.consume();
 			}
 		});
-		*/
 
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl F1"), "dummy help");
@@ -394,6 +423,18 @@ public class FileEditor extends JPanel
 				// show documentation dialog box
 				autoCompletion.setShowDescWindow(true);
 				autoCompletion.install(syntaxTextArea);
+				
+				autoCompletion.addAutoCompletionListener(new AutoCompletionListener()
+				{
+					@Override
+					public void autoCompleteUpdate(AutoCompletionEvent e)
+					{
+						if(e.getEventType() == Type.POPUP_SHOWN)
+						{
+							autoCompltetionTriggered = true;
+						}
+					}
+				});
 				
 				//logger.debug("For file {} installing auto-complete from provider: {}", file.getPath(), provider);
 			}
@@ -493,15 +534,18 @@ public class FileEditor extends JPanel
 		}
 	}
 	
-	public void setEditorFont(Font font)
+	public synchronized void changeSettings(Font font, Boolean wrap)
 	{
-		syntaxTextArea.setFont(font);
-	}
-	
-	public void setEnableTextWrapping(boolean wrap)
-	{
-		syntaxTextArea.setLineWrap(wrap);
-		syntaxTextArea.setWrapStyleWord(wrap);
+		if(font != null)
+		{
+			syntaxTextArea.setFont(font);
+		}
+		
+		if(wrap != null)
+		{
+			syntaxTextArea.setLineWrap(wrap);
+			syntaxTextArea.setWrapStyleWord(wrap);
+		}
 	}
 	
 	public RSyntaxTextArea getTextArea()

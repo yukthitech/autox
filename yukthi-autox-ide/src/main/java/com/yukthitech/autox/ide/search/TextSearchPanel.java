@@ -272,8 +272,10 @@ public class TextSearchPanel extends JPanel
 		
 	}
 	
-	void resetForDisplay()
+	void resetForDisplay(boolean selectedTab)
 	{
+		searchStrFld.requestFocus();
+		
 		File file = projectExplorer.getSelectedFile();
 		
 		//if at least one file is selected, then only enable selected-folders option
@@ -338,7 +340,7 @@ public class TextSearchPanel extends JPanel
 		}
 		
 		searchService.findAll(query, false);
-		parentDialog.setVisible(false);
+		parentDialog.closeDialog();
 	}
 	
 	private void replaceAndFind(ActionEvent e)
@@ -351,7 +353,7 @@ public class TextSearchPanel extends JPanel
 		}
 		
 		searchService.findAll(query, true);
-		parentDialog.setVisible(false);
+		parentDialog.closeDialog();
 	}
 
 	private void replaceAll(ActionEvent e)
@@ -375,7 +377,7 @@ public class TextSearchPanel extends JPanel
 		
 		if(replaceCount >= 0)
 		{
-			parentDialog.setVisible(false);
+			parentDialog.closeDialog();
 			JOptionPane.showMessageDialog(this, "Number of occurrences replaced: " + replaceCount);
 		}
 	}

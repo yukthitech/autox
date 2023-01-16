@@ -18,6 +18,7 @@ package com.yukthitech.autox.ide.search;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -38,11 +39,9 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.search.FileSearchQuery.Scope;
 import com.yukthitech.autox.ide.state.PersistableState;
-import java.awt.Font;
 
 public class XmlSearchPanel extends JPanel
 {
@@ -218,8 +217,10 @@ public class XmlSearchPanel extends JPanel
 		scopeGroup.add(txtSelFoldersRbut);
 	}
 
-	void resetForDisplay()
+	void resetForDisplay(boolean selectedTab)
 	{
+		xpathFld.requestFocus();
+		
 		File file = projectExplorer.getSelectedFile();
 		
 		//if at least one file is selected, then only enable selected-folders option
@@ -273,7 +274,7 @@ public class XmlSearchPanel extends JPanel
 		}
 		
 		searchService.findAll(query, false);
-		parentDialog.setVisible(false);
+		parentDialog.closeDialog();
 	}
 	
 	private void replaceAndFind(ActionEvent e)
@@ -286,7 +287,7 @@ public class XmlSearchPanel extends JPanel
 		}
 		
 		searchService.findAll(query, true);
-		parentDialog.setVisible(false);
+		parentDialog.closeDialog();
 	}
 
 	private void replaceAll(ActionEvent e)
@@ -310,18 +311,8 @@ public class XmlSearchPanel extends JPanel
 		
 		if(replaceCount >= 0)
 		{
-			parentDialog.setVisible(false);
+			parentDialog.closeDialog();
 			JOptionPane.showMessageDialog(this, "Number of occurrences replaced: " + replaceCount);
 		}
-	}
-	
-	void loadState(IdeState state)
-	{
-		
-	}
-	
-	void saveState(IdeState state)
-	{
-		
 	}
 }

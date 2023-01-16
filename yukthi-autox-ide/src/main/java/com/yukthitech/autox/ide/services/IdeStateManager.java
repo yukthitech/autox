@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.ide.services;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.model.IdeState;
@@ -24,7 +22,7 @@ import com.yukthitech.autox.ide.model.IdeState;
 @Service
 public class IdeStateManager
 {
-	private static Logger logger = LogManager.getLogger(IdeStateManager.class);
+	//private static Logger logger = LogManager.getLogger(IdeStateManager.class);
 	
 	private IdeState currentState;
 	
@@ -46,7 +44,7 @@ public class IdeStateManager
 	
 	public void saveState(IdeState ideState)
 	{
-		logger.debug("Saving ide state..");
+		//logger.debug("Saving ide state..");
 		ideState.save();
 	}
 }

@@ -277,16 +277,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		{
 			for(FileEditor editor : pathToEditor.values())
 			{
-				if(font != null)
-				{
-					editor.setEditorFont(editorFont);
-					editor.setEnableTextWrapping(enableTextWrapping);
-				}
-				
-				if(wrap != null)
-				{
-					editor.setEnableTextWrapping(wrap);
-				}
+				editor.changeSettings(editorFont, enableTextWrapping);
 			}
 		}
 	}
@@ -418,13 +409,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			
 			fileEditor = new FileEditor(project, file);
 			IdeUtils.autowireBean(applicationContext, fileEditor);
-			
-			if(editorFont != null)
-			{
-				fileEditor.setEditorFont(editorFont);
-			}
-			
-			fileEditor.setEnableTextWrapping(enableTextWrapping);
+
+			fileEditor.changeSettings(editorFont, enableTextWrapping);
 			
 			FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
 			IdeUtils.autowireBean(applicationContext, fileEditorTab);

@@ -530,6 +530,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		}
 		
 		//check for bean properties
+		
+		//element type can be null, if node is not completed or incorrect
+		if(elem.getElementType() == null)
+		{
+			return completions;
+		}
+		
 		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
 		BeanPropertyInfo beanPropertyInfo = beanInfoFactory.getBeanPropertyInfo(elem.getElementType());
 		Set<String> childNames = elem.getChildNames();

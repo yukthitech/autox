@@ -93,8 +93,8 @@ public class SearchDialog extends IdeDialogPanel
 	
 	public void display()
 	{
-		textSearchPanel.resetForDisplay();
-		xmlSearchPanel.resetForDisplay();
+		textSearchPanel.resetForDisplay(tabbedPane.getSelectedIndex() == 0);
+		xmlSearchPanel.resetForDisplay(tabbedPane.getSelectedIndex() == 1);
 		
 		super.displayInDialog();
 	}
