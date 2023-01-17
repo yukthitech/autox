@@ -115,7 +115,8 @@ public class GlobalKeyboardListener
 			if(stroke.modifiers == modifiers)
 			{
 				stroke.actionListener.actionPerformed(new ActionEvent(e.getSource(), e.getID(), null));
-				return false;
+				e.consume();
+				return true;
 			}
 		}
 

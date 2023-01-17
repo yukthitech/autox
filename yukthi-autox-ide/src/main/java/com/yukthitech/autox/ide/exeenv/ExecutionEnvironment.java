@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -536,6 +537,20 @@ public class ExecutionEnvironment
 		synchronized(pausedThreads)
 		{
 			pausedThreads.values().forEach(mssg -> consumer.accept(mssg));
+		}
+	}
+	
+	public void clean()
+	{
+		try
+		{
+			if(reportFolder.exists())
+			{
+				FileUtils.forceDelete(reportFolder);
+			}
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while cleaning report folder: {}", reportFolder.getPath());
 		}
 	}
 

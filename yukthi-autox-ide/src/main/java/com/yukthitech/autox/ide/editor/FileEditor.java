@@ -264,6 +264,7 @@ public class FileEditor extends JPanel
 		this.syntaxTextArea = (RSyntaxTextArea) scrollPane.getViewport().getView();
 		this.syntaxTextArea.setHighlighter(highlighter);
 		this.syntaxTextArea.setToolTipSupplier(this::getToolTip);
+		this.syntaxTextArea.setCurrentLineHighlightColor(new Color(255, 255, 172, 128));
 		
 		scrollPane.setLineNumbersEnabled(true);
 

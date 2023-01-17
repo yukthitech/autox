@@ -313,7 +313,7 @@ public class DebugClient
 		sendDataToServer(data, null);
 	}
 	
-	public void sendDataToServer(ClientMessage data, IMessageCallback callback)
+	public synchronized void sendDataToServer(ClientMessage data, IMessageCallback callback)
 	{
 		if(clientSocket == null)
 		{

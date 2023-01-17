@@ -113,7 +113,7 @@ public class ExeEnvironmentPanel extends JPanel
 		{
 			public void itemStateChanged(ItemEvent e)
 			{
-				changeEnvironment();
+				onChangeEnvironment();
 			}
 		});
 		
@@ -246,10 +246,14 @@ public class ExeEnvironmentPanel extends JPanel
 		if(activeEnv.isTerminated())
 		{
 			envComboBox.removeItem(activeEnv);
-			executionEnvironmentManager.setActiveEnvironment(null);
-			UiIdElementsManager.setEnableFlagByGroup("debugGroup", false);
+			activeEnv.clean();
 			
-			checkForButtons();
+			if(envComboBox.getItemCount() > 0)
+			{
+				envComboBox.setSelectedIndex(0);
+			}
+
+			onChangeEnvironment();
 		}
 	}
 
@@ -285,22 +289,29 @@ public class ExeEnvironmentPanel extends JPanel
 		for(ExecutionEnvironment renv : envToRemove)
 		{
 			envComboBox.removeItem(renv);
+			renv.clean();
 		}
 		
 		if(activeEnvRemoved)
 		{
-			executionEnvironmentManager.setActiveEnvironment(null);
-			UiIdElementsManager.setEnableFlagByGroup("debugGroup", false);
+			if(envComboBox.getItemCount() > 0)
+			{
+				envComboBox.setSelectedIndex(0);
+			}
+			
+			onChangeEnvironment();
+			return;
 		}
 		
 		checkForButtons();
 	}
 
-	private synchronized void changeEnvironment()
+	private synchronized void onChangeEnvironment()
 	{
 		ExecutionEnvironment env = (ExecutionEnvironment) envComboBox.getSelectedItem();
 		executionEnvironmentManager.setActiveEnvironment(env);
 		
+		checkForButtons();
 		UiIdElementsManager.setEnableFlagByGroup("debugGroup", (env != null && env.isDebugEnv()));
 	}
 	

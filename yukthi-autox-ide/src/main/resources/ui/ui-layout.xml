@@ -128,7 +128,7 @@
 				<short-key ctrl="true" key="ENTER" />
 			</item>
 			<item label="Step Into" action="debugStepInto" group="debugGroup" enabled="false">
-				<short-key key="F5" global="true"/>
+				<short-key key="F5"/>
 			</item>
 			<item label="Step Over" action="debugStepOver" group="debugGroup" enabled="false">
 				<short-key key="F6" global="true"/>

@@ -23,6 +23,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +61,26 @@ public class ExecutionEnvironmentManager
 	
 	private List<ExecutionEnvironment> runningEnvironments = new LinkedList<>();
 	
+	private File reportBaseFolder;
+	
+	@PostConstruct
+	private void init() throws Exception
+	{
+		reportBaseFolder = new File("autox-report").getCanonicalFile();
+		
+		//clean report base folder if one exists during startup
+		try
+		{
+			if(reportBaseFolder.exists())
+			{
+				FileUtils.forceDelete(reportBaseFolder);
+			}
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while cleaning report folder: {}", reportBaseFolder.getPath());
+		}
+	}
+	
 	/**
 	 * Fetches next available socket.
 	 * @return next available socket.
@@ -77,7 +100,7 @@ public class ExecutionEnvironmentManager
 		}
 	}
 	
-	private ExecutionEnvironment startAutoxEnvironment(ExecuteCommand executeCommand, String envName, String... extraArgs)
+	private synchronized ExecutionEnvironment startAutoxEnvironment(ExecuteCommand executeCommand, String envName, String... extraArgs)
 	{
 		ExecutionType executionType = executeCommand.getExecutionType();
 		Project project = executeCommand.getProject();
@@ -86,8 +109,8 @@ public class ExecutionEnvironmentManager
 		
 		String classpath = project.getProjectClassLoader().toClassPath();
 		String javaCmd = "java";
-		String outputDir = "autox-report";
-		File reportFolder = new File(project.getBaseFolderPath(), outputDir);
+		String outputDir = Long.toHexString(System.currentTimeMillis());
+		File reportFolder = new File(this.reportBaseFolder, outputDir);
 		
 		int debugPort = -1;
 		//Eg: -Dautox.debug.enabled=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
@@ -115,6 +138,8 @@ public class ExecutionEnvironmentManager
 		{
 			debugPort = fetchNextAvailablePort();
 			command.addAll(Arrays.asList("--debug-port", "" + debugPort));
+			
+			logger.debug("Starting client with debug port: {}", debugPort);
 		}
 		
 		if(executionType != ExecutionType.SOURCE_FOLDER && testSuiteFolder != null)
