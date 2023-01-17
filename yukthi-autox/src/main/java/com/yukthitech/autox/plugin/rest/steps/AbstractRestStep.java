@@ -34,7 +34,7 @@ import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.rest.RestPlugin;
 import com.yukthitech.autox.plugin.rest.RestPluginSession;
-import com.yukthitech.autox.plugin.rest.UnauthorizedRequestException;
+import com.yukthitech.autox.plugin.rest.SessionResetException;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.rest.HttpClientFactory;
 import com.yukthitech.utils.rest.IRestResponseHandler;
@@ -499,9 +499,10 @@ public abstract class AbstractRestStep extends AbstractStep
 		try
 		{
 			executeRestStep(context, logger);
-		}catch(UnauthorizedRequestException ex)
+		}catch(SessionResetException ex)
 		{
-			logger.warn("Invoked 'unauthorized' rest-plugin event handler as previous request resulted in unauthorized response. Post plugin event handler, invoking previous request one more time");
+			logger.warn("Invoked 'unauthorized' rest-plugin event handler as previous request resulted in unauthorized response. Post session-reset by plugin event handler, "
+					+ "invoking previous request one more time");
 			executeRestStep(context, logger);
 		}finally
 		{

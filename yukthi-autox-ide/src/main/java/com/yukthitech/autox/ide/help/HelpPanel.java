@@ -81,6 +81,7 @@ import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
+import com.yukthitech.autox.doc.PluginInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
@@ -138,9 +139,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 		try
 		{
-			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.html"), Charset.defaultCharset());
-			fmMethodDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/fm-method-doc.html"), Charset.defaultCharset());
-			exprDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/expr-doc.html"), Charset.defaultCharset());
+			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/help/templates/documentation.html"), Charset.defaultCharset());
+			fmMethodDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/help/templates/fm-method-doc.html"), Charset.defaultCharset());
+			exprDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/help/templates/expr-doc.html"), Charset.defaultCharset());
 		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occured while loading documentation template", ex);
@@ -230,6 +231,16 @@ public class HelpPanel extends JPanel implements IViewPanel
 				uiLocatorNode.addHelpNode(new HelpNodeData("uiloc:" + method.getName(), method.getName(), buildDoc(exprDocTemplate, context), method));
 			}
 			
+			HelpNodeData pluginsNode = new HelpNodeData("plugins", "Plugins", "", null);
+			rootNode.addHelpNode(pluginsNode);
+
+			for(PluginInfo plugin : docInformation.getPlugins())
+			{
+				context.put("type", "plugin");
+				context.put("node", plugin);
+				pluginsNode.addHelpNode(new HelpNodeData("plugin:" + plugin.getName(), plugin.getName(), buildDoc(documentTemplate, context), plugin));
+			}
+
 			loadStaticDocs(rootNode);
 
 			// create and open index

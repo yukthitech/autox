@@ -19,15 +19,15 @@ import com.yukthitech.utils.exceptions.UtilsException;
 
 /**
  * Raised when rest request resulted in unauthorized response and plugin 
- * handler needs to repeat the request.
+ * handler had reset the session and request can be reinvokeds.
  * 
  * @author akranthikiran
  */
-public class UnauthorizedRequestException extends UtilsException
+public class SessionResetException extends UtilsException
 {
 	private static final long serialVersionUID = 1L;
 
-	public UnauthorizedRequestException(String message, Object... args)
+	public SessionResetException(String message, Object... args)
 	{
 		super(message, args);
 	}

@@ -18,6 +18,8 @@ package com.yukthitech.autox.doc;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -79,22 +81,40 @@ public class ParamInfo implements Comparable<ParamInfo>
 	private boolean attributable;
 	
 	/**
+	 * Lists the valid values for this param (eg: enum constants for enum fields).
+	 */
+	private Set<String> validValues;
+	
+	/**
 	 * Instantiates a new param info.
 	 *
 	 * @param field the field
 	 * @param paramAnnot the param annot
 	 */
+	@SuppressWarnings("rawtypes")
 	public ParamInfo(Field field, Param paramAnnot)
 	{
 		this.name = field.getName();
-		this.nameWithHyphens = name.replaceAll("([A-Z])", "-$1").toLowerCase();
 		
 		if(StringUtils.isNotBlank(paramAnnot.name()))
 		{
 			this.name = paramAnnot.name();
 		}
 		
+		this.nameWithHyphens = name.replaceAll("([A-Z])", "-$1").toLowerCase();
 		this.description = paramAnnot.description();
+		
+		if(field.getType().isEnum())
+		{
+			Object constants[] = field.getType().getEnumConstants();
+			validValues = new TreeSet<>();
+			
+			for(Object val : constants)
+			{
+				validValues.add(((Enum) val).name());
+			}
+		}
+		
 		this.mandatory = paramAnnot.required();
 		this.sourceType = paramAnnot.sourceType();
 		this.attrName = paramAnnot.attrName();
@@ -235,6 +255,11 @@ public class ParamInfo implements Comparable<ParamInfo>
 	public boolean isAttributable()
 	{
 		return attributable;
+	}
+	
+	public Set<String> getValidValues()
+	{
+		return validValues;
 	}
 
 	/* (non-Javadoc)

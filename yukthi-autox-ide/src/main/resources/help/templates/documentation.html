@@ -54,6 +54,11 @@
 			{
 				background: red;
 			}
+			
+			ul
+			{
+				margin-left: 12px;
+			}
 		</style>
 	</head>
 	
@@ -121,6 +126,10 @@
 								</#if>						
 								
 								${param.description}
+								
+								<#if param.validValues??>
+									<br/><br/><b>Valid Values: </b> <#list param.validValues as value >${value}<#sep>, </#sep></#list>
+								</#if>						
 							</td>
 						</tr>
 						</#list>
@@ -136,36 +145,79 @@
 					</table>
 
 					<#if type="plugin">
-					<table class="docTable">
-						<tr>
-							<td colspan="4"  class="doc_mainHeading">
-								Plugin Command Line Arguments
-							</td>
-						</tr>
-						<tr>
-							<td class="doc_heading"> Short Name </td>
-							<td class="doc_heading"> Long Name </td>
-							<td class="doc_heading"> Type </td>
-							<td class="doc_heading"> Description </td>
-						</tr>
-						<#list node.cliArguments as clia>
-						<tr>
-							<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">${clia.shortName}</td>
-							<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">${clia.longName}</td>
-							<td>${clia.type}</td>
-							<td>${clia.description}</td>
-						</tr>
-						</#list>
-						<tr>
+						<table class="docTable">
+							<tr>
+								<td colspan="4"  class="doc_mainHeading">
+									Plugin Command Line Arguments
+								</td>
+							</tr>
+							<tr>
+								<td class="doc_heading"> Short Name </td>
+								<td class="doc_heading"> Long Name </td>
+								<td class="doc_heading"> Type </td>
+								<td class="doc_heading"> Description </td>
+							</tr>
+							<#list node.cliArguments as clia>
+								<tr>
+									<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">${clia.shortName}</td>
+									<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">${clia.longName}</td>
+									<td>${clia.type}</td>
+									<td>${clia.description}</td>
+								</tr>
+							</#list>
 							<#assign i = node.cliArguments?size>
 							<#if i==0>
-							<td colspan="4" style="font-weight: bold; ">
-								<i>No plugin specific command-line-arguments available.</i>
-							</td>
+								<tr>
+									<td colspan="4" style="font-weight: bold; ">
+										<i>No plugin specific command-line-arguments available.</i>
+									</td>
+								</tr>
 							</#if>
-						</tr>
-					</table>
+						</table>
+						
+						<table class="docTable">
+							<tr>
+								<td colspan="4"  class="doc_mainHeading">
+									Plugin Events (Events supported by plugin)
+								</td>
+							</tr>
+							<tr>
+								<td class="doc_heading"> Name </td>
+								<td class="doc_heading"> Description </td>
+								<td class="doc_heading"> Expected Return Value </td>
+								<td class="doc_heading"> Parameters </td>
+							</tr>
+							<#list node.events as event>
+								<tr>
+									<td>${event.name}</td>
+									<td>${event.description}</td>
+									<td>${event.returnDescription ! 'No Return value expected'}</td>
+									<td>
+										<#if (event.params?size) gt 0>
+											<ul>
+												<#list event.params as param>
+													<li>
+														<B>${param.name}</B>: ${param.description}
+													</li>
+												</#list>
+											</ul>
+										<#else>
+											<b><i>No event parameters available.</i></b>
+										</#if>
+									</td>
+								</tr>
+							</#list>
+							<tr>
+								<#assign i = node.events?size>
+								<#if i==0>
+									<td colspan="4" style="font-weight: bold; ">
+										<i>No plugin specific events available.</i>
+									</td>
+								</#if>
+							</tr>
+						</table>
 					</#if>
+					<!-- End of plugin specific doc -->
 
 					<#if node.hasExamples()>
 						<table class="docTable">

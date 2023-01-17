@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.plugin.IPlugin;
+import com.yukthitech.autox.plugin.PluginEvent;
+import com.yukthitech.autox.plugin.PluginEvents;
 import com.yukthitech.utils.cli.CliArgument;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -50,7 +52,7 @@ public class PluginInfo implements Comparable<PluginInfo>
 	private String javaType;
 	
 	/**
-	 * List of params accepted by this step.
+	 * List of params accepted by this plugin.
 	 */
 	private Set<ParamInfo> params = new TreeSet<>();
 	
@@ -58,6 +60,11 @@ public class PluginInfo implements Comparable<PluginInfo>
 	 * Command line arguments supported by this plugin.
 	 */
 	private Set<CommandLineArgInfo> cliArguments = new TreeSet<>();
+	
+	/**
+	 * Events supported by this plugin.
+	 */
+	private Set<PluginEventInfo> events = new TreeSet<>();
 
 	/**
 	 * Instantiates a new plugin info.
@@ -107,6 +114,25 @@ public class PluginInfo implements Comparable<PluginInfo>
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while fetch cli argument details", ex);
+		}
+		
+		fetchEventInfo(pluginClass);
+	}
+	
+	private void fetchEventInfo(Class<? extends IPlugin<?, ?>> pluginClass)
+	{
+		PluginEvents eventsAnnot = pluginClass.getAnnotation(PluginEvents.class);
+		
+		if(eventsAnnot == null || eventsAnnot.value().length == 0)
+		{
+			return;
+		}
+		
+		PluginEvent eventAnnots[] = eventsAnnot.value();
+		
+		for(PluginEvent eventAnnot : eventAnnots)
+		{
+			this.events.add(new PluginEventInfo(eventAnnot));
 		}
 	}
 	
@@ -203,6 +229,16 @@ public class PluginInfo implements Comparable<PluginInfo>
 	public Set<CommandLineArgInfo> getCliArguments()
 	{
 		return cliArguments;
+	}
+	
+	public Set<PluginEventInfo> getEvents()
+	{
+		return events;
+	}
+	
+	public boolean hasExamples()
+	{
+		return false;
 	}
 
 	/* (non-Javadoc)

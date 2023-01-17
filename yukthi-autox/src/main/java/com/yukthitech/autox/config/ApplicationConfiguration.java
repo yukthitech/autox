@@ -167,7 +167,7 @@ public class ApplicationConfiguration
 	
 	public static void reset() throws Exception
 	{
-		if(applicationConfiguration != null)
+		if(applicationConfiguration != null && applicationConfiguration.storageRepositoryFactory != null)
 		{
 			applicationConfiguration.storageRepositoryFactory.close();
 		}

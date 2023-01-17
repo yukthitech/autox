@@ -52,7 +52,7 @@ public class AutoxRestClientListener implements IRestClientListener
 		
 		if("true".equalsIgnoreCase("" + handlerRes))
 		{
-			throw new UnauthorizedRequestException("Got unauthorized response");
+			throw new SessionResetException("Post unauthorized response, handler did the reset.");
 		}
 	}
 

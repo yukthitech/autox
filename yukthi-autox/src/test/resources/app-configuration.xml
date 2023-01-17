@@ -10,6 +10,7 @@
 	<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
 	
 	<!-- Persistence related configuration -->
+	<!--  
 	<storage-repository-factory createTables="true">
 		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="java.lang.String" ccg:params="h2">
 			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource" driverClassName="org.h2.Driver">
@@ -17,6 +18,7 @@
 			</dataSource>
 		</dataStore>
 	</storage-repository-factory>
+	-->
 
 	<!--
 		Specifies base packages to be scanned for steps and validators.

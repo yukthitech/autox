@@ -26,7 +26,7 @@ public class SeleniumPluginArgs
 	/**
 	 * Name of the web driver to be used.
 	 */
-	@CliArgument(name = "wd", longName = "webdriver", description = "Webdriver to be used by selenium based test cases", required = false)
+	@CliArgument(name = "wd", longName = "webdriver", description = "Name of web-driver (from app-config) to be used by default", required = false)
 	private String webDriver;
 
 	/**

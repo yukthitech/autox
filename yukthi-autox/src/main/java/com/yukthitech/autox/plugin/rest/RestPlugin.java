@@ -45,10 +45,11 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 	name = IRestPluginEvent.EVENT_UNAUTHORIZED, 
 	description = "Invoked when unauthorized response is received with http-status 401. Which may occur during session timeout. "
 			+ "This event can be used to reset session with new token without disturbing testcases",
-	returnDescription = "If this handlers returns null, the request will be rebuilt and the api invocation occurrs one more time (this happens only once)",
+	returnDescription = "Boolean value (true/false). True indicates session is reset successfully and current request (which caused unauthoirzed response)"
+			+ " will be reinvoked (this retry logic is executed only once). If null or non-true value is returned, no action will be taken.",
 	params = {
 		@Param(name = "connectionName", description = "Name of current active connection."),
-		@Param(name = "request", description = "Rest Request which resulted in unauthorized status. Test cases can send special in form of headers or params, when session invalidation is being tested."),
+		@Param(name = "request", description = "Rest Request which resulted in unauthorized status. Test cases can send special values in form of headers or params, when session invalidation is being simulated."),
 		@Param(name = "result", description = "Current rest result which has unauthorized status.")
 	})
 public class RestPlugin extends AbstractPlugin<Object, RestPluginSession> implements Validateable

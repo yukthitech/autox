@@ -431,7 +431,10 @@ public class AutomationLauncher
 		
 		try
 		{
-			repoFactory.close();
+			if(repoFactory != null)
+			{
+				repoFactory.close();
+			}
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while closing the resources", ex);
