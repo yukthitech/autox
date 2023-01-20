@@ -120,8 +120,6 @@ public class IdeState implements Serializable
 	 */
 	public ProjectState addOpenProject(Project project)
 	{
-		logger.debug("Adding project to ide state: {}", project.getName());
-		
 		ProjectState state = getProjectState(project);
 		
 		if(state != null)
@@ -129,6 +127,7 @@ public class IdeState implements Serializable
 			return state;
 		}
 		
+		logger.debug("Adding project to ide state: {}", project.getName());
 		return createNewState(project);
 	}
 	

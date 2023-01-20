@@ -20,9 +20,9 @@ import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.plugin.sql.steps.QueryUtils;
-import com.yukthitech.autox.prefix.IExpressionPath;
+import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.autox.prefix.PrefixExprParam;
-import com.yukthitech.autox.prefix.PrefixExpression;
+import com.yukthitech.autox.prefix.PrefixExpressionAnnot;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
 
 /**
@@ -31,15 +31,15 @@ import com.yukthitech.autox.prefix.PrefixExpressionContext;
  */
 public class SqlPrefixExpressions
 {
-	@PrefixExpression(type = "sqlVal", description = "Used to fetch single value using sql query", 
+	@PrefixExpressionAnnot(type = "sqlVal", description = "Used to fetch single value using sql query", 
 			example = "sqlVal(dataSource=default): select count(*) from emp",
 			params = {
 				@PrefixExprParam(name = "dataSource", type = "String", defaultValue = "Default data-source", 
 					description = "Data-source on which specified query has to be executed.")
 			})
-	public IExpressionPath sqlVal(PrefixExpressionContext parserContext, String expression)
+	public PrefixEpression sqlVal(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IExpressionPath()
+		return new PrefixEpression()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -50,15 +50,15 @@ public class SqlPrefixExpressions
 		};
 	}
 
-	@PrefixExpression(type = "sqlColumnList", description = "Used to fetch first column values as list.", 
+	@PrefixExpressionAnnot(type = "sqlColumnList", description = "Used to fetch first column values as list.", 
 			example = "sqlColumnList: select NAME from emp",
 			params = {
 				@PrefixExprParam(name = "dataSource", type = "String", defaultValue = "Default data-source", 
 						description = "Data-source on which specified query has to be executed.")
 			})
-	public IExpressionPath sqlColumnList(PrefixExpressionContext parserContext, String expression)
+	public PrefixEpression sqlColumnList(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IExpressionPath()
+		return new PrefixEpression()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -69,7 +69,7 @@ public class SqlPrefixExpressions
 		};
 	}
 
-	@PrefixExpression(type = "sqlMap", description = "Used to fetch map from specified key column and value column (each row makes entry into result map).", 
+	@PrefixExpressionAnnot(type = "sqlMap", description = "Used to fetch map from specified key column and value column (each row makes entry into result map).", 
 			example = "sqlMap(keyColumn=ID, valueColumn=NAME): select ID, NAME from emp",
 			params = {
 				@PrefixExprParam(name = "dataSource", type = "String", defaultValue = "Default data-source", 
@@ -79,9 +79,9 @@ public class SqlPrefixExpressions
 				@PrefixExprParam(name = "valueColumn", type = "String", required = true,
 					description = "Mandatory Param. Value column to be used.")
 			})
-	public IExpressionPath sqlMap(PrefixExpressionContext parserContext, String expression)
+	public PrefixEpression sqlMap(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IExpressionPath()
+		return new PrefixEpression()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -105,7 +105,7 @@ public class SqlPrefixExpressions
 		};
 	}
 
-	@PrefixExpression(type = "sqlRowMaps", description = "Used to fetch rows as maps (Column name will be used as key). Result will be list of maps.", 
+	@PrefixExpressionAnnot(type = "sqlRowMaps", description = "Used to fetch rows as maps (Column name will be used as key). Result will be list of maps.", 
 			example = "sqlRowMaps: select ID, NAME, ADDRESS, MANAGER from emp",
 			params = {
 				@PrefixExprParam(name = "dataSource", type = "String", defaultValue = "Default data-source", 
@@ -114,9 +114,9 @@ public class SqlPrefixExpressions
 					description = "Defaults to true, which means all rows will be processed. If made false, then "
 							+ "only first row will be processed.")
 			})
-	public IExpressionPath sqlRowMaps(PrefixExpressionContext parserContext, String expression)
+	public PrefixEpression sqlRowMaps(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IExpressionPath()
+		return new PrefixEpression()
 		{
 			@Override
 			public Object getValue() throws Exception

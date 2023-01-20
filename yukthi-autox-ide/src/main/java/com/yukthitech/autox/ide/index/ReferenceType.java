@@ -13,31 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.xmlfile;
+package com.yukthitech.autox.ide.index;
 
-/**
- * Represents simple start and end offset range.
- * @author akranthikiran
- */
-public class IndexRange
+public enum ReferenceType
 {
-	private int start;
+	APP_PROPERTY,
 	
-	private int end;
-
-	public IndexRange(int start, int end)
-	{
-		this.start = start;
-		this.end = end;
-	}
-
-	public int getStart()
-	{
-		return start;
-	}
-
-	public int getEnd()
-	{
-		return end;
-	}
+	FUNCTION,
+	
+	CUSTOM_PREFIX_EXPRESSION
+	;
 }

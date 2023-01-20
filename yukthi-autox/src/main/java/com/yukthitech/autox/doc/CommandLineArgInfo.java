@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 
 import com.yukthitech.utils.cli.CliArgument;
@@ -24,8 +25,10 @@ import com.yukthitech.utils.cli.CliArgument;
  * 
  * @author akiran
  */
-public class CommandLineArgInfo implements Comparable<CommandLineArgInfo>
+public class CommandLineArgInfo implements Comparable<CommandLineArgInfo>, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Short name of the argument.
 	 */

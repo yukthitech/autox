@@ -36,6 +36,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.ParamInfo;
@@ -49,6 +50,9 @@ import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.editor.IdeShortHandCompletion;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.services.GlobalStateManager;
+import com.yukthitech.autox.ide.services.SpringServiceProvider;
+import com.yukthitech.autox.prefix.ExpressionToken;
 import com.yukthitech.autox.prefix.PrefixExpressionContentType;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.XMLConstants;
@@ -346,6 +350,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		
 		return builder.toString();
 	}
+	
+	private DocInformation getDocInformation()
+	{
+		return SpringServiceProvider
+				.getService(GlobalStateManager.class)
+				.getDocInformation();
+	}
 
 	private List<Completion> getElementCompletions(XmlFileLocation location)
 	{
@@ -375,7 +386,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 				( namespace == null || AutomationUtils.isReserveNamespace(namespace))
 				)
 		{
-			Collection<StepInfo> steps = project.getDocInformation().getSteps();
+			Collection<StepInfo> steps = getDocInformation().getSteps();
 			String doc = null;
 			
 			for(StepInfo step : steps)
@@ -391,7 +402,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 				completions.add( new IdeShortHandCompletion(this, step.getNameWithHyphens(), getElementReplacementText(step, location), step.getName(), doc) );
 			}
 
-			for(ValidationInfo validation : project.getDocInformation().getValidations())
+			for(ValidationInfo validation : getDocInformation().getValidations())
 			{
 				if(curToken != null && !validation.getName().toLowerCase().startsWith(curToken) && !validation.getNameWithHyphens().toLowerCase().startsWith(curToken))
 				{
@@ -482,11 +493,11 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 	private List<Completion> getAttributeCompletions(XmlFileLocation location)
 	{
 		Element elem = location.getParentElement();
-		StepInfo step = project.getDocInformation().getStep(elem.getName());
+		StepInfo step = getDocInformation().getStep(elem.getName());
 		
 		if(step == null)
 		{
-			step = project.getDocInformation().getValidation(elem.getName());
+			step = getDocInformation().getValidation(elem.getName());
 		}
 		
 		List<Completion> completions = new ArrayList<>();
@@ -517,12 +528,12 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 					String name = param.getName().substring(prefix.length());
 					String attrCompletion = location.isFullElementGeneration() ? name + "=\"###CUR###\"" : name;
 					
-					completions.add( new IdeShortHandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
+					completions.add( new IdeShortHandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDocumentation()) );
 				}
 				else
 				{
 					String attrCompletion = location.isFullElementGeneration() ? param.getName() + "=\"###CUR###\"" : param.getName();
-					completions.add( new IdeShortHandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
+					completions.add( new IdeShortHandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDocumentation()) );
 				}
 			}
 			
@@ -572,11 +583,11 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 
 	private List<Completion> getAttributeValueCompletions(Element elem, String propName, String curVal)
 	{
-		StepInfo step = project.getDocInformation().getStep(elem.getName());
+		StepInfo step = getDocInformation().getStep(elem.getName());
 		
 		if(step == null)
 		{
-			step = project.getDocInformation().getValidation(elem.getName());
+			step = getDocInformation().getValidation(elem.getName());
 		}
 		
 		ParamInfo paramInfo = step != null ? step.getParam(propName) : null;
@@ -595,7 +606,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 			{
 				String name = null;
 				
-				for(PrefixExpressionDoc parser : project.getDocInformation().getPrefixExpressions())
+				for(PrefixExpressionDoc parser : getDocInformation().getPrefixExpressions())
 				{
 					if(curVal != null && !parser.getName().startsWith(curVal))
 					{
@@ -612,13 +623,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 
 			if(curVal != null)
 			{
-				List<String> expressionTokens = PrefixExpressionFactory.parseExpressionTokens(curVal);
-				Matcher matcher = EXPR_PREFIX_PATTERN.matcher(expressionTokens.get(expressionTokens.size() - 1));
+				List<ExpressionToken> expressionTokens = PrefixExpressionFactory.parseExpressionTokens(curVal);
+				Matcher matcher = EXPR_PREFIX_PATTERN.matcher(expressionTokens.get(expressionTokens.size() - 1).getValue());
 				
 				if(matcher.find())
 				{
 					String exprType = matcher.group(1);
-					PrefixExpressionDoc parser = project.getDocInformation().getPrefixExpression(exprType);
+					PrefixExpressionDoc parser = getDocInformation().getPrefixExpression(exprType);
 					
 					if(parser != null)
 					{
@@ -635,7 +646,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 			{
 				String name = null;
 				
-				for(UiLocatorDoc locDoc : project.getDocInformation().getUiLocators())
+				for(UiLocatorDoc locDoc : getDocInformation().getUiLocators())
 				{
 					if(curVal != null && !locDoc.getName().startsWith(curVal))
 					{
@@ -708,7 +719,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		{
 			String complText = null, doc = null;
 			
-			for(FreeMarkerMethodDocInfo method : project.getDocInformation().getFreeMarkerMethods())
+			for(FreeMarkerMethodDocInfo method : getDocInformation().getFreeMarkerMethods())
 			{
 				if(curVal != null && !method.getName().startsWith(curVal))
 				{
@@ -718,37 +729,38 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 				doc = method.getDocumentation();
 				doc = (doc == null) ? step.getDescription() : doc;
 
-				complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
-				completions.add( new IdeShortHandCompletion(this, method.getName(), complText + "()", method.getName() + "()", doc) );
-
 				//auto complete with params
 				if(method.hasParameters())
 				{
 					complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
 					completions.add( new IdeShortHandCompletion(this, method.getName(), complText + method.getParameterString(), method.getName() + method.getParameterString(), doc) );
 				}
+				else
+				{
+					complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
+					completions.add( new IdeShortHandCompletion(this, method.getName(), complText + "()", method.getName() + "()", doc) );
+				}
 			}
 		}
-		/*
-		else if(contentType == ParserContentType.ATTRIBUTE && ideContext.getActiveEnvironment() != null)
+
+		if(paramInfo != null && CollectionUtils.isNotEmpty(paramInfo.getValidValues()))
 		{
-			Collection<ContextAttributeDetails> contextAttrs = ideContext.getActiveEnvironment().getContextAttributes();
-			String complText = null, name = null;
+			curVal = StringUtils.isBlank(curVal) ? null : curVal.trim();
 			
-			for(ContextAttributeDetails attr : contextAttrs)
+			for(String validValue : paramInfo.getValidValues())
 			{
-				if(curVal != null && !attr.getName().startsWith(curVal))
+				if(curVal != null && !validValue.startsWith(curVal))
 				{
 					continue;
 				}
 				
-				name = attr.getName();
-				complText = curVal != null ? name.substring(curVal.length()) : name;
-				completions.add( new IdeShortHandCompletion(this, name, complText, name, name) );
+				String replacementVal = (curVal == null) ? validValue : validValue.substring(curVal.length());
+				completions.add( new IdeShortHandCompletion(this, validValue, replacementVal, validValue, validValue) );
 			}
+			
+			return completions;
 		}
-		*/
-
+		
 		return completions;
 	}
 	

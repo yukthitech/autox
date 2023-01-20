@@ -13,11 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.ide.index;
+package com.yukthitech.autox.common;
 
-public interface IIndexConstants
+/**
+ * Represents simple start and end offset range.
+ * @author akranthikiran
+ */
+public class IndexRange
 {
-	String TYPE_FUNCTION = "function";
+	private int start;
 	
-	String TYPE_APP_PROPERTY = "appProp";
+	private int end;
+
+	public IndexRange(int start, int end)
+	{
+		this.start = start;
+		this.end = end;
+	}
+
+	public int getStart()
+	{
+		return start;
+	}
+
+	public int getEnd()
+	{
+		return end;
+	}
 }

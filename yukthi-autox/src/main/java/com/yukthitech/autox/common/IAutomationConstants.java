@@ -57,9 +57,9 @@ public interface IAutomationConstants
 	 */
 	public Pattern REF_PATTERN = Pattern.compile("ref\\s*\\:\\s*(.+)");
 	
-	public Pattern EXPRESSION_PATTERN = Pattern.compile("^\\s*(?<custom>(c|custom)\\:)?\\s*(?<exprType>\\w+)\\s*\\:\\s*");
+	public Pattern EXPRESSION_PATTERN = Pattern.compile("^\\s*(?<custom>(c|custom)\\s*\\:)?\\s*(?<exprType>\\w+)\\s*\\:\\s*");
 	
-	public Pattern EXPRESSION_WITH_PARAMS_PATTERN = Pattern.compile("^\\s*(?<custom>(c|custom)\\:)?\\s*(?<exprType>\\w+)\\(\\s*(?<params>.+?)\\s*\\)\\s*\\:\\s*");
+	public Pattern EXPRESSION_WITH_PARAMS_PATTERN = Pattern.compile("^\\s*(?<custom>(c|custom)\\s*\\:)?\\s*(?<exprType>\\w+)\\(\\s*(?<params>.+?)\\s*\\)\\s*\\:\\s*");
 	
 	public Pattern KEY_VALUE_PATTERN = Pattern.compile("\\s*(?<key>\\w+)\\s*\\=\\s*(?<value>.+)\\s*");
 

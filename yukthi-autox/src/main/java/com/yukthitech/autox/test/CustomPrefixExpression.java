@@ -174,7 +174,8 @@ public class CustomPrefixExpression extends AbstractLocationBased implements Val
 			params.put("context", CommonUtils.toMap(
 				"value", value,
 				"expression", expression,
-				"effectiveExpression", AutomationUtils.getStringValue(context, expression)
+				"effectiveExpression", AutomationUtils.getStringValue(context, expression),
+				"effectiveContext", context.getEffectiveContext()
 			));
 			
 			return Function.execute(autoContext, params, this, function.getSteps());

@@ -110,4 +110,9 @@ public abstract class AbstractIdeFileManager implements IIdeFileManager
 	{
 		return null;
 	}
+	
+	public synchronized void clearCache()
+	{
+		parseCacheMap.clear();
+	}
 }

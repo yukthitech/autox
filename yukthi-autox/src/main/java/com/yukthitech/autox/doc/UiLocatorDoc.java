@@ -27,6 +27,8 @@ import org.apache.commons.collections.CollectionUtils;
  */
 public class UiLocatorDoc extends AbstractDocInfo
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Name of the locator.
 	 */

@@ -25,7 +25,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
-import com.yukthitech.autox.prefix.IExpressionPath;
+import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -85,7 +85,7 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
 			) throws Exception
 	{
-		IExpressionPath customUiLocator = UiAutomationUtils.getCustomUiLocator(locator.toString());
+		PrefixEpression customUiLocator = UiAutomationUtils.getCustomUiLocator(locator.toString());
 		
 		if(customUiLocator != null)
 		{
@@ -126,7 +126,7 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
 			) throws Exception
 	{
-		IExpressionPath customUiLocator = UiAutomationUtils.getCustomUiLocator(locator.toString());
+		PrefixEpression customUiLocator = UiAutomationUtils.getCustomUiLocator(locator.toString());
 		
 		if(customUiLocator != null)
 		{

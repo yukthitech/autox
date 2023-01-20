@@ -20,14 +20,14 @@ import java.io.File;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.springframework.stereotype.Service;
 
+import com.yukthitech.autox.common.IndexRange;
 import com.yukthitech.autox.ide.AbstractIdeFileManager;
 import com.yukthitech.autox.ide.index.FileParseCollector;
-import com.yukthitech.autox.ide.index.IIndexConstants;
 import com.yukthitech.autox.ide.index.ReferableElement;
+import com.yukthitech.autox.ide.index.ReferenceType;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.prop.PropFileParser;
 import com.yukthitech.autox.ide.prop.PropertyFile;
-import com.yukthitech.autox.ide.xmlfile.IndexRange;
 import com.yukthitech.autox.ide.xmlfile.LocationRange;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -54,7 +54,7 @@ public class PropertyIdeFileManager extends AbstractIdeFileManager
 			{
 				LocationRange locRange = entry.getKeyLocationRange();
 				
-				collector.addReferable(new ReferableElement(IIndexConstants.TYPE_APP_PROPERTY, entry.getKey(), null, 
+				collector.addReferable(new ReferableElement(ReferenceType.APP_PROPERTY, entry.getKey(), null, 
 						appProperties, new IndexRange(locRange.getStartOffset(), locRange.getEndOffset())));
 			}
 		}catch(Exception ex)

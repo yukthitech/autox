@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -28,8 +29,10 @@ import com.yukthitech.autox.plugin.PluginEvent;
  * 
  * @author akiran
  */
-public class PluginEventInfo implements Comparable<PluginEventInfo>
+public class PluginEventInfo implements Comparable<PluginEventInfo>, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Name of the event.
 	 */

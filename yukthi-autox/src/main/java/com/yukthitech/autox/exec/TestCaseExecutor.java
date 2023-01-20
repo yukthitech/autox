@@ -24,9 +24,9 @@ import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
+import com.yukthitech.autox.dataprovider.IDataProvider;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
-import com.yukthitech.autox.test.IDataProvider;
 import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;

@@ -219,15 +219,16 @@ public class XmlSearchPanel extends JPanel
 
 	void resetForDisplay(boolean selectedTab)
 	{
-		xpathFld.requestFocus();
-		
 		File file = projectExplorer.getSelectedFile();
 		
 		//if at least one file is selected, then only enable selected-folders option
 		txtSelFoldersRbut.setEnabled(file != null);
 		txtSelFoldersRbut.setSelected(file != null);
 		
-		xpathFld.requestFocus();
+		if(selectedTab)
+		{
+			xpathFld.requestFocus();
+		}
 	}
 
 	private FileSearchQuery buildQuery(boolean replaceOp)

@@ -40,6 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.common.IndexRange;
 import com.yukthitech.autox.ide.FileDetails;
 import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeIndex;
@@ -55,7 +56,7 @@ import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
 import com.yukthitech.autox.ide.search.FileSearchQuery;
 import com.yukthitech.autox.ide.search.FileSearchService;
 import com.yukthitech.autox.ide.search.SearchDialog;
-import com.yukthitech.autox.ide.xmlfile.IndexRange;
+import com.yukthitech.autox.ide.ui.InProgressDialog;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -552,7 +553,7 @@ public class FileActions
 			projNode.getProject().reset();
 		}
 
-		projectExplorer.reloadActiveNode();
+		InProgressDialog.getInstance().display("Refresh in progress", () -> projectExplorer.reloadActiveNode());
 	}
 	
 	public void gotoFile(Project project, String file, int lineNo, boolean limitToTestSuiteFolder)

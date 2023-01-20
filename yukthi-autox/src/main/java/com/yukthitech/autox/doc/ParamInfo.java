@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -33,8 +34,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Information about the parameter.
  * @author akiran
  */
-public class ParamInfo implements Comparable<ParamInfo>
+public class ParamInfo implements Comparable<ParamInfo>, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Name of the parameter.
 	 */
@@ -85,6 +88,11 @@ public class ParamInfo implements Comparable<ParamInfo>
 	 */
 	private Set<String> validValues;
 	
+	/**
+	 * Documentation generated for current info object.
+	 */
+	private String documentation;
+
 	/**
 	 * Instantiates a new param info.
 	 *
@@ -260,6 +268,16 @@ public class ParamInfo implements Comparable<ParamInfo>
 	public Set<String> getValidValues()
 	{
 		return validValues;
+	}
+	
+	public String getDocumentation()
+	{
+		return documentation;
+	}
+
+	public void setDocumentation(String documentation)
+	{
+		this.documentation = documentation;
 	}
 
 	/* (non-Javadoc)

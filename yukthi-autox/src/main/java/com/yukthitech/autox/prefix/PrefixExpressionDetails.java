@@ -360,17 +360,17 @@ public class PrefixExpressionDetails
 	 * @param expression expression to be executed
 	 * @return result
 	 */
-	public IExpressionPath invoke(PrefixExpressionContext context, String expression, String expectedType[])
+	public PrefixEpression invoke(PrefixExpressionContext context, String expression, String expectedType[])
 	{
 		try
 		{
 			if(method.getParameterTypes().length == 2)
 			{
-				return (IExpressionPath) method.invoke(enclosingObject, context, expression);
+				return (PrefixEpression) method.invoke(enclosingObject, context, expression);
 			}
 			else
 			{
-				return (IExpressionPath) method.invoke(enclosingObject, context, expression, expectedType);
+				return (PrefixEpression) method.invoke(enclosingObject, context, expression, expectedType);
 			}
 		}catch(Exception ex)
 		{

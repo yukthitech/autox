@@ -16,9 +16,9 @@
 package com.yukthitech.autox.plugin.ui.common;
 
 import com.yukthitech.autox.plugin.ui.steps.UiSetValueStep;
-import com.yukthitech.autox.prefix.IExpressionPath;
+import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.autox.prefix.PrefixExprParam;
-import com.yukthitech.autox.prefix.PrefixExpression;
+import com.yukthitech.autox.prefix.PrefixExpressionAnnot;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -29,8 +29,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class UiPrefixExpressions
 {
-	@PrefixExpression(type = "uiVal", description = "Used to set/fetch value from ui element.", 
-		example = "ui(driver=default): xpath: //input[@name='statusFld']",
+	@PrefixExpressionAnnot(type = "uiVal", description = "Used to set/fetch value from ui element.", 
+		example = "uiVal(driver=default): xpath: //input[@name='statusFld']",
 		params = {
 			@PrefixExprParam(name = "driver", type = "String", defaultValue = "Default driver", 
 				description = "Driver to be used to access ui browser."),
@@ -42,9 +42,9 @@ public class UiPrefixExpressions
 			 description = "If set to true, instead of value, display value will be fetched (currently non-select fields will return value itself).")
 
 		})
-	public IExpressionPath uiVal(PrefixExpressionContext parserContext, String expression)
+	public PrefixEpression uiVal(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IExpressionPath()
+		return new PrefixEpression()
 		{
 			@Override
 			public void setValue(Object value) throws Exception

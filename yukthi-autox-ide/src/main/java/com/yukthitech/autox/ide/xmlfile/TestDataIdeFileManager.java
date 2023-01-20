@@ -18,6 +18,8 @@ package com.yukthitech.autox.ide.xmlfile;
 import java.io.File;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +37,7 @@ import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ObjectWrapper;
 
@@ -60,6 +63,12 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	
 	@Autowired
 	private IdeContext ideContext;
+	
+	@PostConstruct
+	private void init()
+	{
+		PrefixExpressionFactory.init(null, CommonUtils.toSet("com.yukthitech"));
+	}
 	
 	@Override
 	public boolean isExecutionSupported()

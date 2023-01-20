@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +31,8 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.common.IndexRange;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.ParamInfo;
@@ -41,14 +42,21 @@ import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.index.FileParseCollector;
+import com.yukthitech.autox.ide.index.ProjectIndex;
+import com.yukthitech.autox.ide.index.ReferableElement;
+import com.yukthitech.autox.ide.index.ReferenceType;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.proj.ProjectManager;
+import com.yukthitech.autox.ide.services.GlobalStateManager;
+import com.yukthitech.autox.ide.services.SpringServiceProvider;
+import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.CustomPrefixExpression;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
-import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.beans.BeanProperty;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -57,16 +65,7 @@ public class Element implements INode
 {
 	private static Logger logger = LogManager.getLogger(Element.class);
 	
-	private static final Pattern DOLLAR_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
-	
 	private static DefaultParserHandler defaultParserHandler = new DefaultParserHandler();
-	
-	private static final Map<String, String> COND_TOKEN_TO_ERROR = CommonUtils.toMap(
-			">", "Greater than (>) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
-			"<", "Lesser than (>) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead",
-			"&gt;", "Greater than (&gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead",
-			"&lt;", "Lesser than (&lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead"
-		);
 	
 	private Element parentElement;
 	
@@ -653,7 +652,11 @@ public class Element implements INode
 	private void populateTypesForReserved(Project project, FileParseCollector collector, boolean recursive)
 	{
 		String beanTypeStr = getReservedAttribute(DefaultParserHandler.ATTR_BEAN_TYPE);
-		DocInformation docInformation = project.getDocInformation();
+		
+		DocInformation docInformation = 
+				SpringServiceProvider
+				.getService(GlobalStateManager.class)
+				.getDocInformation();
 		
 		if(beanTypeStr != null)
 		{
@@ -889,6 +892,10 @@ public class Element implements INode
 		{
 			collector.addFuncton(this);
 		}
+		else if(CustomPrefixExpression.class.equals(this.elementType))
+		{
+			collector.addCustomPrefixExpression(this);
+		}
 
 		if(recursive)
 		{
@@ -898,6 +905,9 @@ public class Element implements INode
 	
 	private void populateChildren(Project project, FileParseCollector collector)
 	{
+		ProjectManager projectManager = SpringServiceProvider.getService(ProjectManager.class);
+		ProjectIndex projectIndex = projectManager.getProjectIndex(project.getName());
+		
 		collector.elementStarted(this);
 		
 		try
@@ -907,7 +917,7 @@ public class Element implements INode
 				if(node instanceof TextNode)
 				{
 					TextNode textNode = (TextNode) node;
-					parentElement.parseTextContent(this.name, textNode.getLocation(), textNode.getContent(), collector, 
+					parentElement.parseTextContent(projectIndex, this.name, textNode.getLocation(), textNode.getContent(), collector, 
 							AutomationUtils.isReserveNamespace(namespace), elementType);
 					continue;
 				}
@@ -915,7 +925,7 @@ public class Element implements INode
 				if(node instanceof CdataNode)
 				{
 					CdataNode textNode = (CdataNode) node;
-					parentElement.parseTextContent(this.name, textNode.getValueLocation(), textNode.getContent(), collector, 
+					parentElement.parseTextContent(projectIndex, this.name, textNode.getValueLocation(), textNode.getContent(), collector, 
 							AutomationUtils.isReserveNamespace(namespace), elementType);
 					continue;
 				}
@@ -989,7 +999,7 @@ public class Element implements INode
 				}
 				
 				attr.setAttributeType(propInfo.getType());
-				parseTextContent(name, attr.getValueLocation(), attr.getValue(), collector, false, attr.getAttributeType());
+				parseTextContent(projectIndex, name, attr.getValueLocation(), attr.getValue(), collector, false, attr.getAttributeType());
 			}
 		}finally
 		{
@@ -1008,7 +1018,7 @@ public class Element implements INode
 		return XMLUtil.isSupportedAttributeClass(type);
 	}
 	
-	private void parseTextContent(String propName, LocationRange location, String text, FileParseCollector collector, 
+	private void parseTextContent(ProjectIndex projectIdx, String propName, LocationRange location, String text, FileParseCollector collector, 
 			boolean reservedElementText, Class<?> propType)
 	{
 		if(reservedElementText || !isSupportedTextType(propType))
@@ -1031,31 +1041,72 @@ public class Element implements INode
 		{
 			if(paramInfo.getSourceType() == SourceType.CONDITION)
 			{
-				parseConditionText(propName, location, new TextContent(text), collector);
+				//parseConditionText(propName, location, new TextContent(text), collector);
+				TextParsingRuleManager.getInstance().parseText(0, SourceType.CONDITION, null, location, new TextContent(text), collector);
 			}
-			else if(paramInfo.getSourceType() == SourceType.EXPRESSION)
+			else if(paramInfo.getSourceType() == SourceType.EXPRESSION || paramInfo.getSourceType() == SourceType.EXPRESSION_PATH)
 			{
-				parseExpressionText(propName, location, new TextContent(text), collector);
+				parseExpressionText(projectIdx, paramInfo.getSourceType(), location, new TextContent(text), collector);
 			}
 		}
 		
 		collectReferences(location, text, collector);
 	}
 	
-	private void parseExpressionText(String propName, LocationRange location, TextContent text, FileParseCollector collector)
+	private void parseExpressionText(ProjectIndex projectiDX, SourceType sourceType, LocationRange location, TextContent text, FileParseCollector collector)
 	{
 		String textStr = text.getText();
-		String exprType = PrefixExpressionFactory.getExpressionType(textStr);
+		List<PrefixEpression> expressionPaths = null;
 		
-		if("attr".equals(exprType) && (textStr.contains(".") || textStr.contains("[")))
+		try
 		{
-			collector.addMessage(new FileParseMessage(MessageType.WARNING, "Dot(.)/Property-bracket([]) in attribute expression is potential error. Use 'prop:' for accessing property", 
+			expressionPaths = PrefixExpressionFactory.getExpressionFactory().parseExpressionList(
+					AutomationContext.getInstance(), textStr, 
+					custPrefix -> 
+					{
+						ReferableElement elem = projectiDX.getReferableElement(ReferenceType.CUSTOM_PREFIX_EXPRESSION, custPrefix, null);
+						
+						if(elem == null)
+						{
+							return null;
+						}
+						
+						//return dummy prefix expr object, to indicate the prefix is valid
+						return new CustomPrefixExpression();
+					});
+		}catch(Exception ex)
+		{
+			collector.addMessage(new FileParseMessage(MessageType.ERROR, ex.getMessage(), 
 					location.getStartLineNumber(), 
 					location.getStartOffset(), 
 					location.getEndOffset()));
+			return;
+		}
+		
+		if(CollectionUtils.isEmpty(expressionPaths))
+		{
+			return;
+		}
+		
+		int index = -1;
+		
+		for(PrefixEpression path : expressionPaths)
+		{
+			index++;
+			
+			LocationRange exprLoc = new LocationRange(
+					location.getStartOffset() + path.getIndexRange().getStart(), 
+					location.getStartLineNumber() + text.lineOf(path.getIndexRange().getStart()), 
+					-1, 
+					location.getStartOffset() + path.getIndexRange().getEnd(), 
+					location.getEndLineNumber() + text.lineOf(path.getIndexRange().getStart()), 
+					-1);
+			
+			TextParsingRuleManager.getInstance().parseText(index, sourceType, path.getPrefix(), exprLoc, text, collector);
 		}
 	}
 
+	/*
 	private void parseConditionText(String propName, LocationRange location, TextContent text, FileParseCollector collector)
 	{
 		for(Map.Entry<String, String> tokenEntry : COND_TOKEN_TO_ERROR.entrySet())
@@ -1084,6 +1135,7 @@ public class Element implements INode
 		}
 		
 	}
+	*/
 	
 	private void collectReferences(LocationRange location, String content, FileParseCollector collector)
 	{

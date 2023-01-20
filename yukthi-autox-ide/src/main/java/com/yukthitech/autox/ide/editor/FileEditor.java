@@ -69,6 +69,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import com.yukthitech.autox.common.IndexRange;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
@@ -87,7 +88,6 @@ import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.GlobalStateManager;
 import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.services.IdeSettingsManager;
-import com.yukthitech.autox.ide.xmlfile.IndexRange;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -816,7 +816,7 @@ public class FileEditor extends JPanel
 		this.errorHighLigherPanel.clear();
 	}
 	
-	private void parseFileContent()
+	public FileParseCollector parseFileContent()
 	{
 		int selSt = syntaxTextArea.getSelectionStart();
 		int selEnd = syntaxTextArea.getSelectionEnd();
@@ -842,6 +842,8 @@ public class FileEditor extends JPanel
 		{
 			syntaxTextArea.select(selSt, selEnd);
 		}
+		
+		return collector;
 	}
 
 	public int getCaretPosition()

@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,8 +37,10 @@ import com.yukthitech.autox.Param;
  * Information about a step.
  * @author akiran
  */
-public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
+public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Name of the step.
 	 */

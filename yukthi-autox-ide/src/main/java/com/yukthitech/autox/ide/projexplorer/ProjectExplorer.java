@@ -27,7 +27,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -50,18 +49,12 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.doc.DocInformation;
-import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
-import com.yukthitech.autox.doc.StepInfo;
-import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.FileDetails;
-import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.IdeFileUtils;
@@ -74,7 +67,6 @@ import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.events.ActiveFileChangedEvent;
 import com.yukthitech.autox.ide.events.FileSavedEvent;
-import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.IdePopupMenu;
@@ -84,10 +76,9 @@ import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
+import com.yukthitech.autox.ide.xmlfile.TestDataIdeFileManager;
 import com.yukthitech.swing.IconButton;
 import com.yukthitech.swing.ToggleIconButton;
-import com.yukthitech.utils.CommonUtils;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Component
 public class ProjectExplorer extends JPanel
@@ -124,6 +115,9 @@ public class ProjectExplorer extends JPanel
 	
 	@Autowired
 	private FileActions fileActions;
+	
+	@Autowired
+	private TestDataIdeFileManager testDataIdeFileManager;
 	
 	private IdePopupMenu projectExplorerTreePopup;
 	
@@ -430,6 +424,7 @@ public class ProjectExplorer extends JPanel
 		this.activeTreeNode = activeTreeNode;
 	}
 
+	/*
 	private void initDocs(Project project)
 	{
 		String documentTemplate = null;
@@ -475,6 +470,7 @@ public class ProjectExplorer extends JPanel
 			method.setDocumentation(finalDoc);
 		}
 	}
+	*/
 
 	/**
 	 * Called when an existing project object needs to be opened.
@@ -485,7 +481,7 @@ public class ProjectExplorer extends JPanel
 		ProjectTreeNode projectTreeNode = new ProjectTreeNode(project.getName(), this, project);
 		projectTreeModel.addProject(projectTreeNode);
 		
-		initDocs(project);
+		//initDocs(project);
 		indexFilesFromNode(projectTreeNode);
 		
 		logger.debug("Adding project {} to project tree", project.getName());
@@ -780,11 +776,13 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		node.reload(true);
+		reloadNode(node);
+		
+		//node.reload(true);
 		//projectTreeModel.reload(node);
 		//projectTreeModel.nodeChanged(node);
 		
-		indexFilesFromNode(node);
+		//indexFilesFromNode(node);
 	}
 	
 	public void newFilesAdded(List<File> files)
@@ -915,12 +913,18 @@ public class ProjectExplorer extends JPanel
 			logger.debug("No active node found for reload.");
 			return null;
 		}
-
-		activeTreeNode.reload(true);
-		projectTreeModel.reload(activeTreeNode);
 		
-		indexFilesFromNode(activeTreeNode);
+		reloadNode(activeTreeNode);
 		return activeTreeNode;
+	}
+	
+	private void reloadNode(BaseTreeNode node)
+	{
+		testDataIdeFileManager.clearCache();
+		node.reload(true);
+		projectTreeModel.reload(node);
+		
+		indexFilesFromNode(node);
 	}
 	
 	void checkFile(FileTreeNode fileNode)
@@ -940,12 +944,22 @@ public class ProjectExplorer extends JPanel
 		{
 			//logger.debug("Parsing and loading file: {}", file.getPath());
 			
-			FileParseCollector collector = new FileParseCollector(fileNode.getProject(), file);
+			FileParseCollector collector = null;
+			FileEditor fileEditor = fileEditorTabbedPane.getFileEditor(fileNode.getFile());
+			
 		
 			try
 			{
-				fileManager.parseFile(fileNode.getProject(), file, collector);
-				projectManager.getProjectIndex(project.getName()).addReferableElements(file, collector.getReferableElements());
+				if(fileEditor != null)
+				{
+					collector = fileEditor.parseFileContent();
+				}
+				else
+				{
+					collector = new FileParseCollector(fileNode.getProject(), file);					
+					fileManager.parseFile(fileNode.getProject(), file, collector);
+					projectManager.getProjectIndex(project.getName()).addReferableElements(file, collector.getReferableElements());
+				}
 				
 				fileNode.setErrored(collector.getErrorCount() > 0);
 				fileNode.setWarned(collector.getWarningCount() > 0);

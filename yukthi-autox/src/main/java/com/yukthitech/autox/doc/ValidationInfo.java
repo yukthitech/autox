@@ -26,6 +26,8 @@ import com.yukthitech.autox.IValidation;
  */
 public class ValidationInfo extends StepInfo
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Instantiates a new validation info.
 	 *

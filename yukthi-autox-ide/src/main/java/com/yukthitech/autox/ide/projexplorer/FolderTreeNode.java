@@ -195,6 +195,8 @@ class FolderTreeNode extends BaseTreeNode
 			{
 				FileTreeNode fileNode = new FileTreeNode(nodeInfo.id, projectExplorer, project, nodeInfo.label, file);
 				treeNodes.add(fileNode);
+				
+				fileNode.reload(false);
 			}
 		}
 		

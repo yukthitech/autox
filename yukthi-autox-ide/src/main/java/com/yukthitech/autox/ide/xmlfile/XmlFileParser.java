@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.common.IndexRange;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.index.FileParseCollector;
 import com.yukthitech.autox.ide.xmlfile.PatternScanner.ScannerMatch;

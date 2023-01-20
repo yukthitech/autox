@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,12 +30,16 @@ import com.yukthitech.autox.prefix.PrefixExpressionContentType;
  */
 public class PrefixExpressionDoc extends AbstractDocInfo
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Parameter of the parser.
 	 * @author akiran
 	 */
-	public static class Param
+	public static class Param implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Name of the param.
 		 */

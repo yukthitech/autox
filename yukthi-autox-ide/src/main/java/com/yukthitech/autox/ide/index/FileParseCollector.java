@@ -20,10 +20,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.yukthitech.autox.common.IndexRange;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.Element;
-import com.yukthitech.autox.ide.xmlfile.IndexRange;
 import com.yukthitech.autox.ide.xmlfile.LocationRange;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.test.TestDataFile;
@@ -121,7 +121,7 @@ public class FileParseCollector
 		}
 		
 		IndexRange nameIndex = funcRef.getNameIndex();
-		this.references.add(new ReferenceElement(IIndexConstants.TYPE_FUNCTION, funcRef.getName(), 
+		this.references.add(new ReferenceElement(ReferenceType.FUNCTION, funcRef.getName(), 
 				scope != null ? Arrays.asList(scope) : null, 
 				nameIndex.getStart(), 
 				nameIndex.getEnd()));
@@ -129,7 +129,7 @@ public class FileParseCollector
 	
 	public void addAppPropRef(String name, int startOffset, int endOffset)
 	{
-		this.references.add(new ReferenceElement(IIndexConstants.TYPE_APP_PROPERTY, name, 
+		this.references.add(new ReferenceElement(ReferenceType.APP_PROPERTY, name, 
 				null, 
 				startOffset, 
 				endOffset));
@@ -160,10 +160,25 @@ public class FileParseCollector
 			scope = parent.getAttributeValue("name");
 		}
 		
-		this.referableElements.add(new ReferableElement(IIndexConstants.TYPE_FUNCTION, name, scope, this.file,
+		this.referableElements.add(new ReferableElement(ReferenceType.FUNCTION, name, scope, this.file,
 				new IndexRange(selLocationRange.getStartOffset(), selLocationRange.getEndOffset())));
 	}
 	
+	public void addCustomPrefixExpression(Element prefixExpr)
+	{
+		String name = prefixExpr.getAttributeValue("name");
+
+		if(name == null)
+		{
+			return;
+		}
+		
+		LocationRange selLocationRange = prefixExpr.getAttribute("name").getValueLocation();
+
+		this.referableElements.add(new ReferableElement(ReferenceType.CUSTOM_PREFIX_EXPRESSION, name, null, this.file,
+				new IndexRange(selLocationRange.getStartOffset(), selLocationRange.getEndOffset())));
+	}
+
 	public void addReferable(ReferableElement referable)
 	{
 		this.referableElements.add(referable);

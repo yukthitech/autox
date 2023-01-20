@@ -35,7 +35,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
-import com.yukthitech.autox.prefix.IExpressionPath;
+import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.test.CustomExpressionFailedException;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -133,7 +133,7 @@ public class UiAutomationUtils
 		return populateField(driverName, parent, locator, value);
 	}
 	
-	public static IExpressionPath getCustomUiLocator(String locator)
+	public static PrefixEpression getCustomUiLocator(String locator)
 	{
 		return PrefixExpressionFactory.getExpressionFactory().parseCustomUiLocator(locator);
 	}
@@ -156,7 +156,7 @@ public class UiAutomationUtils
 		logger.trace("For field {} under parent {} setting value - {}", locator, parent, value);
 		
 		AutomationContext context = AutomationContext.getInstance();
-		IExpressionPath customUiLocator = getCustomUiLocator(locator);
+		PrefixEpression customUiLocator = getCustomUiLocator(locator);
 		
 		if(customUiLocator != null)
 		{

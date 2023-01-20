@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -34,8 +35,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Information about a plugin.
  * @author akiran
  */
-public class PluginInfo implements Comparable<PluginInfo>
+public class PluginInfo implements Comparable<PluginInfo>, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Name of the step.
 	 */

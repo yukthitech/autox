@@ -34,6 +34,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.services.IdeStateManager;
+import com.yukthitech.autox.ide.services.ResourceCache;
 import com.yukthitech.autox.ide.swing.IdeDialogPanel;
 import com.yukthitech.autox.ide.views.console.ConsolePanel;
 import com.yukthitech.autox.ide.views.debug.DebugPanel;
@@ -155,12 +157,18 @@ public class AutoxIDE extends JFrame
 		//wait for splash screen to display
 		Thread.sleep(200);
 		
+		StopWatch watch = new StopWatch();
+		watch.start();
+		
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-autox-context.xml");
 		
 		AutoxIDE ide = (AutoxIDE) context.getBean(AutoxIDE.class);
 		IdeDialogPanel.setMainAppWindow(ide);
 		
 		ide.initIde();
+		
+		watch.stop();
+		logger.info("Time taken for IDE startup: {}", watch.formatTime());
 	}
 	
 	private void initIde()
@@ -363,6 +371,8 @@ public class AutoxIDE extends JFrame
 		}
 		
 		logger.debug("Closing the ide..");
+		
+		ResourceCache.getInstance().saveCache();
 		
 		IdeState ideState = ideStateManager.getState();
 

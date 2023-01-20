@@ -19,11 +19,11 @@ import java.io.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.common.IndexRange;
 import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.xmlfile.IndexRange;
 
 @ActionHolder
 public class NavigationHistoryManager

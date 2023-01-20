@@ -15,31 +15,46 @@
  */
 package com.yukthitech.autox.prefix;
 
-import com.yukthitech.persistence.UnsupportedOperationException;
-
 /**
- * Represents a path that can be used to get or set value.
- * @author akiran
+ * Represents an expression token within main expression.
+ * @author akranthikiran
  */
-public interface IExpressionPath
+public class ExpressionToken
 {
 	/**
-	 * Fetches the value of the current path.
-	 * @return value of the path
+	 * Value of this token.
 	 */
-	public Object getValue() throws Exception;
+	private String value;
 	
 	/**
-	 * Sets the value of the current path.
-	 * @param value value to set.
+	 * Start index of this token.
 	 */
-	public default void setValue(Object value) throws Exception
+	private int startIndex;
+	
+	/**
+	 * End index (inclusive) of this token.
+	 */
+	private int endIndex;
+
+	public ExpressionToken(String value, int startIndex, int endIndex)
 	{
-		throw new UnsupportedOperationException("Write is not supported with this expression type");
+		this.value = value;
+		this.startIndex = startIndex;
+		this.endIndex = endIndex;
 	}
 
-	public default void removeValue() throws Exception
+	public String getValue()
 	{
-		throw new UnsupportedOperationException("Remove is not supported with this expression type");
+		return value;
+	}
+
+	public int getStartIndex()
+	{
+		return startIndex;
+	}
+
+	public int getEndIndex()
+	{
+		return endIndex;
 	}
 }

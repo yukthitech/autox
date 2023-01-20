@@ -15,12 +15,16 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
+
 /**
  * Abstract class for doc info objects to hold common properties.
  * @author akiran
  */
-public class AbstractDocInfo
+public class AbstractDocInfo implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Documentation generated for current info object.
 	 */

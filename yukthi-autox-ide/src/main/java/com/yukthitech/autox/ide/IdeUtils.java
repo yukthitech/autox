@@ -50,9 +50,12 @@ import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.ide.services.ResourceCache;
 import com.yukthitech.autox.ide.xmlfile.LocationRange;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.pool.ConsolidatedJobManager;
@@ -63,6 +66,31 @@ import com.yukthitech.utils.pool.ConsolidatedJobManager;
  */
 public class IdeUtils
 {
+	private static Logger logger = LogManager.getLogger(IdeUtils.class);
+	
+	private static class RunnableWrapper implements Runnable
+	{
+		private Runnable runnable;
+
+		public RunnableWrapper(Runnable runnable)
+		{
+			this.runnable = runnable;
+		}
+		
+		@Override
+		public void run()
+		{
+			try
+			{
+				runnable.run();
+			}catch(RuntimeException ex)
+			{
+				logger.error("An error occurred while executing background job", ex);
+				throw ex;
+			}
+		}
+	}
+	
 	/**
 	 * Used to serialize and deserialize the objects.
 	 */
@@ -216,36 +244,39 @@ public class IdeUtils
 	
 	private static ImageIcon loadIcon(String resource, int size, int borderSize, boolean grayScale)
 	{
-		Image baseImg = null;
-		int width = size, height = size;
-		
-		if(resource.toLowerCase().endsWith(".svg"))
+		return ResourceCache.getInstance().getFromCache(() -> 
 		{
-			baseImg = loadSvg(resource, size);
-		}
-		else
-		{
-			ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
-			baseImg = icon.getImage();
-		}
-		
-		if(size <= 0)
-		{
-			width = baseImg.getWidth(null);
-			height = baseImg.getHeight(null);
-		}
+			Image baseImg = null;
+			int width = size, height = size;
+			
+			if(resource.toLowerCase().endsWith(".svg"))
+			{
+				baseImg = loadSvg(resource, size);
+			}
+			else
+			{
+				ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
+				baseImg = icon.getImage();
+			}
+			
+			if(size <= 0)
+			{
+				width = baseImg.getWidth(null);
+				height = baseImg.getHeight(null);
+			}
 
-		int halfBorderSize = borderSize / 2;
-		
-		BufferedImage img = new BufferedImage(width + borderSize, height + borderSize, BufferedImage.TYPE_INT_ARGB);
-		img.getGraphics().drawImage(baseImg, halfBorderSize, halfBorderSize, width, height, null);
-		
-		if(grayScale)
-		{
-			convertToGrayScale(img);
-		}
-		
-		return new ImageIcon(img);
+			int halfBorderSize = borderSize / 2;
+			
+			BufferedImage img = new BufferedImage(width + borderSize, height + borderSize, BufferedImage.TYPE_INT_ARGB);
+			img.getGraphics().drawImage(baseImg, halfBorderSize, halfBorderSize, width, height, null);
+			
+			if(grayScale)
+			{
+				convertToGrayScale(img);
+			}
+			
+			return new ImageIcon(img);
+		}, "%s[s:%s,b:%s,g:%s]", resource, size, borderSize, grayScale);
 	}
 
 	private static void convertToGrayScale(BufferedImage img)
@@ -346,22 +377,22 @@ public class IdeUtils
 	 */
 	public static void execute(Runnable runnable, long delay)
 	{
-		ConsolidatedJobManager.execute(runnable, delay);
+		ConsolidatedJobManager.execute(new RunnableWrapper(runnable), delay);
 	}
 	
 	public static void executeConsolidatedJob(String name, Runnable runnable, long delay)
 	{
-		ConsolidatedJobManager.executeConsolidatedJob(name, runnable, delay);
+		ConsolidatedJobManager.executeConsolidatedJob(name, new RunnableWrapper(runnable), delay);
 	}
 	
 	public static synchronized void rescheduleConsolidatedJob(String name, Runnable runnable, long delay)
 	{
-		ConsolidatedJobManager.rescheduleConsolidatedJob(name, runnable, delay);
+		ConsolidatedJobManager.rescheduleConsolidatedJob(name, new RunnableWrapper(runnable), delay);
 	}
 
 	public static void executeUiTask(Runnable runnable)
 	{
-		EventQueue.invokeLater(runnable);
+		EventQueue.invokeLater(new RunnableWrapper(runnable));
 	}
 	
 	public static void centerOnScreen(Component c)

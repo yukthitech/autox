@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,10 @@ import com.yukthitech.autox.Group;
  * Represents the information required to generate documentation.
  * @author akiran
  */
-public class DocInformation
+public class DocInformation implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Expected hyphen pattern in names.
 	 */

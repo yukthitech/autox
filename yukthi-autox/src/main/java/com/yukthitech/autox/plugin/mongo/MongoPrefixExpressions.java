@@ -20,9 +20,9 @@ import java.util.Map;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.ContextMap;
-import com.yukthitech.autox.prefix.IExpressionPath;
+import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.autox.prefix.PrefixExprParam;
-import com.yukthitech.autox.prefix.PrefixExpression;
+import com.yukthitech.autox.prefix.PrefixExpressionAnnot;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
 
 /**
@@ -32,7 +32,7 @@ import com.yukthitech.autox.prefix.PrefixExpressionContext;
  */
 public class MongoPrefixExpressions
 {
-	@PrefixExpression(type = "mongo", description = "Used to fetch values using mongo json query.", 
+	@PrefixExpressionAnnot(type = "mongo", description = "Used to fetch values using mongo json query.", 
 		example = "mongo(resource=default): {\"find\": \"ENVIRONMENT\"}",
 		params = {
 			@PrefixExprParam(name = "resource", type = "String", defaultValue = "Default mongo-resource", 
@@ -42,9 +42,9 @@ public class MongoPrefixExpressions
 			@PrefixExprParam(name = "jel", type = "boolean", defaultValue = "false", 
 				description = "If set to true, instead of standard json parsing, query will be processed as JEL Json.")
 		})
-	public IExpressionPath mongo(PrefixExpressionContext parserContext, String expression)
+	public PrefixEpression mongo(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IExpressionPath()
+		return new PrefixEpression()
 		{
 			@Override
 			public Object getValue() throws Exception
@@ -63,15 +63,15 @@ public class MongoPrefixExpressions
 		};
 	}
 
-	@PrefixExpression(type = "mongoJs", description = "Used to fetch values using mongo JS query (by yukhi-mongojs).",
+	@PrefixExpressionAnnot(type = "mongoJs", description = "Used to fetch values using mongo JS query (by yukhi-mongojs).",
 		example = "mongoJs: db.ENVIRONMENT.find({})",
 		params = {
 			@PrefixExprParam(name = "resource", type = "String", defaultValue = "Default mongo-resource", 
 				description = "Mongo-resource on which specified query has to be executed.")
 		})
-	public IExpressionPath mongoJs(PrefixExpressionContext parserContext, String expression)
+	public PrefixEpression mongoJs(PrefixExpressionContext parserContext, String expression)
 	{
-		return new IExpressionPath()
+		return new PrefixEpression()
 		{
 			@Override
 			public Object getValue() throws Exception

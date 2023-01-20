@@ -29,6 +29,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ElementInfo extends StepInfo
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Indicates if multiple elements of this node can be present or not.
 	 */

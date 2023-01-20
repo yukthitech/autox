@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,14 +23,18 @@ import java.util.List;
  * Represents basic static docs.
  * @author akiran
  */
-public class BasicDocs
+public class BasicDocs implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Document instance.
 	 * @author akiran
 	 */
-	public static class Document
+	public static class Document implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Title of the document.
 		 */

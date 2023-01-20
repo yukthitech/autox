@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.common;
+package com.yukthitech.autox.dataprovider;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.InvalidArgumentException;
 import org.xml.sax.Locator;
 
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.BeanNode;

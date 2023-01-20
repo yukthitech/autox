@@ -73,21 +73,23 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
-import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.PluginInfo;
+import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IViewPanel;
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.services.GlobalStateManager;
+import com.yukthitech.autox.ide.services.ResourceCache;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Component
@@ -98,6 +100,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private static Logger logger = LogManager.getLogger(HelpPanel.class);
 	
 	private static Pattern URL_PATTERN = Pattern.compile("\\[\\[URL\\]\\s*(.*?)\\s*\\]");
+	
+	@Autowired
+	private GlobalStateManager globalStateManager;
 
 	private JTabbedPane parentTabbedPane;
 
@@ -172,11 +177,10 @@ public class HelpPanel extends JPanel implements IViewPanel
 	{
 		initIndex();
 
-		String[] basepackage = { "com.yukthitech" };
-
 		try
 		{
-			DocInformation docInformation = DocGenerator.buildDocInformation(basepackage);
+			DocInformation docInformation = globalStateManager.getDocInformation();
+			
 			Map<String, Object> context = new HashMap<>();
 
 			rootNode = new HelpNodeData("root", "root", "", null);
@@ -188,7 +192,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				context.put("type", "step");
 				context.put("node", step);
-				stepRootNode.addHelpNode(new HelpNodeData("step:" + step.getName(), step.getName(), buildDoc(documentTemplate, context), step));
+				
+				String stepKey = "step:" + step.getName();
+				stepRootNode.addHelpNode(new HelpNodeData(stepKey, step.getName(), buildDoc(stepKey, documentTemplate, context), step));
 			}
 
 			HelpNodeData validationNode = new HelpNodeData("validations", "Validations", "", null);
@@ -198,7 +204,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				context.put("type", "step");
 				context.put("node", step);
-				validationNode.addHelpNode(new HelpNodeData("validation:" + step.getName(), step.getName(), buildDoc(documentTemplate, context), step));
+				
+				String valKey = "validation:" + step.getName();
+				validationNode.addHelpNode(new HelpNodeData(valKey, step.getName(), buildDoc(valKey, documentTemplate, context), step));
 			}
 
 			HelpNodeData methodNode = new HelpNodeData("methods", "Free Marker Methods", "", null);
@@ -208,7 +216,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				context.put("type", "method");
 				context.put("node", method);
-				methodNode.addHelpNode(new HelpNodeData("method:" + method.getName(), method.getName(), buildDoc(fmMethodDocTemplate, context), method));
+				
+				String metKey = "method:" + method.getName();
+				methodNode.addHelpNode(new HelpNodeData(metKey, method.getName(), buildDoc(metKey, fmMethodDocTemplate, context), method));
 			}
 
 			HelpNodeData expressionNode = new HelpNodeData("expressions", "Prefix Expressions", "", null);
@@ -218,7 +228,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				context.put("type", "expression");
 				context.put("node", prefixExpr);
-				expressionNode.addHelpNode(new HelpNodeData("expression:" + prefixExpr.getName(), prefixExpr.getName(), buildDoc(exprDocTemplate, context), prefixExpr));
+				
+				String exprKey = "expression:" + prefixExpr.getName();
+				expressionNode.addHelpNode(new HelpNodeData(exprKey, prefixExpr.getName(), buildDoc(exprKey, exprDocTemplate, context), prefixExpr));
 			}
 
 			HelpNodeData uiLocatorNode = new HelpNodeData("uiLocators", "UI Locators", "", null);
@@ -228,7 +240,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				context.put("type", "locator");
 				context.put("node", method);
-				uiLocatorNode.addHelpNode(new HelpNodeData("uiloc:" + method.getName(), method.getName(), buildDoc(exprDocTemplate, context), method));
+				
+				String uiLocKey = "uiloc:" + method.getName();
+				uiLocatorNode.addHelpNode(new HelpNodeData(uiLocKey, method.getName(), buildDoc(uiLocKey, exprDocTemplate, context), method));
 			}
 			
 			HelpNodeData pluginsNode = new HelpNodeData("plugins", "Plugins", "", null);
@@ -238,7 +252,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				context.put("type", "plugin");
 				context.put("node", plugin);
-				pluginsNode.addHelpNode(new HelpNodeData("plugin:" + plugin.getName(), plugin.getName(), buildDoc(documentTemplate, context), plugin));
+				
+				String pluginKey = "plugin:" + plugin.getName();
+				pluginsNode.addHelpNode(new HelpNodeData(pluginKey, plugin.getName(), buildDoc(pluginKey, documentTemplate, context), plugin));
 			}
 
 			loadStaticDocs(rootNode);
@@ -672,9 +688,13 @@ public class HelpPanel extends JPanel implements IViewPanel
 		}
 	}
 
-	private String buildDoc(String template, Map<String, Object> context)
+	private String buildDoc(String name, String template, Map<String, Object> context)
 	{
-		return IIdeConstants.FREE_MARKER_ENGINE.processTemplate("documentation.ftl", template, context);
+		return ResourceCache.getInstance().getFromCache(() -> 
+		{
+			return IIdeConstants.FREE_MARKER_ENGINE.processTemplate("documentation.ftl", template, context);
+		}, "helpPanel." + name);
+		
 	}
 
 	private void displayNodeContent()

@@ -274,15 +274,16 @@ public class TextSearchPanel extends JPanel
 	
 	void resetForDisplay(boolean selectedTab)
 	{
-		searchStrFld.requestFocus();
-		
 		File file = projectExplorer.getSelectedFile();
 		
 		//if at least one file is selected, then only enable selected-folders option
 		txtSelFoldersRbut.setEnabled(file != null);
 		txtSelFoldersRbut.setSelected(file != null);
 		
-		searchStrFld.requestFocus();
+		if(selectedTab)
+		{
+			searchStrFld.requestFocus();
+		}
 	}
 
 	private FileSearchQuery buildQuery()

@@ -26,7 +26,7 @@ public class ReferenceElement
 	/**
 	 * Type of this referable element.
 	 */
-	private String type;
+	private ReferenceType type;
 	
 	/**
 	 * Name of the element.
@@ -48,7 +48,7 @@ public class ReferenceElement
 	 */
 	private int endPosition;
 
-	public ReferenceElement(String type, String name, List<String> scopes, int startPostion, int endPosition)
+	public ReferenceElement(ReferenceType type, String name, List<String> scopes, int startPostion, int endPosition)
 	{
 		this.type = type;
 		this.name = name;
@@ -57,7 +57,7 @@ public class ReferenceElement
 		this.endPosition = endPosition;
 	}
 
-	public String getType()
+	public ReferenceType getType()
 	{
 		return type;
 	}

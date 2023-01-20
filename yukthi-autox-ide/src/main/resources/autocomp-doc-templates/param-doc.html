@@ -1,0 +1,9 @@
+<html>
+	<body>
+		${param.description}
+		
+		<#if param.validValues??>
+			<br/><br/><b>Valid Values: </b> <#list param.validValues as value >${value}<#sep>, </#sep></#list>
+		</#if>						
+	</body>
+</html>

@@ -33,8 +33,6 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yukthitech.autox.AutoxVersion;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
-import com.yukthitech.autox.doc.DocGenerator;
-import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.utils.CommonUtils;
@@ -73,8 +71,6 @@ public class Project implements Serializable
 	private LinkedHashSet<String> ignoreFoldersList;
 	
 	private transient ProjectClassLoader projectClassLoader;
-	
-	private transient DocInformation docInformation;
 	
 	private transient BeanPropertyInfoFactory beanPropertyInfoFactory;
 	
@@ -458,6 +454,7 @@ public class Project implements Serializable
 		return projectClassLoader;
 	}
 	
+	/*
 	@JsonIgnore
 	public DocInformation getDocInformation()
 	{
@@ -478,6 +475,7 @@ public class Project implements Serializable
 		
 		return docInformation;
 	}
+	*/
 	
 	@JsonIgnore
 	public BeanPropertyInfoFactory getBeanPropertyInfoFactory()

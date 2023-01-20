@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PrefixExpression
+public @interface PrefixExpressionAnnot
 {
 	/**
 	 * Provides expression type.

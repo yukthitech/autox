@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.doc;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +23,10 @@ import java.util.regex.Pattern;
  * Represents an example with description.
  * @author akiran
  */
-public class Example
+public class Example implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private static final Pattern ESCAPE_INDENT_PATTERN = Pattern.compile("^(\\s*)");
 	
 	/**

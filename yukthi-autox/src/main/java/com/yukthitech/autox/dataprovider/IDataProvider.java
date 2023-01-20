@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.test;
+package com.yukthitech.autox.dataprovider;
 
 import java.util.List;
+
+import com.yukthitech.autox.test.TestCaseData;
 
 /**
  * Abstraction of data provider.

@@ -17,7 +17,7 @@ package com.yukthitech.autox.ide.index;
 
 import java.io.File;
 
-import com.yukthitech.autox.ide.xmlfile.IndexRange;
+import com.yukthitech.autox.common.IndexRange;
 
 /**
  * Represents an element which can be referenced.
@@ -28,7 +28,7 @@ public class ReferableElement
 	/**
 	 * Type of this referable element.
 	 */
-	private String type;
+	private ReferenceType type;
 	
 	/**
 	 * Name of the element.
@@ -50,7 +50,7 @@ public class ReferableElement
 	 */
 	private IndexRange selectionRange;
 
-	public ReferableElement(String type, String name, String scope, File file, IndexRange selectionRange)
+	public ReferableElement(ReferenceType type, String name, String scope, File file, IndexRange selectionRange)
 	{
 		this.type = type;
 		this.name = name;
@@ -59,7 +59,7 @@ public class ReferableElement
 		this.selectionRange = selectionRange;
 	}
 
-	public String getType()
+	public ReferenceType getType()
 	{
 		return type;
 	}
@@ -84,7 +84,7 @@ public class ReferableElement
 		return selectionRange;
 	}
 	
-	public static String getRefName(String scope, String name, String type)
+	public static String getRefName(String scope, String name, ReferenceType type)
 	{
 		if(scope == null)
 		{

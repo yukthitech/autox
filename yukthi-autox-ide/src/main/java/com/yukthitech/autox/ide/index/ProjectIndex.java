@@ -77,7 +77,7 @@ public class ProjectIndex
 	 * @param scopes
 	 * @return
 	 */
-	public ReferableElement getReferableElement(String type, String name, List<String> scopes)
+	public ReferableElement getReferableElement(ReferenceType type, String name, List<String> scopes)
 	{
 		scopes = (scopes == null) ? Collections.emptyList() : scopes;
 		

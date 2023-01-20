@@ -21,15 +21,15 @@ import com.yukthitech.autox.test.CustomPrefixExpression;
  * Expression path wrapper over custom prefix expression functions.
  * @author akranthikiran
  */
-class CustomExprPath implements IExpressionPath
+class CustomPrefixExpressionWrapper extends PrefixEpression
 {
 	private CustomPrefixExpression customPrefixExpression;
 	
 	private PrefixExpressionContext context;
 	
 	private String expression;
-
-	public CustomExprPath(CustomPrefixExpression customPrefixExpression, PrefixExpressionContext context, String expression)
+	
+	public CustomPrefixExpressionWrapper(CustomPrefixExpression customPrefixExpression, PrefixExpressionContext context, String expression)
 	{
 		this.customPrefixExpression = customPrefixExpression;
 		this.context = context;
@@ -52,5 +52,11 @@ class CustomExprPath implements IExpressionPath
 	public void removeValue() throws Exception
 	{
 		customPrefixExpression.removeValue(context, expression);
+	}
+	
+	@Override
+	public String getPrefix()
+	{
+		return "custom";
 	}
 }

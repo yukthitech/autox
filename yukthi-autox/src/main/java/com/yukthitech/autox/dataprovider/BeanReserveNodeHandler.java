@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.common;
+package com.yukthitech.autox.dataprovider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.InvalidArgumentException;

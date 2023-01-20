@@ -44,7 +44,6 @@ import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.swing.DropDownButton;
 import com.yukthitech.swing.DropDownItem;
-import com.yukthitech.swing.common.SwingUtils;
 
 /**
  * Service to manage run configurations.
@@ -90,7 +89,7 @@ public class ExecutionManager
 			return icon;
 		}
 		
-		icon = SwingUtils.loadIconWithoutBorder("/ui/run-icons/" + exeType.name() + ".svg", 20);
+		icon = IdeUtils.loadIconWithoutBorder("/ui/run-icons/" + exeType.name() + ".svg", 20);
 		typeIconMap.put(exeType, icon);
 		
 		return icon;
