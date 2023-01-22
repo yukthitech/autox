@@ -53,6 +53,7 @@ public class ProjectTreeNode extends FolderTreeNode
 		
 		//reload once project is set
 		reload(false);
+		super.checkForStatus();
 	}
 	
 	public File getTestSuiteFolder(File file)

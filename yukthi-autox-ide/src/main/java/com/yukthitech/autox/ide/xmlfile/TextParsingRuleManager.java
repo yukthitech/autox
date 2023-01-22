@@ -220,7 +220,7 @@ public class TextParsingRuleManager
 						rule.message, 
 						location.getStartLineNumber(), 
 						location.getStartOffset(), 
-						location.getEndOffset()));
+						location.getEndOffset() + 1));
 			}
 		}
 	}

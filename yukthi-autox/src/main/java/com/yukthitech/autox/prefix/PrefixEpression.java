@@ -26,6 +26,8 @@ public abstract class PrefixEpression
 {
 	private String prefix;
 	
+	private String text;
+	
 	private IndexRange indexRange;
 	
 	private IndexRange prefixIndexRange;
@@ -44,6 +46,16 @@ public abstract class PrefixEpression
 		return prefix;
 	}
 	
+	public String getText()
+	{
+		return text;
+	}
+
+	void setText(String text)
+	{
+		this.text = text;
+	}
+
 	public IndexRange getPrefixIndexRange()
 	{
 		return prefixIndexRange;

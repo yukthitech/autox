@@ -220,6 +220,17 @@ public class PrefixExpressionFactory
 	{
 		this.customUiLocators.put(expression.getName(), expression);
 	}
+	
+	private static void addToken(StringBuilder token, char ch[], List<ExpressionToken> lst, int start, int end)
+	{
+		while(Character.isWhitespace(ch[end]) && end > start)
+		{
+			end--;
+			token.deleteCharAt(token.length() - 1);
+		}
+		
+		lst.add(new ExpressionToken(token.toString(), start, end));
+	}
 
 	public static List<ExpressionToken> parseExpressionTokens(String expression)
 	{
@@ -227,15 +238,20 @@ public class PrefixExpressionFactory
 		List<ExpressionToken> lst = new ArrayList<>();
 		char ch[] = expression.toCharArray();
 		StringBuilder token = new StringBuilder();
-		int start = 0;
+		int start = -1;
 		
 		for(int i = 0; i < ch.length; i++)
 		{
+			if(start == -1 && Character.isWhitespace(ch[i]))
+			{
+				continue;
+			}
+			
 			if(ch[i] == '\\')
 			{
 				if(i < ch.length - 1 && ch[i + 1] == '|')
 				{
-					start = i;
+					start = (start == -1) ? i : start;
 					token.append('|');
 					i++;
 					continue;
@@ -246,20 +262,22 @@ public class PrefixExpressionFactory
 			{
 				if(token.length() > 0)
 				{
-					lst.add(new ExpressionToken(token.toString(), start, i - 1));
+					addToken(token, ch, lst, start, i - 1);
 				}
-				
+			
+				start = -1;
 				token.setLength(0);
 				continue;
 			}
 			
-			start = i;
+			start = (start == -1) ? i : start;
 			token.append(ch[i]);
 		}
 		
 		if(token.length() > 0)
 		{
-			lst.add(new ExpressionToken(token.toString(), start, token.length() - 1));
+			start = (start == -1) ? 0 : start;
+			addToken(token, ch, lst, start, ch.length - 1);
 		}
 
 		return lst;
@@ -510,6 +528,7 @@ public class PrefixExpressionFactory
 		}
 		
 		prefixExpr.setPrefix(prefix);
+		prefixExpr.setText(expression);
 		prefixExpr.setPrefixIndexRange(prefixRange);
 		prefixExpr.setParamIndexRange(paramRange);
 		prefixExpr.setValueIndexRange(valueRange);

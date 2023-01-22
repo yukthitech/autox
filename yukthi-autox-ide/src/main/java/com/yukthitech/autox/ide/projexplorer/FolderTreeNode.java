@@ -91,6 +91,7 @@ class FolderTreeNode extends BaseTreeNode
 		this.projectExplorer = projectExplorer;
 		
 		reload(false);
+		super.checkForStatus();
 	}
 
 	public FolderTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File folder)

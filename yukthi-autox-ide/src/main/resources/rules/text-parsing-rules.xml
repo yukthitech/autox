@@ -1,25 +1,25 @@
 <rules>
 	<rule sourceType="CONDITION" pattern="\&gt;">
 		<message>
-			Greater than (&gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead
+			Greater than (&gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead.
 		</message>
 	</rule>
 		
 	<rule sourceType="CONDITION" pattern="\&lt;">
 		<message>
-			Lesser than (&lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead
+			Lesser than (&lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead.
 		</message>
 	</rule>
 
 	<rule sourceType="CONDITION" pattern="\&amp;gt\;">
 		<message>
-			Greater than (&amp;gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead
+			Greater than (&amp;gt;) symbol is used in condition, which may not work. Use 'gt' or 'gte' instead.
 		</message>
 	</rule>
 
 	<rule sourceType="CONDITION" pattern="\&amp;lt\;">
 		<message>
-			Lesser than (&amp;lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead
+			Lesser than (&amp;lt;) symbol is used in condition, which may not work. Use 'lt' or 'lte' instead.
 		</message>
 	</rule>
 
@@ -31,13 +31,13 @@
 
 	<rule sourceType="EXPRESSION" expressionType="attr" pattern="\.">
 		<message>
-			Dot(.) in attribute expression is potential error. Use 'prop:' for accessing property
+			Dot(.) in attribute expression is potential bug. Use 'prop:' for accessing properties.
 		</message>
 	</rule>
 
 	<rule sourceType="EXPRESSION" expressionType="attr" pattern="\[">
 		<message>
-			Property-bracket([]) in attribute expression is potential error. Use 'prop:' for accessing property
+			Property-bracket([]) in attribute expression is potential error. Use 'prop:' for accessing properties.
 		</message>
 	</rule>
 
@@ -51,13 +51,13 @@
 		Note // is not suppose to be used at the zeroth index. Post that as the effective-context will be previous
 		expression value, full scan will be okay. 
 	 -->
-	<rule sourceType="EXPRESSION" expressionType="xpath" fromExpressionIndex="0" toExpressionIndex="0" pattern="^\s*\/\/">
+	<rule sourceType="EXPRESSION" expressionType="xpath" fromExpressionIndex="0" toExpressionIndex="0" pattern="^xpath\s*\:\s*\/\/">
 		<message>
 			Xpath starting with // scans all attributes and all properties of context. And is prone for stalling.
 		</message>
 	</rule>
 
-	<rule sourceType="EXPRESSION_PATH" fromExpressionIndex="1">
+	<rule sourceType="EXPRESSION_PATH" fromExpressionIndex="1" error="true">
 		<message>
 			Multi-expression(piped) cannot be used for expression-path.
 		</message>

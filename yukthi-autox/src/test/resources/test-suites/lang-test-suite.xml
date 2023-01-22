@@ -4,7 +4,7 @@
 			<s:return value="string: returnFlag: ${attr.returnFlag}"/>
 		</s:if>
 	
-		<s:if condition="attr.flag == 1 ">
+		<s:if condition="attr.flag == 1">
 			<then>
 				<s:return value="if-then"/>
 			</then>

@@ -1102,7 +1102,7 @@ public class Element implements INode
 					location.getEndLineNumber() + text.lineOf(path.getIndexRange().getStart()), 
 					-1);
 			
-			TextParsingRuleManager.getInstance().parseText(index, sourceType, path.getPrefix(), exprLoc, text, collector);
+			TextParsingRuleManager.getInstance().parseText(index, sourceType, path.getPrefix(), exprLoc, new TextContent(path.getText()), collector);
 		}
 	}
 

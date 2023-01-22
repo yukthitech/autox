@@ -57,4 +57,19 @@ public class ExpressionToken
 	{
 		return endIndex;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("Token: ").append(value);
+		builder.append(" (").append(startIndex).append(" - ").append(endIndex).append(")");
+
+		return builder.toString();
+	}
+
 }
