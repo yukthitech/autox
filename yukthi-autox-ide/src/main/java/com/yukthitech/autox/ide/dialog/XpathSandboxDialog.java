@@ -398,7 +398,7 @@ public class XpathSandboxDialog extends IdeDialogPanel
 		super.displayInDialog();
 	}
 
-	public void display(String attrName, String value)
+	public void display(String prefix, String name, String value)
 	{
 		Object parsedValue = null;
 		
@@ -410,7 +410,7 @@ public class XpathSandboxDialog extends IdeDialogPanel
 			parsedValue = value;
 		}
 		
-		Object contextTree = CommonUtils.toMap("attr", CommonUtils.toMap(attrName, parsedValue));
+		Object contextTree = CommonUtils.toMap(prefix, CommonUtils.toMap(name, parsedValue));
 		String formattedJson = "";
 		
 		try
@@ -422,7 +422,7 @@ public class XpathSandboxDialog extends IdeDialogPanel
 		}
 		
 		contextJsonFld.setText(formattedJson);
-		xpathFld.setText("/attr/" + attrName);
+		xpathFld.setText("/" + prefix + "/" + name);
 		
 		this.display();
 	}

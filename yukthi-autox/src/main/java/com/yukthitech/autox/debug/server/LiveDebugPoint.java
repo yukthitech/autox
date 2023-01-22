@@ -27,6 +27,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -166,6 +167,34 @@ public class LiveDebugPoint
 		return contextAttr;
 	}
 	
+	private Map<String, byte[]> getParams()
+	{
+		Map<String, byte[]> paramMap = new HashMap<>(); 
+		Map<String, Object> params = ExecutionContextManager.getInstance().getExecutionContextStack().getParam();
+		
+		if(MapUtils.isEmpty(params))
+		{
+			return paramMap;
+		}
+		
+		params.forEach((key, val) ->
+		{
+			byte serData[] = null;
+			
+			try
+			{
+				serData = SerializationUtils.serialize((Serializable) val);
+			}catch(Exception ex)
+			{
+				serData = NOT_SER_BYTES;
+			}
+			
+			paramMap.put(key, serData);
+		});
+
+		return paramMap;
+	}
+
 	private void sendOnHoldMssg()
 	{
 		List<ServerMssgExecutionPaused.StackElement> stackTrace = new ArrayList<>();
@@ -193,7 +222,8 @@ public class LiveDebugPoint
 		}
 		
 		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, threadOnHold.getName(), lastPauseLocation.getLocation().getPath(), 
-				lastPauseLocation.getLineNumber(), stackTrace, getContextAttr());
+				lastPauseLocation.getLineNumber(), stackTrace, getContextAttr(),
+				getParams());
 		DebugServer.getInstance().sendClientMessage(pausedMssg);
 	}
 	

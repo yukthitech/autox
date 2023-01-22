@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -407,9 +408,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 	private void updateActiveThread(ExecutionEnvironment activeEnv)
 	{
 		ServerMssgExecutionPaused threadDet = activeEnv == null ? null : activeEnv.getActiveThreadDetails();
-		Map<String, byte[]> contextAttr = threadDet == null ? null : activeEnv.getContextAttributes();
-		contextAttr = (contextAttr == null) ? Collections.emptyMap() : new TreeMap<>(contextAttr);
-		
+
 		if(threadDet != null)
 		{
 			TreePath selectedPath = stackTraceTree.getSelectionPath();
@@ -454,7 +453,24 @@ public class DebugPanel extends JPanel implements IViewPanel
 			}
 		}
 
-		contextAttributesPanel.setContextAttributes(contextAttr);
+		//Get context params and sort them
+		Map<String, byte[]> contextAttr = threadDet == null ? null : activeEnv.getContextAttributes();
+		contextAttr = (contextAttr == null) ? Collections.emptyMap() : new TreeMap<>(contextAttr);
+		
+		//get param map and sort them
+		Map<String, byte[]> paramMap = threadDet == null ? null : threadDet.getParams();
+		paramMap = (paramMap == null) ? Collections.emptyMap() : new TreeMap<>(paramMap);
+		
+		//build final attributes
+		Map<String, byte[]> finalAttr = new LinkedHashMap<>();
+		paramMap.forEach((key, val) -> 
+		{
+			finalAttr.put("(param) " + key, val);
+		});
+		
+		finalAttr.putAll(contextAttr);
+
+		contextAttributesPanel.setContextAttributes(finalAttr);
 		sandboxPanel.setActiveEnvironment(activeEnv, threadDet == null ? null : threadDet.getExecutionId());
 	}
 	
@@ -556,9 +572,9 @@ public class DebugPanel extends JPanel implements IViewPanel
 		previousDebugHighlight = new FileLocation(project, file, executionId);
 	}
 	
-	public void openSandboxTab(String attrName)
+	public void openSandboxTab(String prefix, String name)
 	{
 		ctxTabPane.setSelectedComponent(sandboxPanel);
-		sandboxPanel.setExpression("attr: " + attrName);
+		sandboxPanel.setExpression(prefix + ": " + name);
 	}
 }

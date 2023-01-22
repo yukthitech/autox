@@ -280,6 +280,18 @@ public class ExecutionEnvironment
 		return pauseMssg.getContextAttr();
 	}
 	
+	public Map<String, byte[]> getParamMap()
+	{
+		ServerMssgExecutionPaused pauseMssg = pausedThreads.get(getActiveThreadId());
+		
+		if(pauseMssg == null)
+		{
+			return Collections.emptyMap();
+		}
+		
+		return pauseMssg.getParams();
+	}
+
 	public String[] getExtraArgs()
 	{
 		return extraArgs;

@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -29,6 +30,8 @@ import javax.swing.JMenuItem;
 public class ContextAttributesPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
+
+	private static final String PARAM_PREFIX = "(param) ";
 
 	private static ImageIcon XPATH_SANDBOX_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/xpath-sandbox.svg", 18);
 	private static ImageIcon DEBUG_SANDBOX_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug-sandbox.svg", 18);
@@ -164,7 +167,21 @@ public class ContextAttributesPanel extends JPanel
 		}
 		
 		String row[] = model.getRow(selIdx);
-		xpathSandboxDialog.display(row[0], row[1]);
+		processKey(row[0], (prefix, name) -> xpathSandboxDialog.display(prefix, name, row[1]));
+	}
+	
+	private void processKey(String attrName, BiConsumer<String, String> consumer)
+	{
+		if(attrName.startsWith(PARAM_PREFIX))
+		{
+			attrName = attrName.substring(PARAM_PREFIX.length());
+			consumer.accept("param", attrName);
+		}
+		else
+		{
+			consumer.accept("attr", attrName);
+		}
+
 	}
 
 	private void onDebugSandbox(ActionEvent e)
@@ -177,6 +194,6 @@ public class ContextAttributesPanel extends JPanel
 		}
 		
 		String row[] = model.getRow(selIdx);
-		debugPanel.openSandboxTab(row[0]);
+		processKey(row[0], (prefix, name) -> debugPanel.openSandboxTab(prefix, name));
 	}
 }

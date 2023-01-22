@@ -84,9 +84,12 @@ public class ServerMssgExecutionPaused implements Serializable
 	private List<StackElement> stackTrace;
 	
 	private Map<String, byte[]> contextAttr;
+	
+	private Map<String, byte[]> params;
 
 	public ServerMssgExecutionPaused(String executionId, String name, String debugFilePath, 
-			int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr)
+			int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr,
+			Map<String, byte[]> paramMap)
 	{
 		this.executionId = executionId;
 		this.name = name;
@@ -94,6 +97,7 @@ public class ServerMssgExecutionPaused implements Serializable
 		this.lineNumber = lineNumber;
 		this.stackTrace = new ArrayList<>(stackTrace);
 		this.contextAttr = contextAttr;
+		this.params = paramMap;
 	}
 	
 	public String getName()
@@ -129,5 +133,10 @@ public class ServerMssgExecutionPaused implements Serializable
 	public void setContextAttr(Map<String, byte[]> contextAttr)
 	{
 		this.contextAttr = contextAttr;
+	}
+	
+	public Map<String, byte[]> getParams()
+	{
+		return params;
 	}
 }
