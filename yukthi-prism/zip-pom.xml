@@ -21,5 +21,12 @@
 				<include>*.properties</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<directory>.</directory>
+			<outputDirectory>bin</outputDirectory>
+			<includes>
+				<include>.prism.cache</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 </assembly>
