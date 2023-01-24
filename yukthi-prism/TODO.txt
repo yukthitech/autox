@@ -1,0 +1,90 @@
+Debugging
+File searching
+	regex
+	xpath
+	word search
+hyperlink clicking in code
+tab layout change
+
+sql/mongo/ui prefix expressions
+
+Plugin events
+
+custom prefix expression + Custom ui locator
+
+Resource folder support
+
+===============================
+namespaces standardization
+
+stop support of functionRef  and old namespaces
+	name atr should be able to support post this
+	
+	replace embedded else to explicit else block (and remove then support as well)
+	
+	remove jsonWithType prefix support
+-----------------
+swing automation with java agent
+xpath means of finding components
+	https://commons.apache.org/proper/commons-jxpath/users-guide.html
+	https://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.4/apidocs/index.html
+	
+	https://dzone.com/articles/java-agent-1
+
+ide automaed testing 
+========================
+Function execution
+Parsing xml optimization
+	instead of using rsyntax syntax parsing, custom parser should be used
+		so that only changed text will be parsed all the time
+	based on current token auto-complete or current context should be determind (current full parsing is process intensive)
+	
+	auto completion for custom prefixes
+	auto completion for prefix expr attributes with doc
+	
+	custom expressions should be CTRL + clickable
+	
+Changing one file may resulting fixing or generating error in other file
+	needs means update this in ide dynamically
+	
+attr name hyperlinking
+report cdn urls
+	dynamic or in-progress report viewing
+class path based on maven
+Renaming a function
+extracting static value into app prop
+maven class path
+Console panel
+	filter - filter lines with given text (option to display specified pre and post match lines also)
+Wrap and font-size-change are throwing exception by RsyntaxTextarea sometimes
+
+Tab short cuts
+	prev tab, next tab, close tab
+	
+Perf test case support
+	with graphs
+	
+Graphs for generic params (in summary mail also)
+	test cases pass trend
+	code coverage trend
+	
+error/warning evaluation should be externalized and should be done based on generic framework of rules
+	param-type
+	full-expr-error/warning
+	partial error/warning (patterns/regions to highlight)
+	Same with auto completion 
+	
+Nashron for higher jdk versions
+	https://github.com/szegedi/nashorn/wiki/Using-Nashorn-with-different-Java-versions
+	https://github.com/openjdk/nashorn
+	https://search.maven.org/artifact/org.openjdk.nashorn/nashorn-core/15.4/jar
+
+excel based data provider
+
+
+
+
+
+
+
+
