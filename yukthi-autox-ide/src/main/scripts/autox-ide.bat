@@ -5,9 +5,6 @@ echo "Current directory: " %cd%
 
 md "../logs"
 
-echo "Checking for updates..."
-java -classpath "../lib/*;../config/*;" com.yukthitech.autox.ide.IdeUpgradeChecker
-
 IF NOT EXIST "../lib-new" GOTO STARTIDE
 
 echo "Deleting current lib folder..."

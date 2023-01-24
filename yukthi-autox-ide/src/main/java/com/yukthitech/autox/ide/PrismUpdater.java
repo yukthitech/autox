@@ -16,68 +16,66 @@
 package com.yukthitech.autox.ide;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.swing.JOptionPane;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+import com.yukthitech.autox.ide.events.IdeStartedEvent;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.utils.ZipUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class IdeUpgradeChecker
+/**
+ * Service which can capable for updating the ide.
+ * @author akranthikiran
+ */
+@Service
+public class PrismUpdater
 {
-	private static Logger logger = LogManager.getLogger(IdeUpgradeChecker.class);
+	private static Logger logger = LogManager.getLogger(PrismUpdater.class);
 	
 	private static long timeoutInSec = 180;
 	
-	private static Properties loadAppProp() throws Exception
-	{
-		Properties prop = new Properties();
-		InputStream is = IdeUpgradeChecker.class.getResourceAsStream("/application.properties");
-		prop.load(is);
-		
-		is.close();
-		return prop;
-	}
+	@Value("${autox.ide.version.url}")
+	private String versionUrl;
 	
-	private static String getLatestVersion(Properties prop) throws Exception
+	@Value("${autox.ide.download.url}")
+	private String downloadUrl;
+
+	private String getLatestVersion() throws Exception
 	{
-		String vesionUrl = prop.getProperty("autox.ide.version.url");
-		File verFile = downloadFile(vesionUrl, "autox-ide-version", ".txt");
+		File verFile = downloadFile(versionUrl, "autox-ide-version", ".json");
 		
 		if(verFile == null)
 		{
 			return null;
 		}
 		
-		String latestVersion = FileUtils.readFileToString(verFile, Charset.defaultCharset());
-		Pattern pattern = Pattern.compile("[\\w\\.\\-]+\\-\\d+");
-		latestVersion = latestVersion.trim();
+		FileInputStream fis = new FileInputStream(verFile);
+		String latestVer = Version.getVersion(fis);
+		fis.close();
 		
-		if(!pattern.matcher(latestVersion).matches())
-		{
-			return null;
-		}
-		
-		return latestVersion;
+		return latestVer;
 	}
 	
-	private static File downloadFile(String urlStr, String prefix, String extension) throws Exception
+	private File downloadFile(String urlStr, String prefix, String extension) throws Exception
 	{
 		logger.debug("Downloading file from: " + urlStr);
 		
@@ -129,18 +127,8 @@ public class IdeUpgradeChecker
 		return tempFile;
 	}
 	
-	private static String getLocalVersion() throws Exception
+	private File downloadLatestIde() throws Exception
 	{
-		InputStream is = IdeUpgradeChecker.class.getResourceAsStream("/version/version.txt");
-		String version = IOUtils.toString(is, Charset.defaultCharset());
-		is.close();
-		
-		return version;
-	}
-	
-	private static File downloadLatestIde(Properties prop) throws Exception
-	{
-		String downloadUrl = prop.getProperty("autox.ide.download.url");
 		File tempFile = downloadFile(downloadUrl, "autox-ide-latest", ".zip");
 		
 		if(tempFile == null)
@@ -182,7 +170,7 @@ public class IdeUpgradeChecker
 		return tempFile;
 	}
 	
-	public static void unzipLib(File zipFile, File newLibFolder)
+	public void unzipLib(File zipFile, File newLibFolder)
 	{
 		try
 		{
@@ -227,49 +215,62 @@ public class IdeUpgradeChecker
 			throw new InvalidStateException("An exception occurred while unzipping specified file: " + zipFile, ex);
 		}
 	}
-
-	public static void main(String[] args) throws Exception
+	
+	private void checkForUpdateSync()
 	{
-		if(args.length > 0)
+		try
 		{
-			timeoutInSec = Long.parseLong(args[0]);
-		}
-		
-		Properties prop = loadAppProp();
-		logger.debug("Loaded app properties...");
-		
-		String latestVersion = getLatestVersion(prop);
-		logger.debug("Got latest version as: {}", latestVersion);
-		
-		if(latestVersion == null)
+			String latestVersion = getLatestVersion();
+			logger.debug("Got latest version as: {}", latestVersion);
+			
+			if(latestVersion == null)
+			{
+				logger.error("Failed to determine latest version. So skipping the upgrade");
+				return;
+			}
+			
+			String localVersion = Version.getLocalVersion();
+			logger.debug("Got local version as: {}", localVersion);
+			
+			if(latestVersion.equals(localVersion))
+			{
+				logger.debug("Found the ide is upto date.");
+				return;
+			}
+			
+			int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), "There is a new version of Prism IDE. Would you like to download?", "IDE Upgrade", JOptionPane.YES_NO_OPTION);
+			
+			if(res == JOptionPane.NO_OPTION)
+			{
+				return;
+			}
+			
+			logger.debug("Found new updates available. Downloading latest ide zip file (this may take few mins)...");
+			File latestIde = downloadLatestIde();
+			
+			if(latestIde == null)
+			{
+				logger.error("An error occurred while downloading latest zip file. Hence skipping the upgrade..");
+				return;
+			}
+			
+			logger.debug("Downloaded latest ide as file: {}", latestIde.getPath());
+			
+			unzipLib(latestIde, new File(".." + File.separator + "lib-new"));
+			logger.debug("New ide lib folder is created successfully...");
+			
+			latestIde.delete();
+			
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "Your Prism IDE is upgraded with latest version.\nPlease restart your IDE for changes to take affect.");
+		}catch(Exception ex)
 		{
-			logger.error("Failed to determine latest version. So skipping the upgrade");
-			System.exit(0);
+			logger.error("An error occurred while fetching latest ide", ex);
 		}
-		
-		String localVersion = getLocalVersion();
-		logger.debug("Got local version as: {}", localVersion);
-		
-		if(latestVersion.equals(localVersion))
-		{
-			logger.debug("Found the ide is upto date.");
-			System.exit(0);
-		}
-		
-		logger.debug("Found new updates available. Downloading latest ide zip file (this may take few mins)...");
-		File latestIde = downloadLatestIde(prop);
-		
-		if(latestIde == null)
-		{
-			logger.error("An error occurred while downloading latest zip file. Hence skipping the upgrade..");
-			System.exit(0);
-		}
-		
-		logger.debug("Downloaded latest ide as file: {}", latestIde.getPath());
-		
-		unzipLib(latestIde, new File(".." + File.separator + "lib-new"));
-		logger.debug("New ide lib folder is created successfully...");
-		
-		latestIde.delete();
+	}
+
+	@IdeEventHandler
+	public void checkForUpdate(IdeStartedEvent event)
+	{
+		IdeUtils.execute(() -> checkForUpdateSync(), 10);
 	}
 }

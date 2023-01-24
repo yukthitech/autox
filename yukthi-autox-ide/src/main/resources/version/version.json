@@ -1,0 +1,4 @@
+{
+	"version": "${pom.version}-${timestamp}",
+	"autoxVersion": "${autox.version}" 
+}

@@ -16,21 +16,19 @@
 package com.yukthitech.autox.ide;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import java.awt.Color;
 
-public class AutoxSplashScreen extends JFrame
+public class PrismSplashScreen extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static AutoxSplashScreen splashScreen = new AutoxSplashScreen();
+	private static PrismSplashScreen splashScreen = new PrismSplashScreen();
 	
 	private JPanel contentPane;
 	private final JLabel label = new JLabel("");
@@ -64,21 +62,25 @@ public class AutoxSplashScreen extends JFrame
 	/**
 	 * Create the frame.
 	 */
-	public AutoxSplashScreen()
+	public PrismSplashScreen()
 	{
+		setBackground(Color.WHITE);
 		setUndecorated(true);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		super.setIconImage(IdeUtils.loadIconWithoutBorder("/ui/icons/autox-logo.png", 64).getImage());
-		setBounds(100, 100, 832, 350);
+		setBounds(100, 100, 800, 350);
 		contentPane = new JPanel();
-		contentPane.setBorder(new LineBorder(new Color(0, 0, 255), 2));
+		//contentPane.setBorder(new LineBorder(new Color(0, 0, 255), 2));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
-		label.setBorder(new EmptyBorder(3, 3, 3, 3));
+		label.setOpaque(true);
+		label.setBackground(Color.WHITE);
+		//label.setBorder(new EmptyBorder(3, 3, 3, 3));
 		
 		contentPane.add(label, BorderLayout.CENTER);
 		
-		label.setIcon(new ImageIcon(AutoxSplashScreen.class.getResource("/ui/autox-splash-screen.png")));
+		ImageIcon splashIcon = IdeUtils.loadIcon("/ui/autox-splash-screen.svg", 800, 350, 0, false);
+		label.setIcon(splashIcon);
 	}
 
 }

@@ -16,15 +16,16 @@
 package com.yukthitech.autox.ide.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -33,18 +34,14 @@ import javax.swing.JTextPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import org.apache.commons.io.IOUtils;
-
-import com.yukthitech.autox.ide.IdeUpgradeChecker;
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.autox.ide.Version;
 
-import java.awt.Color;
-import java.awt.Font;
-
-public class AboutAutoxDialog extends JDialog
+public class AboutPrismDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static ImageIcon PRISM_ICON = IdeUtils.loadIcon("/ui/icons/prism.svg", 80);
 	
 	private final JPanel contentPanel = new JPanel();
 	private final JLabel lblNewLabel = new JLabel("");
@@ -52,27 +49,21 @@ public class AboutAutoxDialog extends JDialog
 	private final JTextPane txtpnYukthiTechsoftPvt = new JTextPane();
 	
 	private String version;
+	private String autoxVersion;
 
 	/**
 	 * Create the dialog.
 	 */
-	public AboutAutoxDialog()
+	public AboutPrismDialog()
 	{
 		setResizable(false);
 		super.setModalityType(ModalityType.APPLICATION_MODAL);
 		
-		InputStream is = IdeUpgradeChecker.class.getResourceAsStream("/version/version.txt");
-		
-		try
-		{
-			version = IOUtils.toString(is, Charset.defaultCharset());
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while fetching current autox version", ex);
-		}
+		version = Version.getLocalVersion();
+		autoxVersion = Version.getLocalAutoxVersion();
 
-		setTitle("About Autox");
-		setBounds(100, 100, 576, 218);
+		setTitle("About Prism");
+		setBounds(100, 100, 576, 286);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBackground(Color.WHITE);
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -91,7 +82,7 @@ public class AboutAutoxDialog extends JDialog
 		lblNewLabel.setOpaque(true);
 		lblNewLabel.setBackground(Color.WHITE);
 		
-		lblNewLabel.setIcon(IdeUtils.loadIconWithoutBorder("/ui/autox-logo.png", -1));
+		lblNewLabel.setIcon(PRISM_ICON);
 		
 		contentPanel.add(lblNewLabel, gbc_lblNewLabel);
 		
@@ -110,7 +101,10 @@ public class AboutAutoxDialog extends JDialog
 		txtpnYukthiTechsoftPvt.setForeground(Color.BLACK);
 		txtpnYukthiTechsoftPvt.setFont(new Font("Tahoma", Font.BOLD, 12));
 		txtpnYukthiTechsoftPvt.setText(
-				String.format("Yukthi Techsoft Pvt. Ltd.\r\nVersion: %s\r\nCopyright © 2019 Yukthi Techsoft Pvt. Ltd. All rights reserved.", version)
+				String.format("Prism\r\n"
+						+ "Version: %s\r\n"
+						+ "AutoX Version: %s\r\n"
+						+ "Copyright © 2023 Yukthi Techsoft Pvt. Ltd. All rights reserved.", version, autoxVersion)
 			);
 		txtpnYukthiTechsoftPvt.setEditable(false);
 		contentPanel.add(txtpnYukthiTechsoftPvt, gbc_txtpnYukthiTechsoftPvt);

@@ -18,7 +18,7 @@ package com.yukthitech.autox.ide.actions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.dialog.AboutAutoxDialog;
+import com.yukthitech.autox.ide.dialog.AboutPrismDialog;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.help.HelpPanel;
@@ -37,7 +37,7 @@ public class HelpActions
 	/**
 	 * Used to display about autox info.
 	 */
-	private AboutAutoxDialog aboutAutoxDialog = new AboutAutoxDialog();
+	private AboutPrismDialog aboutAutoxDialog = new AboutPrismDialog();
 	
 	@Action
 	public void help()

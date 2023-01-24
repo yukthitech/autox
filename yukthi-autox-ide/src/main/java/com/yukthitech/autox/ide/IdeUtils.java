@@ -191,14 +191,14 @@ public class IdeUtils
 		}
 	}
 	
-	private static BufferedImage loadSvg(String resource, int size)
+	private static BufferedImage loadSvg(String resource, int width, int height)
 	{
 		// Create a PNG transcoder.
         Transcoder t = new PNGTranscoder();
 
         // Set the transcoding hints.
-        t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) size);
-        t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) size);
+        t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) width);
+        t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) height);
         
         try (InputStream inputStream = IdeUtils.class.getResourceAsStream(resource)) 
         {
@@ -228,7 +228,7 @@ public class IdeUtils
 	
 	public static ImageIcon loadIcon(String resource, int size)
 	{
-		return loadIcon(resource, size, BORDER_SIZE, false);
+		return loadIcon(resource, size, size, BORDER_SIZE, false);
 	}
 	
 	/**
@@ -239,19 +239,20 @@ public class IdeUtils
 	 */
 	public static ImageIcon loadIcon(String resource, int size, boolean grayScale)
 	{
-		return loadIcon(resource, size, BORDER_SIZE, grayScale);
+		return loadIcon(resource, size, size, BORDER_SIZE, grayScale);
 	}
 	
-	private static ImageIcon loadIcon(String resource, int size, int borderSize, boolean grayScale)
+	public static ImageIcon loadIcon(String resource, int w, int h, int borderSize, boolean grayScale)
 	{
 		return ResourceCache.getInstance().getFromCache(() -> 
 		{
+			int width = w, height = h;
+			
 			Image baseImg = null;
-			int width = size, height = size;
 			
 			if(resource.toLowerCase().endsWith(".svg"))
 			{
-				baseImg = loadSvg(resource, size);
+				baseImg = loadSvg(resource, width, height);
 			}
 			else
 			{
@@ -259,7 +260,7 @@ public class IdeUtils
 				baseImg = icon.getImage();
 			}
 			
-			if(size <= 0)
+			if(width <= 0 || height <= 0)
 			{
 				width = baseImg.getWidth(null);
 				height = baseImg.getHeight(null);
@@ -276,7 +277,7 @@ public class IdeUtils
 			}
 			
 			return new ImageIcon(img);
-		}, "%s[s:%s,b:%s,g:%s]", resource, size, borderSize, grayScale);
+		}, "%s[w:%s,h:%s,b:%s,g:%s]", resource, w, h, borderSize, grayScale);
 	}
 
 	private static void convertToGrayScale(BufferedImage img)
@@ -303,12 +304,12 @@ public class IdeUtils
 	
 	public static ImageIcon loadIconWithoutBorder(String resource, int size)
 	{
-		return loadIcon(resource, size, 0, false);
+		return loadIcon(resource, size, size, 0, false);
 	}
 
 	public static ImageIcon loadIconWithoutBorder(String resource, int size, boolean grayScale)
 	{
-		return loadIcon(resource, size, 0, grayScale);
+		return loadIcon(resource, size, size, 0, grayScale);
 	}
 
 	private static ImageIcon getEmptyFileIcon()

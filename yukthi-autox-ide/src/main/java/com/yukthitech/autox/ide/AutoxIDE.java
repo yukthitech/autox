@@ -152,7 +152,7 @@ public class AutoxIDE extends JFrame
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception
 	{
-		AutoxSplashScreen.display();
+		PrismSplashScreen.display();
 		
 		//wait for splash screen to display
 		Thread.sleep(200);
@@ -196,7 +196,7 @@ public class AutoxIDE extends JFrame
 				try
 				{
 					setVisible(true);
-					AutoxSplashScreen.close();
+					PrismSplashScreen.close();
 				} catch(Exception e)
 				{
 					e.printStackTrace();
