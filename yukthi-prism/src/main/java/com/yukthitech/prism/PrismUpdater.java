@@ -77,6 +77,8 @@ public class PrismUpdater
 	
 	private File downloadFile(String urlStr, String prefix, String extension) throws Exception
 	{
+		urlStr = String.format(urlStr, Version.getVersionMap().getIdeVersion());
+		
 		logger.debug("Downloading file from: " + urlStr);
 		
 		URL url = new URL(urlStr);
@@ -147,7 +149,7 @@ public class PrismUpdater
 			{
 				entry = entry.toLowerCase();
 				
-				if(entry.contains("yukthi-autox-ide") && entry.endsWith(".jar"))
+				if(entry.startsWith("lib/yukthi-prism-") && entry.endsWith(".jar"))
 				{
 					foundJar = true;
 					break;

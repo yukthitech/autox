@@ -65,6 +65,5 @@
 	<modules>
 		<module>../yukthi-autox</module>
 		<module>../yukthi-apache-xerces</module>
-		<module>../yukthi-prism</module>
 	</modules>
 </project>

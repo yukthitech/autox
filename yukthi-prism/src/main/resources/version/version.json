@@ -1,4 +1,5 @@
 {
 	"version": "${pom.version}-${timestamp}",
+	"ideVersion": "${pom.version}",
 	"autoxVersion": "${autox.version}" 
 }

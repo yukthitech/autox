@@ -5,11 +5,11 @@
 	<packaging>jar</packaging>
 
 	<name>yukthi-prism</name>
-	<version>2.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<autox.version>2.0.8-SNAPSHOT</autox.version>
+		<autox.version>2.1.0-SNAPSHOT</autox.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -150,7 +150,6 @@
 					<descriptors>
 						<descriptor>zip-pom.xml</descriptor>
 					</descriptors>
-					<finalName>yukthi-prism</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 				<executions>

@@ -26,10 +26,45 @@ public class Version
 {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
-	private static Map<String, Object> versionMap;
+	private static Version versionMap;
 	
-	@SuppressWarnings("unchecked")
-	private static synchronized Map<String, Object> getVersionMap()
+	private String version;
+	
+	private String ideVersion;
+	
+	private String autoxVersion;
+	
+	public String getVersion()
+	{
+		return version;
+	}
+
+	public void setVersion(String version)
+	{
+		this.version = version;
+	}
+
+	public String getIdeVersion()
+	{
+		return ideVersion;
+	}
+
+	public void setIdeVersion(String ideVersion)
+	{
+		this.ideVersion = ideVersion;
+	}
+
+	public String getAutoxVersion()
+	{
+		return autoxVersion;
+	}
+
+	public void setAutoxVersion(String autoxVersion)
+	{
+		this.autoxVersion = autoxVersion;
+	}
+
+	public static synchronized Version getVersionMap()
 	{
 		if(versionMap != null)
 		{
@@ -38,7 +73,7 @@ public class Version
 
 		try
 		{
-			versionMap = (Map<String, Object>) objectMapper.readValue(PrismUpdater.class.getResourceAsStream("/version/version.json"), Object.class);
+			versionMap = (Version) objectMapper.readValue(PrismUpdater.class.getResourceAsStream("/version/version.json"), Version.class);
 			return versionMap;
 		}catch(Exception ex)
 		{
@@ -48,12 +83,12 @@ public class Version
 	
 	public static String getLocalVersion()
 	{
-		return (String) getVersionMap().get("version");
+		return getVersionMap().getVersion();
 	}
 
 	public static String getLocalAutoxVersion()
 	{
-		return (String) getVersionMap().get("autoxVersion");
+		return getVersionMap().getAutoxVersion();
 	}
 
 	@SuppressWarnings("unchecked")
