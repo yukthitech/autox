@@ -21,6 +21,7 @@ import java.awt.Window;
 
 import javax.swing.JPanel;
 
+import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.swing.EscapableDialog;
 
 /**
@@ -54,7 +55,11 @@ public class IdeDialogPanel extends JPanel
 	 */
 	private Rectangle dialogBounds;
 	
+	private Boolean dialogResizable;
+	
 	private ModalityType modalityType;
+	
+	private boolean centerOnScreen;
 	
 	public static void setMainAppWindow(Window mainAppWindow)
 	{
@@ -91,6 +96,26 @@ public class IdeDialogPanel extends JPanel
 		}
 	}
 	
+	public void setCenterOnScreen(boolean centerOnScreen)
+	{
+		this.centerOnScreen = centerOnScreen;
+	}
+	
+	public Boolean getDialogResizable()
+	{
+		return dialogResizable;
+	}
+
+	public void setDialogResizable(Boolean dialogResizable)
+	{
+		this.dialogResizable = dialogResizable;
+
+		if(parentDialog != null && dialogResizable != null)
+		{
+			parentDialog.setResizable(dialogResizable);
+		}
+	}
+
 	public void setTitle(String title)
 	{
 		this.title = title;
@@ -137,7 +162,17 @@ public class IdeDialogPanel extends JPanel
 				parentDialog.setModalityType(modalityType);
 			}
 			
+			if(dialogResizable != null)
+			{
+				parentDialog.setResizable(dialogResizable);
+			}
+			
 			parentDialog.setContentPane(this);
+		}
+		
+		if(centerOnScreen)
+		{
+			IdeUtils.centerOnScreen(parentDialog);
 		}
 		
 		parentDialog.setVisible(true);

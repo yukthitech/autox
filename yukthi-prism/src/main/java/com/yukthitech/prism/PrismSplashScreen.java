@@ -67,7 +67,7 @@ public class PrismSplashScreen extends JFrame
 		setBackground(Color.WHITE);
 		setUndecorated(true);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		super.setIconImage(IdeUtils.loadIconWithoutBorder("/ui/icons/autox-logo.png", 64).getImage());
+		super.setIconImage(IdeUtils.loadIconWithoutBorder("/ui/icons/prism.svg", 64).getImage());
 		setBounds(100, 100, 800, 350);
 		contentPane = new JPanel();
 		//contentPane.setBorder(new LineBorder(new Color(0, 0, 255), 2));

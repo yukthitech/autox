@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="640"
-   height="480"
-   viewBox="0 0 169.33333 127"
+   width="320"
+   height="308"
+   viewBox="0 0 84.666665 81.491667"
    version="1.1"
    id="svg5"
    sodipodi:docname="prism-black.svg"
@@ -24,244 +24,133 @@
      inkscape:document-units="mm"
      showgrid="false"
      units="px"
-     inkscape:zoom="1.0868406"
-     inkscape:cx="292.5912"
-     inkscape:cy="236.92526"
+     inkscape:zoom="1.5370247"
+     inkscape:cx="162.97721"
+     inkscape:cy="164.27843"
      inkscape:window-width="1440"
      inkscape:window-height="837"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="g23364" />
   <defs
      id="defs2">
     <filter
-       inkscape:label="Black Light"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Light areas turn to black"
-       style="color-interpolation-filters:sRGB;"
-       id="filter12348"
-       x="-0.00317279"
-       y="-0.0075737552"
-       width="1.0063455"
-       height="1.0151475">
+       y="-0.40465617"
+       height="1.8093129"
+       inkscape:menu-tooltip="Darkens the edge with an inner blur and adds a flexible glow"
+       inkscape:menu="Shadows and Glows"
+       inkscape:label="Dark and Glow"
+       style="color-interpolation-filters:sRGB"
+       id="filter23326"
+       x="-0.35730292"
+       width="1.7146058">
+      <feGaussianBlur
+         stdDeviation="5"
+         result="result6"
+         id="feGaussianBlur23316" />
+      <feComposite
+         result="result8"
+         in="SourceGraphic"
+         operator="atop"
+         in2="result6"
+         id="feComposite23318" />
+      <feComposite
+         result="result9"
+         operator="over"
+         in2="SourceAlpha"
+         in="result8"
+         id="feComposite23320" />
       <feColorMatrix
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix12340" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="arithmetic"
-         in="result2"
-         k3="2"
-         result="result4"
-         id="feComposite12342" />
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 "
+         result="result10"
+         id="feColorMatrix23322" />
       <feBlend
-         in="result4"
-         mode="multiply"
-         result="result3"
-         in2="result2"
-         id="feBlend12344" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="in"
-         in="result3"
-         id="feComposite12346" />
+         in="result10"
+         mode="normal"
+         in2="result6"
+         id="feBlend23324" />
     </filter>
     <filter
-       inkscape:label="Black Light"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Light areas turn to black"
-       style="color-interpolation-filters:sRGB;"
-       id="filter12358"
-       x="-0.0064299613"
-       y="-0.0045369724"
-       width="1.012861"
-       height="1.0090745">
+       y="-0.39624249"
+       height="1.792485"
+       inkscape:menu-tooltip="Darkens the edge with an inner blur and adds a flexible glow"
+       inkscape:menu="Shadows and Glows"
+       inkscape:label="Dark and Glow"
+       style="color-interpolation-filters:sRGB"
+       id="filter23338"
+       x="-11.195345"
+       width="23.39069">
+      <feGaussianBlur
+         stdDeviation="5"
+         result="result6"
+         id="feGaussianBlur23328" />
+      <feComposite
+         result="result8"
+         in="SourceGraphic"
+         operator="atop"
+         in2="result6"
+         id="feComposite23330" />
+      <feComposite
+         result="result9"
+         operator="over"
+         in2="SourceAlpha"
+         in="result8"
+         id="feComposite23332" />
       <feColorMatrix
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix12350" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="arithmetic"
-         in="result2"
-         k3="2"
-         result="result4"
-         id="feComposite12352" />
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 "
+         result="result10"
+         id="feColorMatrix23334" />
       <feBlend
-         in="result4"
-         mode="multiply"
-         result="result3"
-         in2="result2"
-         id="feBlend12354" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="in"
-         in="result3"
-         id="feComposite12356" />
-    </filter>
-    <filter
-       inkscape:label="Black Light"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Light areas turn to black"
-       style="color-interpolation-filters:sRGB;"
-       id="filter12368"
-       x="-0.0059067172"
-       y="-0.0033641483"
-       width="1.0118131"
-       height="1.0067288">
-      <feColorMatrix
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix12360" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="arithmetic"
-         in="result2"
-         k3="2"
-         result="result4"
-         id="feComposite12362" />
-      <feBlend
-         in="result4"
-         mode="multiply"
-         result="result3"
-         in2="result2"
-         id="feBlend12364" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="in"
-         in="result3"
-         id="feComposite12366" />
-    </filter>
-    <filter
-       inkscape:label="Black Light"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Light areas turn to black"
-       style="color-interpolation-filters:sRGB;"
-       id="filter12378"
-       x="-0.0064307093"
-       y="-0.0033640589"
-       width="1.0128617"
-       height="1.0067287">
-      <feColorMatrix
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix12370" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="arithmetic"
-         in="result2"
-         k3="2"
-         result="result4"
-         id="feComposite12372" />
-      <feBlend
-         in="result4"
-         mode="multiply"
-         result="result3"
-         in2="result2"
-         id="feBlend12374" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="in"
-         in="result3"
-         id="feComposite12376" />
-    </filter>
-    <filter
-       inkscape:label="Black Light"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Light areas turn to black"
-       style="color-interpolation-filters:sRGB;"
-       id="filter12388"
-       x="-0.0077076805"
-       y="-0.0087290052"
-       width="1.0154153"
-       height="1.0174586">
-      <feColorMatrix
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix12380" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="arithmetic"
-         in="result2"
-         k3="2"
-         result="result4"
-         id="feComposite12382" />
-      <feBlend
-         in="result4"
-         mode="multiply"
-         result="result3"
-         in2="result2"
-         id="feBlend12384" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="in"
-         in="result3"
-         id="feComposite12386" />
-    </filter>
-    <filter
-       inkscape:label="Black Light"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Light areas turn to black"
-       style="color-interpolation-filters:sRGB;"
-       id="filter12398"
-       x="-0.24136264"
-       y="-0.00031532367"
-       width="1.4827253"
-       height="1.0006306">
-      <feColorMatrix
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix12390" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="arithmetic"
-         in="result2"
-         k3="2"
-         result="result4"
-         id="feComposite12392" />
-      <feBlend
-         in="result4"
-         mode="multiply"
-         result="result3"
-         in2="result2"
-         id="feBlend12394" />
-      <feComposite
-         in2="SourceGraphic"
-         operator="in"
-         in="result3"
-         id="feComposite12396" />
+         in="result10"
+         mode="normal"
+         in2="result6"
+         id="feBlend23336" />
     </filter>
   </defs>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <path
-       style="opacity:0.999;fill:#daf4ff;fill-opacity:0.6;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;paint-order:markers fill stroke;stroke-opacity:0.60000002;filter:url(#filter12348)"
-       d="M 5.8426228,78.753689 46.740984,64.14713 89.221719,80.944671 44.428277,99.081147 Z"
-       id="path869" />
-    <path
-       style="opacity:0.999;fill:#daf4ff;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;paint-order:markers fill stroke;fill-opacity:0.60000002;stroke-opacity:0.60000002;filter:url(#filter12358)"
-       d="M 5.8426228,78.753689 46.984425,20.44918 46.740984,64.14713 Z"
-       id="path875" />
-    <path
-       style="opacity:0.999;fill:#daf4ff;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;paint-order:markers fill stroke;fill-opacity:0.60000002;stroke-opacity:0.60000002;filter:url(#filter12368)"
-       d="M 89.221719,80.944669 44.428277,99.081147 46.984425,20.44918 Z"
-       id="path873" />
-    <path
-       style="opacity:0.999;fill:#daf4ff;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;paint-order:markers fill stroke;fill-opacity:0.60000002;stroke-opacity:0.60000002;filter:url(#filter12378)"
-       d="M 5.8426228,78.753689 46.984425,20.44918 44.428277,99.081147 Z"
-       id="path871" />
-    <path
-       style="opacity:0.999;fill:#ff0000;fill-opacity:0.55000001;stroke:#ff5455;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;stroke-opacity:0.60000002;paint-order:markers fill stroke;filter:url(#filter12388)"
-       d="M 30.186884,44.184837 45.888933,50.757785 64.512294,45.52377 46.984425,20.44918 Z"
-       id="path7825"
-       sodipodi:nodetypes="ccccc" />
-    <path
-       style="opacity:0.999;fill:#ff0000;fill-opacity:0.55000001;stroke:#ff5455;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;paint-order:markers fill stroke;stroke-opacity:0.60000002;filter:url(#filter12398)"
-       d="M 45.888933,50.757785 46.984425,20.44918"
-       id="path7827" />
+    <g
+       id="g23364"
+       transform="translate(2)">
+      <rect
+         style="opacity:0.999;fill:#000000;stroke:#666666;stroke-width:0.527601;stroke-linejoin:round;stroke-miterlimit:2;paint-order:markers fill stroke"
+         id="rect1288"
+         width="84.139069"
+         height="80.964066"
+         x="-1.7362"
+         y="0.26380008" />
+      <g
+         id="g1937"
+         transform="matrix(1.0090321,0,0,1.001465,-2.0010053,-18.150177)">
+        <path
+           style="opacity:0.999;fill:#daf4ff;fill-opacity:0.6;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;stroke-opacity:0.6;paint-order:markers fill stroke"
+           d="M 0.26457097,78.753689 41.162932,64.14713 83.643667,80.944671 38.850225,99.081147 Z"
+           id="path869" />
+        <path
+           style="opacity:0.999;fill:#daf4ff;fill-opacity:0.6;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;stroke-opacity:0.6;paint-order:markers fill stroke"
+           d="M 0.26457097,78.753689 41.406373,20.44918 41.162932,64.14713 Z"
+           id="path875" />
+        <path
+           style="opacity:0.999;fill:#daf4ff;fill-opacity:0.6;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;stroke-opacity:0.6;paint-order:markers fill stroke"
+           d="M 83.643667,80.944669 38.850225,99.081147 41.406373,20.44918 Z"
+           id="path873" />
+        <path
+           style="opacity:0.999;fill:#daf4ff;fill-opacity:0.6;stroke:#bbecfd;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;stroke-opacity:0.6;paint-order:markers fill stroke"
+           d="M 0.26457097,78.753689 41.406373,20.44918 38.850225,99.081147 Z"
+           id="path871" />
+        <path
+           style="opacity:0.999;fill:#ff0000;fill-opacity:1;stroke:#ff5455;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;stroke-opacity:0.1;paint-order:markers fill stroke;filter:url(#filter23326)"
+           d="M 24.608832,44.184837 40.310881,50.757785 58.934242,45.52377 41.406373,20.44918 Z"
+           id="path7825"
+           sodipodi:nodetypes="ccccc" />
+        <path
+           style="opacity:0.999;fill:#ff0000;fill-opacity:0.55;stroke:#ff5455;stroke-width:0.529167;stroke-linejoin:round;stroke-miterlimit:2;stroke-opacity:0.05;paint-order:markers fill stroke;filter:url(#filter23338)"
+           d="M 40.310881,50.757785 41.406373,20.44918"
+           id="path7827" />
+      </g>
+    </g>
   </g>
 </svg>

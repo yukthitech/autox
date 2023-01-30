@@ -17,8 +17,9 @@ package com.yukthitech.prism.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -27,26 +28,26 @@ import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextPane;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 
 import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.prism.Version;
+import com.yukthitech.prism.swing.IdeDialogPanel;
+import com.yukthitech.swing.HtmlPanel;
 
-public class AboutPrismDialog extends JDialog
+public class AboutPrismDialog extends IdeDialogPanel
 {
 	private static final long serialVersionUID = 1L;
 	
 	private static ImageIcon PRISM_ICON = IdeUtils.loadIcon("/ui/icons/prism.svg", 80);
 	
+	private static Color BG_COLOR = new Color(245, 245, 245);
+	
 	private final JPanel contentPanel = new JPanel();
 	private final JLabel lblNewLabel = new JLabel("");
-	private final JLabel lblNewLabel_1 = new JLabel("");
-	private final JTextPane txtpnYukthiTechsoftPvt = new JTextPane();
+	private final HtmlPanel txtpnYukthiTechsoftPvt = new HtmlPanel();
 	
 	private String version;
 	private String autoxVersion;
@@ -56,68 +57,72 @@ public class AboutPrismDialog extends JDialog
 	 */
 	public AboutPrismDialog()
 	{
-		setResizable(false);
+		super.setDialogResizable(false);
 		super.setModalityType(ModalityType.APPLICATION_MODAL);
 		
 		version = Version.getLocalVersion();
 		autoxVersion = Version.getLocalAutoxVersion();
 
-		setTitle("About Prism");
-		setBounds(100, 100, 576, 286);
-		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setBackground(Color.WHITE);
+		super.setTitle("About Prism");
+		super.setDialogBounds(100, 100, 576, 251);
+		super.setBounds(100, 100, 576, 251);
+		
+		super.setBackground(BG_COLOR);
+		super.setCenterOnScreen(true);
+		
+		setLayout(new BorderLayout());
+		contentPanel.setBackground(BG_COLOR);
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.columnWidths = new int[]{0, 0};
-		gbl_contentPanel.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_contentPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_contentPanel.columnWidths = new int[] {0, 0};
+		gbl_contentPanel.rowHeights = new int[] {0};
+		gbl_contentPanel.columnWeights = new double[]{0.0, 1.0};
+		gbl_contentPanel.rowWeights = new double[]{1.0};
 		contentPanel.setLayout(gbl_contentPanel);
 		
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel.insets = new Insets(0, 15, 5, 15);
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 0;
 		lblNewLabel.setOpaque(true);
-		lblNewLabel.setBackground(Color.WHITE);
+		lblNewLabel.setBackground(BG_COLOR);
 		
 		lblNewLabel.setIcon(PRISM_ICON);
 		
 		contentPanel.add(lblNewLabel, gbc_lblNewLabel);
 		
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
-		gbc_lblNewLabel_1.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 1;
-		lblNewLabel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		contentPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		
 		GridBagConstraints gbc_txtpnYukthiTechsoftPvt = new GridBagConstraints();
 		gbc_txtpnYukthiTechsoftPvt.fill = GridBagConstraints.BOTH;
-		gbc_txtpnYukthiTechsoftPvt.gridx = 0;
-		gbc_txtpnYukthiTechsoftPvt.gridy = 2;
-		txtpnYukthiTechsoftPvt.setForeground(Color.BLACK);
-		txtpnYukthiTechsoftPvt.setFont(new Font("Tahoma", Font.BOLD, 12));
-		txtpnYukthiTechsoftPvt.setText(
-				String.format("Prism\r\n"
-						+ "Version: %s\r\n"
-						+ "AutoX Version: %s\r\n"
-						+ "Copyright © 2023 Yukthi Techsoft Pvt. Ltd. All rights reserved.", version, autoxVersion)
+		gbc_txtpnYukthiTechsoftPvt.gridx = 1;
+		gbc_txtpnYukthiTechsoftPvt.gridy = 0;
+		txtpnYukthiTechsoftPvt.setContent(
+				String.format("<html><body>"
+						+ "<span style=\"color: #ff33cc;font-weight: bold;\">Prism - Open Source IDE for AutoX </span><br/><br/>"
+						+ "<b>Website:</b> <a href=\"https://autox.yukthitech.com\">https://autox.yukthitech.com</a><br/>"
+						+ "<b>Source Location:</b> <a href=\"https://github.com/yukthitech/autox\">https://github.com/yukthitech/autox</a><br/>"
+						+ "<b>Version:</b> %s<br/>"
+						+ "<b>AutoX Version:</b> %s<br/><br/>"
+						+ "<i>Copyright © 2023 Yukthi Techsoft Pvt. Ltd. All rights reserved.</i></body></html>", version, autoxVersion)
 			);
-		txtpnYukthiTechsoftPvt.setEditable(false);
+		txtpnYukthiTechsoftPvt.getTextPane().setBorder(null);
+		txtpnYukthiTechsoftPvt.getTextPane().setBackground(BG_COLOR);
+		txtpnYukthiTechsoftPvt.getScrollPane().setBorder(null);
+		txtpnYukthiTechsoftPvt.setCaretEnabled(false);
+		txtpnYukthiTechsoftPvt.getTextPane().setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 		contentPanel.add(txtpnYukthiTechsoftPvt, gbc_txtpnYukthiTechsoftPvt);
+		
+		
 		{
 			JPanel buttonPane = new JPanel();
-			buttonPane.setBackground(Color.WHITE);
+			buttonPane.setBackground(BG_COLOR);
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+			
+			add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("Close");
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
 				
 				okButton.addActionListener(new ActionListener()
 				{
@@ -133,11 +138,11 @@ public class AboutPrismDialog extends JDialog
 
 	private void close(ActionEvent e)
 	{
-		super.setVisible(false);
+		super.closeDialog();
 	}
 	
 	public void display()
 	{
-		super.setVisible(true);
+		super.displayInDialog();
 	}
 }
