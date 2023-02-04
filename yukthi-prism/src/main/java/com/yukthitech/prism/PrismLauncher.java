@@ -222,7 +222,7 @@ public class PrismLauncher extends JFrame
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
 		super.setIconImage(IdeUtils.loadIconWithoutBorder("/ui/icons/prism.svg", 64).getImage());
-		super.setTitle("AutoX IDE");
+		super.setTitle("Prism - AutoX IDE");
 		
 		super.addWindowListener(new WindowAdapter()
 		{

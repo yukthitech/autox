@@ -122,6 +122,16 @@ public class ExecutionThreadStack
 		return (Map<String, Object>) parametersStack.peek();
 	}
 	
+	public Map<String, Object> getParamForDebug()
+	{
+		if(parametersStack.isEmpty())
+		{
+			return null;
+		}
+		
+		return (Map<String, Object>) parametersStack.peek();
+	}
+
 	public Object getParameter(String name)
 	{
 		Map<String, Object> paramMap = (Map<String, Object>) getParam();

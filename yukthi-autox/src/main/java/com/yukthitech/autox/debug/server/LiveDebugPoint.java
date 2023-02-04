@@ -170,7 +170,7 @@ public class LiveDebugPoint
 	private Map<String, byte[]> getParams()
 	{
 		Map<String, byte[]> paramMap = new HashMap<>(); 
-		Map<String, Object> params = ExecutionContextManager.getInstance().getExecutionContextStack().getParam();
+		Map<String, Object> params = ExecutionContextManager.getInstance().getExecutionContextStack().getParamForDebug();
 		
 		if(MapUtils.isEmpty(params))
 		{
