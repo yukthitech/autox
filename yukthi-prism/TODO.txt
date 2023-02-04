@@ -10,6 +10,8 @@ Full web doc on
 	functions
 	multi threading
 	custom prefixes
+	debugging
+	real time development
 	
 function based execution
 	
