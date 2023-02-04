@@ -1,0 +1,63 @@
+#outsideborder
+{
+  height:100%;
+  border:1px solid blue;
+  overflow:Auto;
+}
+#data
+{
+  font-size:2em;
+  color:black;
+}
+#heading
+{
+  font-size:1em;
+}
+#border
+{
+  box-sizing:content-box;
+  width:400px;
+  height:150px;
+  padding:30px;
+  margin-top:5px;
+}
+#content
+{
+  padding-left:3em;
+  margin-left:1em;
+  line-height:1.6;
+}
+
+/*#insideborder
+{
+  padding:5px;
+  width:70%;
+}
+#insideborder1
+{
+  padding:5px;
+  width:100%;
+  background-color:black;
+  color:white;
+}
+#outsidetag
+{
+  color:#62c8f3;
+}
+#attribute
+{
+  color:#62c8f3;
+}
+
+#name
+{
+  color:#62c8f3;
+}
+#value
+{
+color:#a2fca2;
+}
+#data
+{
+  color:white;
+}*/
