@@ -1,3 +1,49 @@
+Next Target
+-----------
+Full web doc on
+	basic structure
+	steps and validators
+	plugins
+	log monitors
+	summary mail
+		customization
+	functions
+	multi threading
+	custom prefixes
+	
+function based execution
+	
+ui automated code generation
+
+Reports using CDN urls based on config (default using standard CDN)
+
+Integration with maven and jenkins
+	Build templates for non-java lang (for any build mechanism)
+	
+	
+ctrl + click for attributes and custom prefixes
+	
+Graph support
+	Basic
+		pass % over overall - pie chart (include success, failue, error rates)
+		tracked param % - code coverage % pie chart
+	Ierative
+		pass % over executions - XY graph
+		tracked param % over executions - code coverage % pie chart
+	
+using advanced selenium
+perf test cases
+
+sql query box with code generation
+post man like ui for code generation
+mongo query box with code generation
+
+startup params
+	execute test suites in mutli threaded mode
+
+============================
+Latest Features
+-----------------
 Debugging
 File searching
 	regex
