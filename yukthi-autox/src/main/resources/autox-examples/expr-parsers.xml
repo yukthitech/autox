@@ -260,5 +260,19 @@
 				<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}-@{val}, desc=true): $"/>
 			]]></content>
 		</example>
+		<example>
+			<description>Sorting the objects with simple property (non string value sorting)</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(property=name): $"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Sorting the objects with nested property (non string value sorting)</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(property=subprop.name): $"/>
+			]]></content>
+		</example>
 	</collection>
 </examples>

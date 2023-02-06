@@ -448,12 +448,16 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "sort", description = "Sorts the input collection and returns the result as list. As the input is expected to be collection this filter"
-			+ "can be used only with $. If no property is specified, ordering will be done in natural order.", 
-			example = "attr: lstAttr | sort(property=name): $",
+			+ "can be used only with $. If no property/propertyExpr is specified, ordering will be done in natural order. Note if both property & propertyExpr is specified"
+			+ " property only will be considered.", 
+			example = "attr: lstAttr | sort(propertyExpr=name): $",
 			params = {
 					@PrefixExprParam(name = "propertyExpr", type = "String", defaultValue = "natural-ordering", 
 							description = "A free marker expression which will be used to convert each object into string, post which sorting will be done. In order"
-									+ "to overcome default expression parsing, optionally @{} expression format can be used instead of ${}."),
+									+ "to overcome default expression parsing, @{} expression format can be used instead of ${}."),
+					@PrefixExprParam(name = "property", type = "String", defaultValue = "natural-ordering", 
+							description = "Property which will be evaluated on each object. And this property value will be used for sorting. The value of property should"
+									+ " be basic comparable values (like number, string, etc). If not error will be thrown."),
 					@PrefixExprParam(name = "desc", type = "boolean", defaultValue = "false", 
 						description = "If set to true, the sorting will be done in reverse order.")
 				})
@@ -478,10 +482,11 @@ public class DefaultPrefixExpressions
 				}
 				
 				List<Object> lst = new ArrayList<>((Collection<Object>) curVal);
-				String prop = parserContext.getParameter("propertyExpr");
+				String propExpr = parserContext.getParameter("propertyExpr");
+				String finalProp = parserContext.getParameter("property");
 				boolean desc = "true".equals(parserContext.getParameter("desc"));
 				
-				if(StringUtils.isBlank(prop))
+				if(StringUtils.isBlank(propExpr) && StringUtils.isBlank(finalProp))
 				{
 					if(desc)
 					{
@@ -495,9 +500,13 @@ public class DefaultPrefixExpressions
 					return lst;
 				}
 				
-				prop = prop.replaceAll("\\@\\{(.*?)\\}", "\\${$1}");
+				if(propExpr != null)
+				{
+					propExpr = propExpr.replaceAll("\\@\\{(.*?)\\}", "\\${$1}");
+				}
 				
-				final String finalProp = prop;
+				final String finalPropExpr = propExpr;
+				
 				Comparator<Object> valueComparator = new Comparator<Object>()
 				{
 					@Override
@@ -513,10 +522,43 @@ public class DefaultPrefixExpressions
 							return 1;
 						}
 						
-						String val1 = FreeMarkerMethodManager.replaceExpressions("expression-obj1", o1, finalProp);
-						String val2 = FreeMarkerMethodManager.replaceExpressions("expression-obj2", o2, finalProp);
+						Object val1 = null;
+						Object val2 = null;
 						
-						int diff = val1.compareTo(val2);
+						if(StringUtils.isBlank(finalProp))
+						{
+							val1 = (Comparable) FreeMarkerMethodManager.replaceExpressions("expression-obj1", o1, finalPropExpr);
+							val2 = (Comparable) FreeMarkerMethodManager.replaceExpressions("expression-obj2", o2, finalPropExpr);
+						}
+						else
+						{
+							val1 = (Comparable) PropertyAccessor.getProperty(o1, finalProp);
+							val2 = (Comparable) PropertyAccessor.getProperty(o2, finalProp);
+						}
+						
+						if(val1 == null && val2 == null)
+						{
+							return 0;
+						}
+						
+						if(val1 != null && val2 == null)
+						{
+							return 1;
+						}
+
+						if(val1 == null && val2 != null)
+						{
+							return -1;
+						}
+
+						//Note: propExpr results in string which is always comparable
+						if(!(val1 instanceof Comparable))
+						{
+							//so this if block may be reachable only when property is used
+							throw new InvalidStateException("Property '{}' resulted in non-comparable value: {}", finalProp, val1);
+						}
+
+						int diff = ((Comparable<Object>) val1).compareTo(val2);
 						return (diff == 0) ? 1 : diff;
 					}
 				};
