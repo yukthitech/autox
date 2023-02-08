@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,7 +73,15 @@ public class TestSuiteExecutor extends Executor
 			
 			if(!testCase.isExecutable(excludedGroup))
 			{
-				logger.debug("Exluding test-case '{}' as it is part of excluded group: {}", testCase.getName(), excludedGroup.getValue());
+				if(StringUtils.isBlank(excludedGroup.getValue()))
+				{
+					logger.debug("Exluding test-case '{}' as it is not part of executable groups.", testCase.getName());
+				}
+				else
+				{
+					logger.debug("Exluding test-case '{}' as it is part of excluded group: {}", testCase.getName(), excludedGroup.getValue());
+				}
+				
 				continue;
 			}
 			
@@ -100,10 +109,12 @@ public class TestSuiteExecutor extends Executor
 			}
 		}
 		
+		/*
 		if(CollectionUtils.isEmpty(super.getChildExecutors()))
 		{
 			throw new InvalidStateException("For test-suite '{}' no child test cases found", testSuite.getName());
 		}
+		*/
 	}
 	
 	private Set<String> getRestrictedTestCases()

@@ -46,6 +46,8 @@ public class BaseTestCases
 	@BeforeMethod
 	public void reset() throws Exception
 	{
+		System.setProperty("autox.executable.groups", "");
+		
 		AutomationLauncher.resetState();
 	}
 }

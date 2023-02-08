@@ -212,15 +212,30 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	 */
 	public boolean isExecutable(ObjectWrapper<String> excludedGroup)
 	{
+		Set<String> executableGroups = AutomationContext.getInstance().getExecutableGroups();
+		boolean executableGroupsSpecified = CollectionUtils.isNotEmpty(executableGroups);
+		
 		if(groups.isEmpty())
 		{
-			return true;
+			//if no group is specified at test case level
+			//  then return true if no executable groups are specified otherwise false
+			return !executableGroupsSpecified;
 		}
 		
 		ApplicationConfiguration appConfig = AutomationContext.getInstance().getAppConfiguration();
+		//by default, tc is executable if executable-groups are not specified
+		boolean executable = !executableGroupsSpecified;
 		
 		for(String grp : this.groups)
 		{
+			//if executable groups is specified and current group is part
+			//  of executable groups, then mark test case as executable
+			if(executableGroupsSpecified && executableGroups.contains(grp))
+			{
+				executable = true;
+			}
+			
+			//if current group is excluded in app config
 			if(appConfig.isGroupExcluded(grp))
 			{
 				logger.debug("Test case '{}' is non-executable as its group '{}' is under exclusion list", name, grp);
@@ -234,7 +249,7 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 			}
 		}
 		
-		return true;
+		return executable;
 	}
 	
 	/**

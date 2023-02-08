@@ -41,6 +41,12 @@ public interface IAutomationConstants
 	 */
 	public String AUTOX_PROP_PARALLEL_EXEC_ENABLED = "autox.testSuites.parallelExecutionEnabled";
 	
+	/**
+	 * Used to specify groups which should be executed. If specified testcases belonging to these
+	 * groups only will be executed.
+	 */
+	public String AUTOX_PROP_EXECUTABLE_GROUPS = "autox.executable.groups";
+	
 	public String PROP_LOG_MAX_PROP_LEN = "autox.log.max.param.len";
 	
 	public String STEP_NAME_SPACE = "http://autox.yukthitech.com/steps";

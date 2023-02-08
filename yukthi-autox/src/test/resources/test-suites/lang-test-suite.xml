@@ -25,6 +25,8 @@
 			<description>
 				Tests simple function working which does not use return.
 			</description>
+			
+			<group>group1</group>
 
 			<f:sumWithoutReturn a="int: 10" b="int: 20"/>
 		
@@ -35,6 +37,7 @@
 			<description>
 				Tests expressions are replaced in test suite files properly
 			</description>
+			<group>group2</group>
 		
 			<s:set expression="testAttr" value="SimpleValue"/>
 		
@@ -507,10 +510,10 @@
 			<s:set expression="unsortedLst">
 				<value>
 					json: [
-						{"name": "xyz", "val": "20"},
-						{"name": "bdc", "val": "25"},
-						{"name": "yzx", "val": "30"},
-						{"name": "abc", "val": "40"}
+						{"name": "xyz", "val": "20", "subprop": {"id": 3}},
+						{"name": "bdc", "val": "25", "subprop": {"id": 2}},
+						{"name": "yzx", "val": "30", "subprop": {"id": 14}},
+						{"name": "abc", "val": "40", "subprop": {"id": 1}}
 					]
 				</value>
 			</s:set>
@@ -518,15 +521,18 @@
 			<s:set expression="sortedLst">
 				<value>
 					json: [
-						{"name": "abc", "val": "40"},
-						{"name": "bdc", "val": "25"},
-						{"name": "xyz", "val": "20"},
-						{"name": "yzx", "val": "30"}
+						{"name": "abc", "val": "40", "subprop": {"id": 1}},
+						{"name": "bdc", "val": "25", "subprop": {"id": 2}},
+						{"name": "xyz", "val": "20", "subprop": {"id": 3}},
+						{"name": "yzx", "val": "30", "subprop": {"id": 14}}
 					]
 				</value>
 			</s:set>
 
 			<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}): $"/>
+			<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(property=name): $"/>
+			<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(property=subprop.id): $"/>
+			
 			<s:assert-equals expected="list: abc, bcd, def, fgh" actual="set: def, fgh, abc, bcd | sort: $"/>
 			
 			<s:assert-equals expected="list: fgh, def, bcd, abc" actual="set: def, fgh, abc, bcd | sort(desc=true): $"/>

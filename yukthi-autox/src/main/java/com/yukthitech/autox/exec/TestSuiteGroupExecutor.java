@@ -17,6 +17,8 @@ package com.yukthitech.autox.exec;
 
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.yukthitech.autox.AutoxCliArguments;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
@@ -61,6 +63,7 @@ public class TestSuiteGroupExecutor extends Executor
 				return true;
 			})
 			.map(ts -> new TestSuiteExecutor(ts))
+			.filter(tse -> CollectionUtils.isNotEmpty(tse.getChildExecutors()))
 			.forEach(exec -> addChildExector(exec));
 	}
 }

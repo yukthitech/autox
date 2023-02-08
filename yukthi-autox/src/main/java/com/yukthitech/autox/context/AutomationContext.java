@@ -16,11 +16,17 @@
 package com.yukthitech.autox.context;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutoxCliArguments;
 import com.yukthitech.autox.TestSuiteParserHandler;
@@ -43,6 +49,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class AutomationContext
 {
+	private static Logger logger = LogManager.getLogger(AutomationContext.class);
+	
 	/**
 	 * Automation context that can be accessed anywhere needed.
 	 */
@@ -93,6 +101,11 @@ public class AutomationContext
 	 * Test suite group being executed.
 	 */
 	private TestSuiteGroup testSuiteGroup;
+	
+	/**
+	 * Executable group names.
+	 */
+	private Set<String> executableGroups;
 	
 	/**
 	 * Constructor.
@@ -524,6 +537,26 @@ public class AutomationContext
 	public void setTestSuiteParserHandler(TestSuiteParserHandler testSuiteParserHandler)
 	{
 		this.testSuiteParserHandler = testSuiteParserHandler;
+	}
+	
+	public synchronized Set<String> getExecutableGroups()
+	{
+		if(executableGroups != null)
+		{
+			return executableGroups;
+		}
+		
+		String propVal = getOverridableProp(IAutomationConstants.AUTOX_PROP_EXECUTABLE_GROUPS);
+		
+		if(StringUtils.isBlank(propVal))
+		{
+			executableGroups = Collections.emptySet();
+			return executableGroups;
+		}
+		
+		executableGroups = new HashSet<>(Arrays.asList(propVal.trim().split("\\s*\\,\\s*")));
+		logger.debug("Limiting test case execution for group: {}", executableGroups);
+		return executableGroups;
 	}
 
 	public String getOverridableProp(String name)

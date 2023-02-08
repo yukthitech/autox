@@ -46,6 +46,27 @@ public class TAutomation extends BaseTestCases
 	}
 
 	@Test
+	public void testGroupWiseExecution() throws Exception
+	{
+		System.setProperty("autox.executable.groups", "group1,group2");
+		
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
+				"-rf", "./output/groups", 
+				"-prop", "./src/test/resources/app.properties",
+				//"-ts", "ui-test-suites"
+				//"-tc", "fillForm"
+				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+			});
+		
+		FinalReport exeResult = objectMapper.readValue(new File("./output/groups/test-results.json"), FinalReport.class);
+		
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 2, "Found extra test suites.");
+		Assert.assertEquals(exeResult.getTestCaseCount(), 3, "Found extra test cases.");
+		
+		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 2, "Found invalid number of success test suites.");
+	}
+
+	@Test
 	public void testGlobalSetupError() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml",
