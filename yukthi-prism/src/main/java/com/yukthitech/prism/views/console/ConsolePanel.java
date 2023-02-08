@@ -242,15 +242,18 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		
 		String code = injectLinks(activeEnvironment.getConsoleHtml());
 
-		try
+		EventQueue.invokeLater(() -> 
 		{
-			consoleDisplayArea.setText("<html><body id=\"body\">" + code + "</body></html>");
-		}catch(Exception ex)
-		{
-			logger.error("An error occurred while setting content in console panel. Code:\n{}", code, ex);
-		}
-		
-		moveToEnd();
+			try
+			{
+				consoleDisplayArea.setText("<html><body id=\"body\">" + code + "</body></html>");
+			}catch(Exception ex)
+			{
+				logger.error("An error occurred while setting content in console panel. Code:\n{}", code, ex);
+			}
+			
+			moveToEnd();
+		});
 	}
 	
 	private String injectLinks(CharSequence html)
@@ -281,24 +284,27 @@ public class ConsolePanel extends JPanel implements IViewPanel
 
 	private void appendNewContent(String content)
 	{
-		HTMLDocument htmlDoc = (HTMLDocument) consoleDisplayArea.getDocument();
-		Element element = htmlDoc.getElement("body");
-		
-		try
+		EventQueue.invokeLater(() -> 
 		{
-			htmlDoc.insertBeforeEnd(element, injectLinks(content));
-			moveToEnd();
-			
-			/*
-			if(parentTabbedPane != null)
+			try
 			{
-				parentTabbedPane.setSelectedComponent(this);
+				HTMLDocument htmlDoc = (HTMLDocument) consoleDisplayArea.getDocument();
+				Element element = htmlDoc.getElement("body");
+
+				htmlDoc.insertBeforeEnd(element, injectLinks(content));
+				moveToEnd();
+				
+				/*
+				if(parentTabbedPane != null)
+				{
+					parentTabbedPane.setSelectedComponent(this);
+				}
+				*/
+			} catch(Exception ex)
+			{
+				logger.error("An error occurred while adding html content", ex);
 			}
-			*/
-		} catch(Exception ex)
-		{
-			logger.error("An error occurred while adding html content", ex);
-		}
+		});
 	}
 	
 	private void clearConsole()
