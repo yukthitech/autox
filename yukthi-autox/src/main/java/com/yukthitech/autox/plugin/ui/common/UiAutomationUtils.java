@@ -20,17 +20,17 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotInteractableException;
-import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.config.AutomationConfiguration;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
@@ -55,16 +55,6 @@ public class UiAutomationUtils
 	 * Pattern expected to be used by locator strings.
 	 */
 	private static Pattern LOCATOR_PATTERN = Pattern.compile("(\\w+)\\s*\\:\\s*(.*)");
-
-	/**
-	 * The open bracket.
-	 **/
-	private static String OPENBRACKET = "[";
-
-	/**
-	 * The close bracket.
-	 **/
-	private static String CLOSEBRACKET = "]";
 
 	/**
 	 * Fetches input form field type of specified element.
@@ -181,7 +171,7 @@ public class UiAutomationUtils
 			locator = LocatorType.NAME.getKey() + ":" + locator;
 		}
 
-		List<WebElement> elements = findElements(driverName, parent, locator);
+		List<WebElement> elements = findElements(driverName, parent, locator, true);
 
 		// if no elements found with specified name
 		if(elements == null || elements.isEmpty())
@@ -256,7 +246,7 @@ public class UiAutomationUtils
 	 */
 	public static WebElement findElement(String driverName, WebElement parent, String locator)
 	{
-		List<WebElement> elements = findElements(driverName, parent, locator);
+		List<WebElement> elements = findElements(driverName, parent, locator, true);
 
 		if(elements == null || elements.size() == 0)
 		{
@@ -311,8 +301,7 @@ public class UiAutomationUtils
 	public static List<WebElement> findElements(String driverName, String parentName, String locator)
 	{
 		WebElement parent = getParentElement(parentName);
-		
-		return findElements(driverName, parent, locator);
+		return findElements(driverName, parent, locator, false);
 	}
 	
 	public static By getLocator(String locator)
@@ -379,7 +368,7 @@ public class UiAutomationUtils
 	 *            Locator to be used for searching
 	 * @return Matching elements
 	 */
-	public static List<WebElement> findElements(String driverName, WebElement parent, String locator)
+	public static List<WebElement> findElements(String driverName, WebElement parent, String locator, boolean singleElementExpected)
 	{
 		logger.trace("Trying to find element with location '{}' under parent - {}", locator, parent);
 
@@ -428,7 +417,12 @@ public class UiAutomationUtils
 
 		if(logger.isTraceEnabled())
 		{
-			logger.trace("For locator '{}' found elements as - {}", locator, toString(driverName, result));
+			logger.trace("For locator '{}' found elements as - {}", locator, toString(result));
+		}
+		
+		if(singleElementExpected && result != null && result.size() > 1)
+		{
+			AutomationContext.getInstance().getExecutionLogger().warn("Given locator '{}' resulted in multiple elements: {}", locator, toString(result));
 		}
 
 		return result;
@@ -517,35 +511,41 @@ public class UiAutomationUtils
 	 *            Elements to be converted
 	 * @return Converted string.
 	 */
-	public static String toString(String driverName, Collection<WebElement> elements)
+	private static String toString(Collection<WebElement> elements)
 	{
-		StringBuilder builder = new StringBuilder(OPENBRACKET);
-		boolean first = true;
-		
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
-		JavascriptExecutor jsExecutor = (JavascriptExecutor) seleniumSession.getWebDriver(driverName);
-
-		for(WebElement element : elements)
+		return elements
+					.stream()
+					.map(elem -> toString(elem))
+					.collect(Collectors.joining(", "));
+	}
+	
+	private static String toString(WebElement element)
+	{
+		if(element == null)
 		{
-			if(!first)
-			{
-				builder.append(",\n");
-			}
-
-			builder.append(element).append(OPENBRACKET);
-
-			if(element == null)
-			{
-				builder.append("null");
-				continue;
-			}
-
-			builder.append(jsExecutor.executeScript(AutomationConfiguration.getInstance().getScript("elementToString"), element));
-			builder.append(CLOSEBRACKET);
-			first = false;
+			return "null";
 		}
-
-		builder.append(CLOSEBRACKET);
+		
+		StringBuilder builder = new StringBuilder("[");
+		
+		builder.append("Tag: ").append(element.getTagName()).append(", ");
+		
+		Rectangle bounds = element.getRect();
+		
+		if(bounds == null)
+		{
+			builder.append("Bounds: null").append(", ");
+		}
+		else
+		{
+			builder.append("Bounds: ").append(String.format("(x: %s, y: %s, width: %s, height: %s)", bounds.x, bounds.y, bounds.width, bounds.height)).append(", ");
+		}
+		
+		builder.append("Visible: ").append(element.isDisplayed()).append(", ");
+		builder.append("Enabled: ").append(element.isEnabled());
+		
+		builder.append("]");
+		
 		return builder.toString();
 	}
 

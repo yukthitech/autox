@@ -279,7 +279,7 @@ public class AssertFormFields extends AbstractValidation
 
 		for(FormField field : this.fields)
 		{
-			fieldElements = UiAutomationUtils.findElements(driverName, formElement, field.locator);
+			fieldElements = UiAutomationUtils.findElements(driverName, formElement, field.locator, false);
 
 			if(fieldElements == null || fieldElements.isEmpty())
 			{

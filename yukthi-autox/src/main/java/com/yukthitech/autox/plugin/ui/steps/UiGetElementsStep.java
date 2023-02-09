@@ -79,7 +79,6 @@ public class UiGetElementsStep extends AbstractParentUiStep
 	{
 		exeLogger.trace("Fetching ui element value for locator - {}", locator);
 		
-		
 		List<WebElement> webElements = UiAutomationUtils.findElements(driverName, parentElement, locator);
 		
 		if(webElements == null || webElements.isEmpty())
