@@ -47,6 +47,7 @@ import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.SummaryNotificationConfig;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.ResourceManager;
+import com.yukthitech.autox.test.ResourceManager.ResourceFilter;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -81,8 +82,11 @@ public class ReportGenerator
 		}
 		*/
 		
+		boolean functionReport = (finalReport.getFunctionResult() != null);
+		
 		// copy the resource files into output folder
-		ResourceManager.getInstance().copyReportResources(reportFolder);
+		ResourceFilter filter = new ResourceFilter().setExecutionType(functionReport ? "function" : "automation");
+		ResourceManager.getInstance().copyReportResources(reportFolder, filter);
 
 		// create final report files
 		try

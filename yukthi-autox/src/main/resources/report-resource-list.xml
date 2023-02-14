@@ -1,5 +1,7 @@
 <list>
-	<file path="index.html"/>
+	<file path="index.html" exclude="function"/>
+	<file path="func-index.html" exclude="automation" dest="index.html"/>
+
 	<file path="log.html"/>
 	<file path="css/bootstrap.min.css"/>
 	<file path="css/common.css"/>

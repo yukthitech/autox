@@ -36,8 +36,11 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
+import com.yukthitech.autox.exec.FunctionExecutor;
 import com.yukthitech.autox.exec.TestCaseExecutor;
+import com.yukthitech.autox.exec.report.FinalReport.FunctionResult;
 import com.yukthitech.autox.logmon.LogMonitorContext;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -70,7 +73,22 @@ public class ReportDataManager
 	{
 		private Map<ExecutionType, ExecutionLogger> loggers;
 		
-		private ExecutionStatusReport statusReport = new ExecutionStatusReport();
+		private ExecutionStatusReport statusReport;
+		
+		private FunctionResult functionResult;
+		
+		public ExecutorDetails(Executor executor)
+		{
+			if(executor instanceof FunctionExecutor)
+			{
+				Function function = (Function) executor.getExecutable();
+				functionResult = new FunctionResult(function.getName());
+			}
+			else
+			{
+				statusReport = new ExecutionStatusReport();
+			}
+		}
 		
 		public IExecutionLogger getLoggerIfPresent(ExecutionType executionType)
 		{
@@ -139,7 +157,7 @@ public class ReportDataManager
 		
 		if(details == null)
 		{
-			details = new ExecutorDetails();
+			details = new ExecutorDetails(executor);
 			executorDetailsMap.put(executor, details);
 			
 			if(rootExecutorDetails == null)
@@ -225,10 +243,18 @@ public class ReportDataManager
 			}
 			case MAIN:
 			{
-				executorDetails.statusReport.setName(reportInfoProviders.getName(executor));
-				executorDetails.statusReport.setAuthor(reportInfoProviders.getAuthor(executor));
+				if(executorDetails.statusReport != null)
+				{
+					executorDetails.statusReport.setName(reportInfoProviders.getName(executor));
+					executorDetails.statusReport.setAuthor(reportInfoProviders.getAuthor(executor));
+					
+					executorDetails.statusReport.setMainExecutionDetails(new ExecutionDetails());
+				}
+				else
+				{
+					executorDetails.functionResult.setExecutionDetails(new ExecutionDetails());
+				}
 				
-				executorDetails.statusReport.setMainExecutionDetails(new ExecutionDetails());
 				break;
 			}
 			default:
@@ -262,7 +288,15 @@ public class ReportDataManager
 			}
 			case MAIN:
 			{
-				endTime = executorDetails.statusReport.getMainExecutionDetails().setEndDetails(status, mssg);
+				if(executorDetails.statusReport != null)
+				{
+					endTime = executorDetails.statusReport.getMainExecutionDetails().setEndDetails(status, mssg);
+				}
+				else
+				{
+					endTime = executorDetails.functionResult.getExecutionDetails().setEndDetails(status, mssg);
+				}
+				
 				logger = executorDetails.getLoggerIfPresent(ExecutionType.MAIN);
 				break;
 			}
@@ -282,9 +316,20 @@ public class ReportDataManager
 	
 	public FinalReport generateReport()
 	{
-		FinalReport finalReport = new FinalReport(
-				AutomationContext.getInstance().getAppConfiguration().getReportName(), 
-				rootExecutorDetails.statusReport);
+		FinalReport finalReport = null;
+		
+		if(rootExecutorDetails.functionResult != null)
+		{
+			finalReport = new FinalReport(
+					AutomationContext.getInstance().getAppConfiguration().getReportName(), 
+					rootExecutorDetails.functionResult);
+		}
+		else
+		{
+			finalReport = new FinalReport(
+					AutomationContext.getInstance().getAppConfiguration().getReportName(), 
+					rootExecutorDetails.statusReport);
+		}
 		
 		reportGenerator.generateReports(finalReport);
 		return finalReport;
@@ -319,9 +364,14 @@ public class ReportDataManager
 	
 	public synchronized boolean isSuccessful()
 	{
-		int totalCount = rootExecutorDetails.statusReport.getTotalCount();
-		int successCount = rootExecutorDetails.statusReport.getSuccessCount();
-		return (totalCount == successCount);
+		if(rootExecutorDetails.statusReport != null)
+		{
+			int totalCount = rootExecutorDetails.statusReport.getTotalCount();
+			int successCount = rootExecutorDetails.statusReport.getSuccessCount();
+			return (totalCount == successCount);
+		}
+		
+		return rootExecutorDetails.functionResult.getExecutionDetails().getStatus() == TestStatus.SUCCESSFUL;
 	}
 	
 	private ReportLogFile generateMonitorHtml(Executor executor, ExecutorDetails executorDetails, String name, ReportLogFile logFile)
@@ -338,12 +388,16 @@ public class ReportDataManager
 			
 			logContent = StringEscapeUtils.escapeHtml4(logContent);
 			
+			ExecutionDetails executionDetails = executorDetails.functionResult != null ? 
+					executorDetails.functionResult.getExecutionDetails()
+					: executorDetails.statusReport.getMainExecutionDetails();
+			
 			String processedContent = FreeMarkerMethodManager.replaceExpressions("monitor-log-template.html", 
 					new LogMonitorContext(
 						reportInfoProviders.getName(executor), 
 						name, 
 						logContent, 
-						executorDetails.statusReport.getMainExecutionDetails().getStatus(), 
+						executionDetails.getStatus(), 
 						reportInfoProviders.getDescription(executor)), 
 					MONITOR_HTML_TEMPLATE);
 			
@@ -376,7 +430,14 @@ public class ReportDataManager
 				continue;
 			}
 			
-			executorDetails.statusReport.addMonitorLog(entry.getKey(), htmlLogFile.getFile().getName());
+			if(executorDetails.statusReport != null)
+			{
+				executorDetails.statusReport.addMonitorLog(entry.getKey(), htmlLogFile.getFile().getName());
+			}
+			else
+			{
+				executorDetails.functionResult.addMonitorLog(entry.getKey(), htmlLogFile.getFile().getName());
+			}
 		}
 	}
 }

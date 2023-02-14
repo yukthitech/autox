@@ -1,4 +1,11 @@
 <testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+
+	<function name="assertTestFunc">
+		<s:set expression="intAttr" value="int: 10"/>
+		<s:set expression="attr(int): intAttr1" value="10"/>
+		<s:assert-equals actual="string:value" expected="string:value"/>
+	</function>
+	
 	<testSuite name="assert-test-suites">
 		<!--
 			================================= Test with properties file -=======================================

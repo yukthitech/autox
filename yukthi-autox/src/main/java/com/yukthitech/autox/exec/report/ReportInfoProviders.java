@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.TestCaseExecutor;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestSuite;
@@ -35,6 +36,7 @@ public class ReportInfoProviders
 		addProvider(TestSuiteGroup.class, new ReportInfoProvider<>(false, grp -> "", grp -> "global", grp -> "global", grp -> ""));
 		addProvider(TestSuite.class, new ReportInfoProvider<>(false, ts -> "ts", ts -> ts.getName(), ts -> ts.getDescription(), ts -> ts.getAuthor()));
 		addProvider(TestCase.class, new ReportInfoProvider<>(true, tc -> "tc", tc -> tc.getName(), tc -> tc.getDescription(), tc -> tc.getAuthor()));
+		addProvider(Function.class, new ReportInfoProvider<>(true, func -> "func", func -> func.getName(), func -> func.getDescription(), func -> null));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })

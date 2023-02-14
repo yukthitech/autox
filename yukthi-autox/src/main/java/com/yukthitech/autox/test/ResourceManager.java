@@ -19,10 +19,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -56,6 +59,21 @@ public class ResourceManager
 	}
 	
 	/**
+	 * Filter to filter resources during copy.
+	 * @author akranthikiran
+	 */
+	public static class ResourceFilter
+	{
+		private String executionType;
+
+		public ResourceFilter setExecutionType(String executionType)
+		{
+			this.executionType = executionType;
+			return this;
+		}
+	}
+
+	/**
 	 * Represents resource file.
 	 * @author akiran
 	 */
@@ -66,9 +84,29 @@ public class ResourceManager
 		 */
 		private String path;
 		
+		/**
+		 * Dest file name to be used post copy.
+		 */
+		private String dest;
+		
+		/**
+		 * Execution types to exclude.
+		 */
+		private Set<String> excludeList;
+		
 		public void setPath(String path)
 		{
 			this.path = path;
+		}
+		
+		public void setDest(String dest)
+		{
+			this.dest = dest;
+		}
+
+		public void setExclude(String list)
+		{
+			excludeList = CommonUtils.toSet(list.trim().split("\\s*\\,\\s*"));
 		}
 	}
 	
@@ -116,9 +154,9 @@ public class ResourceManager
 	 * Copies report resources to specified out folder.
 	 * @param outFolder folder to where resources to be copied.
 	 */
-	public void copyReportResources(File outFolder)
+	public void copyReportResources(File outFolder, ResourceFilter filter)
 	{
-		copyResources(outFolder, reportResources, REPORT_RES_FOLDER);
+		copyResources(outFolder, reportResources, REPORT_RES_FOLDER, filter);
 	}
 	
 	/**
@@ -127,7 +165,7 @@ public class ResourceManager
 	 */
 	public void copyDocResources(File outFolder)
 	{
-		copyResources(outFolder, docResources, DOC_RES_FOLDER);
+		copyResources(outFolder, docResources, DOC_RES_FOLDER, null);
 	}
 	
 	/**
@@ -136,7 +174,7 @@ public class ResourceManager
 	 * @param resourceList list of resources to be copied
 	 * @param resFolder source class path resource folder
 	 */
-	private void copyResources(File outFolder, ResourceFileList resourceList, String resFolder)
+	private void copyResources(File outFolder, ResourceFileList resourceList, String resFolder, ResourceFilter filter)
 	{
 		String subpath = null;
 		int idx = 0;
@@ -144,8 +182,16 @@ public class ResourceManager
 		
 		for(ResourceFile file : resourceList.resourceFiles)
 		{
+			if(filter != null && filter.executionType != null && 
+					file.excludeList != null && file.excludeList.contains(filter.executionType))
+			{
+				continue;
+			}
+			
 			idx = file.path.lastIndexOf("/");
 			parentFolder = outFolder;
+			
+			String fileName = StringUtils.isBlank(file.dest) ? file.path : file.dest;
 			
 			//if required create sub folders
 			if(idx > 0)
@@ -163,13 +209,11 @@ public class ResourceManager
 						throw new InvalidStateException("An error occurred while creating output folder path: {}", parentFolder.getPath());
 					}
 				}
-				
-				outFile = new File(parentFolder, file.path.substring(idx + 1));
+			
+				fileName = file.path.substring(idx + 1);
 			}
-			else
-			{
-				outFile = new File(parentFolder, file.path);
-			}
+			
+			outFile = new File(parentFolder, fileName);
 			
 			try
 			{

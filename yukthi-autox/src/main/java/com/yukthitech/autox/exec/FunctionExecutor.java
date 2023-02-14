@@ -16,8 +16,11 @@
 package com.yukthitech.autox.exec;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ReportLogFile;
+import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.FunctionRef;
 
@@ -32,12 +35,30 @@ public class FunctionExecutor extends Executor
 	public FunctionExecutor(Function function)
 	{
 		super(function, null);
-		super.childSteps = Arrays.asList(new FunctionRef(function.getName(), RETURN_ATTR));
+		
+		FunctionRef funcRef = new FunctionRef(function.getName(), RETURN_ATTR);
+		funcRef.setLocation(function.getLocation(), function.getLineNumber());
+		
+		super.childSteps = Arrays.asList(funcRef);
 	}
 
 	public Object executeFunction()
 	{
 		super.execute(null, null, null);
 		return AutomationContext.getInstance().getAttribute(RETURN_ATTR);
+	}
+
+	@Override
+	protected void preexecute()
+	{
+		AutomationContext.getInstance().startLogMonitoring();
+	}
+	
+	@Override
+	protected void postExecute()
+	{
+		boolean isErrored = (super.status != null && super.status.isErrored());
+		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(isErrored);
+		ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
 	}
 }

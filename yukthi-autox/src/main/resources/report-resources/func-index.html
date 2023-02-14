@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    
+		<title>Function Results</title>
+		
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	    <script src="js/jquery-2.2.0.js"></script>
+	    
+	    <!-- Include all compiled plugins (below), or include individual files as needed -->
+	    <script src="js/bootstrap.min.js"></script>
+		<link href="css/common.css" rel="stylesheet">
+	    
+		<script src="js/angular.js"></script>
+	    <script src="js/angular-sanitize.min.js"></script>
+	    <script src="js/angular-app.js"></script>
+		
+		<script type="text/javascript" src="test-results.js"></script>
+		<script src="js/index.js"></script>
+
+		<style>
+			table
+			{
+				width: 100%; 
+				height: 100%;
+			}
+			
+			td
+			{
+				text-align: center;
+			}
+			
+			.errorVal
+			{
+				font-weight: bold;
+				color: red;
+			}
+			
+			.defaultVal
+			{
+				font-weight: bold;
+				color: black;
+			}
+
+			.timeDisplay
+			{
+				font-weight: bold;
+				color: black;
+
+				font-size: 0.8em;
+				white-space: nowrap;
+			}
+			
+			.dataProviderDiv
+			{
+				display: inline-block;
+				background: #484848;
+				color: white;
+				font-size: 0.9em;
+				width: 100%;
+				padding: 5px;
+				text-align: left;
+				border-radius: 5px;
+			}
+			
+			.dataProviderDiv a
+			{
+				color: white;
+				font-size: 0.85em;
+			}
+		</style>
+	</head>
+	
+	<body ng-app="application" ng-controller="testAutomationAppController" ng-init="fetchObjects()">
+		
+		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: rgb(2,5,14);
+				border-bottom: 2px solid grey;">
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; vertical-align: top; width: 1em; padding-left: 1em;">
+						<span style="font-size: 2em; color: white; font-weight: bold;">Auto</span><span style="font-size: 2.5em; color: red; font-weight: bold;">X</span>
+					</td>
+					
+					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold;">
+						{{testResults.reportName}} <sub style="font-size: 0.6em;">({{testResults.executionDateStr}})</sub>
+					</td>
+					
+				</tr>
+			</table>
+		</div>
+		
+		<div class="resultBox" style="margin-top: 10em; border: 2px solid black; margin-left: auto; margin-right: auto; width: 40%;">
+		
+			<table style="margin-bottom: 0px;" class="table table-hover table-striped table-bordered">
+				<tr>
+					<td colspan="2" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: white;">
+						Function Details
+					</td>
+				</tr>
+				<tr>
+					<th style="width: 0px; text-align: right;">Name: </th>
+					<td class="defaultVal" style="text-align: left;">{{testResults.functionResult.name}}</td>
+				</tr>
+				<tr>
+					<th style="width: 0px; text-align: right;">Status: </th>
+					<td style="text-align: left;" ng-class="testResults.functionResult.executionDetails.statusStr == 'SUCCESSFUL' ? 'successVal' : 'errorVal'">
+						{{testResults.functionResult.executionDetails.status}}
+					</td>
+				</tr>
+				<tr>
+					<th style="width: 0px; text-align: right;">Duration: </th>
+					<td class="defaultVal" style="text-align: left;">
+						{{testResults.functionResult.executionDetails.startTimeStr}} - {{testResults.functionResult.executionDetails.endTimeStr}}
+					</td>
+				</tr>
+				<tr>
+					<th style="width: 0px; text-align: right;">Logs: </th>
+					<td class="defaultVal" style="text-align: left;">
+						<a href="./log.html?func_{{testResults.functionResult.name}}" style="display: block;">System Log</a>
+						<a  ng-repeat="(key,val) in testResults.functionResult.monitorLogs" href="logs/{{val}}" style="color: brown; display: block;">
+							{{key}}
+						</a>
+					</td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<td style="text-align: right; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em; 
+						white-space: nowrap; color: white;">
+						<div style="display: inline; margin: 2px; padding: 2px 5px; background-color: white; color: black;">
+							Total Time Taken: {{testResults.functionResult.executionDetails.timeTaken}}
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>

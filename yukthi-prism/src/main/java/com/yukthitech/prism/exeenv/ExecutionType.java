@@ -25,6 +25,8 @@ public enum ExecutionType
 	
 	TEST_SUITE,
 	
+	FUNCTION,
+	
 	PROJECT,
 	
 	FOLDER,

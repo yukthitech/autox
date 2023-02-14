@@ -41,6 +41,7 @@ import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.lang.steps.LangException;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
@@ -470,8 +471,9 @@ public abstract class Executor
 			}
 		}
 
+		logger.error("An unhandled error occurred while executing {} with name: {}", stepType, name, ex);
 		//for unhandled exceptions log on ui
-		//exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
+		exeLogger.error("An unhandled error occurred while executing {} with name: {}\nError: {}", stepType, name, CommonUtils.getRootCauseMessages(ex));
 		ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
 		setStatus(TestStatus.ERRORED, stepType + " errored: " + executable.name());
 	}

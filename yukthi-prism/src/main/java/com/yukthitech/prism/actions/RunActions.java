@@ -44,6 +44,8 @@ public class RunActions
 	
 	public static final String NODE_TEST_CASE = "testcase";
 	
+	public static final String NODE_FUNCTION = "function";
+	
 	@Autowired
 	private FileEditorTabbedPane fileEditorTabbedPane;
 	
@@ -80,7 +82,7 @@ public class RunActions
 		executionManager.execute(new ExecuteCommand(ExecutionType.TEST_SUITE, project, testSuiteFolder, testSuite, debug));
 	}
 	
-	private void runTestCase(boolean debug, boolean runToCurLine)
+	private void runExecutable(boolean debug, boolean runToCurLine)
 	{
 		FileEditor fileEditor = fileEditorTabbedPane.getCurrentFileEditor();
 		
@@ -91,16 +93,22 @@ public class RunActions
 		}
 		
 		Project project = fileEditor.getProject();
-		String testCase = fileEditor.getCurrentElementName(NODE_TEST_CASE);
+		String testCaseName = fileEditor.getCurrentElementName(NODE_TEST_CASE);
+		String funcName = fileEditor.getCurrentElementName(NODE_FUNCTION);
 		
-		if(testCase == null)
+		if(testCaseName == null && funcName == null)
 		{
-			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no active test-case found at cursor position.");
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no active test-case/function found at cursor position.");
 			return;
 		}
 		
 		File testSuiteFolder = projectExplorer.getTestSuiteFolder(fileEditor.getFile());
-		ExecuteCommand exeCommand = new ExecuteCommand(ExecutionType.TEST_CASE, project, testSuiteFolder, testCase, debug);
+		ExecuteCommand exeCommand = new ExecuteCommand(
+				(funcName == null) ? ExecutionType.TEST_CASE : ExecutionType.FUNCTION, 
+				project, 
+				testSuiteFolder, 
+				(funcName == null) ? testCaseName : funcName, 
+				debug);
 		
 		if(runToCurLine)
 		{
@@ -120,7 +128,7 @@ public class RunActions
 	@Action
 	public void runTestCase()
 	{
-		runTestCase(false, false);
+		runExecutable(false, false);
 	}
 	
 	@Action
@@ -132,7 +140,7 @@ public class RunActions
 	@Action
 	public void debugTestCase()
 	{
-		runTestCase(true, false);
+		runExecutable(true, false);
 	}
 
 	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback)
@@ -204,7 +212,7 @@ public class RunActions
 	@Action
 	public void runToCurrentStep()
 	{
-		runTestCase(true, true);
+		runExecutable(true, true);
 	}
 	
 	private synchronized void executeTestSuiteFolder(boolean debug) 

@@ -28,6 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,12 +41,14 @@ import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.exec.AsyncTryCatchBlock;
 import com.yukthitech.autox.exec.ExecutionPool;
+import com.yukthitech.autox.exec.FunctionExecutor;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.PluginManager;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
@@ -459,6 +462,83 @@ public class AutomationLauncher
 		System.out.println(summary);
 	}
 	
+	private static void executeTestSuiteGroup(TestSuiteGroup testSuiteGroup, AutomationContext context) throws InterruptedException
+	{
+		TestSuiteGroupExecutor executor = new TestSuiteGroupExecutor(testSuiteGroup);
+		CountDownLatch latch = new CountDownLatch(1);
+		
+		AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
+		{
+			executor.execute(null, null, callback);
+		}).onComplete(callback -> 
+		{
+			FinalReport finalReport = ReportDataManager.getInstance().generateReport();
+			printSummary(finalReport);
+			
+			ExecutionContextManager.getInstance().close();
+			
+			AutomationContext.getInstance()
+				.getAppConfiguration()
+				.getAllPlugins()
+				.forEach(plugin -> plugin.close());
+			
+			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
+		}).onError((callback, ex) -> 
+		{
+			logger.error("An error occurred during automation execution", ex);
+		})
+		.onFinally(callback -> 
+		{
+			latch.countDown();
+		}).execute();
+		
+		latch.await();
+		logger.debug("Automation completed...");
+	}
+	
+	private static void executeFunction(String functionName, AutomationContext context) throws InterruptedException
+	{
+		Function function = context.getGlobalFunction(functionName);
+		
+		if(function == null)
+		{
+			System.err.println("No function found with specified name: " + functionName);
+			System.exit(-1);
+		}
+		
+		FunctionExecutor executor = new FunctionExecutor(function);
+		
+		CountDownLatch latch = new CountDownLatch(1);
+		
+		AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
+		{
+			executor.execute(null, null, callback);
+		}).onComplete(callback -> 
+		{
+			FinalReport finalReport = ReportDataManager.getInstance().generateReport();
+			printSummary(finalReport);
+			
+			ExecutionContextManager.getInstance().close();
+			
+			AutomationContext.getInstance()
+				.getAppConfiguration()
+				.getAllPlugins()
+				.forEach(plugin -> plugin.close());
+			
+			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
+		}).onError((callback, ex) -> 
+		{
+			logger.error("An error occurred during automation execution", ex);
+		})
+		.onFinally(callback -> 
+		{
+			latch.countDown();
+		}).execute();
+		
+		latch.await();
+		logger.debug("Automation completed...");
+	}
+
 	/**
 	 * Automation entry point.
 	 * 
@@ -482,37 +562,17 @@ public class AutomationLauncher
 			{
 				DebugServer.start(debugPort);
 			}
-	
-			TestSuiteGroupExecutor executor = new TestSuiteGroupExecutor(testSuiteGroup);
-			CountDownLatch latch = new CountDownLatch(1);
 			
-			AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
-			{
-				executor.execute(null, null, callback);
-			}).onComplete(callback -> 
-			{
-				FinalReport finalReport = ReportDataManager.getInstance().generateReport();
-				printSummary(finalReport);
-				
-				ExecutionContextManager.getInstance().close();
-				
-				AutomationContext.getInstance()
-					.getAppConfiguration()
-					.getAllPlugins()
-					.forEach(plugin -> plugin.close());
-				
-				automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
-			}).onError((callback, ex) -> 
-			{
-				logger.error("An error occurred during automation execution", ex);
-			})
-			.onFinally(callback -> 
-			{
-				latch.countDown();
-			}).execute();
+			String funcToExecute = context.getBasicArguments().getFunction();
 			
-			latch.await();
-			logger.debug("Automation completed...");
+			if(StringUtils.isNotBlank(funcToExecute))
+			{
+				executeFunction(funcToExecute, context);
+			}
+			else
+			{
+				executeTestSuiteGroup(testSuiteGroup, context);
+			}
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution. Error: {}", ex.getMessage(), ex);

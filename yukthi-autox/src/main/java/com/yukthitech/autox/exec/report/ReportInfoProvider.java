@@ -23,6 +23,10 @@ import java.util.function.Function;
  */
 public class ReportInfoProvider<T>
 {
+	/**
+	 * Flag indicating if the setup and cleanup logs of this executable should get into 
+	 * single log file.
+	 */
 	private boolean singleLogger;
 	
 	private Function<T, String> codeFunc;

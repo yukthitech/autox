@@ -211,6 +211,11 @@ public class ExecutionEnvironmentManager
 		return startAutoxEnvironment(executeCommand, "tc-" + executeCommand.getName(), "-tc", executeCommand.getName());
 	}
 	
+	private ExecutionEnvironment executeFunction(ExecuteCommand executeCommand)
+	{
+		return startAutoxEnvironment(executeCommand, "func-" + executeCommand.getName(), "-fn", executeCommand.getName());
+	}
+
 	private ExecutionEnvironment executeFolder(ExecuteCommand executeCommand, List<File> folders)
 	{
 		String foldersPath = folders.stream()
@@ -238,6 +243,10 @@ public class ExecutionEnvironmentManager
 			case TEST_CASE:
 			{
 				return executeTestCase(executeCommand);
+			}
+			case FUNCTION:
+			{
+				return executeFunction(executeCommand);
 			}
 			case TEST_SUITE:
 			{

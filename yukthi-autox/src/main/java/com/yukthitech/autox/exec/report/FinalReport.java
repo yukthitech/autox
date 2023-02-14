@@ -17,7 +17,9 @@ package com.yukthitech.autox.exec.report;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -181,6 +183,60 @@ public class FinalReport
 		}
 	}
 	
+	public static class FunctionResult
+	{
+		private String name;
+		
+		private ExecutionDetails executionDetails;
+		
+		private Map<String, String> monitorLogs;
+
+		public FunctionResult(String name)
+		{
+			this.name = name;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public ExecutionDetails getExecutionDetails()
+		{
+			return executionDetails;
+		}
+
+		public void setExecutionDetails(ExecutionDetails executionDetails)
+		{
+			this.executionDetails = executionDetails;
+		}
+
+		public void addMonitorLog(String name, String fileName)
+		{
+			if(this.monitorLogs == null)
+			{
+				this.monitorLogs = new LinkedHashMap<>();
+			}
+			
+			this.monitorLogs.put(name, fileName);
+		}
+
+		public Map<String, String> getMonitorLogs()
+		{
+			return monitorLogs;
+		}
+
+		public void setMonitorLogs(Map<String, String> monitorLogs)
+		{
+			this.monitorLogs = monitorLogs;
+		}
+	}
+	
 	private String reportName;
 	
 	private Date executionDate = new Date();
@@ -222,8 +278,19 @@ public class FinalReport
 	 */
 	private ExecutionDetails cleanupExecutionDetails;
 	
+	/**
+	 * Result of function execution.
+	 */
+	private FunctionResult functionResult;
+	
 	public FinalReport()
 	{}
+	
+	public FinalReport(String reportName, FunctionResult result)
+	{
+		this.reportName = reportName;
+		this.functionResult = result;
+	}
 	
 	public FinalReport(String reportName, ExecutionStatusReport testSuiteGroupReport)
 	{
@@ -440,5 +507,15 @@ public class FinalReport
 	public void setCleanupExecutionDetails(ExecutionDetails cleanupExecutionDetails)
 	{
 		this.cleanupExecutionDetails = cleanupExecutionDetails;
+	}
+
+	public FunctionResult getFunctionResult()
+	{
+		return functionResult;
+	}
+
+	public void setFunctionResult(FunctionResult functionResult)
+	{
+		this.functionResult = functionResult;
 	}
 }

@@ -473,6 +473,11 @@ public class AutomationContext
 		return nameToFunction.get(name);
 	}
 
+	public Function getGlobalFunction(String name)
+	{
+		return nameToFunction.get(name);
+	}
+
 	/**
 	 * Gets the persistence storage to persist data across the executions.
 	 *

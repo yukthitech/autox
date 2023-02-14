@@ -51,6 +51,12 @@ public class AutoxCliArguments
 	private String testCases;
 	
 	/**
+	 * If specified, function only with specified name will be executed.
+	 */
+	@CliArgument(name = "fn", longName = "function", description = "Function to be executed. If specified, testcases, test-suites and other execute options will be ignored.", required = false)
+	private String function;
+
+	/**
 	 * Used to specify application properties which can then be injected into config files using {{}} expressions.
 	 */
 	@CliArgument(name = "prop", longName = "property-file", description = "Used to specify application properties which can then be injected into config files using #{} expressions", required = false)
@@ -264,6 +270,16 @@ public class AutoxCliArguments
 		this.folderLimits = folderLimits;
 	}
 	
+	public String getFunction()
+	{
+		return function;
+	}
+
+	public void setFunction(String function)
+	{
+		this.function = function;
+	}
+
 	/**
 	 * Fetches the folder limits as file objects.
 	 * @return folder limits as files

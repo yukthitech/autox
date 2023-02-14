@@ -245,7 +245,6 @@ public class TestCaseExecutor extends Executor
 		ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
 	}
 
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
