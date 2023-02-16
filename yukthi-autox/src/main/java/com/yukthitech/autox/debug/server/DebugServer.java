@@ -42,6 +42,7 @@ import com.yukthitech.autox.debug.server.handler.DebugPointsHandler;
 import com.yukthitech.autox.debug.server.handler.DebuggerInitHandler;
 import com.yukthitech.autox.debug.server.handler.EvalExpressionHandler;
 import com.yukthitech.autox.debug.server.handler.ExecuteStepsHandler;
+import com.yukthitech.autox.debug.server.handler.LoadAppPropHandler;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -118,6 +119,7 @@ public class DebugServer
 		addAsyncServerDataHandler(new DebugPointsHandler());
 		addAsyncServerDataHandler(new EvalExpressionHandler());
 		addAsyncServerDataHandler(new DebugOpHandler());
+		addAsyncServerDataHandler(new LoadAppPropHandler());
 	}
 	
 	public static boolean isRunningInDebugMode()

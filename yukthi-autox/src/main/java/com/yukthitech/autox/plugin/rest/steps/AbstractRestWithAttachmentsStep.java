@@ -23,8 +23,13 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.yukthitech.autox.ChildElement;
+import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.resource.IResource;
@@ -43,12 +48,20 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 	/**
 	 * Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.
 	 */
-	private List<HttpPart> parts = new ArrayList<>();
+	private List<HttpPart> partList = new ArrayList<>();
 	
 	/**
 	 * List of files to be attachment with this request. Values are resources.
 	 */
-	private List<HttpAttachment> attachments = new ArrayList<>();
+	private List<HttpAttachment> attachmentList = new ArrayList<>();
+	
+	@Param(description = "List of attachment objects. This is expected to be used when attachments has to be dynamic. Resultant json should map to list of attachments.", 
+			required = false, sourceType = SourceType.EXPRESSION)
+	private Object attachments;
+
+	@Param(description = "List of part objects. This is expected to be used when parts has to be dynamic. Resultant json should map to list of parts.", 
+			required = false, sourceType = SourceType.EXPRESSION)
+	private Object parts;
 
 	/**
 	 * Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.
@@ -57,7 +70,7 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 	@ChildElement(description = "Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.")
 	public void addPart(HttpPart part)
 	{
-		parts.add(part);
+		partList.add(part);
 	}
 	
 	/**
@@ -67,18 +80,57 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 	@ChildElement(description = "List of files to be attached with this request. Values are resources")
 	public void addAttachment(HttpAttachment attachment)
 	{
-		attachments.add(attachment);
+		attachmentList.add(attachment);
+	}
+	
+	@SuppressWarnings("hiding")
+	private <T> T parse(Object exprObj, JavaType expectedType) throws Exception
+	{
+		String json = null;
+		
+		if(exprObj instanceof String)
+		{
+			json = (String) exprObj;
+		}
+		else
+		{
+			json = IAutomationConstants.OBJECT_MAPPER.writeValueAsString(exprObj);
+		}
+		
+		return IAutomationConstants.OBJECT_MAPPER.readValue(json, expectedType);
+	}
+	
+	public void setAttachments(Object attachments) throws Exception
+	{
+		this.attachments = attachments;
+	}
+	
+	public void setParts(Object parts) throws Exception
+	{
+		this.parts = parts;
 	}
 	
 	@Override
 	public void executeRestStep(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
+		if(this.attachments != null)
+		{
+			List<HttpAttachment> attachmentList = parse(attachments, TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, HttpAttachment.class));
+			this.attachmentList.addAll(attachmentList);
+		}
+		
+		if(this.parts != null)
+		{
+			List<HttpPart> partList = parse(attachments, TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, HttpPart.class));
+			this.partList.addAll(partList);
+		}
+		
 		T postRestRequest = newRequest(uri);
 		postRestRequest.setMultipartRequest(true);
 		
 		IResource partResource = null;
 		
-		for(HttpPart partEntry : parts)
+		for(HttpPart partEntry : partList)
 		{
 			if(StringUtils.isNotBlank(partEntry.getCondition()))
 			{
@@ -110,7 +162,7 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 		IResource resource = null;
 		List<File> filesToDelete = new ArrayList<>();
 		
-		for(HttpAttachment attachment : attachments)
+		for(HttpAttachment attachment : attachmentList)
 		{
 			if(StringUtils.isNotBlank(attachment.getCondition()))
 			{

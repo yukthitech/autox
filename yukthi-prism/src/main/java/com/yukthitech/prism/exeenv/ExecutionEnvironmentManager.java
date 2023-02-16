@@ -201,6 +201,18 @@ public class ExecutionEnvironmentManager
 		runningEnvironments.forEach(env -> env.onDebugPointChange(event));
 	}
 	
+	public List<ExecutionEnvironment> getRunningEnvironments()
+	{
+		List<ExecutionEnvironment> runningEnvironments = new ArrayList<>();
+		
+		synchronized(runningEnvironments)
+		{
+			runningEnvironments.addAll(this.runningEnvironments);
+		}
+		
+		return runningEnvironments;
+	}
+	
 	private ExecutionEnvironment executeTestSuite(ExecuteCommand executeCommand)
 	{
 		return startAutoxEnvironment(executeCommand, "ts-" + executeCommand.getName(), "-ts", executeCommand.getName());

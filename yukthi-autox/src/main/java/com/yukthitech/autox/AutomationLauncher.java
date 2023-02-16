@@ -111,6 +111,11 @@ public class AutomationLauncher
 				mainError = CommonUtils.getRootCauseMessages(ex.getCause());
 			}
 			
+			if("true".equalsIgnoreCase(System.getProperty("logLoadErrors")))
+			{
+				logger.error("An error occurred while loading file: {}", xmlFile.getPath(), ex);
+			}
+			
 			error = String.format("File: %s\n"
 					+ "Location: [Line: %s, Column: %s]\n"
 					+ "Error: %s", xmlFile.getPath(), 

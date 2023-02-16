@@ -573,6 +573,6 @@ public class AutomationContext
 			return val;
 		}
 		
-		return appConfiguration.getApplicationProperties().getProperty(name);
+		return appConfiguration.getApplicationProperties().get(name);
 	}
 }

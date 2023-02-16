@@ -61,7 +61,6 @@ public class Project implements Serializable
 	private String appConfigFilePath;
 	
 	private String appPropertyFilePath;
-	private File appPropertyFile;
 	
 	
 	private LinkedHashSet<String> testSuitesFoldersList;
@@ -70,6 +69,8 @@ public class Project implements Serializable
 	
 	private LinkedHashSet<String> ignoreFoldersList;
 	
+	private transient File appPropertyFile;
+
 	private transient ProjectClassLoader projectClassLoader;
 	
 	private transient BeanPropertyInfoFactory beanPropertyInfoFactory;
@@ -165,6 +166,7 @@ public class Project implements Serializable
 		this.appConfigFilePath = appConfigFilePath;
 	}
 	
+	@JsonIgnore
 	public File getAppPropertyFile()
 	{
 		if(appPropertyFile == null)

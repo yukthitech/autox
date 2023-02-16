@@ -38,6 +38,7 @@ import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.common.IndexRange;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.exec.HandledException;
 import com.yukthitech.autox.exec.report.DummyExecutionLogger;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.CustomPrefixExpression;
@@ -669,7 +670,7 @@ public class PrefixExpressionFactory
 				throw (AutoxInfoException) ex;
 			}
 			
-			throw new InvalidStateException("An error occurred while evaluating expression '{}'", expression, ex);
+			throw new HandledException(ex);
 		}
 	}
 	

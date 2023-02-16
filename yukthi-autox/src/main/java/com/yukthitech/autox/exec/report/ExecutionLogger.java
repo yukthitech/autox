@@ -99,7 +99,7 @@ public class ExecutionLogger implements IExecutionLogger
 		
 		if(automationContext.getAppConfiguration() != null && automationContext.getAppConfiguration().getApplicationProperties() != null)
 		{
-			String logMaxParamLenStr = automationContext.getAppConfiguration().getApplicationProperties().getProperty(IAutomationConstants.PROP_LOG_MAX_PROP_LEN);
+			String logMaxParamLenStr = automationContext.getAppConfiguration().getApplicationProperties().get(IAutomationConstants.PROP_LOG_MAX_PROP_LEN);
 			
 			if(logMaxParamLenStr != null)
 			{

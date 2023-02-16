@@ -62,7 +62,7 @@ public class HttpAttachment implements Validateable, Serializable
 	/**
 	 * Condition for this condition. If specified, this attachement will be included if condition evaluates to true.
 	 */
-	@Param(name = "condition", description = "Condition for this condition. If specified, this attachement will be included if condition evaluates to true.", required = false)
+	@Param(name = "condition", description = "Condition for this attachment. If specified, this attachement will be included if condition evaluates to true.", required = false)
 	private String condition;
 
 	/**

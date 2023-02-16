@@ -110,7 +110,7 @@ public class ApplicationConfiguration
 	/**
 	 * Application properties.
 	 */
-	private Properties applicationProperties;
+	private Map<String, String> applicationProperties = new HashMap<>();
 	
 	/**
 	 * Defines the summary notification configuration. This is optional.
@@ -151,7 +151,7 @@ public class ApplicationConfiguration
 	 */
 	public ApplicationConfiguration(Properties applicationProperties)
 	{
-		this.applicationProperties = applicationProperties;
+		this.setApplicationProperties(applicationProperties);
 		ApplicationConfiguration.applicationConfiguration = this;
 	}
 	
@@ -215,12 +215,18 @@ public class ApplicationConfiguration
 		return appConfig;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void setApplicationProperties(Properties applicationProperties)
+	{
+		this.applicationProperties.putAll((Map) applicationProperties);
+	}
+	
 	/**
 	 * Gets the application properties.
 	 *
 	 * @return the application properties
 	 */
-	public Properties getApplicationProperties()
+	public Map<String, String> getApplicationProperties()
 	{
 		return applicationProperties;
 	}
