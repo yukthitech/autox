@@ -44,7 +44,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class CustomPrefixExpression extends AbstractLocationBased implements Validateable, IStepIntegral
 {
-	public static class ExprFunction implements IStepContainer
+	public static class ExprFunction extends AbstractLocationBased implements IStepContainer
 	{
 		/**
 		 * Steps for the function.
@@ -133,15 +133,30 @@ public class CustomPrefixExpression extends AbstractLocationBased implements Val
 	{
 		this.getFunction = getFunction;
 	}
+	
+	public ExprFunction getGetFunction()
+	{
+		return getFunction;
+	}
 
 	public void setSetFunction(ExprFunction setFunction)
 	{
 		this.setFunction = setFunction;
 	}
+	
+	public ExprFunction getSetFunction()
+	{
+		return setFunction;
+	}
 
 	public void setRemoveFunction(ExprFunction removeFunction)
 	{
 		this.removeFunction = removeFunction;
+	}
+	
+	public ExprFunction getRemoveFunction()
+	{
+		return removeFunction;
 	}
 
 	/**

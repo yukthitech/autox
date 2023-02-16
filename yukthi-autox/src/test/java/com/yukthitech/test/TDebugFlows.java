@@ -239,7 +239,7 @@ public class TDebugFlows extends BaseTestCases
 			String steps = "<s:log message=\"This is from dyn step execution..\"/>\n"
 					+ "<s:set expression=\"someAttr\" value=\"int: 100\"/>\n";
 			
-			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps, null));
+			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps, null, new File("test.xml"), 1));
 			
 			//wait for 5 seconds, so that step execution is completed
 			AutomationUtils.sleep(5000);
@@ -261,7 +261,7 @@ public class TDebugFlows extends BaseTestCases
 			//using step evaluation set attr to 100
 			String steps = "<function name=\"testOp\"><s:return value=\"expr: (param.param1 * param.param2)\"/></function>";
 			
-			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps, "debug-flow"));
+			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps, "debug-flow", new File("test.xml"), 1));
 			
 			//wait for 5 seconds, so that step execution is completed
 			AutomationUtils.sleep(5000);

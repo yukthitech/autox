@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.debug.common;
 
+import java.io.File;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,16 @@ public class ClientMssgExecuteSteps extends ClientMessage
 	private String stepsToExecute;
 	
 	/**
+	 * Source file in which code is defined.
+	 */
+	private File sourceFile;
+	
+	/**
+	 * Line number at which code is defined.
+	 */
+	private int startLineNumber;
+	
+	/**
 	 * In case steps to execute has functions to be reloaded, 
 	 * then this field will be considered. If this field is not null,
 	 * then functions will be loaded into this function, if not will
@@ -40,7 +51,8 @@ public class ClientMssgExecuteSteps extends ClientMessage
 	 */
 	private String targetTestSuite;
 
-	public ClientMssgExecuteSteps(String executionId, String stepsToExecute, String targetTestSuite)
+	public ClientMssgExecuteSteps(String executionId, String stepsToExecute, String targetTestSuite, 
+			File sourceFile, int startLineNumber)
 	{
 		super(UUID.randomUUID().toString());
 		
@@ -57,6 +69,9 @@ public class ClientMssgExecuteSteps extends ClientMessage
 		this.executionId = executionId;
 		this.stepsToExecute = stepsToExecute;
 		this.targetTestSuite = targetTestSuite;
+		
+		this.sourceFile = sourceFile;
+		this.startLineNumber = startLineNumber;
 	}
 	
 	public String getExecutionId()
@@ -72,5 +87,15 @@ public class ClientMssgExecuteSteps extends ClientMessage
 	public String getTargetTestSuite()
 	{
 		return targetTestSuite;
+	}
+
+	public File getSourceFile()
+	{
+		return sourceFile;
+	}
+
+	public int getStartLineNumber()
+	{
+		return startLineNumber;
 	}
 }

@@ -19,6 +19,7 @@ import java.io.File;
 
 import org.fife.ui.rsyntaxtextarea.Token;
 
+import com.yukthitech.prism.common.CodeSnippet;
 import com.yukthitech.prism.editor.FileEditor;
 import com.yukthitech.prism.editor.IIdeCompletionProvider;
 import com.yukthitech.prism.index.FileParseCollector;
@@ -97,7 +98,7 @@ public interface IIdeFileManager
 	 * @param nodeType node type to be fetched.
 	 * @return matching node type at current position.
 	 */
-	public default String getActiveElementText(FileEditor fileEditor, String nodeType)
+	public default CodeSnippet getActiveElementText(FileEditor fileEditor, String nodeType)
 	{
 		return null;
 	}

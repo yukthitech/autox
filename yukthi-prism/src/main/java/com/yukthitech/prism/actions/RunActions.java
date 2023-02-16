@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.yukthitech.autox.debug.common.ClientMssgExecuteSteps;
 import com.yukthitech.prism.IIdeConstants;
 import com.yukthitech.prism.IdeUtils;
+import com.yukthitech.prism.common.CodeSnippet;
 import com.yukthitech.prism.editor.FileEditor;
 import com.yukthitech.prism.editor.FileEditorTabbedPane;
 import com.yukthitech.prism.exeenv.ExecuteCommand;
@@ -143,12 +144,7 @@ public class RunActions
 		runExecutable(true, false);
 	}
 
-	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback)
-	{
-		executeStepCode(code, project, envCallback, null);
-	}
-	
-	private void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback, String callbackMssg)
+	private void executeStepCode(CodeSnippet codeSnippet, Project project, Consumer<ExecutionEnvironment> envCallback, String callbackMssg)
 	{
 		ExecutionEnvironment activeEnv = executionEnvManager.getActiveEnvironment();
 		
@@ -178,7 +174,9 @@ public class RunActions
 			currentTestSuiteName = fileEditor.getCurrentElementName(NODE_TEST_SUITE);
 		}
 		
-		activeEnv.sendDataToServer(new ClientMssgExecuteSteps(activeEnv.getActiveThreadId(), code, currentTestSuiteName));
+		activeEnv.sendDataToServer(new ClientMssgExecuteSteps(activeEnv.getActiveThreadId(), 
+				codeSnippet.getCode(), currentTestSuiteName,
+				codeSnippet.getFile(), codeSnippet.getStartLineNumber()));
 	}
 	
 	@Action
@@ -193,7 +191,7 @@ public class RunActions
 		}
 		
 		Project project = fileEditor.getProject();
-		String selectedText = fileEditor.getSelectedText();
+		CodeSnippet selectedText = fileEditor.getSelectedCodeSnippet();
 		
 		if(selectedText == null)
 		{
@@ -206,7 +204,7 @@ public class RunActions
 			}
 		}
 
-		executeStepCode(selectedText, project, null);
+		executeStepCode(selectedText, project, null, null);
 	}
 	
 	@Action

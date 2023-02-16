@@ -75,6 +75,7 @@ import com.yukthitech.prism.IIdeFileManager;
 import com.yukthitech.prism.IdeFileManagerFactory;
 import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.prism.actions.FileActions;
+import com.yukthitech.prism.common.CodeSnippet;
 import com.yukthitech.prism.editor.FileEditorIconGroup.IconType;
 import com.yukthitech.prism.events.ActiveFileChangedEvent;
 import com.yukthitech.prism.events.FileSavedEvent;
@@ -966,7 +967,7 @@ public class FileEditor extends JPanel
 		return currentFileManager.getActiveElementLineNumber(this, nodeType);
 	}
 
-	public String getCurrentElementText(String nodeType)
+	public CodeSnippet getCurrentElementText(String nodeType)
 	{
 		return currentFileManager.getActiveElementText(this, nodeType);
 	}
@@ -991,6 +992,28 @@ public class FileEditor extends JPanel
 		return null;
 	}
 	
+	public CodeSnippet getSelectedCodeSnippet()
+	{
+		String selectedText = syntaxTextArea.getSelectedText();
+
+		if(StringUtils.isNotBlank(selectedText))
+		{
+			int lineNo = -1;
+			
+			try
+			{
+				lineNo = syntaxTextArea.getLineOfOffset(syntaxTextArea.getSelectionStart());
+			}catch(BadLocationException ex)
+			{
+				throw new InvalidStateException("An error occurred while fetching line number of selected text", ex);
+			}
+			
+			return new CodeSnippet(selectedText, file, lineNo);
+		}
+
+		return null;
+	}
+
 	public void selectText(int start, int end)
 	{
 		syntaxTextArea.select(start, end);

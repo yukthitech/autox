@@ -74,6 +74,8 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 		}
 		
 		StepHolder stepHolder = parseSteps(steps.getStepsToExecute());
+		stepHolder.updateLocations(steps.getSourceFile(), steps.getStartLineNumber());
+		
 		AutomationContext automationContext = AutomationContext.getInstance();
 		boolean reloadingDone = false;
 		

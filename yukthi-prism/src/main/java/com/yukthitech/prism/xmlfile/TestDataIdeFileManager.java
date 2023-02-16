@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import com.yukthitech.prism.AbstractIdeFileManager;
 import com.yukthitech.prism.IdeNotificationPanel;
+import com.yukthitech.prism.common.CodeSnippet;
 import com.yukthitech.prism.context.IdeContext;
 import com.yukthitech.prism.editor.FileEditor;
 import com.yukthitech.prism.editor.FileParseMessage;
@@ -191,7 +192,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	}
 	
 	@Override
-	public String getActiveElementText(FileEditor fileEditor, String nodeType)
+	public CodeSnippet getActiveElementText(FileEditor fileEditor, String nodeType)
 	{
 		String content = fileEditor.getContent();
 		
@@ -213,7 +214,8 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 			return null;
 		}
 		
-		return content.substring(curElement.getStartLocation().getStartOffset(), curElement.getEndLocation().getEndOffset() + 1);
+		String elemText = content.substring(curElement.getStartLocation().getStartOffset(), curElement.getEndLocation().getEndOffset() + 1);
+		return new CodeSnippet(elemText, fileEditor.getFile(), curElement.getStartLocation().getStartLineNumber());
 	}
 
 	private XmlFile getXmlFile(Project project, File file, String content)
