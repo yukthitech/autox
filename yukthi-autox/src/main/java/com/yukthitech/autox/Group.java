@@ -25,6 +25,8 @@ public enum Group
 	
 	Common,
 	
+	Io,
+	
 	Rdbms,
 	
 	Mongodb,

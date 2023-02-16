@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.test.common.steps;
+package com.yukthitech.autox.test.io.steps;
 
 import java.io.File;
 
@@ -23,6 +23,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
@@ -32,7 +33,7 @@ import com.yukthitech.autox.test.TestCaseFailedException;
  * 
  * @author akiran
  */
-@Executable(name = "mkdir", group = Group.Common, message = "Creates a directory with required parent folder as needed in work folder.")
+@Executable(name = "ioMkdir", group = Group.Io, message = "Creates a directory.")
 public class MkDirStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
@@ -40,14 +41,17 @@ public class MkDirStep extends AbstractStep
 	/**
 	 * Directory path to create.
 	 */
-	@Param(description = "Directory path to create.")
+	@Param(description = "Directory path to create.", sourceType = SourceType.EXPRESSION)
 	private String path;
 
 	/**
 	 * Context attribute to which result folder path will be set.
 	 */
-	@Param(description = "Context attribute to which result folder path will be set")
+	@Param(description = "Context attribute to which result folder path will be set", sourceType = SourceType.EXPRESSION)
 	private String name;
+	
+	@Param(description = "Flag indicating if the specified path is absolute or not. Not absolute folders will be created with-in work folder. Default: false", required = false)
+	private boolean absolutePath = false;
 
 	/**
 	 * Sets the directory path to create.
@@ -68,6 +72,11 @@ public class MkDirStep extends AbstractStep
 	{
 		this.name = name;
 	}
+	
+	public void setAbsolutePath(boolean absolutePath)
+	{
+		this.absolutePath = absolutePath;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.automation.IStep#execute(com.yukthitech.automation.AutomationContext, com.yukthitech.automation.IExecutionLogger)
@@ -75,9 +84,20 @@ public class MkDirStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Creating directory {} in work folder: {}", path, context.getWorkDirectory().getPath());
+		exeLogger.debug("Creating {} directory {} in work folder: {}", 
+				absolutePath ? "absolute" : "work", 
+				path, context.getWorkDirectory().getPath());
 		
-		File dirToCreate = new File(context.getWorkDirectory().getPath() + File.separator + path);
+		File dirToCreate = null;
+		
+		if(absolutePath)
+		{
+			dirToCreate = new File(path);
+		}
+		else
+		{
+			dirToCreate = new File(context.getWorkDirectory().getPath() + File.separator + path);
+		}
 		
 		try
 		{

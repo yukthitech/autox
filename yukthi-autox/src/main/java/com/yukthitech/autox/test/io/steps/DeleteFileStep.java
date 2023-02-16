@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.test.common.steps;
+package com.yukthitech.autox.test.io.steps;
 
 import java.io.File;
 
@@ -23,6 +23,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -32,8 +33,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "deleteDir", group = Group.Common, message = "Deletes specified directory.")
-public class DeleteDirStep extends AbstractStep
+@Executable(name = "ioDeleteFile", group = Group.Io, message = "Deletes specified file.")
+public class DeleteFileStep extends AbstractStep
 {
 	/**
 	 * The Constant serialVersionUID.
@@ -41,15 +42,15 @@ public class DeleteDirStep extends AbstractStep
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Path of directory to delete.
+	 * Path of file to delete.
 	 */
-	@Param(description = "Path of directory to delete.", required = true)
+	@Param(description = "Path of file to delete.", required = true, sourceType = SourceType.EXPRESSION)
 	private String path;
 
 	/**
-	 * Sets the path of directory to delete.
+	 * Sets the path of file to delete.
 	 *
-	 * @param path the new path of directory to delete
+	 * @param path the new path of file to delete
 	 */
 	public void setPath(String path)
 	{
@@ -62,29 +63,29 @@ public class DeleteDirStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Deleting directory: {}", path);
+		exeLogger.debug("Deleting file: {}", path);
 		
-		File folder = new File(path);
+		File file = new File(path);
 		
-		if(!folder.exists())
+		if(!file.exists())
 		{
 			exeLogger.debug("Specified path does not exist. So ignoring delete request. Path: {}", path);
 			return;
 		}
 		
-		if(!folder.isDirectory())
+		if(!file.isFile())
 		{
-			exeLogger.debug("Specified path is not a directory. So ignoring delete request. Path: {}", path);
+			exeLogger.debug("Specified path is not a file. So ignoring delete request. Path: {}", path);
 			return;
 		}
 
 		try
 		{
-			FileUtils.deleteDirectory(folder);
-			exeLogger.debug("Successfully deleted folder - {}", path);
+			FileUtils.delete(file);
+			exeLogger.debug("Successfully deleted file - {}", path);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while deleting folder: {}", path, ex);
+			throw new InvalidStateException("An error occurred while deleting file: {}", path, ex);
 		}
 	}
 }

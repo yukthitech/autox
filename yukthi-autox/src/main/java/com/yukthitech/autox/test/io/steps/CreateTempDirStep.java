@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.test.common.steps;
+package com.yukthitech.autox.test.io.steps;
 
 import java.io.File;
 
@@ -23,6 +23,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -32,7 +33,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "createTempDir", group = Group.Common, message = "Creates temporary directory.")
+@Executable(name = "ioCreateTempDir", group = Group.Io, message = "Creates temporary directory within the work folder.")
 public class CreateTempDirStep extends AbstractStep
 {
 	/**
@@ -49,7 +50,7 @@ public class CreateTempDirStep extends AbstractStep
 	/**
 	 * Prefix to be used for generated file. Default: temp.
 	 */
-	@Param(description = "Prefix to be used for generated file. Default: temp", required = false)
+	@Param(description = "Prefix to be used for generated file. Default: temp", required = false, sourceType = SourceType.EXPRESSION)
 	private String prefix = "temp";
 
 	/**
@@ -82,14 +83,14 @@ public class CreateTempDirStep extends AbstractStep
 		
 		try
 		{
-			String tempDir = System.getProperty("java.io.tmpdir");
+			String timeStamp = Long.toHexString(System.currentTimeMillis());
 			
 			File tempFolder = null;
 			boolean found = false;
 			
-			for(int i = 1; i <= 10; i++)
+			for(int i = 1; i <= 50; i++)
 			{
-				tempFolder = new File(new File(tempDir), prefix + "-" + System.currentTimeMillis() + "-" + i);
+				tempFolder = new File(context.getWorkDirectory().getPath(), String.format("%s-%s-%s", prefix, timeStamp, i));
 				
 				if(!tempFolder.exists())
 				{
@@ -100,7 +101,7 @@ public class CreateTempDirStep extends AbstractStep
 			
 			if(!found)
 			{
-				throw new InvalidStateException("Failed to create temp directory after trying for 10 times also");
+				throw new InvalidStateException("Failed to create temp directory even after 50 attempts.");
 			}
 			
 			FileUtils.forceMkdir(tempFolder);

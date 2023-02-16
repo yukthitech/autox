@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.rest.RestPlugin;
@@ -111,7 +112,8 @@ public class InvokeGetFileStep extends AbstractRestStep
 	/**
 	 * Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set response attribute.
 	 */
-	@Param(description = "Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set as rest-result value", required = false)
+	@Param(description = "Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set as rest-result value", 
+			required = false)
 	private String outputFile;
 
 	/**
@@ -141,7 +143,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 		
 		try
 		{
-			file = outputFile != null ? new File(outputFile) : File.createTempFile("response", ".tmp");
+			file = outputFile != null ? new File(outputFile) : AutomationUtils.createTempFile(null, "response", ".temp");
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating file", ex);

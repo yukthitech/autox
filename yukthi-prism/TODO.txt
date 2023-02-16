@@ -62,6 +62,12 @@ custom prefix expression + Custom ui locator
 
 Resource folder support
 
+Step name changes
+	createTempDir -  ioCreateTempDir
+	createTempFile - ioCreateTempFile
+	deleteDir - ioDeleteDir
+	mkdir - ioMkdir
+
 ===============================
 namespaces standardization
 

@@ -16,7 +16,6 @@
 package com.yukthitech.autox.common;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -48,7 +47,6 @@ import org.w3c.dom.NodeList;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -58,27 +56,6 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  */
 public class CommonFreeMarkerMethods
 {
-	/**
-	 * Converts input file path (Can be relative, partial path) to full canonical path.
-	 * @param path path to convert.
-	 * @return converted path.
-	 */
-	@FreeMarkerMethod(
-			description = "Converts input file path (Can be relative, partial path) to full canonical path.",
-			returnDescription = "Canonical path of the specified path"
-			)
-	public static String fullPath(
-			@FmParam(name = "path", description = "Path to be converted") String path)
-	{
-		try
-		{
-			return new File(path).getCanonicalPath();
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An exception occurred while fetching full path of path: {}", path, ex);
-		}
-	}
-
 	@FreeMarkerMethod(
 			description = "Converts specified date into millis.",
 			returnDescription = "Millis value"
@@ -92,36 +69,6 @@ public class CommonFreeMarkerMethods
 		}
 		
 		return date.getTime();
-	}
-
-	@FreeMarkerMethod(
-			description = "Checks if specified file path exists or not.",
-			returnDescription = "Path to be checked"
-			)
-	public static boolean fileExists(
-			@FmParam(name = "path", description = "Path to be checked") String path)
-	{
-		return new File(path).exists();
-	}
-
-	@FreeMarkerMethod(
-			description = "Checks if specified file path is a file or not.",
-			returnDescription = "Path to be checked"
-			)
-	public static boolean isFile(
-			@FmParam(name = "path", description = "Path to be checked") String path)
-	{
-		return new File(path).isFile();
-	}
-
-	@FreeMarkerMethod(
-			description = "Checks if specified file path is a directory or not.",
-			returnDescription = "Path to be checked"
-			)
-	public static boolean isDirectory(
-			@FmParam(name = "path", description = "Path to be checked") String path)
-	{
-		return new File(path).isDirectory();
 	}
 
 	/**

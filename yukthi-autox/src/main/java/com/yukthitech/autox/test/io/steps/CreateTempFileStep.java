@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.test.common.steps;
+package com.yukthitech.autox.test.io.steps;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -25,6 +25,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -34,13 +35,9 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "createTempFile", group = Group.Common, message = "Creates temporary file with specified content.")
+@Executable(name = "ioCreateTempFile", group = Group.Io, message = "Creates temporary file with specified content.")
 public class CreateTempFileStep extends AbstractStep
 {
-	
-	/**
-	 * The Constant serialVersionUID.
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -52,20 +49,24 @@ public class CreateTempFileStep extends AbstractStep
 	/**
 	 * Content to be written to the file being created.
 	 */
-	@Param(description = "Content to be written to the file being created.", required = true, sourceType = SourceType.EXPRESSION)
+	@Param(description = "Content (in string format) to be written to the file being created. If not specified empty file will be created.", 
+			required = false, sourceType = SourceType.EXPRESSION)
 	private Object content;
 
 	/**
 	 * Prefix to be used for generated file. Default: temp.
 	 */
-	@Param(description = "Prefix to be used for generated file. Default: temp", required = false)
+	@Param(description = "Prefix to be used for generated file. Default: temp", required = false, sourceType = SourceType.EXPRESSION)
 	private String prefix = "temp";
 
 	/**
 	 * Suffix to be used for generated file. Default: .txt.
 	 */
-	@Param(description = "Suffix to be used for generated file. Default: .txt", required = false)
+	@Param(description = "Suffix to be used for generated file. Default: .txt", required = false, sourceType = SourceType.EXPRESSION)
 	private String suffix = ".txt";
+	
+	@Param(description = "Folder under which file should be created. If not specified, file will be created in work folder.", required = false, sourceType = SourceType.EXPRESSION)
+	private String folder;
 
 	/**
 	 * Sets the name of the attribute to use to set the generated file path.
@@ -106,22 +107,32 @@ public class CreateTempFileStep extends AbstractStep
 	{
 		this.suffix = suffix;
 	}
-
+	
+	public void setFolder(String folder)
+	{
+		this.folder = folder;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Creating temp file with [Prefix: {}, Suffix: {}, Path attr: {}]", prefix, suffix, pathAttr);
+		exeLogger.debug("Creating temp file with [Prefix: {}, Suffix: {}, Path attr: {}, Folder: {}]", prefix, suffix, pathAttr, folder);
+		
 		try
 		{
-			File tempFile = File.createTempFile(prefix, suffix);
-			exeLogger.debug("Created empty temp file '{}'. Now writing specified content to this file", tempFile.getPath());
+			File fileToCreate = AutomationUtils.createTempFile(folder, prefix, suffix);
+
+			exeLogger.debug("Created empty temp file '{}'. Now writing specified content to this file", fileToCreate.getPath());
 			
-			FileUtils.write(tempFile, content.toString(), Charset.defaultCharset());
+			if(content != null)
+			{
+				FileUtils.write(fileToCreate, content.toString(), Charset.defaultCharset());
+			}
 			
-			context.setAttribute(pathAttr, tempFile.getPath());
+			context.setAttribute(pathAttr, fileToCreate.getPath());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating temp file", ex);

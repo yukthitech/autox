@@ -1044,4 +1044,42 @@ public class AutomationUtils
 		
 		return expression.trim();
 	}
+	
+	public static synchronized File createTempFile(String folder, String prefix, String suffix) throws IOException
+	{
+		String paretFolderPath = StringUtils.isBlank(folder) ? AutomationContext.getInstance().getWorkDirectory().getPath() : folder;
+		File parentFolder = new File(paretFolderPath);
+		
+		if(!parentFolder.exists())
+		{
+			FileUtils.forceMkdir(parentFolder);
+		}
+		
+		if(!parentFolder.isDirectory())
+		{
+			throw new InvalidStateException("Specified path is not a folder path: {}", paretFolderPath);
+		}
+		
+		File fileToCreate = null;
+		String timeStamp = Long.toHexString(System.currentTimeMillis());
+		boolean created = false;
+		
+		for(int i = 1; i < 50 ; i++)
+		{
+			fileToCreate = new File(parentFolder, String.format("%s-%s-%s%s", prefix, timeStamp, i, suffix));
+			
+			if(fileToCreate.createNewFile())
+			{
+				created = true;
+				break;
+			}
+		}
+		
+		if(!created)
+		{
+			throw new InvalidStateException("Failed to create temp file even after 50 attempts.");
+		}
+		
+		return fileToCreate;
+	}
 }
