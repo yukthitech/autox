@@ -18,7 +18,7 @@
 				</responseBody>
 			</s:mock-response>
 
-			<s:rest-invoke-post baseUrl="http://localhost:9944" responseContextAttribure="apiResult" uri="/test/job">
+			<s:rest-invoke-post baseUrl="string: http://localhost:9944" responseContextAttribure="apiResult" uri="/test/job">
 				<body>json:
 					{
 						"content": "Some test body",
@@ -61,7 +61,7 @@
 			<s:assert-equals actual="expr: (attr.resetMockRequests)?size" expected="int: 0"/>
 
 			<!-- Ensure post reset no requests are getting mocked -->
-			<s:rest-invoke-post baseUrl="http://localhost:9944" resultContextAttribute="apiResult" uri="/test/job" >
+			<s:rest-invoke-post baseUrl="string: http://localhost:9944" resultContextAttribute="apiResult" uri="/test/job" >
 				<body>json:
 					{
 						"content": "Some test body",
@@ -92,7 +92,7 @@
 				</responseBody>
 			</s:mock-response>
 		
-			<s:rest-invoke-post baseUrl="http://localhost:9944" responseContextAttribure="apiResult" uri="/test/job">
+			<s:rest-invoke-post baseUrl="string: http://localhost:9944" responseContextAttribure="apiResult" uri="/test/job">
 				<param name="param1">val1</param>
 			</s:rest-invoke-post>
 
@@ -124,7 +124,7 @@
 				</responseBody>
 			</s:mock-response>
 		
-			<s:rest-invoke-post baseUrl="http://localhost:9944" responseContextAttribure="apiResult" uri="/test/work" >
+			<s:rest-invoke-post baseUrl="string: http://localhost:9944" responseContextAttribure="apiResult" uri="/test/work" >
 				<body>json:
 					{
 						"reqId": 13456
@@ -165,7 +165,7 @@
 				</responseBody>
 			</s:mock-response>
 
-			<s:rest-invoke-get baseUrl="http://localhost:9944" uri="/test/fetchData?t=1" responseContextAttribure="apiResult">
+			<s:rest-invoke-get baseUrl="string: http://localhost:9944" uri="/test/fetchData?t=1" responseContextAttribure="apiResult">
 				<header name="Content-Type">application/json</header>
 				<param name="param1">value1</param>
 				<param name="param2">value2</param>
