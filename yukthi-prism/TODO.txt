@@ -68,6 +68,12 @@ Step name changes
 	deleteDir - ioDeleteDir
 	mkdir - ioMkdir
 
+Lot of step parameters are made into expressions (like base url, uri, etc)
+	so that dynamic values can be accepted
+	this may cause errors in case http:// like urls are used
+	
+rest steps accept uri as full url as well. In this case baseUrl will not be prepended
+
 ===============================
 namespaces standardization
 

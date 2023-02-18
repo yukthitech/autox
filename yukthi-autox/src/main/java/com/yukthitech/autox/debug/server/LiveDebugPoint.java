@@ -18,9 +18,11 @@ package com.yukthitech.autox.debug.server;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -29,6 +31,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,6 +42,7 @@ import com.yukthitech.autox.IStepIntegral;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack.StackElement;
+import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
 import com.yukthitech.autox.debug.common.DebugOp;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
@@ -49,6 +53,7 @@ import com.yukthitech.autox.debug.common.ServerMssgStepExecuted;
 import com.yukthitech.autox.exec.HandledException;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.DropToStackFrameException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -67,11 +72,14 @@ public class LiveDebugPoint
 		private String requestId;
 		
 		private Object data;
+		
+		private Object requestObject;
 
-		public Request(String requestId, Object data)
+		public Request(String requestId, Object data, Object requestObject)
 		{
 			this.requestId = requestId;
 			this.data = data;
+			this.requestObject = requestObject;
 		}
 	}
 	
@@ -103,6 +111,8 @@ public class LiveDebugPoint
 	private Condition releaseRequestCondition = pauseLock.newCondition();
 	
 	private AtomicBoolean requestExecutionInProgress = new AtomicBoolean(false);
+	
+	private Set<String> dropableFrameIds = new HashSet<>();
 	
 	private LiveDebugPoint(ILocationBased location, DebugPoint debugPoint, Consumer<LiveDebugPoint> callback)
 	{
@@ -201,24 +211,35 @@ public class LiveDebugPoint
 		int index = -1;
 		ILocationBased prevStep = null;
 				
-		for(StackElement elem : ExecutionContextManager.getInstance().getExecutionStack().getStackTrace())
+		synchronized(dropableFrameIds)
 		{
-			index++;
+			dropableFrameIds.clear();
 			
-			/*
-			 * Skip the step addition to stack trace in following case:
-			 * 	 Step is not a top step (Top or latest step should be always part of stack trace)
-			 *   AND current step is not stackable step (stackable step should be pushed to stack trace)
-			 *   AND prev step in integral step (When integral step is being executed, next following step should always get added)
-			 */
-			if(index > 0 && !(elem.getElement() instanceof IStackableStep) && !(prevStep instanceof IStepIntegral))
+			for(StackElement elem : ExecutionContextManager.getInstance().getExecutionStack().getStackTrace())
 			{
-				prevStep = elem.getElement();
-				continue;
-			}
+				index++;
+				
+				/*
+				 * Skip the step addition to stack trace in following case:
+				 * 	 Step is not a top step (Top or latest step should be always part of stack trace)
+				 *   AND current step is not stackable step (stackable step should be pushed to stack trace)
+				 *   AND prev step in integral step (When integral step is being executed, next following step should always get added)
+				 */
+				if(index > 0 && !(elem.getElement() instanceof IStackableStep) && !(prevStep instanceof IStepIntegral))
+				{
+					prevStep = elem.getElement();
+					continue;
+				}
 
-			prevStep = elem.getElement();
-			stackTrace.add(new ServerMssgExecutionPaused.StackElement(elem.getLocation(), elem.getLineNumber()));
+				prevStep = elem.getElement();
+				stackTrace.add(new ServerMssgExecutionPaused.StackElement(elem.getLocation(), elem.getLineNumber(), elem.getStackElementId()));
+				
+			
+				if(StringUtils.isNotBlank(elem.getStackElementId()))
+				{
+					dropableFrameIds.add(elem.getStackElementId());
+				}
+			}
 		}
 		
 		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, threadOnHold.getName(), lastPauseLocation.getLocation().getPath(), 
@@ -255,6 +276,7 @@ public class LiveDebugPoint
 				{
 					//wait for release request
 					releaseRequestCondition.await();
+					handleOnHoldTasks();
 					break;
 				}catch(InterruptedException ex)
 				{
@@ -265,6 +287,10 @@ public class LiveDebugPoint
 			logger.trace("LivePOINT: Pause released at location: {}:{}", lastPauseLocation.getLocation().getName(), lastPauseLocation.getLineNumber());
 			
 			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
+		}catch(DropToStackFrameException ex)
+		{
+			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
+			throw ex;
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred during debug point hold", ex);
@@ -279,7 +305,7 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			StepsExecutor.execute(steps, null);
+			StepsExecutor.execute(steps, null, null);
 			
 			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, true, getContextAttr(), null));
 		} catch(Exception ex)
@@ -334,8 +360,19 @@ public class LiveDebugPoint
 	
 			for(Request req : currentRequests)
 			{
+				if(req.requestObject instanceof ClientMssgDropToFrame)
+				{
+					throw new DropToStackFrameException(((ClientMssgDropToFrame) req.requestObject).getStackElementId());
+				}
+				
+				if(released)
+				{
+					continue;
+				}
+				
 				if(req.data instanceof List)
 				{
+					
 					executeStepsRequest(req.requestId, (List) req.data);
 				}
 				else
@@ -349,7 +386,7 @@ public class LiveDebugPoint
 		}
 	}
 	
-	public void executeSteps(String reqId, List<IStep> steps)
+	public void requestExecuteSteps(String reqId, List<IStep> steps)
 	{
 		pauseLock.lock();
 		
@@ -362,7 +399,7 @@ public class LiveDebugPoint
 				return;
 			}
 			
-			this.requests.addLast(new Request(reqId, steps));
+			this.requests.addLast(new Request(reqId, steps, null));
 			threadOnHold.interrupt();
 		}finally
 		{
@@ -370,7 +407,7 @@ public class LiveDebugPoint
 		}
 	}
 	
-	public void evalExpression(String reqId, String expression)
+	public void requestEvalExpression(String reqId, String expression)
 	{
 		pauseLock.lock();
 		
@@ -384,7 +421,7 @@ public class LiveDebugPoint
 			
 			synchronized(requests)
 			{
-				this.requests.addLast(new Request(reqId, expression));
+				this.requests.addLast(new Request(reqId, expression, null));
 			}
 			
 			threadOnHold.interrupt();
@@ -394,6 +431,42 @@ public class LiveDebugPoint
 		}
 	}
 	
+	public boolean requestDropToFrame(ClientMssgDropToFrame dropToFrame)
+	{
+		pauseLock.lock();
+		
+		try
+		{
+			if(!onPause.get())
+			{
+				DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+						"Current live-point is not in paused state"));
+				return false;
+			}
+			
+			synchronized(dropableFrameIds)
+			{
+				if(!dropableFrameIds.contains(dropToFrame.getStackElementId()))
+				{
+					DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+							"Invalid frame id specified for drop"));
+					return false;
+				}
+			}
+			
+			synchronized(requests)
+			{
+				this.requests.addLast(new Request(dropToFrame.getRequestId(), null, dropToFrame));
+			}
+			
+			clearThread();
+			return true;
+		}finally
+		{
+			pauseLock.unlock();
+		}
+	}
+
 	public boolean isDynamicExecutionInProgress()
 	{
 		pauseLock.lock();
@@ -407,7 +480,7 @@ public class LiveDebugPoint
 		}
 	}
 	
-	public boolean release(String reqId, DebugOp debugOp)
+	public boolean requestRelease(String reqId, DebugOp debugOp)
 	{
 		pauseLock.lock();
 		

@@ -28,6 +28,7 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.exec.StackFrameExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.ccg.xml.DynamicDataAcceptor;
 import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
@@ -155,22 +156,30 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 			}
 		}
 		
+		Map<String, Object> finalParamValues = paramValues;
 		function = (Function) function.clone();
 		
 		logger.debug("Executing function '{}' with parameters: {}", name, paramValues);
 		
-		Object resVal = function.execute(context, paramValues);
-		
-		if(returnAttr != null)
+		StackFrameExecutor.newExecutor("function " + name, function, (func, stackFrameId) -> 
 		{
-			logger.debug("Seting return attr '{}' with function return value: {}", returnAttr, resVal);
-			context.setAttribute(returnAttr, resVal);
-		}
-		else if(resVal != null)
+			Object resVal = func.execute(context, finalParamValues, stackFrameId);
+			
+			if(returnAttr != null)
+			{
+				logger.debug("Seting return attr '{}' with function return value: {}", returnAttr, resVal);
+				context.setAttribute(returnAttr, resVal);
+			}
+			else if(resVal != null)
+			{
+				logger.debug("Non-null return value is ignored as no return-attr is set. Return value was: {}", resVal);
+			}
+		}).onReload(func -> 
 		{
-			logger.debug("Non-null return value is ignored as no return-attr is set. Return value was: {}", resVal);
-		}
-
+			//get latest function element (in case it is modified)
+			Function reloadFunc = context.getFunction(name);
+			return (Function) reloadFunc.clone();
+		}).execute();
 	}
 	
 	@Override

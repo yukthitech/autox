@@ -98,7 +98,7 @@ public class ExecutorUtils
 		return executable;
 	}
 
-	public static boolean executeSetup(Setup setup, String mode, Executor executor)
+	public static boolean executeSetup(Setup setup, String mode, Executor executor, java.util.function.Function<Setup, Setup> reloader)
 	{
 		if(setup == null)
 		{
@@ -115,7 +115,12 @@ public class ExecutorUtils
 		{
 			reportManager.executionStarted(ExecutionType.SETUP, executor);
 			
-			StepsExecutor.execute(setup.getSteps(), currentStep);
+			StackFrameExecutor.newExecutor("Setup", setup, (setupObj, stackFrameId) -> 
+			{
+				StepsExecutor.execute(setupObj.getSteps(), currentStep, stackFrameId);
+			}).onReload(reloader)
+			.execute();
+		
 			reportManager.executionCompleted(ExecutionType.SETUP, executor);
 			
 			return true;
@@ -137,7 +142,7 @@ public class ExecutorUtils
 		}
 	}
 	
-	public static boolean executeCleanup(Cleanup cleanup, String mode, Executor executor)
+	public static boolean executeCleanup(Cleanup cleanup, String mode, Executor executor, java.util.function.Function<Cleanup, Cleanup> reloader)
 	{
 		if(cleanup == null)
 		{
@@ -154,7 +159,12 @@ public class ExecutorUtils
 		{
 			reportManager.executionStarted(ExecutionType.CLEANUP, executor);
 			
-			StepsExecutor.execute(cleanup.getSteps(), currentStep);
+			StackFrameExecutor.newExecutor("Cleanup", cleanup, (cleanupObj, stackFrameId) -> 
+			{
+				StepsExecutor.execute(cleanupObj.getSteps(), currentStep, stackFrameId);
+			}).onReload(reloader)
+			.execute();
+			
 			reportManager.executionCompleted(ExecutionType.CLEANUP, executor);
 			
 			return true;
@@ -175,5 +185,4 @@ public class ExecutorUtils
 			executor.activeExecutionLogger.clearMode();
 		}
 	}
-
 }

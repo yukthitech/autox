@@ -48,7 +48,7 @@ public class UiFreeMarkerMethods
 	 * @param parent
 	 * @return
 	 */
-	private static WebElement getElementByLocator(String driverName, Object locator, String parent)
+	private static WebElement getElementByLocator(String driverName, Object locator, Object parent)
 	{
 		WebElement webElement = null;
 		
@@ -68,6 +68,18 @@ public class UiFreeMarkerMethods
 		return webElement;
 	}
 	
+	@FreeMarkerMethod(
+			description = "Fetches value of specified locator. If element is text/textarea, its ui value will be fetched.",
+			returnDescription = "Value of the ui element"
+			)
+	public static WebElement uiGetElement(
+			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") String locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			) throws Exception
+	{
+		return getElementByLocator(driverName, locator, parent);
+	}
 	
 	/**
 	 * Fetches value of specified locator.
@@ -80,8 +92,8 @@ public class UiFreeMarkerMethods
 			returnDescription = "Value of the ui element"
 			)
 	public static String uiValue(
-			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "locator", description = "Locator/Webelement of the ui element whose element needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
 			) throws Exception
 	{
@@ -110,6 +122,34 @@ public class UiFreeMarkerMethods
 		return element.getText().trim();
 	}
 	
+	@FreeMarkerMethod(
+			description = "Fetches inner-html of specified locator.",
+			returnDescription = "Value of the ui element"
+			)
+	public static String uiInnerHtml(
+			@FmParam(name = "locator", description = "Locator/Webelement of the ui element whose element needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			) throws Exception
+	{
+		PrefixEpression customUiLocator = UiAutomationUtils.getCustomUiLocator(locator.toString());
+		
+		if(customUiLocator != null)
+		{
+			Object res = customUiLocator.getValue();
+			return (res == null) ? null : res.toString();
+		}
+
+		WebElement element = getElementByLocator(driverName, locator, parent);
+
+		if(element == null)
+		{
+			return null;
+		}
+		
+		return element.getAttribute("innerHTML");
+	}
+
 	/**
 	 * Fetches display value of specified locator.
 	 * @param locator locator whose value needs to be fetched
@@ -121,8 +161,8 @@ public class UiFreeMarkerMethods
 			returnDescription = "Value of the ui element"
 			)
 	public static String uiDisplayValue(
-			@FmParam(name = "locator", description = "Locator of the ui element whose display value needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "locator", description = "Locator/Webelement of the ui element whose display value needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
 			) throws Exception
 	{
@@ -164,8 +204,8 @@ public class UiFreeMarkerMethods
 			)
 	public static String uiElemAttr(
 			@FmParam(name = "attrName", description = "Name of the attribute whose value to be fetched.") String attrName, 
-			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "locator", description = "Locator/Webelement of the ui element whose attribute value needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
 			)
 	{
@@ -190,8 +230,8 @@ public class UiFreeMarkerMethods
 			returnDescription = "True if element is visible"
 			)
 	public static boolean uiIsVisible(
-			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "locator", description = "Locator/Webelement of the ui element whose attribute value needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
 			)
 	{
@@ -216,8 +256,8 @@ public class UiFreeMarkerMethods
 			returnDescription = "True if element is available (need not be visible)"
 			)
 	public static boolean uiIsPresent(
-			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") String locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "locator", description = "Locator/Webelement of the ui element whose attribute value needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
 			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
 			)
 	{

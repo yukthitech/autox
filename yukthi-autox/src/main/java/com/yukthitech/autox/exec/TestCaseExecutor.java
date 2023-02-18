@@ -186,7 +186,9 @@ public class TestCaseExecutor extends Executor
 			return true;
 		}
 		
-		if(!ExecutorUtils.executeSetup(dataSetup, "Data-Setup", this))
+		if(!ExecutorUtils.executeSetup(dataSetup, "Data-Setup", this,
+				obj -> {reload(); return dataSetup;})
+				)
 		{
 			return false;
 		}
@@ -222,7 +224,8 @@ public class TestCaseExecutor extends Executor
 			return;
 		}
 		
-		ExecutorUtils.executeCleanup(dataCleanup, "Data-Cleanup", this);
+		ExecutorUtils.executeCleanup(dataCleanup, "Data-Cleanup", this,
+				obj -> {reload(); return dataCleanup;});
 	}
 	
 	@Override

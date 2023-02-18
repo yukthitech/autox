@@ -165,4 +165,17 @@ public class RegexFreeMarkerMethods
 		Matcher matcher = getMatcher(content, regex);
 		return matcher.matches();
 	}
+
+	@FreeMarkerMethod(
+			description = "Replaces the matches of specified pattern with specified replacement string.",
+			returnDescription = "Resultant string post all replacements"
+			)
+	public static String regexReplaceAll(
+			@FmParam(name = "content", description = "String in which matches has to be replaced") String content, 
+			@FmParam(name = "regex", description = "Regex to be used") String regex,
+			@FmParam(name = "replaceWith", description = "Replacement string") String replaceWith
+			)
+	{
+		return content.replaceAll(regex, replaceWith);
+	}
 }

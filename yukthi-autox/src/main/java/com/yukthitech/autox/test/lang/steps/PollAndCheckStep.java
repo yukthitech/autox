@@ -180,7 +180,7 @@ public class PollAndCheckStep extends AbstractValidation
 				DebugFlowManager.getInstance().checkForDebugPoint(this);
 			}
 			
-			StepsExecutor.execute(poll, null);
+			StepsExecutor.execute(poll, null, null);
 			
 			boolean conditionSuccessful = checkCondition(context, exeLogger);
 			

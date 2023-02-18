@@ -218,7 +218,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 			
 			try
 			{
-				StepsExecutor.execute(steps, null);
+				StepsExecutor.execute(steps, null, null);
 			}catch(Exception ex)
 			{
 				if(ex instanceof BreakException)

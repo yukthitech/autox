@@ -21,18 +21,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.InvalidArgumentException;
 
 /**
- * Used in debug env, to perform debug operations.
+ * Used in debug environment to drop current execution in a particular stack-element frame.
  * @author akiran
  */
-public class ClientMssgDebugOp extends ClientMessage
+public class ClientMssgDropToFrame extends ClientMessage
 {
 	private static final long serialVersionUID = 1L;
 	
 	private String executionId;
 
-	private DebugOp debugOp;
+	private String stackElementId;
 
-	public ClientMssgDebugOp(String executionId, DebugOp debugOp)
+	public ClientMssgDropToFrame(String executionId, String stackElementId)
 	{
 		super(UUID.randomUUID().toString());
 		
@@ -41,13 +41,13 @@ public class ClientMssgDebugOp extends ClientMessage
 			throw new InvalidArgumentException("Invalid execution id specified");
 		}
 		
-		if(debugOp == null)
+		if(StringUtils.isBlank(stackElementId))
 		{
-			throw new InvalidArgumentException("Debug op cannot be null");
+			throw new InvalidArgumentException("Invalid stack-element id specified");
 		}
 		
 		this.executionId = executionId;
-		this.debugOp = debugOp;
+		this.stackElementId = stackElementId;
 	}
 	
 	public String getExecutionId()
@@ -55,8 +55,8 @@ public class ClientMssgDebugOp extends ClientMessage
 		return executionId;
 	}
 
-	public DebugOp getDebugOp()
+	public String getStackElementId()
 	{
-		return debugOp;
+		return stackElementId;
 	}
 }

@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -78,7 +79,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 				value = null;
 			}
 			
-			logger.debug("Got response status as {} and body as: {}", status, value);
+			//logger.debug("Got response status as {} and body as: {}", status, value);
 			
 			RestResult<String> result = null;
 			
@@ -113,7 +114,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 	 * Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set response attribute.
 	 */
 	@Param(description = "Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set as rest-result value", 
-			required = false)
+			required = false, sourceType = SourceType.EXPRESSION)
 	private String outputFile;
 
 	/**

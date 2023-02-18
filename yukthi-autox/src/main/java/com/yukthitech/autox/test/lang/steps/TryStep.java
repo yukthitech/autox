@@ -59,7 +59,7 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 	{
 		try
 		{
-			StepsExecutor.execute(steps, null);
+			StepsExecutor.execute(steps, null, null);
 		}catch(Exception ex)
 		{
 			if(catchStep == null)
@@ -87,7 +87,7 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 			try
 			{
 				context.setAttribute(catchStep.getErrorAttr(), ex);
-				StepsExecutor.execute(catchStep.getSteps(), null);
+				StepsExecutor.execute(catchStep.getSteps(), null, null);
 			}finally
 			{
 				executionStack.pop(catchStep);

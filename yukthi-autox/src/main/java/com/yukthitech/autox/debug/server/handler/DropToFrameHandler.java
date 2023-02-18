@@ -18,33 +18,43 @@ package com.yukthitech.autox.debug.server.handler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.debug.common.ClientMssgEvalExpression;
+import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.debug.server.LiveDebugPoint;
 
-public class EvalExpressionHandler extends AbstractServerDataHandler<ClientMssgEvalExpression>
+/**
+ * Used to handle drop to frame request.
+ * @author akiran
+ */
+public class DropToFrameHandler extends AbstractServerDataHandler<ClientMssgDropToFrame>
 {
-	private static Logger logger = LogManager.getLogger(EvalExpressionHandler.class);
-
-	public EvalExpressionHandler()
+	private static Logger logger = LogManager.getLogger(DropToFrameHandler.class);
+	
+	public DropToFrameHandler()
 	{
-		super(ClientMssgEvalExpression.class);
+		super(ClientMssgDropToFrame.class);
 	}
-
+	
 	@Override
-	public void processData(ClientMssgEvalExpression evalExpr)
+	public void processData(ClientMssgDropToFrame data)
 	{
-		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(evalExpr.getExecutionId());
+		logger.debug("Executing drop to frame request: {}", data);
 		
-		if(livepoint == null)
+		LiveDebugPoint livePoint = DebugFlowManager.getInstance().getLiveDebugPoint(data.getExecutionId());
+		
+		if(livePoint == null)
 		{
-			logger.warn("Invalid live point id specified: " + evalExpr.getExecutionId());
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(evalExpr.getRequestId(), false, "Invalid live point id specified: %s", evalExpr.getExecutionId()));
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), false, "No live-debug-point found with execution id: " + data.getExecutionId()));
 			return;
 		}
 		
-		livepoint.requestEvalExpression(evalExpr.getRequestId(), evalExpr.getExpression());
+		boolean res = livePoint.requestDropToFrame(data);
+		
+		if(res)
+		{
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
+		}
 	}
 }

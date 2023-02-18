@@ -40,6 +40,7 @@ import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.server.handler.DebugOpHandler;
 import com.yukthitech.autox.debug.server.handler.DebugPointsHandler;
 import com.yukthitech.autox.debug.server.handler.DebuggerInitHandler;
+import com.yukthitech.autox.debug.server.handler.DropToFrameHandler;
 import com.yukthitech.autox.debug.server.handler.EvalExpressionHandler;
 import com.yukthitech.autox.debug.server.handler.ExecuteStepsHandler;
 import com.yukthitech.autox.debug.server.handler.LoadAppPropHandler;
@@ -120,6 +121,7 @@ public class DebugServer
 		addAsyncServerDataHandler(new EvalExpressionHandler());
 		addAsyncServerDataHandler(new DebugOpHandler());
 		addAsyncServerDataHandler(new LoadAppPropHandler());
+		addAsyncServerDataHandler(new DropToFrameHandler());
 	}
 	
 	public static boolean isRunningInDebugMode()

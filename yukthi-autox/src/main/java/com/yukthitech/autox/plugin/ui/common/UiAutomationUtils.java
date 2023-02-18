@@ -109,7 +109,7 @@ public class UiAutomationUtils
 	 * 
 	 * @param context
 	 *            Automation context
-	 * @param parentName
+	 * @param parentElement
 	 *            Parent attribute name under which target element can be found
 	 * @param locator
 	 *            Locator of the target field. If locator pattern is not used, this will be assumed as name.
@@ -117,9 +117,9 @@ public class UiAutomationUtils
 	 *            Value to be populated
 	 * @return True, if population was successful.
 	 */
-	public static boolean populateField(String driverName, String parentName, String locator, Object value)
+	public static boolean populateField(String driverName, Object parentElement, String locator, Object value)
 	{
-		WebElement parent = getParentElement(parentName);
+		WebElement parent = getParentElement(driverName, parentElement);
 		return populateField(driverName, parent, locator, value);
 	}
 	
@@ -215,15 +215,15 @@ public class UiAutomationUtils
 	 * 
 	 * @param context
 	 *            Context to be used
-	 * @param parentName
+	 * @param parentElement
 	 *            Parent attribute name under which element need to be searched
 	 * @param locator
 	 *            Locator to be used for searching
 	 * @return Matching element
 	 */
-	public static WebElement findElement(String driverName, String parentName, String locator)
+	public static WebElement findElement(String driverName, Object parentElement, String locator)
 	{
-		List<WebElement> elements = findElements(driverName, parentName, locator);
+		List<WebElement> elements = findElements(driverName, parentElement, locator);
 
 		if(elements == null || elements.size() == 0)
 		{
@@ -259,31 +259,51 @@ public class UiAutomationUtils
 	/**
 	 * Fetches parent element from context with specified name.
 	 * @param context
-	 * @param parentName
+	 * @param parentElement
 	 * @return
 	 */
-	private static WebElement getParentElement(String parentName)
+	private static WebElement getParentElement(String driverName, Object parentElement)
 	{
-		WebElement parent = null;
-		
-		if(parentName != null)
+		if(parentElement == null)
 		{
-			AutomationContext context = AutomationContext.getInstance();
-			Object parentObj = context.getAttribute(parentName);
-			
-			if(parentObj == null)
-			{
-				throw new InvalidArgumentException("Failed to find parent element with name: {}", parentName);
-			}
-			
-			if(!(parentObj instanceof WebElement))
-			{
-				throw new InvalidArgumentException("Non web-element found as parent with name: {}", parentName);
-			}
-			
-			parent = (WebElement) parentObj;
+			return null;
 		}
 		
+		if(parentElement instanceof WebElement)
+		{
+			return (WebElement) parentElement;
+		}
+		
+		if(!(parentElement instanceof String))
+		{
+			throw new InvalidArgumentException("Invalid parent element type encountered: {}", parentElement.getClass().getName());
+		}
+		
+		String parentLocator = (String) parentElement;
+		Matcher matcher = LOCATOR_PATTERN.matcher(parentLocator);
+		
+		//if locator is of locator pattern
+		if(matcher.matches())
+		{
+			return findElement(driverName, null, parentLocator);
+		}
+		
+		WebElement parent = null;
+		
+		AutomationContext context = AutomationContext.getInstance();
+		Object parentObj = context.getAttribute(parentLocator);
+		
+		if(parentObj == null)
+		{
+			throw new InvalidArgumentException("Failed to find parent element with name: {}", parentLocator);
+		}
+		
+		if(!(parentObj instanceof WebElement))
+		{
+			throw new InvalidArgumentException("Non web-element found as parent with name: {}", parentLocator);
+		}
+		
+		parent = (WebElement) parentObj;
 		return parent;
 	}
 
@@ -292,15 +312,15 @@ public class UiAutomationUtils
 	 * 
 	 * @param context
 	 *            Context to be used
-	 * @param parentName
+	 * @param parentElement
 	 *            Parent attributed name under which elements need to be searched
 	 * @param locator
 	 *            Locator to be used for searching
 	 * @return Matching elements
 	 */
-	public static List<WebElement> findElements(String driverName, String parentName, String locator)
+	public static List<WebElement> findElements(String driverName, Object parentElement, String locator)
 	{
-		WebElement parent = getParentElement(parentName);
+		WebElement parent = getParentElement(driverName, parentElement);
 		return findElements(driverName, parent, locator, false);
 	}
 	

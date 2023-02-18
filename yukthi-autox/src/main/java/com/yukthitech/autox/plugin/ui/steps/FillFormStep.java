@@ -49,7 +49,7 @@ public class FillFormStep extends AbstractParentUiStep
 	 * Html locator of the form or container (like DIV) enclosing the input
 	 * elements.
 	 */
-	@Param(description = "Html locator of the form or container (like DIV) enclosing the input elements", sourceType = SourceType.UI_LOCATOR)
+	@Param(description = "Html locator of the parent form or container (like DIV) enclosing the input elements.", sourceType = SourceType.UI_LOCATOR, required = false)
 	private String locator;
 
 	/**
@@ -77,7 +77,7 @@ public class FillFormStep extends AbstractParentUiStep
 	{
 		exeLogger.debug("Filling form '{}' with standard bean - {}", locator, data);
 		
-		WebElement parentElement = UiAutomationUtils.findElement(driverName, (WebElement) null, locator);
+		WebElement parentElement = (locator == null) ? null : UiAutomationUtils.findElement(driverName, (WebElement) null, locator);
 
 		PropertyDescriptor propDescLst[] = PropertyUtils.getPropertyDescriptors(data.getClass());
 		Object value = null;
@@ -134,7 +134,7 @@ public class FillFormStep extends AbstractParentUiStep
 	{
 		exeLogger.debug("Filling form '{}' with dynamic bean - {}", locator, data);
 		
-		WebElement parentElement = UiAutomationUtils.findElement(driverName, (WebElement) null, locator);
+		WebElement parentElement = (locator == null) ? null : UiAutomationUtils.findElement(driverName, (WebElement) null, locator);
 
 		Object value = null;
 

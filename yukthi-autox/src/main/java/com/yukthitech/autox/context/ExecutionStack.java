@@ -40,12 +40,20 @@ public class ExecutionStack
 		private ILocationBased element;
 		
 		private int entryPointLevel;
+		
+		private String stackElementId;
 
-		public StackElement(IEntryPoint entryPoint, ILocationBased element, int entryPointLevel)
+		public StackElement(IEntryPoint entryPoint, ILocationBased element, int entryPointLevel, String stackElementId)
 		{
 			this.entryPoint = entryPoint;
 			this.element = element;
 			this.entryPointLevel = entryPointLevel;
+			this.stackElementId = stackElementId;
+		}
+		
+		public String getStackElementId()
+		{
+			return stackElementId;
 		}
 		
 		public ILocationBased getElement()
@@ -144,6 +152,11 @@ public class ExecutionStack
 	
 	public void push(Object object)
 	{
+		push(object, null);
+	}
+	
+	public void push(Object object, String stackElementId)
+	{
 		object = unwrapStep(object);
 		
 		//System.out.println("==========> Pushing object: " + object);
@@ -158,7 +171,8 @@ public class ExecutionStack
 		IEntryPoint entryPoint = entryPointStack.getFirst();
 		ILocationBased element = (ILocationBased) object;
 		
-		StackElement stackElement = new StackElement(entryPoint, element, entryPointStack.size());
+		StackElement stackElement = new StackElement(entryPoint, element, 
+				entryPointStack.size(), stackElementId);
 		stackTrace.push(stackElement);
 		
 		ThreadContext.put("xmlLoc", stackElement.getSourceLocation());

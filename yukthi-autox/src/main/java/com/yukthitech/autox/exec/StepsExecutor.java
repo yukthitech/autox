@@ -30,6 +30,7 @@ import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
+import com.yukthitech.autox.test.DropToStackFrameException;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ObjectWrapper;
@@ -82,7 +83,7 @@ public class StepsExecutor
 	 * @param exeLogger logger to be used
 	 * @param step step to be executed
 	 */
-	private static void executeStep(IStep sourceStep) throws Exception
+	private static void executeStep(IStep sourceStep, String parentFrameId) throws Exception
 	{
 		AutomationContext context = AutomationContext.getInstance();
 		IExecutionLogger exeLogger = context.getExecutionLogger();
@@ -99,11 +100,13 @@ public class StepsExecutor
 		step.setSourceStep(sourceStep);
 
 		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
-		executionStack.push(step);
-		DebugFlowManager.getInstance().checkForDebugPoint(step);
 		
+		executionStack.push(step, parentFrameId);
+
 		try
 		{
+			DebugFlowManager.getInstance().checkForDebugPoint(step);
+
 			AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
 
 			stepListeners.get().stepStarted(step);
@@ -111,7 +114,7 @@ public class StepsExecutor
 			step.execute(context, exeLogger);
 			
 			stepListeners.get().stepCompleted(step);
-		} catch(HandledException | LangException ex)
+		} catch(HandledException | LangException | DropToStackFrameException ex)
 		{
 			//already handled exception and lang exception should be thrown
 			// without logging
@@ -144,7 +147,7 @@ public class StepsExecutor
 
 	}
 	
-	public static void execute(List<IStep> steps, ObjectWrapper<IStep> currentStep) throws Exception
+	public static void execute(List<IStep> steps, ObjectWrapper<IStep> currentStep, String parentFrameId) throws Exception
 	{
 		if(CollectionUtils.isEmpty(steps))
 		{
@@ -162,7 +165,7 @@ public class StepsExecutor
 					currentStep.setValue(step);
 				}
 				
-				executeStep(step);
+				executeStep(step, parentFrameId);
 			}
 		}catch(HandledException ex)
 		{

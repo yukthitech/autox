@@ -16,6 +16,7 @@
 package com.yukthitech.autox.plugin.ui.steps;
 
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 
 /**
  * Base abstract class for ui steps with optional parent element.
@@ -28,15 +29,17 @@ public abstract class AbstractParentUiStep extends AbstractUiStep
 	/**
 	 * Name of the parent element under which locator needs to be searched. If not specified, fetches globally.
 	 */
-	@Param(description = "Name of the parent element under which locator needs to be searched. If not specified, fetches globally.", required = false)
-	protected String parentElement;
+	@Param(description = "Parent element (Webelement or ui-locator or attr-name of parent web-element) under which current operation should be performed. "
+			+ "If not specified, fetches globally.", 
+			required = false, sourceType = SourceType.EXPRESSION)
+	protected Object parentElement;
 
 	/**
 	 * Sets the name of the parent element under which locator needs to be searched. If not specified, fetches globally.
 	 *
 	 * @param parentElement the new name of the parent element under which locator needs to be searched
 	 */
-	public void setParentElement(String parentElement)
+	public void setParentElement(Object parentElement)
 	{
 		this.parentElement = parentElement;
 	}
@@ -51,7 +54,7 @@ public abstract class AbstractParentUiStep extends AbstractUiStep
 		return getLocatorWithParent(parentElement, locator);
 	}
 
-	protected static String getLocatorWithParent(String parentElement, String locator)
+	protected static String getLocatorWithParent(Object parentElement, String locator)
 	{
 		if(parentElement != null)
 		{

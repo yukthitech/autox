@@ -166,7 +166,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 		
 		if(res)
 		{
-			StepsExecutor.execute(then, null);
+			StepsExecutor.execute(then, null, null);
 			return;
 		}
 		
@@ -188,7 +188,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 					if(res)
 					{
 						matched = true;
-						StepsExecutor.execute(elseIfBlock.getSteps(), null);
+						StepsExecutor.execute(elseIfBlock.getSteps(), null, null);
 						break;
 					}
 				}finally
@@ -206,7 +206,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 			try
 			{
 				exeLogger.trace("Executing else block");
-				StepsExecutor.execute(elseBlock.getSteps(), null);
+				StepsExecutor.execute(elseBlock.getSteps(), null, null);
 			}finally
 			{
 				executionStack.pop(elseBlock);

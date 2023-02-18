@@ -97,6 +97,25 @@ public class DebugFlowManager
 		return this;
 	}
 	
+	public void addSinglePauseDebugPoint(File sourceFile, int lineNumber)
+	{
+		String key = sourceFile.getPath() + ":" + lineNumber;
+		
+		synchronized(debugPoints)
+		{
+			//if normal debug point is already present, skip adding this point
+			if(debugPoints.containsKey(key))
+			{
+				return;
+			}
+			
+			DebugPoint point = new DebugPoint(sourceFile.getPath(), lineNumber, null);
+			point.setSinglePauseOnly(true);
+			
+			debugPoints.put(key, point);
+		}
+	}
+	
 	/**
 	 * Checks if specified step has debug point, if it does throws debug exception, so that execution can be paused.
 	 * 

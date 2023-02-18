@@ -216,7 +216,9 @@ public abstract class Executor
 		{
 			boolean exeRes = ExecutionContextManager.executeInContext(Executor.this, () -> 
 			{
-				if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this))
+				if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this, 
+						obj -> {reload(); return beforeChildFromParent;})
+						)
 				{
 					return false;
 				}
@@ -226,7 +228,9 @@ public abstract class Executor
 				preexecute();
 	
 				//Execute setup
-				if(!ExecutorUtils.executeSetup(setup, "Setup", Executor.this))
+				if(!ExecutorUtils.executeSetup(setup, "Setup", Executor.this,
+						obj -> {reload(); return setup;})
+						)
 				{
 					return false;
 				}
@@ -267,7 +271,8 @@ public abstract class Executor
 					preCleanup();
 					
 					//execute cleanup
-					ExecutorUtils.executeCleanup(cleanup, "Cleanup", this);
+					ExecutorUtils.executeCleanup(cleanup, "Cleanup", this,
+							obj -> {reload(); return cleanup;});
 				});
 			});
 			
@@ -279,7 +284,8 @@ public abstract class Executor
 				// but should not execute if before-child fails
 				if(beforeChildCompleted.getValue())
 				{
-					ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this);
+					ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this,
+							obj -> {reload(); return afterChildFromParent;});
 					postExecute();
 				}
 				
@@ -405,14 +411,28 @@ public abstract class Executor
 			// here only
 			try
 			{
-				StepsExecutor.execute(childSteps, currentStep);
-				setStatus(TestStatus.SUCCESSFUL, null);
+				StackFrameExecutor.newExecutor(uniqueId, childSteps, (steps, stackFrameId) -> 
+				{
+					StepsExecutor.execute(steps, currentStep, stackFrameId);
+					setStatus(TestStatus.SUCCESSFUL, null);
+				}).onReload(steps -> 
+				{
+					reload();
+					return childSteps;
+				}).execute();
 			} catch(Exception ex)
 			{
 				handleException(currentStep.getValue(), activeExecutionLogger, ex);
 			}
 		});
 	}
+	
+	/**
+	 * Expected to be overridden by child executors 
+	 * to reload steps/setups/cleanups as needed.
+	 */
+	protected void reload()
+	{}
 	
 	private void handleException(IStep step, IExecutionLogger exeLogger, Exception ex)
 	{

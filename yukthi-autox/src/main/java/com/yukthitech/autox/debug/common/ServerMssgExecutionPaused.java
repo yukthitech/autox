@@ -40,11 +40,14 @@ public class ServerMssgExecutionPaused implements Serializable
 		private String file;
 		
 		private int lineNumber;
+		
+		private String stackElementId;
 
-		public StackElement(String file, int lineNumber)
+		public StackElement(String file, int lineNumber, String stackElementId)
 		{
 			this.file = file;
 			this.lineNumber = lineNumber;
+			this.stackElementId = stackElementId;
 		}
 
 		public String getFile()
@@ -55,6 +58,11 @@ public class ServerMssgExecutionPaused implements Serializable
 		public int getLineNumber()
 		{
 			return lineNumber;
+		}
+		
+		public String getStackElementId()
+		{
+			return stackElementId;
 		}
 	}
 	

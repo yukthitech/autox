@@ -162,6 +162,11 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	
 	public static Object execute(AutomationContext context, Map<String, Object> params, Object executable, List<IStep> steps) throws Exception
 	{
+		return execute(context, params, executable, steps, null);
+	}
+	
+	private static Object execute(AutomationContext context, Map<String, Object> params, Object executable, List<IStep> steps, String parentRefId) throws Exception
+	{
 		context.pushParameters(params);
 		
 		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
@@ -169,7 +174,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		
 		try
 		{
-			StepsExecutor.execute(steps, null);
+			StepsExecutor.execute(steps, null, parentRefId);
 		} catch(Exception ex)
 		{
 			//occurs during return statement execution
@@ -188,9 +193,9 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		return null;
 	}
 
-	public Object execute(AutomationContext context, Map<String, Object> params) throws Exception
+	public Object execute(AutomationContext context, Map<String, Object> params, String parentRefId) throws Exception
 	{
-		return execute(context, params, this, steps);
+		return execute(context, params, this, steps, parentRefId);
 	}
 	
 	@Override

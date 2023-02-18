@@ -208,7 +208,7 @@ public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 		
 		try
 		{
-			StepsExecutor.execute(steps, null);
+			StepsExecutor.execute(steps, null, null);
 
 			// Finalize the encoding, i.e. clear the buffers, write the header, etc.
 		    encoder.finish();

@@ -95,6 +95,16 @@ public class FileFreeMarkerMethods
 	}
 
 	@FreeMarkerMethod(
+			description = "Extracts file name from path.",
+			returnDescription = "file name from path"
+			)
+	public static String fileNameFromPath(
+			@FmParam(name = "path", description = "Path from which file name to be extracted") String path) throws IOException, URISyntaxException
+	{
+		return new File(path).getName();
+	}
+
+	@FreeMarkerMethod(
 			description = "Extracts suffix from file name.",
 			returnDescription = "Suffix of file name."
 			)

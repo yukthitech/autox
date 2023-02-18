@@ -151,7 +151,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 			return;
 		}
 		
-		livepoint.executeSteps(steps.getRequestId(), stepHolder.getSteps());
+		livepoint.requestExecuteSteps(steps.getRequestId(), stepHolder.getSteps());
 	}
 	
 	private StepHolder parseSteps(String xml)

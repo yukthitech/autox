@@ -28,6 +28,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
@@ -104,7 +105,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	/**
 	 * Base Url to be used. 
 	 */
-	@Param(description = "Base url to be used. If specified, this will be used instead of using base url from plugin.", required = false)
+	@Param(description = "Base url to be used. If specified, this will be used instead of using base url from plugin.", required = false, sourceType = SourceType.EXPRESSION)
 	private String baseUrl;
 	
 	/**
@@ -116,7 +117,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	/**
 	 * Uri to be invoked.
 	 */
-	@Param(description = "Uri to be invoked.")
+	@Param(description = "Uri to be invoked.", sourceType = SourceType.EXPRESSION)
 	protected String uri;
 	
 	/**

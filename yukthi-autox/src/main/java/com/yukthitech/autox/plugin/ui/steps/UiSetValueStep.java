@@ -98,7 +98,7 @@ public class UiSetValueStep extends AbstractParentUiStep
 		this.pressEnterAtEnd = pressEnterAtEnd;
 	}
 	
-	public static boolean setUiValue(AutomationContext context, String driver, String parentElement, String locator, String value, boolean pressEnter)
+	public static boolean setUiValue(AutomationContext context, String driver, Object parentElement, String locator, String value, boolean pressEnter)
 	{
 		if(value == null)
 		{
