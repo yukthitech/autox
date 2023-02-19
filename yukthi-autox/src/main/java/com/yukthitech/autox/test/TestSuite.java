@@ -15,7 +15,6 @@
  */
 package com.yukthitech.autox.test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -81,11 +80,6 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 	private Map<String, Function> nameToFunction = new HashMap<>();
 	
 	/**
-	 * File in which this test suite is defined.
-	 */
-	private File file;
-	
-	/**
 	 * If enabled, underlying test-cases will be executed in parallel. 
 	 */
 	private boolean parallelExecutionEnabled = false;
@@ -132,37 +126,11 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 		this.parallelExecutionEnabled = parallelExecutionEnabled;
 	}
 
-	/**
-	 * Sets the file in which this test suite is defined.
-	 *
-	 * @param file the new file in which this test suite is defined
-	 */
-	public void setFile(File file)
-	{
-		try
-		{
-			this.file = file.getCanonicalFile();
-		}catch(Exception ex)
-		{
-			throw new IllegalStateException("An error occurred while determining cannotical path", ex);
-		}
-	}
-	
-	/**
-	 * Gets the file in which this test suite is defined.
-	 *
-	 * @return the file in which this test suite is defined
-	 */
-	public File getFile()
-	{
-		return file;
-	}
-	
-	public void merge(TestSuite newTestSuite)
+	public void merge(TestSuite newTestSuite, boolean forReload)
 	{
 		if(newTestSuite.getSetup() != null)
 		{
-			if(this.setup != null)
+			if(this.setup != null && !forReload)
 			{
 				throw new InvalidConfigurationException("For test-suite '{}' duplicate setups are configured. [Location1: {}:{}, Location2: {}:{}]", 
 						this.name, 
@@ -175,7 +143,7 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 		
 		if(newTestSuite.cleanup != null)
 		{
-			if(this.cleanup != null)
+			if(this.cleanup != null && !forReload)
 			{
 				throw new InvalidConfigurationException("For test-suite '{}' duplicate cleanups are configured. [Location1: {}:{}, Location2: {}:{}]", 
 						this.name, 
@@ -214,7 +182,7 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 		
 		if(newTestSuite.afterTestCase != null)
 		{
-			if(this.afterTestCase == null)
+			if(this.afterTestCase == null || forReload)
 			{
 				this.afterTestCase = newTestSuite.afterTestCase;
 			}
@@ -226,7 +194,7 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 		
 		if(newTestSuite.beforeTestCase != null)
 		{
-			if(this.beforeTestCase == null)
+			if(this.beforeTestCase == null || forReload)
 			{
 				this.beforeTestCase = newTestSuite.beforeTestCase;
 			}

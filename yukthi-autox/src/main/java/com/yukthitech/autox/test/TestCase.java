@@ -15,7 +15,6 @@
  */
 package com.yukthitech.autox.test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -165,10 +164,6 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		}
 	}
 
-	public void setFile(File file)
-	{
-	}
-	
 	/**
 	 * Sets the parent test suite.
 	 *

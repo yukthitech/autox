@@ -93,7 +93,7 @@ public class TestSuiteGroup implements IEntryPoint
 	 * Adds the specified test suite.
 	 * @param testSuite test suite to add.
 	 */
-	public void addTestSuite(TestSuite testSuite)
+	public void addTestSuite(TestSuite testSuite, boolean forReload)
 	{
 		TestSuite existingTestSuite = this.testSuitesMap.get(testSuite.getName());
 		
@@ -103,7 +103,7 @@ public class TestSuiteGroup implements IEntryPoint
 		}
 		else
 		{
-			existingTestSuite.merge(testSuite);
+			existingTestSuite.merge(testSuite, forReload);
 		}
 	}
 	

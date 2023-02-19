@@ -100,7 +100,7 @@ public class AutomationContext
 	/**
 	 * Test suite group being executed.
 	 */
-	private TestSuiteGroup testSuiteGroup;
+	private TestSuiteGroup testSuiteGroup = new TestSuiteGroup();
 	
 	/**
 	 * Executable group names.
@@ -138,11 +138,6 @@ public class AutomationContext
 	public TestSuiteGroup getTestSuiteGroup()
 	{
 		return testSuiteGroup;
-	}
-
-	public void setTestSuiteGroup(TestSuiteGroup testSuiteGroup)
-	{
-		this.testSuiteGroup = testSuiteGroup;
 	}
 
 	public static void reset() throws Exception
