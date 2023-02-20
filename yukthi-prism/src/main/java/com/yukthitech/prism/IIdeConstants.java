@@ -37,6 +37,8 @@ public interface IIdeConstants
 	
 	public Color DEBUG_BG_COLOR = new Color(198, 219, 174);
 	
+	public Color DEBUG_ERR_BG_COLOR = new Color(222, 29, 111);
+	
 	public int MSSG_WRAP_LENGTH = 105;
 	
 	public static String wrap(String text)

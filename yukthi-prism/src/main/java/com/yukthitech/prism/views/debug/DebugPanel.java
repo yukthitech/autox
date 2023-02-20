@@ -67,6 +67,7 @@ import com.yukthitech.prism.exeenv.debug.DebugPointManager;
 import com.yukthitech.prism.exeenv.debug.DebugPointsChangedEvent;
 import com.yukthitech.prism.exeenv.debug.DebugStepsExecutedEvent;
 import com.yukthitech.prism.exeenv.debug.IdeDebugPoint;
+import com.yukthitech.prism.layout.UiIdElementsManager;
 import com.yukthitech.prism.model.Project;
 import com.yukthitech.prism.proj.ProjectManager;
 import com.yukthitech.prism.services.IdeEventHandler;
@@ -506,10 +507,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 			{
 				activateTab();
 				
-				highlightDebugPoint(activeEnv.getProject(), 
-						new File(threadDet.getDebugFilePath()), 
-						threadDet.getLineNumber() + 1, 
-						threadDet.getExecutionId());
+				highlightDebugPoint(activeEnv, threadDet);
 			}
 		}
 		//if no active env is found or active thread is not found
@@ -627,7 +625,22 @@ public class DebugPanel extends JPanel implements IViewPanel
 		debugPointManager.removeAllDebugPoints(this);
 	}
 	
-	private synchronized void highlightDebugPoint(Project project, File file, int lineNo, String executionId)
+	public static void controlDebugActions(ExecutionEnvironment activeEnv)
+	{
+		if(activeEnv == null || activeEnv.isTerminated() || !activeEnv.isDebugEnv())
+		{
+			UiIdElementsManager.setEnableFlagByGroups(false, "debugGroup", "debugErrGroup");
+			return;
+		}
+		
+		ServerMssgExecutionPaused currentPauseMssg = activeEnv.getActiveThreadDetails();
+		boolean errorPoint = currentPauseMssg != null && currentPauseMssg.isErrorPoint();
+		
+		UiIdElementsManager.setEnableFlagByGroup("debugGroup", !errorPoint);
+		UiIdElementsManager.setEnableFlagByGroup("debugErrGroup", errorPoint);
+	}
+	
+	private synchronized void highlightDebugPoint(ExecutionEnvironment activeEnv, ServerMssgExecutionPaused threadDet)
 	{
 		if(previousDebugHighlight != null)
 		{
@@ -641,10 +654,14 @@ public class DebugPanel extends JPanel implements IViewPanel
 			previousDebugHighlight = null;
 		}
 		
-		FileEditor editor = fileEditorTabbedPane.openProjectFile(project, file);
-		editor.highlightDebugLine(lineNo);
+		File file = new File(threadDet.getDebugFilePath());
+		int lineNo = threadDet.getLineNumber() + 1; 
 		
-		previousDebugHighlight = new FileLocation(project, file, executionId);
+		FileEditor editor = fileEditorTabbedPane.openProjectFile(activeEnv.getProject(), file);
+		editor.highlightDebugLine(lineNo, threadDet.isErrorPoint());
+		
+		previousDebugHighlight = new FileLocation(activeEnv.getProject(), file, threadDet.getExecutionId());
+		controlDebugActions(activeEnv);
 	}
 	
 	public void openSandboxTab(String prefix, String name)

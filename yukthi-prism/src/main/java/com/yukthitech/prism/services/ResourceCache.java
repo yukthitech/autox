@@ -40,7 +40,7 @@ public class ResourceCache
 	
 	private HashMap<String, Serializable> cacheMap = new HashMap<>();
 	
-	private File cacheFile = new File(".prism.cache");
+	private File cacheFile = new File("prism.cache");
 	
 	private boolean modified = false;
 	

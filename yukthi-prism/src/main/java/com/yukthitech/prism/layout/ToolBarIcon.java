@@ -176,7 +176,17 @@ public class ToolBarIcon implements Validateable
 		
 		if(id != null)
 		{
-			UiIdElementsManager.registerElement(id, group, button);
+			UiIdElementsManager.registerElement(id, null, button);
+		}
+
+		if(group != null)
+		{
+			String groupNames[] = group.trim().split("\\s*\\,\\s*");
+			
+			for(String grp : groupNames)
+			{
+				UiIdElementsManager.registerElement(null, grp, button);
+			}
 		}
 		
 		return button;

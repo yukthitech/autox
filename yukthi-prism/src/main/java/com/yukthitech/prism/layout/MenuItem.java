@@ -255,9 +255,19 @@ public class MenuItem implements Validateable
 			menuItem.setIcon(IdeUtils.loadIcon(this.icon, 16));
 		}
 		
-		if(id != null || group != null)
+		if(id != null)
 		{
-			UiIdElementsManager.registerElement(id, group, menuItem);
+			UiIdElementsManager.registerElement(id, null, menuItem);
+		}
+
+		if(group != null)
+		{
+			String groupNames[] = group.trim().split("\\s*\\,\\s*");
+			
+			for(String grp : groupNames)
+			{
+				UiIdElementsManager.registerElement(null, grp, menuItem);
+			}
 		}
 		
 		menuItem.setEnabled(enabled);

@@ -210,6 +210,24 @@ public class DebugFlowManager
 		});
 	}
 	
+	public void pauseAtErrorPoint(ILocationBased step)
+	{
+		if(!DebugServer.isRunningInDebugMode())
+		{
+			return;
+		}
+
+		DebugPoint debugPoint = new DebugPoint(step.getLocation().getPath(), step.getLineNumber(), null);
+		
+		LiveDebugPoint.pauseAtErrorPoint(step, debugPoint, livePoint -> 
+		{
+			synchronized(livePoints)
+			{
+				this.livePoints.put(livePoint.getId(), livePoint);	
+			}
+		});
+	}
+	
 	public LiveDebugPoint getLiveDebugPoint(String id)
 	{
 		synchronized(livePoints)

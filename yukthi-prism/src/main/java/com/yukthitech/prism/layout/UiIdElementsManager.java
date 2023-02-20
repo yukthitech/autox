@@ -16,6 +16,7 @@
 package com.yukthitech.prism.layout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,23 @@ public class UiIdElementsManager
 	public static void setEnableFlagByGroup(String groupName, boolean enableFlag)
 	{
 		List<JComponent> elements = groupElements.get(groupName);
+		
+		if(elements == null)
+		{
+			return;
+		}
+		
+		elements.forEach(elem -> elem.setEnabled(enableFlag));
+	}
+
+	public static void setEnableFlagByGroups(boolean enableFlag, String... groupNames)
+	{
+		Arrays.asList(groupNames).forEach(grp -> setEnableFlagByGroup(grp, enableFlag));
+	}
+
+	public static void setEnableFlagById(String id, boolean enableFlag)
+	{
+		List<JComponent> elements = getElements(id);
 		
 		if(elements == null)
 		{

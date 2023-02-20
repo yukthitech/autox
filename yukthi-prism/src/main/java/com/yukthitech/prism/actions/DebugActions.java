@@ -18,7 +18,9 @@ package com.yukthitech.prism.actions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
+import com.yukthitech.autox.debug.common.ClientMssgIgnoreError;
 import com.yukthitech.autox.debug.common.DebugOp;
+import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.prism.exeenv.ExecutionEnvironment;
 import com.yukthitech.prism.exeenv.ExecutionEnvironmentManager;
 import com.yukthitech.prism.layout.Action;
@@ -40,6 +42,26 @@ public class DebugActions
 		}
 		
 		activeEnv.sendDataToServer(new ClientMssgDebugOp(activeEnv.getActiveThreadId(), debugOp));
+	}
+	
+	@Action
+	public void ignoreDebugError()
+	{
+		ExecutionEnvironment activeEnv = executionEnvManager.getActiveEnvironment();
+		
+		if(activeEnv == null || !activeEnv.isDebugEnv() || activeEnv.getActiveThreadId() == null)
+		{
+			return;
+		}
+		
+		ServerMssgExecutionPaused mssg = activeEnv.getActiveThreadDetails();
+		
+		if(!mssg.isErrorPoint())
+		{
+			return;
+		}
+		
+		activeEnv.sendDataToServer(new ClientMssgIgnoreError(activeEnv.getActiveThreadId()));
 	}
 	
 	@Action

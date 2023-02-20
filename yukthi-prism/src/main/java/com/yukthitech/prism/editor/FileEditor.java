@@ -699,7 +699,7 @@ public class FileEditor extends JPanel
 		return currentFileManager.getToolTip(this, parsedFileContent, offset);
 	}
 	
-	public synchronized void highlightDebugLine(int lineNo)
+	public synchronized void highlightDebugLine(int lineNo, boolean errorPoint)
 	{
 		if(debugHighlightTag != null)
 		{
@@ -714,7 +714,8 @@ public class FileEditor extends JPanel
 			lineNo = lineNo - 1;
 			
 			//work around for highlight bug - reduce line number by 1
-			debugHighlightTag = syntaxTextArea.addLineHighlight(lineNo - 1, IIdeConstants.DEBUG_BG_COLOR);
+			debugHighlightTag = syntaxTextArea.addLineHighlight(lineNo - 1, 
+					errorPoint ?  IIdeConstants.DEBUG_ERR_BG_COLOR : IIdeConstants.DEBUG_BG_COLOR);
 		}catch(BadLocationException ex)
 		{
 			logger.error("Wrong line number specified for debug highlight: {}", lineNo, ex);

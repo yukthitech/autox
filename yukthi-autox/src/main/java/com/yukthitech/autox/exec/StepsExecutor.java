@@ -31,6 +31,7 @@ import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.DropToStackFrameException;
+import com.yukthitech.autox.test.IgnoreErrorException;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ObjectWrapper;
@@ -135,6 +136,16 @@ public class StepsExecutor
 			}
 			
 			exeLogger.error("Execution result in error: \n{}.\nStack Trace:{}", CommonUtils.getRootCauseMessages(ex), stackTrace);
+			
+			try
+			{
+				DebugFlowManager.getInstance().pauseAtErrorPoint(step);
+			}catch(IgnoreErrorException igEx)
+			{
+				//if debug env and request is raised to ignore current error
+				// return from this step execution without error
+				return;
+			}
 			
 			throw new HandledException(ex);
 		}finally

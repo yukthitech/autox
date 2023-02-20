@@ -43,6 +43,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack.StackElement;
 import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
+import com.yukthitech.autox.debug.common.ClientMssgIgnoreError;
 import com.yukthitech.autox.debug.common.DebugOp;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
@@ -54,6 +55,7 @@ import com.yukthitech.autox.exec.HandledException;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.test.DropToStackFrameException;
+import com.yukthitech.autox.test.IgnoreErrorException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -114,20 +116,32 @@ public class LiveDebugPoint
 	
 	private Set<String> dropableFrameIds = new HashSet<>();
 	
-	private LiveDebugPoint(ILocationBased location, DebugPoint debugPoint, Consumer<LiveDebugPoint> callback)
+	/**
+	 * Flag indicating if this live point is created because of the error.
+	 */
+	private boolean errorPoint;
+	
+	private LiveDebugPoint(ILocationBased location, DebugPoint debugPoint, Consumer<LiveDebugPoint> callback, boolean errorPoint)
 	{
 		this.debugPoint = debugPoint;
 		this.threadOnHold = Thread.currentThread();
+		this.errorPoint = errorPoint;
 		
 		pause(location, callback);
 	}
 	
 	public static LiveDebugPoint pauseAtDebugPoint(ILocationBased location, DebugPoint debugPoint, Consumer<LiveDebugPoint> callback)
 	{
-		LiveDebugPoint liveDebugPoint = new LiveDebugPoint(location, debugPoint, callback);
+		LiveDebugPoint liveDebugPoint = new LiveDebugPoint(location, debugPoint, callback, false);
 		return liveDebugPoint;
 	}
 	
+	public static LiveDebugPoint pauseAtErrorPoint(ILocationBased location, DebugPoint debugPoint, Consumer<LiveDebugPoint> callback)
+	{
+		LiveDebugPoint liveDebugPoint = new LiveDebugPoint(location, debugPoint, callback, true);
+		return liveDebugPoint;
+	}
+
 	public static LiveDebugPoint getLivePoint()
 	{
 		LiveDebugPoint point = livePointThreadLocal.get();
@@ -242,9 +256,10 @@ public class LiveDebugPoint
 			}
 		}
 		
-		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, threadOnHold.getName(), lastPauseLocation.getLocation().getPath(), 
+		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, threadOnHold.getName(), lastPauseLocation.getLocation().getPath(),
 				lastPauseLocation.getLineNumber(), stackTrace, getContextAttr(),
-				getParams());
+				getParams(),
+				errorPoint);
 		DebugServer.getInstance().sendClientMessage(pausedMssg);
 	}
 	
@@ -287,11 +302,11 @@ public class LiveDebugPoint
 			logger.trace("LivePOINT: Pause released at location: {}:{}", lastPauseLocation.getLocation().getName(), lastPauseLocation.getLineNumber());
 			
 			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
-		}catch(DropToStackFrameException ex)
+		} catch(DropToStackFrameException | IgnoreErrorException ex)
 		{
 			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
 			throw ex;
-		}catch(Exception ex)
+		} catch(Exception ex)
 		{
 			logger.error("An error occurred during debug point hold", ex);
 		} finally
@@ -365,6 +380,12 @@ public class LiveDebugPoint
 					throw new DropToStackFrameException(((ClientMssgDropToFrame) req.requestObject).getStackElementId());
 				}
 				
+				if(req.requestObject instanceof ClientMssgIgnoreError)
+				{
+					throw new IgnoreErrorException();
+				}
+				
+				
 				if(released)
 				{
 					continue;
@@ -372,7 +393,6 @@ public class LiveDebugPoint
 				
 				if(req.data instanceof List)
 				{
-					
 					executeStepsRequest(req.requestId, (List) req.data);
 				}
 				else
@@ -452,6 +472,39 @@ public class LiveDebugPoint
 							"Invalid frame id specified for drop"));
 					return false;
 				}
+			}
+			
+			synchronized(requests)
+			{
+				this.requests.addLast(new Request(dropToFrame.getRequestId(), null, dropToFrame));
+			}
+			
+			clearThread();
+			return true;
+		}finally
+		{
+			pauseLock.unlock();
+		}
+	}
+
+	public boolean requestIgnoreError(ClientMssgIgnoreError dropToFrame)
+	{
+		pauseLock.lock();
+		
+		try
+		{
+			if(!onPause.get())
+			{
+				DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+						"Current live-point is not in paused state"));
+				return false;
+			}
+			
+			if(!errorPoint)
+			{
+				DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+						"Current break point is not halted on error"));
+				return false;
 			}
 			
 			synchronized(requests)

@@ -491,9 +491,13 @@ public abstract class Executor
 			}
 		}
 
-		logger.error("An unhandled error occurred while executing {} with name: {}", stepType, name, ex);
-		//for unhandled exceptions log on ui
-		exeLogger.error("An unhandled error occurred while executing {} with name: {}\nError: {}", stepType, name, CommonUtils.getRootCauseMessages(ex));
+		if(!(ex instanceof HandledException))
+		{
+			logger.error("An unhandled error occurred while executing {} with name: {}", stepType, name, ex);
+			//for unhandled exceptions log on ui
+			exeLogger.error("An unhandled error occurred while executing {} with name: {}\nError: {}", stepType, name, CommonUtils.getRootCauseMessages(ex));
+		}
+		
 		ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
 		setStatus(TestStatus.ERRORED, stepType + " errored: " + executable.name());
 	}

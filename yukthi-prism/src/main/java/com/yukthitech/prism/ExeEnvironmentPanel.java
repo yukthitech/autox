@@ -43,8 +43,8 @@ import com.yukthitech.prism.exeenv.EnvironmentStartedEvent;
 import com.yukthitech.prism.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.prism.exeenv.ExecutionEnvironment;
 import com.yukthitech.prism.exeenv.ExecutionEnvironmentManager;
-import com.yukthitech.prism.layout.UiIdElementsManager;
 import com.yukthitech.prism.services.IdeEventHandler;
+import com.yukthitech.prism.views.debug.DebugPanel;
 import com.yukthitech.swing.IconButton;
 
 @Component
@@ -182,6 +182,7 @@ public class ExeEnvironmentPanel extends JPanel
 		checkForButtons();
 	}
 	
+	
 	@IdeEventHandler
 	private void newEnvironmentAdded(EnvironmentStartedEvent event)
 	{
@@ -196,7 +197,7 @@ public class ExeEnvironmentPanel extends JPanel
 		checkForButtons();
 		
 		executionEnvironmentManager.setActiveEnvironment(environment);
-		UiIdElementsManager.setEnableFlagByGroup("debugGroup", (environment != null && environment.isDebugEnv()));
+		DebugPanel.controlDebugActions(environment);
 	}
 
 	@IdeEventHandler
@@ -210,7 +211,7 @@ public class ExeEnvironmentPanel extends JPanel
 			envComboBox.setSelectedIndex(selIdx);
 			
 			ExecutionEnvironment selEnv = envComboBox.getItemAt(selIdx);
-			UiIdElementsManager.setEnableFlagByGroup("debugGroup", (!selEnv.isTerminated() && selEnv.isDebugEnv()));
+			DebugPanel.controlDebugActions(selEnv);
 		}
 		
 		checkForButtons();
@@ -312,7 +313,7 @@ public class ExeEnvironmentPanel extends JPanel
 		executionEnvironmentManager.setActiveEnvironment(env);
 		
 		checkForButtons();
-		UiIdElementsManager.setEnableFlagByGroup("debugGroup", (env != null && env.isDebugEnv()));
+		DebugPanel.controlDebugActions(env);
 	}
 	
 	private synchronized void checkForButtons()

@@ -124,7 +124,7 @@
 
 			<item label="-" />
 			
-			<item label="Run Selected Steps..." action="runSelectedSteps" group="debugGroup" enabled="false">
+			<item label="Run Selected Steps..." action="runSelectedSteps" group="debugGroup, debugErrGroup" enabled="false">
 				<short-key ctrl="true" key="ENTER" />
 			</item>
 			<item label="Step Into" action="debugStepInto" group="debugGroup" enabled="false">
@@ -136,8 +136,11 @@
 			<item label="Step Return" action="debugStepReturn" group="debugGroup" enabled="false">
 				<short-key key="F7"/>
 			</item>
-			<item label="Resume" action="debugResume" group="debugGroup" enabled="false">
+			<item label="Resume" action="debugResume" group="debugGroup, debugErrGroup" enabled="false">
 				<short-key key="F8" global="true"/>
+			</item>
+			<item label="Ignore Error" action="ignoreDebugError" group="debugErrGroup" enabled="false">
+				<short-key key="F11"/>
 			</item>
 		</menu>
 
