@@ -17,6 +17,7 @@ package com.yukthitech.autox.plugin.ui.steps;
 
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
 
 /**
  * Base abstract class for ui steps with optional parent element.
@@ -56,11 +57,13 @@ public abstract class AbstractParentUiStep extends AbstractUiStep
 
 	protected static String getLocatorWithParent(Object parentElement, String locator)
 	{
+		String locatorType = UiAutomationUtils.getLocatorType(locator);
+		
 		if(parentElement != null)
 		{
-			return String.format("[Locator: %s, Parent: %s]", locator, parentElement);
+			return String.format("[Type: %s, Locator: %s, Parent: %s]", locatorType, locator, parentElement);
 		}
 		
-		return String.format("[Locator: %s]", locator);
+		return String.format("[Type: %s, Locator: %s]", locatorType, locator);
 	}
 }

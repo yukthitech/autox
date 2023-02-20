@@ -67,7 +67,15 @@ public class ContextAttributeTableModel extends AbstractTableModel
 			return "";
 		}
 		
-		Object convVal = SerializationUtils.deserialize(val);
+		Object convVal = null;
+		
+		try
+		{
+			convVal = SerializationUtils.deserialize(val);
+		}catch(Exception ex)
+		{
+			return "(Deserialization error)";
+		}
 		
 		if(convVal instanceof String)
 		{

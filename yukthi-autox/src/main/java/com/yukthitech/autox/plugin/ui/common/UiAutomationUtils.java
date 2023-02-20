@@ -324,6 +324,18 @@ public class UiAutomationUtils
 		return findElements(driverName, parent, locator, false);
 	}
 	
+	public static String getLocatorType(String locator)
+	{
+		Matcher matcher = LOCATOR_PATTERN.matcher(locator);
+		
+		if(matcher.matches())
+		{
+			return matcher.group(1);
+		}
+		
+		return LocatorType.NAME.getKey();
+	}
+	
 	public static By getLocator(String locator)
 	{
 		Matcher matcher = LOCATOR_PATTERN.matcher(locator);

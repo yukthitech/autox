@@ -636,8 +636,16 @@ public class DebugPanel extends JPanel implements IViewPanel
 		ServerMssgExecutionPaused currentPauseMssg = activeEnv.getActiveThreadDetails();
 		boolean errorPoint = currentPauseMssg != null && currentPauseMssg.isErrorPoint();
 		
-		UiIdElementsManager.setEnableFlagByGroup("debugGroup", !errorPoint);
-		UiIdElementsManager.setEnableFlagByGroup("debugErrGroup", errorPoint);
+		if(errorPoint)
+		{
+			UiIdElementsManager.setEnableFlagByGroup("debugGroup", false);
+			UiIdElementsManager.setEnableFlagByGroup("debugErrGroup", true);
+		}
+		else
+		{
+			UiIdElementsManager.setEnableFlagByGroup("debugErrGroup", false);
+			UiIdElementsManager.setEnableFlagByGroup("debugGroup", true);
+		}
 	}
 	
 	private synchronized void highlightDebugPoint(ExecutionEnvironment activeEnv, ServerMssgExecutionPaused threadDet)
