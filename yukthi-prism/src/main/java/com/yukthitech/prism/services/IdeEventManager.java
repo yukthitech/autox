@@ -15,6 +15,7 @@
  */
 package com.yukthitech.prism.services;
 
+import java.awt.EventQueue;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.yukthitech.utils.RuntimeInterruptedException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Service
@@ -163,27 +166,70 @@ public class IdeEventManager
 		}
 	}
 	
-	private void processEvent(IIdeEvent event)
+	private void processInEventThread(Runnable runnable)
 	{
-		List<EventMethod> methods = typeToMethods.get(event.getClass());
+		CountDownLatch latch = new CountDownLatch(1);
 		
-		if(methods == null)
+		//invoke the handlers in event queue, so that ui updates
+		//  will not create dead locks
+		EventQueue.invokeLater(() -> 
 		{
-			return;
-		}
-		
-		for(EventMethod met : methods)
-		{
-			logger.trace("Invoking event method {}.{}() for event of type: {}", 
-					met.method.getDeclaringClass().getName(), met.method.getName(), event.getClass().getName());
-			
 			try
 			{
-				met.invoke(event);
-			}catch(Exception ex)
+				runnable.run();
+			} finally
 			{
-				logger.debug("An error occurred while process event method", ex);
+				latch.countDown();
 			}
+		});
+		
+		//wait for AWT event thread to process current event handlers
+		try
+		{
+			latch.await();
+		} catch(InterruptedException ex)
+		{
+			throw new RuntimeInterruptedException(ex);
+		}
+	}
+	
+	private void processEvent(IIdeEvent event)
+	{
+		Runnable executeHandlers = () -> 
+		{
+			List<EventMethod> methods = typeToMethods.get(event.getClass());
+			
+			if(methods == null)
+			{
+				return;
+			}
+			
+			for(EventMethod met : methods)
+			{
+				logger.trace("Invoking event method {}.{}() for event of type: {}", 
+						met.method.getDeclaringClass().getName(), met.method.getName(), event.getClass().getName());
+				
+				try
+				{
+					met.invoke(event);
+				}catch(Exception ex)
+				{
+					logger.debug("An error occurred while process event method", ex);
+				}
+			}
+		};
+		
+		//if current thread is event dispatcher thread
+		if(EventQueue.isDispatchThread())
+		{
+			//execute handlers in same thread (to avoid dead lock)
+			executeHandlers.run();
+		}
+		else
+		{
+			//execute handlers in event thread and wait for handlers
+			// to complete execution
+			processInEventThread(executeHandlers);
 		}
 	}
 	

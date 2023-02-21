@@ -55,7 +55,10 @@ public class ReloadFileHandler extends AbstractServerDataHandler<ClientMssgReloa
 		else
 		{
 			String errStr = errors.stream().collect(Collectors.joining("\n\t"));
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, "Loading of file '{}' failed with below errors: \n\t{}", 
+			
+			logger.error("Loading of file '{}' failed with below errors: \\n\\t{}", data.getFile().getName(), errStr);
+			
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), false, "Loading of file '%s' failed with below errors: \n\t%s", 
 					data.getFile().getName(), errStr));
 		}
 	}

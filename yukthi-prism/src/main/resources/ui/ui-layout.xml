@@ -139,9 +139,18 @@
 			<item label="Resume" action="debugResume" group="debugGroup, debugErrGroup" enabled="false">
 				<short-key key="F8" global="true"/>
 			</item>
-			<item label="Ignore Error" action="ignoreDebugError" group="debugErrGroup" enabled="false">
-				<short-key key="F11"/>
-			</item>
+			
+			<menu label="Error Actions (Debug)">
+				<item label="Ignore &amp; Step Over" action="errDebugStepOver" group="debugErrGroup" enabled="false">
+					<short-key shift="true" key="F6"/>
+				</item>
+				<item label="Ignore &amp; Step Return" action="errDebugStepReturn" group="debugErrGroup" enabled="false">
+					<short-key shift="true" key="F7"/>
+				</item>
+				<item label="Ignore &amp; Resume" action="errDebugResume" group="debugErrGroup" enabled="false">
+					<short-key shift="true" key="F8"/>
+				</item>
+			</menu>
 		</menu>
 
 		<menu label="Window" mnemonic="W">

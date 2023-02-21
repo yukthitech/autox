@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.swing.JComponent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -163,9 +164,9 @@ public class ActionCollection
 		}, 0);
 	}
 	
-	public void registerGlobalAction(ShortKey shortKey, String action)
+	public void registerGlobalAction(ShortKey shortKey, String action, JComponent component)
 	{
-		globalKeyboardListener.addGlobalKeyListener(shortKey, getActionListener(action, null));
+		globalKeyboardListener.addGlobalKeyListener(shortKey, getActionListener(action, null), component);
 	}
 	
 	public ActionListener getActionListener(String action, IdePopupMenu idePopup)

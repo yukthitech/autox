@@ -43,7 +43,6 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack.StackElement;
 import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
-import com.yukthitech.autox.debug.common.ClientMssgIgnoreError;
 import com.yukthitech.autox.debug.common.DebugOp;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
@@ -76,12 +75,22 @@ public class LiveDebugPoint
 		private Object data;
 		
 		private Object requestObject;
+		
+		private boolean ignoreError = false;
 
 		public Request(String requestId, Object data, Object requestObject)
 		{
 			this.requestId = requestId;
 			this.data = data;
 			this.requestObject = requestObject;
+		}
+		
+		public static Request ignoreError()
+		{
+			Request req = new Request(null, null, null);
+			req.ignoreError = true;
+			
+			return req;
 		}
 	}
 	
@@ -263,6 +272,13 @@ public class LiveDebugPoint
 		DebugServer.getInstance().sendClientMessage(pausedMssg);
 	}
 	
+	/**
+	 * This is the main method which will hold current execution thread till approp debug operations
+	 * are requested.
+	 * 
+	 * @param location
+	 * @param callback
+	 */
 	private void pause(ILocationBased location, Consumer<LiveDebugPoint> callback)
 	{
 		livePointThreadLocal.set(this);
@@ -291,10 +307,16 @@ public class LiveDebugPoint
 				{
 					//wait for release request
 					releaseRequestCondition.await();
+					
+					//execute on hold tasks that might be required post release as well
 					handleOnHoldTasks();
+					
+					//break the current loop (as signal also indicates release)
 					break;
 				}catch(InterruptedException ex)
 				{
+					//Interruption occurs for evaluation, which needs to be completed
+					// and needs to get back to hold state
 					handleOnHoldTasks();
 				}
 			}
@@ -380,12 +402,17 @@ public class LiveDebugPoint
 					throw new DropToStackFrameException(((ClientMssgDropToFrame) req.requestObject).getStackElementId());
 				}
 				
-				if(req.requestObject instanceof ClientMssgIgnoreError)
+				if(errorPoint && req.ignoreError)
 				{
+					//as current error is being ignored, set current point as non-error point
+					this.errorPoint = false;
+					
+					//throw exception to ignore current error
 					throw new IgnoreErrorException();
 				}
 				
-				
+				//when debug point is already released, dont execute steps
+				//  or expressions request
 				if(released)
 				{
 					continue;
@@ -487,6 +514,7 @@ public class LiveDebugPoint
 		}
 	}
 
+	/*
 	public boolean requestIgnoreError(ClientMssgIgnoreError dropToFrame)
 	{
 		pauseLock.lock();
@@ -519,6 +547,7 @@ public class LiveDebugPoint
 			pauseLock.unlock();
 		}
 	}
+	*/
 
 	public boolean isDynamicExecutionInProgress()
 	{
@@ -533,7 +562,7 @@ public class LiveDebugPoint
 		}
 	}
 	
-	public boolean requestRelease(String reqId, DebugOp debugOp)
+	public boolean requestRelease(String reqId, DebugOp debugOp, boolean ignoreError)
 	{
 		pauseLock.lock();
 		
@@ -545,6 +574,14 @@ public class LiveDebugPoint
 			{
 				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(reqId, false, "Current live-point is not in paused state"));
 				return false;
+			}
+			
+			if(this.errorPoint && ignoreError)
+			{
+				synchronized(requests)
+				{
+					this.requests.addLast(Request.ignoreError());
+				}
 			}
 			
 			if(debugOp == DebugOp.RESUME)

@@ -98,7 +98,7 @@ public class TDebugFlows extends BaseTestCases
 					pauseConsumer.accept(mssg, this);
 				}
 				
-				debugClient.sendDataToServer(new ClientMssgDebugOp(mssg.getExecutionId(), debugOp));
+				debugClient.sendDataToServer(new ClientMssgDebugOp(mssg.getExecutionId(), debugOp, false));
 			}
 			else if(data instanceof ServerMssgExecutionReleased)
 			{

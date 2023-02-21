@@ -18,9 +18,7 @@ package com.yukthitech.prism.actions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
-import com.yukthitech.autox.debug.common.ClientMssgIgnoreError;
 import com.yukthitech.autox.debug.common.DebugOp;
-import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.prism.exeenv.ExecutionEnvironment;
 import com.yukthitech.prism.exeenv.ExecutionEnvironmentManager;
 import com.yukthitech.prism.layout.Action;
@@ -32,7 +30,7 @@ public class DebugActions
 	@Autowired
 	private ExecutionEnvironmentManager executionEnvManager;
 	
-	private void executeDebugOp(DebugOp debugOp)
+	private void executeDebugOp(DebugOp debugOp, boolean ignoreError)
 	{
 		ExecutionEnvironment activeEnv = executionEnvManager.getActiveEnvironment();
 		
@@ -41,9 +39,10 @@ public class DebugActions
 			return;
 		}
 		
-		activeEnv.sendDataToServer(new ClientMssgDebugOp(activeEnv.getActiveThreadId(), debugOp));
+		activeEnv.sendDataToServer(new ClientMssgDebugOp(activeEnv.getActiveThreadId(), debugOp, ignoreError));
 	}
 	
+	/*
 	@Action
 	public void ignoreDebugError()
 	{
@@ -63,28 +62,47 @@ public class DebugActions
 		
 		activeEnv.sendDataToServer(new ClientMssgIgnoreError(activeEnv.getActiveThreadId()));
 	}
+	*/
 	
 	@Action
 	public void debugStepInto()
 	{
-		executeDebugOp(DebugOp.STEP_INTO);
+		executeDebugOp(DebugOp.STEP_INTO, false);
 	}
 	
 	@Action
 	public void debugStepOver()
 	{
-		executeDebugOp(DebugOp.STEP_OVER);
+		executeDebugOp(DebugOp.STEP_OVER, false);
 	}
 	
 	@Action
 	public void debugStepReturn()
 	{
-		executeDebugOp(DebugOp.STEP_RETURN);
+		executeDebugOp(DebugOp.STEP_RETURN, false);
 	}
 
 	@Action
 	public void debugResume()
 	{
-		executeDebugOp(DebugOp.RESUME);
+		executeDebugOp(DebugOp.RESUME, false);
+	}
+
+	@Action
+	public void errDebugStepOver()
+	{
+		executeDebugOp(DebugOp.STEP_OVER, true);
+	}
+	
+	@Action
+	public void errDebugStepReturn()
+	{
+		executeDebugOp(DebugOp.STEP_RETURN, true);
+	}
+
+	@Action
+	public void errDebugResume()
+	{
+		executeDebugOp(DebugOp.RESUME, true);
 	}
 }

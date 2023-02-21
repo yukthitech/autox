@@ -50,7 +50,7 @@ public class DebugOpHandler extends AbstractServerDataHandler<ClientMssgDebugOp>
 			return;
 		}
 		
-		boolean res = livePoint.requestRelease(data.getExecutionId(), data.getDebugOp());
+		boolean res = livePoint.requestRelease(data.getExecutionId(), data.getDebugOp(), data.isIgnoreErrorEnabled());
 		
 		if(res)
 		{

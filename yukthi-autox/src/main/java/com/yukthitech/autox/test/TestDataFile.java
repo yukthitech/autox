@@ -51,15 +51,22 @@ public class TestDataFile
 	private Cleanup cleanup;
 	
 	/**
+	 * Flag indicating if this data file is being loaded
+	 * as part of reload flow.
+	 */
+	private boolean forReload;
+	
+	/**
 	 * Instantiates a new test data file.
 	 *
 	 * @param context the context
 	 */
-	public TestDataFile(AutomationContext context)
+	public TestDataFile(AutomationContext context, boolean forReload)
 	{
 		this.context = context;
+		this.forReload = forReload;
 	}
-
+	
 	/**
 	 * Gets the setup steps to be executed before executing any test suite.
 	 *
@@ -152,7 +159,14 @@ public class TestDataFile
 	 */
 	public void addFunction(Function function)
 	{
-		context.addFunction(function);
+		if(forReload)
+		{
+			context.addOrReplaceFunction(function);
+		}
+		else
+		{
+			context.addFunction(function);
+		}
 	}
 	
 	public void addEventHandler(EventHandler handler)

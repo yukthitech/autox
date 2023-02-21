@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.swing.JComponent;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -47,12 +48,18 @@ public class GlobalKeyboardListener
 		private int keyCode;
 		
 		private ActionListener actionListener;
+		
+		/**
+		 * Used to check if current action is enabled or not.
+		 */
+		private JComponent jcomponent;
 
-		public KeyStroke(int modifiers, int keyCode, ActionListener actionListener)
+		public KeyStroke(int modifiers, int keyCode, ActionListener actionListener, JComponent jcomponent)
 		{
 			this.modifiers = modifiers;
 			this.keyCode = keyCode;
 			this.actionListener = actionListener;
+			this.jcomponent = jcomponent;
 		}
 	}
 	
@@ -64,9 +71,9 @@ public class GlobalKeyboardListener
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor(this::handleKeyEvent);
 	}
 	
-	public void addGlobalKeyListener(ShortKey shortKey, ActionListener listener)
+	public void addGlobalKeyListener(ShortKey shortKey, ActionListener listener, JComponent jcomponent)
 	{
-		KeyStroke keyStroke = new KeyStroke(shortKey.getModifiers(), shortKey.getKeyCode(), listener);
+		KeyStroke keyStroke = new KeyStroke(shortKey.getModifiers(), shortKey.getKeyCode(), listener, jcomponent);
 		List<KeyStroke> strokes = keyToStrokes.get(keyStroke.keyCode);
 		
 		if(strokes == null)
@@ -112,6 +119,12 @@ public class GlobalKeyboardListener
 		
 		for(KeyStroke stroke : strokes)
 		{
+			//if component is disable, dont execute the action
+			if(!stroke.jcomponent.isEnabled())
+			{
+				continue;
+			}
+			
 			if(stroke.modifiers == modifiers)
 			{
 				stroke.actionListener.actionPerformed(new ActionEvent(e.getSource(), e.getID(), null));

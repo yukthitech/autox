@@ -31,8 +31,14 @@ public class ClientMssgDebugOp extends ClientMessage
 	private String executionId;
 
 	private DebugOp debugOp;
+	
+	/**
+	 * Flag indicating if current error has to be ignored
+	 * before taking specified debug operation.
+	 */
+	private boolean ignoreErrorEnabled;
 
-	public ClientMssgDebugOp(String executionId, DebugOp debugOp)
+	public ClientMssgDebugOp(String executionId, DebugOp debugOp, boolean ignoreErrorEnabled)
 	{
 		super(UUID.randomUUID().toString());
 		
@@ -48,6 +54,7 @@ public class ClientMssgDebugOp extends ClientMessage
 		
 		this.executionId = executionId;
 		this.debugOp = debugOp;
+		this.ignoreErrorEnabled = ignoreErrorEnabled;
 	}
 	
 	public String getExecutionId()
@@ -58,5 +65,10 @@ public class ClientMssgDebugOp extends ClientMessage
 	public DebugOp getDebugOp()
 	{
 		return debugOp;
+	}
+	
+	public boolean isIgnoreErrorEnabled()
+	{
+		return ignoreErrorEnabled;
 	}
 }

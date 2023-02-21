@@ -102,7 +102,7 @@ public class AutomationFileLoader
 			TestSuiteParserHandler defaultParserHandler, Set<String> errors, boolean forReload)
 	{
 		AutomationContext context = AutomationContext.getInstance();
-		TestDataFile testDataFile = new TestDataFile(context);
+		TestDataFile testDataFile = new TestDataFile(context, forReload);
 		TestSuiteGroup testSuiteGroup = context.getTestSuiteGroup();
 		
 		defaultParserHandler.setFileBeingParsed(xmlFile);

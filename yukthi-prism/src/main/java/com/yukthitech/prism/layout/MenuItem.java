@@ -241,7 +241,7 @@ public class MenuItem implements Validateable
 			
 			if(shortKey.isGlobal() && action != null)
 			{
-				actionCollection.registerGlobalAction(shortKey, action);
+				actionCollection.registerGlobalAction(shortKey, action, menuItem);
 			}
 		}
 		

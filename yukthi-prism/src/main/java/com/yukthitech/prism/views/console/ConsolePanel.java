@@ -87,6 +87,8 @@ public class ConsolePanel extends JPanel implements IViewPanel
 
 	private ExecutionEnvironment activeEnvironment;
 	private final IconButton btnOpenReport = new IconButton();
+	
+	private JTabbedPane parentTabbedPane;
 
 	/**
 	 * Create the panel.
@@ -229,7 +231,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	@Override
 	public void setParent(JTabbedPane parentTabPane)
 	{
-		//this.parentTabbedPane = parentTabPane;
+		this.parentTabbedPane = parentTabPane;
 	}
 
 	private void refreshConsoleText()
@@ -272,14 +274,18 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	
 	private void moveToEnd()
 	{
-		EventQueue.invokeLater(() -> {
-			// move scroll pane to the end
-			JScrollBar vertical = scrollPane.getVerticalScrollBar();
-			vertical.setValue(vertical.getMaximum());
-			
-			JScrollBar horizontal = scrollPane.getHorizontalScrollBar();
-			horizontal.setValue(0);
-		});
+		IdeUtils.execute(() -> 
+		{
+			EventQueue.invokeLater(() -> 
+			{
+				// move scroll pane to the end
+				JScrollBar vertical = scrollPane.getVerticalScrollBar();
+				vertical.setValue(vertical.getMaximum());
+				
+				JScrollBar horizontal = scrollPane.getHorizontalScrollBar();
+				horizontal.setValue(0);
+			});
+		}, 200);
 	}
 
 	private void appendNewContent(String content)
@@ -294,12 +300,10 @@ public class ConsolePanel extends JPanel implements IViewPanel
 				htmlDoc.insertBeforeEnd(element, injectLinks(content));
 				moveToEnd();
 				
-				/*
 				if(parentTabbedPane != null)
 				{
 					parentTabbedPane.setSelectedComponent(this);
 				}
-				*/
 			} catch(Exception ex)
 			{
 				logger.error("An error occurred while adding html content", ex);
