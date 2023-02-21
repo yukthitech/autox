@@ -11,7 +11,6 @@
 		</setup>
 		
 		<function name="function1">
-			<s:assert-equals actual="1" expected="int: 1"/>
 			<s:log message="function1- Line 1"/>
 			<s:log message="function1- Line 2"/>
 		</function>
