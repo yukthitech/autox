@@ -59,4 +59,21 @@ public class ClientMssgEvalExpression extends ClientMessage
 	{
 		return expression;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(super.getRequestId());
+		builder.append(",").append("Execution Id: ").append(executionId);
+		builder.append(",").append("Eval Expression: ").append(StringUtils.left(expression, 100));
+
+		builder.append("]");
+		return builder.toString();
+	}
 }

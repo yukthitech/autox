@@ -15,8 +15,8 @@
  */
 package com.yukthitech.autox.debug.server;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,9 +42,11 @@ import com.yukthitech.autox.IStepIntegral;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack.StackElement;
+import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
 import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
 import com.yukthitech.autox.debug.common.DebugOp;
 import com.yukthitech.autox.debug.common.DebugPoint;
+import com.yukthitech.autox.debug.common.DebugUtils;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.common.ServerMssgEvalExprResult;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
@@ -64,9 +66,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class LiveDebugPoint
 {
 	private static Logger logger = LogManager.getLogger(LiveDebugPoint.class);
-	private static ThreadLocal<LiveDebugPoint> livePointThreadLocal = new ThreadLocal<>();
 	
-	private static byte[] NOT_SER_BYTES = "<Not Serializable>".getBytes();
+	private static final int LOCK_TIME_OUT = 10;
+	
+	private static ThreadLocal<LiveDebugPoint> livePointThreadLocal = new ThreadLocal<>();
 	
 	private static class Request
 	{
@@ -184,16 +187,7 @@ public class LiveDebugPoint
 		Map<String, byte[]> contextAttr = new HashMap<>(); 
 		ExecutionContextManager.getExecutionContext().getAttr().forEach((key, val) ->
 		{
-			byte serData[] = null;
-			
-			try
-			{
-				serData = SerializationUtils.serialize((Serializable) val);
-			}catch(Exception ex)
-			{
-				serData = NOT_SER_BYTES;
-			}
-			
+			byte serData[] = DebugUtils.serialize(val);
 			contextAttr.put(key, serData);
 		});
 
@@ -212,16 +206,7 @@ public class LiveDebugPoint
 		
 		params.forEach((key, val) ->
 		{
-			byte serData[] = null;
-			
-			try
-			{
-				serData = SerializationUtils.serialize((Serializable) val);
-			}catch(Exception ex)
-			{
-				serData = NOT_SER_BYTES;
-			}
-			
+			byte serData[] = DebugUtils.serialize(val);
 			paramMap.put(key, serData);
 		});
 
@@ -233,6 +218,7 @@ public class LiveDebugPoint
 		List<ServerMssgExecutionPaused.StackElement> stackTrace = new ArrayList<>();
 		int index = -1;
 		ILocationBased prevStep = null;
+		List<ServerMssgExecutionPaused.StackElement> elementsWithoutId = new ArrayList<>();
 				
 		synchronized(dropableFrameIds)
 		{
@@ -241,6 +227,23 @@ public class LiveDebugPoint
 			for(StackElement elem : ExecutionContextManager.getInstance().getExecutionStack().getStackTrace())
 			{
 				index++;
+				
+				String elemId = elem.getStackElementId();
+				
+				//when an element is found with id
+				if(StringUtils.isNotBlank(elemId))
+				{
+					//and previously elements are found without id
+					if(!elementsWithoutId.isEmpty())
+					{
+						//copy id from current element to prev elements without id
+						elementsWithoutId.forEach(msgElem -> msgElem.setStackElementId(elemId));
+						elementsWithoutId.clear();
+					}
+					
+					//mark current element id as dropable
+					dropableFrameIds.add(elemId);
+				}
 				
 				/*
 				 * Skip the step addition to stack trace in following case:
@@ -255,14 +258,44 @@ public class LiveDebugPoint
 				}
 
 				prevStep = elem.getElement();
-				stackTrace.add(new ServerMssgExecutionPaused.StackElement(elem.getLocation(), elem.getLineNumber(), elem.getStackElementId()));
 				
+				ServerMssgExecutionPaused.StackElement mssgStackElem = new ServerMssgExecutionPaused.StackElement(elem.getLocation(), 
+						elem.getLineNumber(), elemId);
+				
+				stackTrace.add(mssgStackElem);
 			
-				if(StringUtils.isNotBlank(elem.getStackElementId()))
+				//when stack elem id is empty
+				if(StringUtils.isBlank(elemId))
 				{
-					dropableFrameIds.add(elem.getStackElementId());
+					elementsWithoutId.add(mssgStackElem);
 				}
 			}
+		}
+		
+		/*
+		 * Populate stack-element-id for elements with missing stack-element-id.
+		 * This would be the case in case of steps part of step-container-step like loop, try-catch etc.
+		 */
+		
+		//get stack trace in reverse order as the parent/wrapping element comes in reverse order
+		List<ServerMssgExecutionPaused.StackElement> revStackTrace = new ArrayList<>(stackTrace);
+		Collections.reverse(revStackTrace);
+		
+		String prevStackElemId = null;
+		String stackElemId = null;
+		
+		for(ServerMssgExecutionPaused.StackElement elem : revStackTrace)
+		{
+			stackElemId = elem.getStackElementId();
+			stackElemId = StringUtils.isBlank(stackElemId) ? prevStackElemId : stackElemId;
+			
+			if(StringUtils.isBlank(stackElemId))
+			{
+				stackElemId = prevStackElemId;
+				elem.setStackElementId(stackElemId);
+			}
+			
+			prevStackElemId = stackElemId;
 		}
 		
 		ServerMssgExecutionPaused pausedMssg = new ServerMssgExecutionPaused(id, threadOnHold.getName(), lastPauseLocation.getLocation().getPath(),
@@ -433,9 +466,25 @@ public class LiveDebugPoint
 		}
 	}
 	
+	private void acquirePauseLock()
+	{
+		try
+		{
+			boolean res = pauseLock.tryLock(LOCK_TIME_OUT, TimeUnit.SECONDS);
+			
+			if(!res)
+			{
+				throw new DebugLockException("Failed to acquire required locks before timeout.");
+			}
+		}catch(InterruptedException ex)
+		{
+			throw new DebugLockException("Thread was interrupted before acquiring required locks");
+		}
+	}
+	
 	public void requestExecuteSteps(String reqId, List<IStep> steps)
 	{
-		pauseLock.lock();
+		acquirePauseLock();
 		
 		try
 		{
@@ -456,7 +505,7 @@ public class LiveDebugPoint
 	
 	public void requestEvalExpression(String reqId, String expression)
 	{
-		pauseLock.lock();
+		acquirePauseLock();
 		
 		try
 		{
@@ -480,7 +529,7 @@ public class LiveDebugPoint
 	
 	public boolean requestDropToFrame(ClientMssgDropToFrame dropToFrame)
 	{
-		pauseLock.lock();
+		acquirePauseLock();
 		
 		try
 		{
@@ -562,25 +611,36 @@ public class LiveDebugPoint
 		}
 	}
 	
-	public boolean requestRelease(String reqId, DebugOp debugOp, boolean ignoreError)
+	public boolean requestRelease(ClientMssgDebugOp request)
 	{
-		pauseLock.lock();
+		acquirePauseLock();
 		
 		try
 		{
+			DebugOp debugOp = request.getDebugOp();
 			logger.trace("LivePOINT: Release operation request with op: {}", debugOp);
 
 			if(!onPause.get())
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(reqId, false, "Current live-point is not in paused state"));
+				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(request.getRequestId(), false, "Current live-point is not in paused state"));
 				return false;
 			}
 			
-			if(this.errorPoint && ignoreError)
+			if(this.errorPoint)
 			{
-				synchronized(requests)
+				if(request.isIgnoreErrorEnabled())
 				{
-					this.requests.addLast(Request.ignoreError());
+					synchronized(requests)
+					{
+						this.requests.addLast(Request.ignoreError());
+					}
+				}
+				else if(debugOp != DebugOp.RESUME)
+				{
+					DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(request.getRequestId(), false, 
+							String.format("Current error-point does not support specified operation. [Op: %s, Ignore Error: %s]", debugOp, request.isIgnoreErrorEnabled())
+							));
+					return false;
 				}
 			}
 			

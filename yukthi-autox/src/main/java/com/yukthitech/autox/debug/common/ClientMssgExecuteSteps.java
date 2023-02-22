@@ -98,4 +98,23 @@ public class ClientMssgExecuteSteps extends ClientMessage
 	{
 		return startLineNumber;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(super.getRequestId());
+		builder.append(",").append("Execution Id: ").append(executionId);
+		builder.append(",").append("Source File: ").append(sourceFile);
+		builder.append(",").append("Start Line# ").append(startLineNumber);
+		builder.append(",").append("Target Test Suite: ").append(targetTestSuite);
+
+		builder.append("]");
+		return builder.toString();
+	}
 }

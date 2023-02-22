@@ -15,10 +15,14 @@
  */
 package com.yukthitech.prism.actions;
 
+import javax.swing.JOptionPane;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
 import com.yukthitech.autox.debug.common.DebugOp;
+import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
+import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.prism.exeenv.ExecutionEnvironment;
 import com.yukthitech.prism.exeenv.ExecutionEnvironmentManager;
 import com.yukthitech.prism.layout.Action;
@@ -37,6 +41,19 @@ public class DebugActions
 		if(activeEnv == null || !activeEnv.isDebugEnv() || activeEnv.getActiveThreadId() == null)
 		{
 			return;
+		}
+		
+		ServerMssgExecutionPaused execDet = activeEnv.getActiveThreadDetails();
+		
+		if(execDet.isErrorPoint() && !ignoreError)
+		{
+			int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), "Current operation will resume the flow without ignoring the error.\n"
+							+ "This may stop/error current execution. Are you sure you want to continue?", "Resume on Error", JOptionPane.YES_NO_OPTION);
+			
+			if(res != JOptionPane.YES_OPTION)
+			{
+				return;
+			}
 		}
 		
 		activeEnv.sendDataToServer(new ClientMssgDebugOp(activeEnv.getActiveThreadId(), debugOp, ignoreError));

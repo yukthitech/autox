@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -29,11 +30,15 @@ import org.springframework.stereotype.Component;
 import com.yukthitech.autox.debug.common.ClientMessage;
 import com.yukthitech.autox.debug.common.ClientMssgLoadAppProperties;
 import com.yukthitech.autox.debug.common.ClientMssgReloadFile;
+import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.prism.IIdeFileManager;
 import com.yukthitech.prism.IdeFileManagerFactory;
 import com.yukthitech.prism.events.FileSavedEvent;
+import com.yukthitech.prism.exeenv.debug.DebugPointManager;
+import com.yukthitech.prism.exeenv.debug.IdeDebugPoint;
 import com.yukthitech.prism.model.Project;
 import com.yukthitech.prism.services.IdeEventHandler;
+import com.yukthitech.prism.services.SpringServiceProvider;
 
 /**
  * Component responsible for reloading app properties and other files in debug environments.
@@ -116,6 +121,13 @@ public class FileSaveListener
 			return;
 		}
 		
-		sendMessageToEnvs(new ClientMssgReloadFile(event.getFile()), event.getProject());
+		//get the debug points, as their positions might have changed along with file content
+		DebugPointManager debugManager = SpringServiceProvider.getService(DebugPointManager.class);
+		List<IdeDebugPoint> ideDebugPoints = debugManager.getDebugPoints(event.getProject().getName());
+		List<DebugPoint> debugPoints = ideDebugPoints.stream()
+				.map(idePoint -> new DebugPoint(idePoint.getFile().getPath(), idePoint.getLineNo() + 1, idePoint.getCondition()))
+				.collect(Collectors.toList());
+
+		sendMessageToEnvs(new ClientMssgReloadFile(event.getFile(), debugPoints), event.getProject());
 	}
 }

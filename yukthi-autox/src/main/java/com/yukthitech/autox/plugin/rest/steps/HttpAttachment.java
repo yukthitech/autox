@@ -44,7 +44,7 @@ public class HttpAttachment implements Validateable, Serializable
 	/**
 	 * File of the attachment.
 	 */
-	@Param(name = "file", description = "Resource to be added as attachment", required = true)
+	@Param(name = "file", description = "Resource to be added as attachment. Should be resource expression.", required = true)
 	private String file;
 	
 	/**

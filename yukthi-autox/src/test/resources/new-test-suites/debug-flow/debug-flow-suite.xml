@@ -18,7 +18,7 @@
 		<function name="function2">
 			<s:log message="function2- Line 1"/>
 			<s:log message="function2- Line 2"/>
-			
+
 			<f:function1/>
 			<s:log message="Post Func call"/>
 		</function>

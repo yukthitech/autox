@@ -240,9 +240,10 @@ public class PrismUpdater
 				return;
 			}
 			
-			int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), "There is a new version of Prism IDE. Would you like to download?", "IDE Upgrade", JOptionPane.YES_NO_OPTION);
+			int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), "There is a new version of Prism IDE. Would you like to download?", "IDE Upgrade",
+					JOptionPane.YES_NO_OPTION);
 			
-			if(res == JOptionPane.NO_OPTION)
+			if(res != JOptionPane.YES_OPTION)
 			{
 				return;
 			}

@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.AutomationFileLoader;
 import com.yukthitech.autox.debug.common.ClientMssgReloadFile;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.DebugServer;
 
 /**
@@ -50,6 +51,7 @@ public class ReloadFileHandler extends AbstractServerDataHandler<ClientMssgReloa
 		
 		if(errors.isEmpty())
 		{
+			DebugFlowManager.getInstance().setDebugPoints(data.getDebugPoints());
 			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
 		}
 		else

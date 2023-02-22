@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,6 +69,12 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 	{
 		this.name = name;
 		this.returnAttr = returnAttr;
+	}
+	
+	@Override
+	public void setLocation(File location, int lineNumber)
+	{
+		super.setLocation(location, lineNumber);
 	}
 
 	/**

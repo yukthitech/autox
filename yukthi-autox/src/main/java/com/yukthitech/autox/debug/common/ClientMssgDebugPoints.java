@@ -41,4 +41,21 @@ public class ClientMssgDebugPoints extends ClientMessage
 	{
 		return debugPoints;
 	}
+
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(super.getRequestId());
+		builder.append(",").append("Debug Point Count: ").append(debugPoints.size());
+
+		builder.append("]");
+		return builder.toString();
+	}
 }

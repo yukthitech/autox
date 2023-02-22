@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+
 /**
  * Used when execution is paused because of debug point.
  * @author akranthikiran
@@ -63,6 +65,11 @@ public class ServerMssgExecutionPaused implements Serializable
 		public String getStackElementId()
 		{
 			return stackElementId;
+		}
+		
+		public void setStackElementId(String stackElementId)
+		{
+			this.stackElementId = stackElementId;
 		}
 	}
 	
@@ -158,5 +165,27 @@ public class ServerMssgExecutionPaused implements Serializable
 	public boolean isErrorPoint()
 	{
 		return errorPoint;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Execution Id: ").append(executionId);
+		builder.append(",").append("Name: ").append(name);
+		builder.append(",").append("File path: ").append(debugFilePath);
+		builder.append(",").append("Line# ").append(lineNumber);
+		builder.append(",").append("Error Point: ").append(errorPoint);
+		builder.append(",").append("Attr Count: ").append(CollectionUtils.size(contextAttr));
+		builder.append(",").append("Param Count: ").append(CollectionUtils.size(params));
+
+		builder.append("]");
+		return builder.toString();
 	}
 }

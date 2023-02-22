@@ -37,6 +37,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.text.Element;
 import javax.swing.text.html.HTMLDocument;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -223,7 +224,16 @@ public class DebugSandboxPanel extends JPanel
 	private void onExprEvaluation(ServerMssgConfirmation confirmation)
 	{
 		ServerMssgEvalExprResult resMssg = (ServerMssgEvalExprResult) confirmation;
-		Object value = resMssg.getResult();
+		Object value = null;
+		
+		try
+		{
+			value = SerializationUtils.deserialize(resMssg.getResult());
+		}catch(Exception ex)
+		{
+			value = "<non-deserializable>";
+		}
+		
 		ExprDetails expDetails = null;
 		
 		synchronized(expressionMap)

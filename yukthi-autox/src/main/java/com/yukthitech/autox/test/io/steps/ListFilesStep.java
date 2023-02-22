@@ -53,7 +53,7 @@ public class ListFilesStep extends AbstractStep
 	@Param(description = "Flag indicating files has to be included. Default true", required = false)
 	private boolean files = true;
 
-	@Param(description = "Name of attribute to which file list has to be set. Default: fileList", required = false)
+	@Param(description = "Name of attribute to which file list has to be set. Default: fileList", required = false, attrName = true)
 	private String listAttr = "fileList";
 
 	public void setFolder(String folder)

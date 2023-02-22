@@ -713,6 +713,8 @@ public class FileEditor extends JPanel
 			//convert to zero index line
 			lineNo = lineNo - 1;
 			
+			logger.debug("Highlighting debug point line {}:{}", file.getName(), lineNo);
+
 			//work around for highlight bug - reduce line number by 1
 			debugHighlightTag = syntaxTextArea.addLineHighlight(lineNo - 1, 
 					errorPoint ?  IIdeConstants.DEBUG_ERR_BG_COLOR : IIdeConstants.DEBUG_BG_COLOR);

@@ -83,15 +83,14 @@ public class DebugFlowManager
 	
 	public DebugFlowManager setDebugPoints(Collection<DebugPoint> points)
 	{
-		if(CollectionUtils.isEmpty(points))
-		{
-			return this;
-		}
-		
 		synchronized(debugPoints)
 		{
 			this.debugPoints.clear();
-			points.forEach(point -> debugPoints.put(point.getFilePath() + ":" + point.getLineNumber(), point));
+			
+			if(CollectionUtils.isNotEmpty(points))
+			{
+				points.forEach(point -> debugPoints.put(point.getFilePath() + ":" + point.getLineNumber(), point));
+			}
 		}
 		
 		return this;

@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.ui.common;
 
+import java.util.List;
+
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -69,8 +71,8 @@ public class UiFreeMarkerMethods
 	}
 	
 	@FreeMarkerMethod(
-			description = "Fetches value of specified locator. If element is text/textarea, its ui value will be fetched.",
-			returnDescription = "Value of the ui element"
+			description = "Fetches first element of specified locator.",
+			returnDescription = "Matching web element"
 			)
 	public static WebElement uiGetElement(
 			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") String locator, 
@@ -79,6 +81,19 @@ public class UiFreeMarkerMethods
 			) throws Exception
 	{
 		return getElementByLocator(driverName, locator, parent);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Fetches all elements matching specified locator.",
+			returnDescription = "Matching web elements"
+			)
+	public static List<WebElement> uiGetElements(
+			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") String locator, 
+			@FmParam(name = "parent", description = "Optional. Webelement or ui-locator or attr-name of parent web-element.") Object parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			) throws Exception
+	{
+		return UiAutomationUtils.findElements(driverName, parent, locator);
 	}
 	
 	/**

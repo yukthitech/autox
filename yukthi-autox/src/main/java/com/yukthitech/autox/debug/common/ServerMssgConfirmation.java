@@ -62,4 +62,21 @@ public class ServerMssgConfirmation implements Serializable
 	{
 		return error;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(requestId);
+		builder.append(",").append("Successful: ").append(successful);
+		builder.append(",").append("Error: ").append(error);
+
+		builder.append("]");
+		return builder.toString();
+	}
 }

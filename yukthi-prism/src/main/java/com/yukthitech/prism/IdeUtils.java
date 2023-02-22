@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -191,7 +192,7 @@ public class IdeUtils
 		}
 	}
 	
-	private static BufferedImage loadSvg(String resource, int width, int height)
+	private static BufferedImage loadSvg(String resource, InputStream inputStream, int width, int height)
 	{
 		// Create a PNG transcoder.
         Transcoder t = new PNGTranscoder();
@@ -200,7 +201,7 @@ public class IdeUtils
         t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) width);
         t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) height);
         
-        try (InputStream inputStream = IdeUtils.class.getResourceAsStream(resource)) 
+        try 
         {
             // Create the transcoder input.
             TranscoderInput input = new TranscoderInput(inputStream);
@@ -218,14 +219,25 @@ public class IdeUtils
 
             // Convert the byte stream into an image.
             byte[] imgData = outputStream.toByteArray();
+            inputStream.close();
+            
             return ImageIO.read(new ByteArrayInputStream(imgData));
-
         } catch (IOException | TranscoderException ex) 
         {
             throw new InvalidStateException("An error occurred while loading svg resource: {}", resource, ex);
         }
 	}
 	
+	private static BufferedImage loadSvg(String resource, int width, int height)
+	{
+		return loadSvg(resource, IdeUtils.class.getResourceAsStream(resource), width, height);
+	}
+	
+	public static BufferedImage loadSvgFile(String file, int width, int height) throws FileNotFoundException
+	{
+		return loadSvg(file, new FileInputStream(file), width, height);
+	}
+
 	public static ImageIcon loadIcon(String resource, int size)
 	{
 		return loadIcon(resource, size, size, BORDER_SIZE, false);

@@ -48,4 +48,20 @@ public class ServerMssgStepExecuted extends ServerMssgConfirmation
 	{
 		return executionId;
 	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Exeuction Id: ").append(executionId);
+
+		builder.append("]");
+		return builder.toString();
+	}
 }

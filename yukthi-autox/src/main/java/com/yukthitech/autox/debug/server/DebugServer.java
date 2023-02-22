@@ -16,7 +16,6 @@
 package com.yukthitech.autox.debug.server;
 
 import java.io.Closeable;
-import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -36,6 +35,7 @@ import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.debug.common.ClientMessage;
+import com.yukthitech.autox.debug.common.DebugUtils;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.server.handler.DebugOpHandler;
 import com.yukthitech.autox.debug.server.handler.DebugPointsHandler;
@@ -194,23 +194,22 @@ public class DebugServer
 			{
 				clientDataBufferLock.unlock();
 			}
-
+			
+			byte rawData[] = null;
+			
 			try
 			{
-				try
+				for(Serializable mssg : dataBuff)
 				{
-					clientOutputStream.writeObject(dataBuff);
-				}catch(NotSerializableException ex)
-				{
-					clientOutputStream.writeObject("<< Not serializable >>");
+					rawData = DebugUtils.serialize(mssg);
+					
+					clientOutputStream.writeObject(rawData);
+					clientOutputStream.flush();
 				}
-				
-				clientOutputStream.flush();
 			} catch(Exception ex)
 			{
 				logger.error("An error occurred while sending data to client. There might be some data loss being sent to client", ex);
 			}
-			
 			
 			try
 			{
@@ -230,25 +229,30 @@ public class DebugServer
 		//wait till client socket is closed
 		while(!stopped && clientSocket != null && !clientSocket.isClosed())
 		{
+			ClientMessage clientMssg = null;
+			
 			try
 			{
-				ClientMessage object = (ClientMessage) clientInputStream.readObject();
-				logger.debug("Received command from client: {}", object);
+				clientMssg = (ClientMessage) clientInputStream.readObject();
+				logger.debug("Received command from client: {}", clientMssg);
 				
-				Class<?> mssgType = object.getClass();
+				Class<?> mssgType = clientMssg.getClass();
 				
 				IServerDataHandler<Serializable> handler = this.dataHandlers.get(mssgType);
 				
 				if(handler != null)
 				{
-					handler.processData(object);
+					handler.processData(clientMssg);
 				}
 				else
 				{
-					logger.warn("Unsupported debug-message received: {}", object);
-					sendClientMessage(new ServerMssgConfirmation(object.getRequestId(), false, "Unsupported debug-message received: %s", object));
+					logger.warn("Unsupported debug-message received: {}", clientMssg);
+					sendClientMessage(new ServerMssgConfirmation(clientMssg.getRequestId(), false, "Unsupported debug-message received: %s", clientMssg));
 				}
-			}catch(Exception ex)
+			} catch(DebugLockException ex)
+			{
+				sendClientMessage(new ServerMssgConfirmation(clientMssg.getRequestId(), false, ex.getMessage()));
+			} catch(Exception ex)
 			{
 				logger.error("An error occurred while fetching data from client", ex);
 				

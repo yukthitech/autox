@@ -209,6 +209,8 @@ public class ExecutionEnvironment
 	
 	private void onServerMessage(Serializable data)
 	{
+		logger.debug("From server received message: {}", data);
+		
 		if(data instanceof ServerMssgExecutionPaused)
 		{
 			ServerMssgExecutionPaused mssg = (ServerMssgExecutionPaused) data;

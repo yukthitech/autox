@@ -284,6 +284,15 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	
 	private void saveFilesState(IdeState state) throws IOException
 	{
+		//clear open files state
+		Set<ProjectState> openProjects = state.getOpenProjects();
+		
+		if(CollectionUtils.isNotEmpty(openProjects))
+		{
+			openProjects.forEach(proj -> proj.getOpenFiles().clear());
+		}
+		
+		//add currently open file details to the state
 		int tabCount = super.getTabCount();
 		Set<String> existingProjects = new HashSet<>();
 		

@@ -103,9 +103,9 @@ public class MkDirStep extends AbstractStep
 		{
 			FileUtils.forceMkdir(dirToCreate);
 			
-			exeLogger.debug("Setting created directory path {} on context with attribute - {}", dirToCreate, name);
+			exeLogger.debug("Setting created directory path {} on context with attribute: {}", dirToCreate, name);
 			
-			context.setAttribute(name, dirToCreate);
+			context.setAttribute(name, dirToCreate.getPath());
 		}catch(Exception ex)
 		{
 			//exeLogger.error(ex, "An error occurred while creating directory - {}", path);

@@ -46,6 +46,8 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -82,6 +84,8 @@ import com.yukthitech.swing.tree.BasicTreeNodeRenderer;
 public class DebugPanel extends JPanel implements IViewPanel
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(DebugPanel.class);
 	
 	private static ImageIcon DEBUG_POINT_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/debug-point.svg", 12);
 	
@@ -303,7 +307,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 			activeEnv.setActiveThreadId(executionId);
 		}
 		
-		updateActiveThread(activeEnv);
+		updateActiveThread(activeEnv, false);
 	}
 	
 	private void onDropToFrame(ActionEvent e)
@@ -401,7 +405,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 		}
 		
 		stackTraceTreeModel.setEnvironment(activeEnv);
-		updateActiveThread(activeEnv);
+		updateActiveThread(activeEnv, true);
 	}
 	
 	@IdeEventHandler
@@ -415,11 +419,18 @@ public class DebugPanel extends JPanel implements IViewPanel
 			return;
 		}
 		
+		logger.debug("Processing on pause event...");
+		
 		stackTraceTreeModel.addOrUpdate(event.getPausedMssg());
 		
 		if(event.getPausedMssg().getExecutionId().equals(activeEnv.getActiveThreadId()))
 		{
-			updateActiveThread(activeEnv);
+			updateActiveThread(activeEnv, true);
+		}
+		else
+		{
+			logger.debug("Skipping updating active thread details as execution ids are different [Event exe id: {}, Active env exe id: {}]", 
+					event.getPausedMssg().getExecutionId(), activeEnv.getActiveThreadId());
 		}
 	}
 	
@@ -433,11 +444,13 @@ public class DebugPanel extends JPanel implements IViewPanel
 		{
 			return;
 		}
+		
+		logger.debug("Processing on release event...");
 
 		stackTraceTreeModel.removeStackTrace(event.getPausedMssg().getExecutionId());
 
 		//post release active env should be considered as null
-		updateActiveThread(activeEnv.getActiveThreadId() == null ? null : activeEnv);
+		updateActiveThread(activeEnv.getActiveThreadId() == null ? null : activeEnv, true);
 	}
 	
 	@IdeEventHandler
@@ -452,7 +465,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 
 		if(event.getStepExecuted().getExecutionId().equals(activeEnv.getActiveThreadId()) && event.getStepExecuted().getContextAttr() != null)
 		{
-			updateActiveThread(activeEnv);
+			updateActiveThread(activeEnv, false);
 		}
 	}
 
@@ -481,7 +494,7 @@ public class DebugPanel extends JPanel implements IViewPanel
 		}
 	}
 
-	private void updateActiveThread(ExecutionEnvironment activeEnv)
+	private void updateActiveThread(ExecutionEnvironment activeEnv, boolean forceHighlight)
 	{
 		ServerMssgExecutionPaused threadDet = activeEnv == null ? null : activeEnv.getActiveThreadDetails();
 
@@ -503,11 +516,16 @@ public class DebugPanel extends JPanel implements IViewPanel
 				activateTab();
 			}
 
-			if(previousDebugHighlight == null || !previousDebugHighlight.executionId.equals(threadDet.getExecutionId()))
+			if(forceHighlight || previousDebugHighlight == null || !previousDebugHighlight.executionId.equals(threadDet.getExecutionId()))
 			{
 				activateTab();
 				
 				highlightDebugPoint(activeEnv, threadDet);
+			}
+			else
+			{
+				logger.debug("Skipping highlighting debug line as execution ids are same [Prev Exec id: {}, New Exec Id: {}]", 
+						previousDebugHighlight.executionId, threadDet.getExecutionId());
 			}
 		}
 		//if no active env is found or active thread is not found

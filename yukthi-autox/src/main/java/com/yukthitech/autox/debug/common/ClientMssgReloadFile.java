@@ -16,6 +16,7 @@
 package com.yukthitech.autox.debug.common;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 import org.openqa.selenium.InvalidArgumentException;
@@ -32,8 +33,13 @@ public class ClientMssgReloadFile extends ClientMessage
 	 * File which is modified.
 	 */
 	private File file;
+	
+	/**
+	 * Debug points to be used.
+	 */
+	private List<DebugPoint> debugPoints;
 
-	public ClientMssgReloadFile(File file)
+	public ClientMssgReloadFile(File file, List<DebugPoint> debugPoints)
 	{
 		super(UUID.randomUUID().toString());
 		
@@ -43,10 +49,33 @@ public class ClientMssgReloadFile extends ClientMessage
 		}
 
 		this.file = file;
+		this.debugPoints = debugPoints;
 	}
 
 	public File getFile()
 	{
 		return file;
+	}
+	
+	public List<DebugPoint> getDebugPoints()
+	{
+		return debugPoints;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(super.getRequestId());
+		builder.append(",").append("File: ").append(file.getPath());
+		builder.append(",").append("Debug Point Count: ").append(debugPoints.size());
+
+		builder.append("]");
+		return builder.toString();
 	}
 }

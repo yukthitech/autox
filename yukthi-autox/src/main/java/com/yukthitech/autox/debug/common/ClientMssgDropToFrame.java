@@ -59,4 +59,21 @@ public class ClientMssgDropToFrame extends ClientMessage
 	{
 		return stackElementId;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(super.getRequestId());
+		builder.append(",").append("Execution Id: ").append(executionId);
+		builder.append(",").append("Stack Element Id: ").append(stackElementId);
+
+		builder.append("]");
+		return builder.toString();
+	}
 }

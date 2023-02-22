@@ -41,6 +41,8 @@ import com.yukthitech.prism.layout.ShortKey;
 @Service
 public class GlobalKeyboardListener
 {
+	private static final int MIN_EVENT_TIME_GAP_MILLIS = 500;
+	
 	private class KeyStroke
 	{
 		private int modifiers;
@@ -64,6 +66,12 @@ public class GlobalKeyboardListener
 	}
 	
 	private Map<Integer, List<KeyStroke>> keyToStrokes = new HashMap<>();
+	
+	/**
+	 * Used to ensure key events are separated by minimal time gap.
+	 * Which is intended to avoid duplicate events for single key stroke.
+	 */
+	private long lastKeyEventTime = 0;
 	
 	@PostConstruct
 	private void init()
@@ -91,7 +99,7 @@ public class GlobalKeyboardListener
 		{
 			return false;
 		}
-		
+
 		int keyCode = e.getKeyCode();
 		List<KeyStroke> strokes = keyToStrokes.get(keyCode);
 		
@@ -100,6 +108,26 @@ public class GlobalKeyboardListener
 			return false;
 		}
 		
+		long curTime = System.currentTimeMillis();
+		
+		synchronized(this)
+		{
+			long timeGap = curTime - lastKeyEventTime;
+			
+			//ignore key events which come without minimal time gap
+			//  which can be duplicate key events for single key stroke
+			if(timeGap < 2000)
+			{
+				return false;
+			}
+			
+			System.out.println(String.format("[[Global Key Event]] Cur time: %s, Last Event Time: %s, Time gap: %s, Event time: %s, Event: %s",
+					curTime, lastKeyEventTime, timeGap, e.getWhen(), e));
+	
+			//keep updating last key event time (which was processed)
+			this.lastKeyEventTime = curTime;
+		}
+
 		int modifiers = 0;
 		
 		if(e.isControlDown())

@@ -47,4 +47,19 @@ public class ClientMssgLoadAppProperties extends ClientMessage
 	{
 		return properties;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(super.getRequestId());
+
+		builder.append("]");
+		return builder.toString();
+	}
 }

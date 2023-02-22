@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -137,7 +138,6 @@ public class DebugClient
 	/**
 	 * Method to read data from server and add it to read buffer.
 	 */
-	@SuppressWarnings("unchecked")
 	private void readDataFromServer()
 	{
 		boolean firstError = true;
@@ -147,14 +147,15 @@ public class DebugClient
 		{
 			try
 			{
-				List<Serializable> dataLst = (List<Serializable>) readerStream.readObject();
+				byte rawData[] = (byte[]) readerStream.readObject();
+				Serializable actObj = SerializationUtils.deserialize(rawData);
 				
 				synchronized(this)
 				{
-					this.readBuffer.addAll(dataLst);
+					this.readBuffer.add(actObj);
 					super.notifyAll();
 				}
-			}catch(Exception ex)
+			} catch(Exception ex)
 			{
 				if(ex instanceof SocketException)
 				{
@@ -167,6 +168,10 @@ public class DebugClient
 					{
 						firstError = false;
 					}
+				}
+				else
+				{
+					logger.error("An error occurred while fetching data from server", ex);
 				}
 				
 				//as the exception might be because of client close. So wait for second and check again

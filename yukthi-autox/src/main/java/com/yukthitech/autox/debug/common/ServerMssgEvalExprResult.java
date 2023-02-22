@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.debug.common;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Response message for eval expression along with result.
  * @author akranthikiran
@@ -26,16 +28,34 @@ public class ServerMssgEvalExprResult extends ServerMssgConfirmation
 	/**
 	 * Result value.
 	 */
-	private Object result;
+	private byte[] result;
 	
 	public ServerMssgEvalExprResult(String requestId, boolean successful, Object result, String errorMssg, Object... mssgArgs)
 	{
 		super(requestId, successful, errorMssg, mssgArgs);
-		this.result = result;
+		this.result = DebugUtils.serialize(result);
 	}
 
-	public Object getResult()
+	public byte[] getResult()
 	{
 		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Request Id: ").append(super.getRequestId());
+		builder.append(",").append("Successful: ").append(super.isSuccessful());
+		builder.append(",").append("Error: ").append(super.getError());
+		builder.append(",").append("Result: ").append(StringUtils.left("" + result, 100));
+
+		builder.append("]");
+		return builder.toString();
 	}
 }

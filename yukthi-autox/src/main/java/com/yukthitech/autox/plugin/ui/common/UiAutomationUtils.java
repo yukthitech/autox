@@ -223,7 +223,8 @@ public class UiAutomationUtils
 	 */
 	public static WebElement findElement(String driverName, Object parentElement, String locator)
 	{
-		List<WebElement> elements = findElements(driverName, parentElement, locator);
+		WebElement parent = getParentElement(driverName, parentElement);
+		List<WebElement> elements = findElements(driverName, parent, locator, true);
 
 		if(elements == null || elements.size() == 0)
 		{
