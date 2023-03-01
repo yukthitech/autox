@@ -20,9 +20,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
@@ -839,7 +840,7 @@ public class AutomationUtils
 	 */
 	public static Object loadObjectContent(String data, String name, Class<?> type, IExecutionLogger logger) throws Exception
 	{
-		InputStream is = new ByteArrayInputStream(data.getBytes());
+		Reader reader = new StringReader(data);
 		
 		if(name.toLowerCase().endsWith(".properties"))
 		{
@@ -849,7 +850,7 @@ public class AutomationUtils
 			}
 			
 			Properties prop = new Properties();
-			prop.load(is);
+			prop.load(reader);
 			
 			return new HashMap<>(prop);
 		}
@@ -866,7 +867,7 @@ public class AutomationUtils
 				type = Object.class;
 			}
 			
-			Object res = AutomationUtils.convertToWriteable( objectMapper.readValue(is, type) );
+			Object res = AutomationUtils.convertToWriteable( objectMapper.readValue(reader, type) );
 			
 			return res;
 		}
@@ -883,7 +884,7 @@ public class AutomationUtils
 				type = Object.class;
 			}
 			
-			Object res = AutomationUtils.convertToWriteable( objectMapperWithType.readValue(is, type) );
+			Object res = AutomationUtils.convertToWriteable( objectMapperWithType.readValue(reader, type) );
 			
 			return res;
 		}
@@ -912,7 +913,8 @@ public class AutomationUtils
 			parserHandler.registerReserveNodeHandler(new BeanReserveNodeHandler());
 			parserHandler.registerReserveNodeHandler(new CloneReserveNodeHandler());
 			
-			res = XMLBeanParser.parse(is, res, parserHandler);
+			ByteArrayInputStream bis = new ByteArrayInputStream(data.getBytes());
+			res = XMLBeanParser.parse(bis, res, parserHandler);
 			
 			if(res instanceof DynamicBean)
 			{

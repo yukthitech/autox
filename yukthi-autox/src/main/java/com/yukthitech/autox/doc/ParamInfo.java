@@ -168,11 +168,12 @@ public class ParamInfo implements Comparable<ParamInfo>, Serializable
 	 * @param description the description
 	 * @param type the type
 	 */
-	public ParamInfo(String name, String description, String type)
+	public ParamInfo(String name, String description, String type, String defaultValue)
 	{
 		this.name = name;
 		this.description = description;
 		this.type = type;
+		this.defaultValue = defaultValue;
 	}
 
 	/**

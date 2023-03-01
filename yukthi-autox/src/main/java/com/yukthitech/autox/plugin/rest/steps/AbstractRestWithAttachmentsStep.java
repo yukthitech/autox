@@ -148,11 +148,11 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 			if(partEntry.getValue() instanceof String)
 			{
 				partResource = ResourceFactory.getResource(context, (String) partEntry.getValue(), exeLogger, true);
-				postRestRequest.addTextPart(partEntry.getName(), partResource.toText(), partEntry.getContentType());
+				postRestRequest.addTextPart(partEntry.getName(), partResource.toText(), partEntry.getContentType(), partEntry.getCharset());
 			}
 			else
 			{
-				postRestRequest.addJsonPart(partEntry.getName(), partEntry.getValue());
+				postRestRequest.addJsonPart(partEntry.getName(), partEntry.getValue(), partEntry.getCharset());
 			}
 		}
 		

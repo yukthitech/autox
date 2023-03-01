@@ -215,6 +215,29 @@ public class DebugFlowManager
 		{
 			return;
 		}
+		
+		LiveDebugPoint currentLivePoint = LiveDebugPoint.getLivePoint();
+		
+		/*
+		 * Current thread might be holding already a debug point
+		 * This can happen when steps are getting executed as part of error
+		 * point and steps again resulted in error.
+		 */
+		if(currentLivePoint != null)
+		{
+			//if error came up during dynamic code execution, ignore the error
+			if(currentLivePoint.isDynamicExecutionInProgress())
+			{
+				return;
+			}
+			else
+			{
+				//By returning without creating error point
+				//  would throw the exception as part of step execution and will return back
+				//  to current debug point
+				currentLivePoint.clearThread();
+			}
+		}
 
 		DebugPoint debugPoint = new DebugPoint(step.getLocation().getPath(), step.getLineNumber(), null);
 		

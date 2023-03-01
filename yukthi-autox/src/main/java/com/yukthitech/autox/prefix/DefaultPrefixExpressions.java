@@ -740,6 +740,13 @@ public class DefaultPrefixExpressions
 			type = Class.forName(exprType[0]);
 		}
 		
+		String charset = parserContext.getParameter("charset");
+		
+		if(charset != null)
+		{
+			data = new String(data.getBytes(), Charset.forName(charset));
+		}
+		
 		Object val = AutomationUtils.loadObjectContent(data, name, type, logger);
 		
 		if("true".equalsIgnoreCase(parserContext.getParameter("expressions")))

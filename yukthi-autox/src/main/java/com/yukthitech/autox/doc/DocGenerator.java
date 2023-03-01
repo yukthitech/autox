@@ -239,7 +239,7 @@ public class DocGenerator
 			{
 				for(ParamDoc pdoc : doc.getParameters())
 				{
-					metInfo.addParameter(new ParamInfo(pdoc.getName(), pdoc.getDescription(), pdoc.getType()));
+					metInfo.addParameter(new ParamInfo(pdoc.getName(), pdoc.getDescription(), pdoc.getType(), pdoc.getDefaultValue()));
 				}
 			}
 			

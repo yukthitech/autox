@@ -67,7 +67,7 @@ public class LiveDebugPoint
 {
 	private static Logger logger = LogManager.getLogger(LiveDebugPoint.class);
 	
-	private static final int LOCK_TIME_OUT = 10;
+	private static final int LOCK_TIME_OUT_SEC = 10;
 	
 	private static ThreadLocal<LiveDebugPoint> livePointThreadLocal = new ThreadLocal<>();
 	
@@ -353,10 +353,6 @@ public class LiveDebugPoint
 					handleOnHoldTasks();
 				}
 			}
-			
-			logger.trace("LivePOINT: Pause released at location: {}:{}", lastPauseLocation.getLocation().getName(), lastPauseLocation.getLineNumber());
-			
-			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
 		} catch(DropToStackFrameException | IgnoreErrorException ex)
 		{
 			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
@@ -366,6 +362,9 @@ public class LiveDebugPoint
 			logger.error("An error occurred during debug point hold", ex);
 		} finally
 		{
+			logger.trace("LivePOINT: Pause released at location: {}:{}", lastPauseLocation.getLocation().getName(), lastPauseLocation.getLineNumber());
+			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
+
 			onPause.set(false);
 			pauseLock.unlock();
 		}
@@ -470,7 +469,7 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			boolean res = pauseLock.tryLock(LOCK_TIME_OUT, TimeUnit.SECONDS);
+			boolean res = pauseLock.tryLock(LOCK_TIME_OUT_SEC, TimeUnit.SECONDS);
 			
 			if(!res)
 			{
@@ -598,13 +597,18 @@ public class LiveDebugPoint
 	}
 	*/
 
+	/**
+	 * Returns true, if the current live point is in pause state, and owner thread
+	 * itself is invoking this method.
+	 * @return
+	 */
 	public boolean isDynamicExecutionInProgress()
 	{
 		pauseLock.lock();
 		
 		try
 		{
-			return onPause.get() && !requests.isEmpty();
+			return onPause.get() && (Thread.currentThread() == threadOnHold);
 		}finally
 		{
 			pauseLock.unlock();

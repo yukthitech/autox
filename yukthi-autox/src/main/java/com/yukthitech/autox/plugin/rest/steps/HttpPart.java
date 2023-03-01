@@ -30,10 +30,6 @@ import com.yukthitech.ccg.xml.util.Validateable;
  */
 public class HttpPart implements Serializable, Validateable
 {
-	
-	/**
-	 * The Constant serialVersionUID.
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -53,6 +49,9 @@ public class HttpPart implements Serializable, Validateable
 	 */
 	@Param(name = "contentType", description = "Content type of the part. By default is is json part.", required = false)
 	private String contentType = IRestConstants.JSON_CONTENT_TYPE;
+
+	@Param(name = "charset", description = "Charset to be used for this part. By default no char set will be used.", required = false)
+	private String charset;
 
 	/**
 	 * Condition for this part. If specified, this part will be included if condition evaluates to true.
@@ -141,6 +140,16 @@ public class HttpPart implements Serializable, Validateable
 	public void setCondition(String condition)
 	{
 		this.condition = condition;
+	}
+	
+	public void setCharset(String charset)
+	{
+		this.charset = charset;
+	}
+	
+	public String getCharset()
+	{
+		return charset;
 	}
 
 	@Override

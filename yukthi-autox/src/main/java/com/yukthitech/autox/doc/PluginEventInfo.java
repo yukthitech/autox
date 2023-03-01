@@ -76,7 +76,7 @@ public class PluginEventInfo implements Comparable<PluginEventInfo>, Serializabl
 
 			for(Param paramAnnot : paramAnnots)
 			{
-				this.params.add(new ParamInfo(paramAnnot.name(), paramAnnot.description(), null));
+				this.params.add(new ParamInfo(paramAnnot.name(), paramAnnot.description(), null, paramAnnot.defaultValue()));
 			}
 		}
 	}

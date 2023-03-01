@@ -326,8 +326,8 @@ public class CommonFreeMarkerMethods
 			)
 	public static Object ifTrue(
 			@FmParam(name = "value", description = "Value to be checked for true.") Object value,
-			@FmParam(name = "trueValue", description = "Value to be returned when value is true. Default: true") Object trueValue,
-			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null. Default: false") Object falseValue
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true.", defaultValue = "true") Object trueValue,
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null.", defaultValue = "false") Object falseValue
 			)
 	{
 		trueValue = (trueValue == null) ? true : trueValue;
@@ -346,8 +346,8 @@ public class CommonFreeMarkerMethods
 			)
 	public static Object ifFalse(
 			@FmParam(name = "value", description = "Value to be checked for false. Can be boolean true or string 'true'") Object value,
-			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null. Default: true") Object falseValue,
-			@FmParam(name = "trueValue", description = "Value to be returned when value is true. Default: false") Object trueValue
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null.", defaultValue = "true") Object falseValue,
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true.", defaultValue = "false") Object trueValue
 			)
 	{
 		trueValue = (trueValue == null) ? false : trueValue;
@@ -398,9 +398,11 @@ public class CommonFreeMarkerMethods
 	public static Boolean contains(
 			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
 			@FmParam(name = "value", description = "Value/key to be searched") Object value,
-			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type") Boolean nullVal
+			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type", defaultValue = "false") Boolean nullVal
 			) throws Exception
 	{
+		nullVal = (nullVal == null) ? false : nullVal;
+		
 		if(collection instanceof Collection)
 		{
 			Collection<Object> col = (Collection<Object>) collection;
@@ -424,9 +426,11 @@ public class CommonFreeMarkerMethods
 	public static Boolean notContains(
 			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
 			@FmParam(name = "value", description = "Value/key to be searched") Object value,
-			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type") Boolean nullVal
+			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type", defaultValue = "true") Boolean nullVal
 			) throws Exception
 	{
+		nullVal = (nullVal == null) ? true : nullVal;
+		
 		Boolean res = contains(collection, value, null);
 		
 		if(res == null)
