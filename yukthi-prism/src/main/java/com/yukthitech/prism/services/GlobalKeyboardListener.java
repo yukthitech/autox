@@ -41,8 +41,6 @@ import com.yukthitech.prism.layout.ShortKey;
 @Service
 public class GlobalKeyboardListener
 {
-	private static final int MIN_EVENT_TIME_GAP_MILLIS = 500;
-	
 	private class KeyStroke
 	{
 		private int modifiers;

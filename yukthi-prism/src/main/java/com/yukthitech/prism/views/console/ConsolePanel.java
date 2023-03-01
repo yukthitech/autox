@@ -38,8 +38,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.Element;
-import javax.swing.text.html.HTMLDocument;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,8 +47,6 @@ import org.springframework.stereotype.Component;
 import com.yukthitech.prism.IViewPanel;
 import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.prism.actions.FileActions;
-import com.yukthitech.prism.exeenv.ConsoleContentAddedEvent;
-import com.yukthitech.prism.exeenv.ConsoleContentTruncateEvent;
 import com.yukthitech.prism.exeenv.EnvironmentActivationEvent;
 import com.yukthitech.prism.exeenv.EnvironmentTerminatedEvent;
 import com.yukthitech.prism.exeenv.ExecutionEnvironment;
@@ -89,6 +85,10 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	private final IconButton btnOpenReport = new IconButton();
 	
 	private JTabbedPane parentTabbedPane;
+	
+	private int currentEnvironmentId = -1;
+	
+	private long lastUpdatedOn = -1;
 
 	/**
 	 * Create the panel.
@@ -124,6 +124,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 				clearConsole();
 			}
 		});
+		
 		btnClear.setToolTipText("Clear");
 		btnClear.setIcon(IdeUtils.loadIconWithoutBorder("/ui/icons/clear-console.svg", 20));
 
@@ -160,6 +161,8 @@ public class ConsolePanel extends JPanel implements IViewPanel
 				globalStateManager.focusGained(consoleDisplayArea);
 			}
 		});
+		
+		IdeUtils.scheduleJob(this::refreshConsoleText, 500);
 	}
 
 	@IdeEventHandler
@@ -195,54 +198,34 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		btnOpenReport.setEnabled(repFile);
 	}
 	
-	@IdeEventHandler
-	public void onConsoleContentAdded(ConsoleContentAddedEvent event)
-	{
-		if(activeEnvironment != event.getExecutionEnvironment())
-		{
-			return;
-		}
-
-		appendNewContent(event.getNewContent());
-		
-		boolean repFile = (event.getExecutionEnvironment().isReportFileAvailable());
-		btnOpenReport.setEnabled(repFile);
-	}
-
-	@IdeEventHandler
-	public void onConsoleContentTruncate(ConsoleContentTruncateEvent event)
-	{
-		if(activeEnvironment != event.getExecutionEnvironment())
-		{
-			return;
-		}
-		
-		HTMLDocument htmlDoc = (HTMLDocument) consoleDisplayArea.getDocument();
-		Element bodyElement = htmlDoc.getElement("body");
-
-		int count = event.getLines();
-		
-		for(int i = 0; i < count && bodyElement.getElementCount() > 1; i++)
-		{
-			htmlDoc.removeElement(bodyElement.getElement(0));
-		}
-	}
-
 	@Override
 	public void setParent(JTabbedPane parentTabPane)
 	{
 		this.parentTabbedPane = parentTabPane;
 	}
 
-	private void refreshConsoleText()
+	private synchronized void refreshConsoleText()
 	{
 		if(activeEnvironment == null)
 		{
+			if(currentEnvironmentId == -1)
+			{
+				return;
+			}
+			
 			consoleDisplayArea.setText("");
+			currentEnvironmentId = -1;
 			return;
 		}
 		
-		String code = injectLinks(activeEnvironment.getConsoleHtml());
+		if(activeEnvironment.getId() == currentEnvironmentId 
+				&& activeEnvironment.getLastConsoleChangeTime() == lastUpdatedOn)
+		{
+			return;
+		}
+		
+		String html = activeEnvironment.getConsoleHtml();
+		String code = injectLinks(html);
 
 		EventQueue.invokeLater(() -> 
 		{
@@ -256,6 +239,9 @@ public class ConsolePanel extends JPanel implements IViewPanel
 			
 			moveToEnd();
 		});
+		
+		currentEnvironmentId = activeEnvironment.getId();
+		lastUpdatedOn = activeEnvironment.getLastConsoleChangeTime();
 	}
 	
 	private String injectLinks(CharSequence html)
@@ -288,30 +274,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		}, 200);
 	}
 
-	private void appendNewContent(String content)
-	{
-		EventQueue.invokeLater(() -> 
-		{
-			try
-			{
-				HTMLDocument htmlDoc = (HTMLDocument) consoleDisplayArea.getDocument();
-				Element element = htmlDoc.getElement("body");
-
-				htmlDoc.insertBeforeEnd(element, injectLinks(content));
-				moveToEnd();
-				
-				if(parentTabbedPane != null)
-				{
-					parentTabbedPane.setSelectedComponent(this);
-				}
-			} catch(Exception ex)
-			{
-				logger.error("An error occurred while adding html content", ex);
-			}
-		});
-	}
-	
-	private void clearConsole()
+	private synchronized void clearConsole()
 	{
 		if(activeEnvironment == null)
 		{

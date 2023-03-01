@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -69,6 +70,10 @@ public class ExecutionEnvironment
 {
 	private static Logger logger = LogManager.getLogger(ExecutionEnvironment.class);
 	
+	private static AtomicInteger idTracker = new AtomicInteger(0);
+	
+	private int id = idTracker.incrementAndGet();
+	
 	@Autowired
 	private UiLayout uiLayout;
 	
@@ -85,6 +90,8 @@ public class ExecutionEnvironment
 	private Process process;
 
 	private LinkedList<String> consoleHtml = new LinkedList<>();
+	
+	private long lastConsoleChangeTime = 0;
 
 	private boolean terminated = false;
 
@@ -178,6 +185,10 @@ public class ExecutionEnvironment
 		}
 	}
 	
+	public int getId()
+	{
+		return id;
+	}
 	
 	/**
 	 * This is expected to be called by {@link ExecutionEnvironmentManager}.
@@ -314,21 +325,54 @@ public class ExecutionEnvironment
 		process.destroyForcibly();
 	}
 
-	private synchronized void appenConsoleHtml(String html)
+	private void appenConsoleHtml(String html)
 	{
-		consoleHtml.add(html);
-		ideEventManager.raiseAsyncEvent(new ConsoleContentAddedEvent(this, html));
-		
-		if(consoleHtml.size() > maxLines)
+		synchronized(consoleHtml)
 		{
-			for(int i = 0; i < truncateLength; i++)
-			{
-				consoleHtml.removeFirst();
-			}
+			consoleHtml.add(html);
+			lastConsoleChangeTime = System.currentTimeMillis();
 			
-			ideEventManager.raiseAsyncEvent(new ConsoleContentTruncateEvent(this, truncateLength));
+			if(consoleHtml.size() > maxLines)
+			{
+				for(int i = 0; i < truncateLength; i++)
+				{
+					consoleHtml.removeFirst();
+				}
+			
+				lastConsoleChangeTime = System.currentTimeMillis();
+			}
 		}
 	}
+	
+	public long getLastConsoleChangeTime()
+	{
+		synchronized(consoleHtml)
+		{
+			return lastConsoleChangeTime;
+		}
+	}
+	
+	public String getConsoleHtml()
+	{
+		List<String> tmpLst = new LinkedList<>();
+		
+		synchronized(consoleHtml)
+		{
+			tmpLst.addAll(consoleHtml);
+		}
+		
+		return tmpLst.stream().collect(Collectors.joining());
+	}
+	
+	public void clearConsole()
+	{
+		synchronized(consoleHtml)
+		{
+			consoleHtml.clear();
+			this.lastConsoleChangeTime = System.currentTimeMillis();
+		}
+	}
+
 
 	private void logOnConsole(String lineText)
 	{
@@ -439,15 +483,6 @@ public class ExecutionEnvironment
 		return name;
 	}
 
-	public StringBuilder getConsoleHtml()
-	{
-		StringBuilder builder = new StringBuilder();
-		
-		consoleHtml.forEach(line -> builder.append(line));
-		
-		return builder;
-	}
-	
 	public void stop()
 	{
 		process.destroyForcibly();
@@ -473,11 +508,6 @@ public class ExecutionEnvironment
 		debugClient.sendDataToServer(data, callback);
 	}
 
-	public synchronized void clearConsole()
-	{
-		consoleHtml.clear();
-	}
-	
 	public boolean isReportFileAvailable()
 	{
 		return (reportFile != null && reportFile.exists());

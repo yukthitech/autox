@@ -88,13 +88,14 @@
 		
 					<table class="docTable">
 						<tr>
-							<td colspan="3"  class="doc_mainHeading">
+							<td colspan="4"  class="doc_mainHeading">
 								Parameters
 							</td>
 						</tr>
 						<tr>
 							<td class="doc_heading"> Name </td>
 							<td class="doc_heading"> Type </td>
+							<td class="doc_heading"> Default Value </td>
 							<td class="doc_heading"> Description </td>
 						</tr>
 						<#if node.hasParameters()>
@@ -102,6 +103,7 @@
 								<tr>
 									<td>${param.name}</td>
 									<td>${param.type}</td>
+									<td>${param.defaultValue ! ''}</td>
 									<td>${param.description}</td>
 								</tr>
 							</#list>

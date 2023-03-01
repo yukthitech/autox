@@ -402,6 +402,11 @@ public class IdeUtils
 	{
 		ConsolidatedJobManager.rescheduleConsolidatedJob(name, new RunnableWrapper(runnable), delay);
 	}
+	
+	public static void scheduleJob(Runnable runnable, long fixedDelay)
+	{
+		ConsolidatedJobManager.scheduleJob(runnable, fixedDelay);
+	}
 
 	public static void executeUiTask(Runnable runnable)
 	{

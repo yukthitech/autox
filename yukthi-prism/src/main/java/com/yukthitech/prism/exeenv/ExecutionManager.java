@@ -116,8 +116,10 @@ public class ExecutionManager
 		DropDownButton debugButton = (DropDownButton) UiIdElementsManager.getElement("debugList");
 		DropDownItem item = runButton.moveToTop(runConfig);
 		
+		//if the item already exist
 		if(item != null)
 		{
+			debugButton.moveToTop(runConfig);
 			return;
 		}
 		

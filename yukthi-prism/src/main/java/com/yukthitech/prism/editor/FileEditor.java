@@ -723,6 +723,7 @@ public class FileEditor extends JPanel
 			logger.error("Wrong line number specified for debug highlight: {}", lineNo, ex);
 		}
 		
+		syntaxTextArea.requestFocus();
 		IdeUtils.executeUiTask(() -> makeLineVisible(actLineNo));
 	}
 	

@@ -25,7 +25,7 @@
 			<directory>.</directory>
 			<outputDirectory>bin</outputDirectory>
 			<includes>
-				<include>.prism.cache</include>
+				<include>prism.cache</include>
 			</includes>
 		</fileSet>
 	</fileSets>
