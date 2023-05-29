@@ -30,16 +30,16 @@ public class ServerMssgStepExecuted extends ServerMssgConfirmation
 	/**
 	 * Step execution request id.
 	 */
-	private Map<String, byte[]> contextAttr;
+	private Map<String, KeyValue> contextAttr;
 	
-	public ServerMssgStepExecuted(String requestId, String executionId, boolean successful, Map<String, byte[]> contextAttr, String errorMssg, Object... mssgArgs)
+	public ServerMssgStepExecuted(String requestId, String executionId, boolean successful, Map<String, KeyValue> contextAttr, String errorMssg, Object... mssgArgs)
 	{
 		super(requestId, successful, errorMssg, mssgArgs);
 		this.executionId = executionId;
 		this.contextAttr = contextAttr;
 	}
 	
-	public Map<String, byte[]> getContextAttr()
+	public Map<String, KeyValue> getContextAttr()
 	{
 		return contextAttr;
 	}

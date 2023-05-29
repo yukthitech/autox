@@ -1,0 +1,317 @@
+<html>
+<head>
+	<style>
+		table
+		{
+			border-collapse: collapse;
+			border: 1px solid black;
+			margin-left: 15px;
+		}
+		
+		td, th
+		{
+			border: 1px solid black;
+			padding: 10px;
+		}
+		
+		code
+		{
+			display: block;
+			margin-left: 10px;
+			color: blue;
+		}
+		
+		P
+		{
+			margin: 5px;
+			
+		}
+		
+	</style>
+</head>
+
+<body>
+	<p>
+		Property expressions can be used to access direct, index or nested properties. This helps in setting/adding/removing or reading complex data properties
+		with simple expressions.
+	</p>
+	
+	<h3>Accessing List Values</h3>
+	<p>
+		List is an indexed collection. So list elements can be accessed using index. For below examples assume a list attribute value is set using below code:
+		<pre>
+			&lt;s:set expression="lst" value="list: 1, 2, 3"/&gt;
+		</pre>
+	</p>
+	
+	<table>
+		<tr>
+			<th colspan="2">
+				List Operations
+			</th>
+		</tr>
+		<tr>
+			<th>
+				Setting (replacing) value at existing index
+			</th>
+			<td>
+				Simple zero-based index can be used.<br/>
+				<code>
+					&lt;s:set expression="prop: attr.lst[1]" value="20"/&gt;
+				</code>
+			</td>
+		</tr>
+
+		<tr>
+			<th rowspan="2">
+				Adding value at the end of list
+			</th>
+			<td>
+				New element can be added at end of the list either using + expression.<br/>
+				<code>
+					&lt;s:set expression="prop: attr.lst[+]" value="5"/&gt;
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				New element can be added at end by specifying index equal to current list size<br/>
+				<code>
+					&lt;s:set expression="prop: attr.lst[3]" value="5"/&gt;
+				</code><br/>
+				<b>Note: Specifying value greater than list size will result in error</b>
+			</td>
+		</tr>
+
+		<tr>
+			<th>
+				Inserting value in middle
+			</th>
+			<td>
+				Simple zero-based index can be used with + sign.<br/>
+				<code>
+					&lt;s:set expression="prop: attr.lst[+0]" value="0"/&gt;<br/>
+					&lt;s:set expression="prop: attr.lst[+3]" value="300"/&gt;
+				</code>
+			</td>
+		</tr>
+
+		<tr>
+			<th rowspan="2">
+				Removing a value
+			</th>
+			<td>
+				Simple zero-based index can be used.<br/>
+				<code>
+					&lt;s:remove expression="prop: attr.lst[4]"/&gt;
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Removing specified value using condition.<br/>
+				<code>
+					&lt;s:remove expression="prop: attr.lst[@this = 4]"/&gt;
+				</code>
+				<b>Note: All matching values will be removed with condition</b>
+			</td>
+		</tr>
+	</table>
+
+
+	<h3>Accessing Set Values</h3>
+	<p>
+		Set is unique value collection without order. Set values access is similar to list, except index based expressions should not be used (which would result in error).
+	</p>
+	
+	<table>
+		<tr>
+			<th colspan="2">
+				Set Operations
+			</th>
+		</tr>
+		<tr>
+			<th>
+				Adding value at the end of set
+			</th>
+			<td>
+				New element can be added at end of the list either using + expression. Any index used post + operator does not have any impact on set values.<br/>
+				<code>
+					&lt;s:set expression="prop: attr.set[+]" value="5"/&gt;
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				Removing a value
+			</th>
+			<td>
+				Removing specified value using condition.<br/>
+				<code>
+					&lt;s:remove expression="prop: attr.set[@this = 4]"/&gt;
+				</code>
+			</td>
+		</tr>
+	</table>
+
+	<h3>Accessing Map Values</h3>
+	<p>
+		Map is collection of key-value pairs called entries. So map entries can be accessed keys.
+	</p>
+	
+	<table>
+		<tr>
+			<th colspan="2">
+				Map Operations
+			</th>
+		</tr>
+		<tr>
+			<th>
+				Setting (replacing)/Adding entry
+			</th>
+			<td>
+				Simple dot operator followed by key<br/>
+				<code>
+					&lt;s:set expression="prop: attr.map.k1" value="V1"/&gt;<br/>
+					&lt;s:set expression="prop: attr.map.k5" value="v5"/&gt;<br/>
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<th rowspan="2">
+				Removing an entry
+			</th>
+			<td>
+				Simple dot operator followed by key<br/>
+				<code>
+					&lt;s:remove expression="prop: attr.map.k3"/&gt;
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Removing specified value using condition.<br/>
+				<code>
+					&lt;s:remove expression="prop: attr.map[@this.value = 'v2']"/&gt;
+				</code>
+				<b>Note: Here @this represents current entry. So condition can be based on 'key' or 'value'. And all matching entries will be removed with condition</b>
+			</td>
+		</tr>
+	</table>
+	
+
+	<h3>Nested properties</h3>
+	<p>
+		Nested properties can be accessed on complex objects. Where [] operator, dot and condition operations can bed clubbed together. For example purpose, consider below json on
+		context:
+	</p>
+	
+	<div style="overflow: auto; color: green; overflow: auto; height: 150px; border: 1px solid black; margin: 20px; padding: 5px;">
+		<pre>
+&lt;s:set expression="schoolData"&gt;
+  &lt;value&gt;json: {
+    "desc": "Schools and their info",
+    "schools":[
+      {
+        "name": "Little Flower",
+        "languages": ["English", "Hindi", "Telugu", "Malyalam"],
+        "level": 1,
+        "student": [
+          {
+            "name": "Ravi",
+            "subjects": ["English", "Hindi", "Social", "Maths"]
+          },
+          {
+            "name": "Sham",
+            "subjects": ["English", "Social", "Maths"]
+          }
+        ]
+      },
+      {
+        "name": "Rockwoods",
+        "languages": ["English", "Hindi", "Telugu", "Sanskrit"],
+        "level": 1,
+        "student": [
+          {
+            "name": "Abhi",
+            "subjects": ["English", "Hindi", "Social", "Maths"]
+          },
+          {
+            "name": "Mac",
+            "subjects": ["English", "Social", "Urdu"]
+          }
+        ]
+      },
+      {
+        "name": "Saraswati",
+        "languages": ["English", "Hindi", "Telugu", "Sanskrit"],
+        "level": 2,
+        "student": [
+          {
+            "name": "abc",
+            "subjects": ["English", "Hindi", "Social", "Maths"]
+          },
+          {
+            "name": "xyz",
+            "subjects": ["English", "Social", "Urdu"]
+          }
+        ]
+      }
+    ]
+  }&lt;/value&gt;
+&lt;/s:set&gt;
+		</pre>
+	</div>
+	
+	<table>
+		<tr>
+			<th colspan="2">
+				Nested properties
+			</th>
+		</tr>
+		<tr>
+			<th>
+				Accessing sub list property
+			</th>
+			<td>
+				<code>
+					&lt;s:assert-equals actual="prop: attr.schoolData.schools[1].name" expected="Rockwoods"/&gt;<br/>
+					&lt;s:assert-equals actual="prop: attr.schoolData.schools[1].student[0].name" expected="Abhi"/&gt;<br/>
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				Conditional access based on simple property
+			</th>
+			<td>
+				<code>
+					&lt;s:assert-equals actual="prop: attr.schoolData.schools[name = 'Rockwoods'].student[0].name" expected="Abhi"/&gt;<br/>
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				Conditional access based on sub-list element property
+			</th>
+			<td>
+				<code>
+					&lt;s:assert-equals actual="prop: attr.schoolData.schools[student[0].name = 'Abhi'].name" expected="Rockwoods"/&gt;<br/>
+				</code>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				Conditional access - find main element is sublist contains particular value
+			</th>
+			<td>
+				<code>
+					&lt;s:assert-equals actual="prop: attr.schoolData.schools[languages[@this = 'Malyalam'] = 'Malyalam'].name" expected="Little Flower"/&gt;<br/>
+				</code>
+			</td>
+		</tr>
+	</table>
+	
+<br/><br/>
+</body>
+</html>

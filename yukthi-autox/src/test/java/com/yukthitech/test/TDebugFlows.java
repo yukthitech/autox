@@ -232,7 +232,7 @@ public class TDebugFlows extends BaseTestCases
 			consumerExectued.setValue(true);
 			
 			//check whether attr is coming properly
-			Object value = SerializationUtils.deserialize(mssg.getContextAttr().get("someAttr"));
+			Object value = SerializationUtils.deserialize(mssg.getContextAttr().get("someAttr").getValue());
 			Assert.assertEquals(value, 10);
 			
 			//using step evaluation set attr to 100

@@ -29,6 +29,7 @@
 			<group>group1</group>
 
 			<f:sumWithoutReturn a="int: 10" b="int: 20"/>
+			<s:set expression="someLst" value="json: [1, 2, 3, 4]"/>
 		
 			<s:assert-equals actual="attr: sumResult" expected="int: 30"/>
 		</testCase>

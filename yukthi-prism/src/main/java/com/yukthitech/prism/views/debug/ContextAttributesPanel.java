@@ -20,6 +20,7 @@ import javax.swing.event.ListSelectionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.debug.common.KeyValue;
 import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.prism.dialog.XpathSandboxDialog;
 import com.yukthitech.swing.IconButton;
@@ -29,6 +30,10 @@ import javax.swing.JMenuItem;
 @Component
 public class ContextAttributesPanel extends JPanel
 {
+	private static final int VAL_COL_IDX = 3;
+
+	private static final int KEY_COL_IDX = 0;
+
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_PREFIX = "(param) ";
@@ -93,7 +98,7 @@ public class ContextAttributesPanel extends JPanel
 		this.debugPanel = debugPanel;
 	}
 	
-	public void setContextAttributes(Map<String, byte[]> attributes)
+	public void setContextAttributes(Map<String, KeyValue> attributes)
 	{
 		model.setContextAttributes(attributes);
 	}
@@ -118,7 +123,7 @@ public class ContextAttributesPanel extends JPanel
 				@Override
 				public void mouseClicked(MouseEvent e)
 				{
-					if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2 && table.getSelectedColumn() == 1)
+					if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2)
 					{
 						if(ctxValDlg == null)
 						{
@@ -126,8 +131,8 @@ public class ContextAttributesPanel extends JPanel
 						}
 						
 						ctxValDlg.display(
-							model.getValueAt(table.getSelectedRow(), 0).toString(),
-							model.getValueAt(table.getSelectedRow(), table.getSelectedColumn()).toString()
+							model.getValueAt(table.getSelectedRow(), KEY_COL_IDX).toString(),
+							model.getValueAt(table.getSelectedRow(), VAL_COL_IDX).toString()
 						);
 					}
 					else if(SwingUtilities.isRightMouseButton(e))
@@ -167,7 +172,7 @@ public class ContextAttributesPanel extends JPanel
 		}
 		
 		String row[] = model.getRow(selIdx);
-		processKey(row[0], (prefix, name) -> xpathSandboxDialog.display(prefix, name, row[1]));
+		processKey(row[KEY_COL_IDX], (prefix, name) -> xpathSandboxDialog.display(prefix, name, row[VAL_COL_IDX]));
 	}
 	
 	private void processKey(String attrName, BiConsumer<String, String> consumer)

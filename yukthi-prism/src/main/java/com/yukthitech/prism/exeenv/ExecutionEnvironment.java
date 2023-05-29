@@ -45,6 +45,7 @@ import com.yukthitech.autox.debug.common.ClientMessage;
 import com.yukthitech.autox.debug.common.ClientMssgDebugPoints;
 import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
 import com.yukthitech.autox.debug.common.DebugPoint;
+import com.yukthitech.autox.debug.common.KeyValue;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
@@ -281,7 +282,7 @@ public class ExecutionEnvironment
 		}
 	}
 	
-	public Map<String, byte[]> getContextAttributes()
+	public Map<String, KeyValue> getContextAttributes()
 	{
 		ServerMssgExecutionPaused pauseMssg = pausedThreads.get(getActiveThreadId());
 		
@@ -293,7 +294,7 @@ public class ExecutionEnvironment
 		return pauseMssg.getContextAttr();
 	}
 	
-	public Map<String, byte[]> getParamMap()
+	public Map<String, KeyValue> getParamMap()
 	{
 		ServerMssgExecutionPaused pauseMssg = pausedThreads.get(getActiveThreadId());
 		

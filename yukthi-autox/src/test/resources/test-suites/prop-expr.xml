@@ -1,0 +1,178 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="collection-tests">
+		<test-case name="list-test">
+			<description>
+				Tests different operations on list.
+			</description>
+
+			<s:set expression="lst" value="list: 1, 2, 3"/>
+
+			<!-- Set operations -->
+			<s:set expression="prop: attr.lst[3]" value="4"/>
+			<s:assert-equals actual="attr: lst" expected="list: 1, 2, 3, 4"/>
+
+			<s:set expression="prop: attr.lst[1]" value="20"/>
+			<s:assert-equals actual="attr: lst" expected="list: 1, 20, 3, 4"/>
+
+			<s:set expression="prop: attr.lst[0]" value="10"/>
+			<s:assert-equals actual="attr: lst" expected="list: 10, 20, 3, 4"/>
+
+			<!-- ADD operations -->
+			<s:set expression="prop: attr.lst[+0]" value="0"/>
+			<s:assert-equals actual="attr: lst" expected="list: 0, 10, 20, 3, 4"/>
+
+			<s:set expression="prop: attr.lst[+3]" value="300"/>
+			<s:assert-equals actual="attr: lst" expected="list: 0, 10, 20, 300, 3, 4"/>
+
+			<s:set expression="prop: attr.lst[+]" value="5"/>
+			<s:assert-equals actual="attr: lst" expected="list: 0, 10, 20, 300, 3, 4, 5"/>
+
+			<!-- Remove operations -->
+			<s:remove expression="prop: attr.lst[3]"/>
+			<s:assert-equals actual="attr: lst" expected="list: 0, 10, 20, 3, 4, 5"/>
+
+			<s:remove expression="prop: attr.lst[0]"/>
+			<s:assert-equals actual="attr: lst" expected="list: 10, 20, 3, 4, 5"/>
+
+			<s:remove expression="prop: attr.lst[4]"/>
+			<s:assert-equals actual="attr: lst" expected="list: 10, 20, 3, 4"/>
+
+			<s:set expression="prop: attr.lst[+0]" value="4"/>
+			<s:assert-equals actual="attr: lst" expected="list: 4, 10, 20, 3, 4"/>
+			<s:remove expression="prop: attr.lst[@this = 4]"/>
+			<s:assert-equals actual="attr: lst" expected="list: 10, 20, 3"/>
+		</test-case>
+
+		<test-case name="set-test">
+			<description>
+				Tests different operations on set.
+			</description>
+
+			<s:set expression="set" value="set: 1, 2, 3"/>
+
+			<!-- ADD operations -->
+			<s:set expression="prop: attr.set[+]" value="4"/>
+			<s:assert-equals actual="attr: set" expected="set: 1, 2, 3, 4"/>
+
+			<s:set expression="prop: attr.set[+3]" value="5"/>
+			<s:assert-equals actual="attr: set" expected="set: 1, 2, 3, 4, 5"/>
+
+			<!-- Remove operations -->
+			<s:remove expression="prop: attr.set[@this = 4]"/>
+			<s:assert-equals actual="attr: set" expected="set: 1, 2, 3, 5"/>
+
+			<s:remove expression="prop: attr.set[@this = 1]"/>
+			<s:assert-equals actual="attr: set" expected="set: 2, 3, 5"/>
+		</test-case>
+
+		<test-case name="map-test">
+			<description>
+				Tests different operations on map.
+			</description>
+
+			<s:set expression="map">
+				<value>json: {
+					"k1": "v1",
+					"k2": "v2",
+					"k3": "v3"
+				}
+				</value>
+			</s:set>
+
+			<!-- ADD operations -->
+			<s:set expression="prop: attr.map.k4" value="v4"/>
+			<s:set expression="prop: attr.map.k5" value="v5"/>
+			<s:assert-equals actual="attr: map" expected="map: k1=v1, k2=v2, k3=v3, k4=v4, k5=v5"/>
+			
+			<!-- SET operations -->
+			<s:set expression="prop: attr.map.k1" value="V1"/>
+			<s:assert-equals actual="attr: map" expected="map: k1=V1, k2=v2, k3=v3, k4=v4, k5=v5"/>
+
+			<!-- Remove operations -->
+			<s:remove expression="prop: attr.map.k3"/>
+			<s:assert-equals actual="attr: map" expected="map: k1=V1, k2=v2, k4=v4, k5=v5"/>
+
+			<s:remove expression="prop: attr.map.k4"/>
+			<s:assert-equals actual="attr: map" expected="map: k1=V1, k2=v2, k5=v5"/>
+
+			<s:set expression="prop: attr.map.k6" value="v2"/>
+			<s:assert-equals actual="attr: map" expected="map: k1=V1, k2=v2, k5=v5, k6=v2"/>
+			<s:remove expression="prop: attr.map[@this.value = 'v2']"/>
+			<s:assert-equals actual="attr: map" expected="map: k1=V1, k5=v5"/>
+		</test-case>
+
+		<test-case name="complex-access-test">
+			<description>
+				Tests complex access of properties.
+			</description>
+
+			<s:set expression="schoolData">
+				<value>json: {
+					"desc": "Schools and their info",
+					"schools":[
+						{
+							"name": "Little Flower",
+							"languages": ["English", "Hindi", "Telugu", "Malyalam"],
+							"level": 1,
+							"student": [
+								{
+									"name": "Ravi",
+									"subjects": ["English", "Hindi", "Social", "Maths"]
+								},
+								{
+									"name": "Sham",
+									"subjects": ["English", "Social", "Maths"]
+								}
+							]
+						},
+						{
+							"name": "Rockwoods",
+							"languages": ["English", "Hindi", "Telugu", "Sanskrit"],
+							"level": 1,
+							"student": [
+								{
+									"name": "Abhi",
+									"subjects": ["English", "Hindi", "Social", "Maths"]
+								},
+								{
+									"name": "Mac",
+									"subjects": ["English", "Social", "Urdu"]
+								}
+							]
+						},
+						{
+							"name": "Saraswati",
+							"languages": ["English", "Hindi", "Telugu", "Sanskrit"],
+							"level": 2,
+							"student": [
+								{
+									"name": "abc",
+									"subjects": ["English", "Hindi", "Social", "Maths"]
+								},
+								{
+									"name": "xyz",
+									"subjects": ["English", "Social", "Urdu"]
+								}
+							]
+						}
+					]
+				}</value>
+			</s:set>
+
+			<s:assert-equals actual="prop: attr.schoolData.schools[1].name" expected="Rockwoods"/>
+			<s:assert-equals actual="prop: attr.schoolData.schools[1].student[0].name" expected="Abhi"/>
+
+			<s:assert-equals actual="prop: attr.schoolData.schools[name = 'Rockwoods'].student[0].name" expected="Abhi"/>
+
+			<s:assert-equals actual="prop: attr.schoolData.schools[student[0].name = 'Abhi'].name" expected="Rockwoods"/>
+
+			<s:assert-equals actual="prop: attr.schoolData.schools[languages[@this = 'Malyalam'] = 'Malyalam'].name" expected="Little Flower"/>
+		</test-case>
+
+	</test-suite>
+
+</test-file>

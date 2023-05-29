@@ -18,6 +18,7 @@ package com.yukthitech.test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.testng.Assert;
@@ -32,6 +33,14 @@ public class TestPropertyAccessor
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
 	@Test
+	public void testSimple() throws Exception
+	{
+		Object data = CommonUtils.toMap("list", new ArrayList<>(Arrays.asList(1, 2, 3)));
+		
+		System.out.println(PropertyAccessor.getProperty(data, "list[+1]"));
+	}
+	
+	@Test
 	public void testGetProperty() throws Exception
 	{
 		Object data = objectMapper.readValue(TestPropertyAccessor.class.getResourceAsStream("/data/prop-access-test-data.json"), Object.class);
@@ -39,24 +48,22 @@ public class TestPropertyAccessor
 		assertEquals(PropertyAccessor.getProperty(data, "name"), "testTemplate");
 		assertEquals(PropertyAccessor.getProperty(data, "versionLong"), 1000000);
 		assertEquals(PropertyAccessor.getProperty(data, "audit.createdBy"), "svcjenkins");
-		assertEquals(PropertyAccessor.getProperty(data, "audit(updatedBy)"), "svcupdate");
+		assertEquals(PropertyAccessor.getProperty(data, "audit.updatedBy"), "svcupdate");
 		assertEquals(PropertyAccessor.getProperty(data, "audit"), CommonUtils.toMap(
 				"createdBy", "svcjenkins", 
 				"updatedBy", "svcupdate"));
 		
 		assertEquals(PropertyAccessor.getProperty(data, "system.containers[0].name"), "insurance");
-		assertEquals(PropertyAccessor.getProperty(data, "system.containers[0](name)"), "insurance");
 		assertEquals(PropertyAccessor.getProperty(data, "system.products[0].supportedContainers[0]"), "bank");
 		
-		assertEquals(PropertyAccessor.getProperty(data, "keys[name = PERCENTAGE_FAILURE_FOR_BLOCKING].enumOptions[1].value"), "70");
-		assertEquals(PropertyAccessor.getProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label"), "5 failed logins to one site");
+		assertEquals(PropertyAccessor.getProperty(data, "keys[name = 'PERCENTAGE_FAILURE_FOR_BLOCKING'].enumOptions[1].value"), "70");
+		assertEquals(PropertyAccessor.getProperty(data, "keys[name = 'USER_THRESHOLD_LIMIT'].enumOptions[value = 5].label"), "5 failed logins to one site");
 		
 		//test nested condition property
-		assertEquals(PropertyAccessor.getProperty(data, "keys[groupNames[0] = REFRESH-group].name"), "REFRESH");
-		assertEquals(PropertyAccessor.getProperty(data, "keys[cobMapProperty(processExpr) = thisKey.REFRESH].name"), "REFRESH");
-		assertEquals(PropertyAccessor.getProperty(data, "keys[cobMapProperty.processExpr = thisKey.REFRESH].name"), "REFRESH");
+		assertEquals(PropertyAccessor.getProperty(data, "keys[groupNames[0] = 'REFRESH-group'].name"), "REFRESH");
+		assertEquals(PropertyAccessor.getProperty(data, "keys[cobMapProperty.processExpr = 'thisKey.REFRESH'].name"), "REFRESH");
 
-		assertEquals(PropertyAccessor.getProperty(data, "system.containers[accountTypes[@this = CMA] = CMA].name"), "investment");
+		assertEquals(PropertyAccessor.getProperty(data, "system.containers[accountTypes[@this = 'CMA'] = 'CMA'].name"), "investment");
 	}
 	
 	private void checkNegativeCase(Runnable runnable, String message)
@@ -86,10 +93,10 @@ public class TestPropertyAccessor
 		PropertyAccessor.setProperty(data, "audit.createdBy", "svcjenkins1");
 		assertEquals(PropertyAccessor.getProperty(data, "audit.createdBy"), "svcjenkins1");
 		
-		PropertyAccessor.setProperty(data, "audit(updatedBy)", "svcjenkins2");
-		assertEquals(PropertyAccessor.getProperty(data, "audit(updatedBy)"), "svcjenkins2");
+		PropertyAccessor.setProperty(data, "audit.updatedBy", "svcjenkins2");
+		assertEquals(PropertyAccessor.getProperty(data, "audit.updatedBy"), "svcjenkins2");
 		
-		PropertyAccessor.setProperty(data, "audit(testedBy)", "svcjenkins3");
+		PropertyAccessor.setProperty(data, "audit.testedBy", "svcjenkins3");
 		assertEquals(PropertyAccessor.getProperty(data, "audit"), CommonUtils.toMap(
 				"createdBy", "svcjenkins1", 
 				"updatedBy", "svcjenkins2",
@@ -104,16 +111,19 @@ public class TestPropertyAccessor
 		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedContainers"), Arrays.asList("bankTest", "investment"));
 
 		//test add element
-		PropertyAccessor.addProperty(data, "system.products[1].supportedContainers[0]", "bank");
+		PropertyAccessor.setProperty(data, "system.products[1].supportedContainers[+0]", "bank");
 		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedContainers"), Arrays.asList("bank", "bankTest", "investment"));
 		
 		//test append element
-		PropertyAccessor.addProperty(data, "system.products[1].supportedContainers[-1]", "credit");
+		PropertyAccessor.setProperty(data, "system.products[1].supportedContainers[3]", "credit");
 		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedContainers"), Arrays.asList("bank", "bankTest", "investment", "credit"));
 		
+		PropertyAccessor.setProperty(data, "system.products[1].supportedContainers[+]", "test");
+		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedContainers"), Arrays.asList("bank", "bankTest", "investment", "credit", "test"));
+
 		//test properties with conditions
-		PropertyAccessor.setProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label", "5 failed tests to one site");
-		assertEquals(PropertyAccessor.getProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label"), "5 failed tests to one site");
+		PropertyAccessor.setProperty(data, "keys[name = 'USER_THRESHOLD_LIMIT'].enumOptions[value = 5].label", "5 failed tests to one site");
+		assertEquals(PropertyAccessor.getProperty(data, "keys[name = 'USER_THRESHOLD_LIMIT'].enumOptions[value = 5].label"), "5 failed tests to one site");
 	}
 
 	@Test
@@ -125,9 +135,9 @@ public class TestPropertyAccessor
 		PropertyAccessor.removeProperty(data, "versionLong");
 		assertNull(PropertyAccessor.getProperty(data, "versionLong"));
 		
-		PropertyAccessor.setProperty(data, "audit(testedBy)", "svcjenkins3");
+		PropertyAccessor.setProperty(data, "audit.testedBy", "svcjenkins3");
 		PropertyAccessor.removeProperty(data, "audit.createdBy");
-		PropertyAccessor.removeProperty(data, "audit(updatedBy)");
+		PropertyAccessor.removeProperty(data, "audit.updatedBy");
 
 		assertEquals(PropertyAccessor.getProperty(data, "audit"), CommonUtils.toMap(
 				"testedBy", "svcjenkins3"
@@ -141,11 +151,11 @@ public class TestPropertyAccessor
 		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedContainers"), Arrays.asList("investment"));
 
 		//test properties with conditions
-		PropertyAccessor.removeProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label");
-		assertNull(PropertyAccessor.getProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label"));
+		PropertyAccessor.removeProperty(data, "keys[name = 'USER_THRESHOLD_LIMIT'].enumOptions[value = 5].label");
+		assertNull(PropertyAccessor.getProperty(data, "keys[name = 'USER_THRESHOLD_LIMIT'].enumOptions[value = 5].label"));
 
-		PropertyAccessor.removeProperty(data, "system.products[1].supportedDatasetAttribs[@this = BANK_TRANSFER_CODE]");
-		PropertyAccessor.removeProperty(data, "system.products[1].supportedDatasetAttribs[@this = HOLDER_DETAILS]");
+		PropertyAccessor.removeProperty(data, "system.products[1].supportedDatasetAttribs[@this = 'BANK_TRANSFER_CODE']");
+		PropertyAccessor.removeProperty(data, "system.products[1].supportedDatasetAttribs[@this = 'HOLDER_DETAILS']");
 		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedDatasetAttribs"), 
 				Arrays.asList("FULL_ACCT_NUMBER", "HOLDER_NAME", "PAYMENT_PROFILE"));
 	}
@@ -156,16 +166,12 @@ public class TestPropertyAccessor
 		Object data = objectMapper.readValue(TestPropertyAccessor.class.getResourceAsStream("/data/prop-access-test-data.json"), Object.class);
 		
 		checkNegativeCase(() -> 
-			PropertyAccessor.getProperty(data, "keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty[0]"), 
-			"Index is used on non-list value at: keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty");
+			PropertyAccessor.getProperty(data, "keys[name = 'THRESHOLD_LIMIT_FOR_BLOCKING'].cobMapProperty[0]"), 
+			"Index is used on non-list value at: keys[name = 'THRESHOLD_LIMIT_FOR_BLOCKING'].cobMapProperty");
 		
 		checkNegativeCase(
-				() -> PropertyAccessor.getProperty(data, "keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty[processExpr = test]"), 
-				"Condition is used on non-collection value at: keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty");
-
-		checkNegativeCase(
-				() -> PropertyAccessor.getProperty(data, "keys[name = NON_EXISTING].cobMapProperty", true), 
-				"Property path 'keys[name = NON_EXISTING]' resulted in null");
+				() -> PropertyAccessor.getProperty(data, "keys[name = 'NON_EXISTING'].cobMapProperty", true), 
+				"Property path 'keys[name = 'NON_EXISTING']' resulted in null");
 	}
 
 	@Test
@@ -174,12 +180,12 @@ public class TestPropertyAccessor
 		Object data = objectMapper.readValue(TestPropertyAccessor.class.getResourceAsStream("/data/prop-access-test-data.json"), Object.class);
 		
 		checkNegativeCase(() -> 
-			PropertyAccessor.setProperty(data, "keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty[0]", "xyz"), 
-			"Index is used on non-list value at: keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty");
+			PropertyAccessor.setProperty(data, "keys[name = 'THRESHOLD_LIMIT_FOR_BLOCKING'].cobMapProperty[0]", "xyz"), 
+			"Index is used on non-collection value at: keys[name = 'THRESHOLD_LIMIT_FOR_BLOCKING'].cobMapProperty");
 		
 		checkNegativeCase(
-				() -> PropertyAccessor.setProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5]", "test"), 
-				"Condition is used as last property to set property: keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5]");
+				() -> PropertyAccessor.setProperty(data, "keys[name = 'USER_THRESHOLD_LIMIT'].enumOptions[value = 5]", "test"), 
+				"Condition is used as last property to set property: keys[name = 'USER_THRESHOLD_LIMIT'].enumOptions[value = 5]");
 	}
 
 	@Test
@@ -188,11 +194,7 @@ public class TestPropertyAccessor
 		Object data = objectMapper.readValue(TestPropertyAccessor.class.getResourceAsStream("/data/prop-access-test-data.json"), Object.class);
 		
 		checkNegativeCase(() -> 
-			PropertyAccessor.removeProperty(data, "keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty[0]"), 
-			"Index is used on non-list value at: keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty");
-		
-		checkNegativeCase(
-				() -> PropertyAccessor.removeProperty(data, "keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty[idx = 0]"), 
-				"Condition is used on non-collection value at: keys[name = THRESHOLD_LIMIT_FOR_BLOCKING].cobMapProperty");
+			PropertyAccessor.removeProperty(data, "keys[name = 'THRESHOLD_LIMIT_FOR_BLOCKING'].cobMapProperty[0]"), 
+			"Index is used on non-list value at: keys[name = 'THRESHOLD_LIMIT_FOR_BLOCKING'].cobMapProperty");
 	}
 }

@@ -43,6 +43,10 @@ public class PropertyAccessor
 	 */
 	private static Pattern CONDITION_PATTERN = Pattern.compile("^\\s*(.*)\\s*\\=\\s*(.*)\\s*$");
 	
+	private static Pattern INT_VAL_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*$");
+	
+	private static Pattern STRING_VAL_PATTERN = Pattern.compile("^\\s*\\'(.*)\\'\\s*$");
+	
 	/**
 	 * Enumeration of path element types.
 	 * @author akranthikiran
@@ -86,7 +90,12 @@ public class PropertyAccessor
 		/**
 		 * Value to be matched in condition.
 		 */
-		private String value;
+		private Object value;
+		
+		/**
+		 * Flag indicating if this is an add expression. Which is helpful in inserting/adding elements into list.
+		 */
+		private boolean addExpression = false;
 
 		public PathElement(String path, String fullPath, PathElementType type, Object key)
 		{
@@ -96,7 +105,7 @@ public class PropertyAccessor
 			this.key = key;
 		}
 		
-		public static PathElement newCondition(String path, String fullPath, List<PathElement> conditionPath, String value)
+		public static PathElement newCondition(String path, String fullPath, List<PathElement> conditionPath, Object value)
 		{
 			PathElement pathElem = new PathElement(path, fullPath, PathElementType.CONDITION, null);
 			pathElem.conditionPath = conditionPath;
@@ -162,15 +171,20 @@ public class PropertyAccessor
 			if(condMatcher.matches())
 			{
 				List<PathElement> condPath = parse(condMatcher.group(1));
-				elements.add(PathElement.newCondition(path, fullPath, condPath, condMatcher.group(2)));
+				Object value = parseValue(condMatcher.group(2));
+				
+				elements.add(PathElement.newCondition(path, fullPath, condPath, value));
 				
 				builder.setLength(0);
 				return true;
 			}
 			
 			//parse the value as index
-			int idx = Integer.parseInt(expr);
-			elements.add(new PathElement(path, fullPath, PathElementType.INDEX, idx));
+			Integer idx = "+".equals(expr) ? null : Integer.parseInt(expr);
+			PathElement newElem = new PathElement(path, fullPath, PathElementType.INDEX, idx);
+			newElem.addExpression = expr.startsWith("+");
+			
+			elements.add(newElem);
 			
 			builder.setLength(0);
 			return true;
@@ -178,6 +192,25 @@ public class PropertyAccessor
 		{
 			throw new InvalidArgumentException("Invalid index '{}' specified for: {}", builder.toString(), path, ex);
 		}
+	}
+	
+	private static Object parseValue(String valStr)
+	{
+		Matcher matcher = INT_VAL_PATTERN.matcher(valStr);
+		
+		if(matcher.matches())
+		{
+			return Integer.parseInt(matcher.group(1));
+		}
+		
+		matcher = STRING_VAL_PATTERN.matcher(valStr);
+		
+		if(matcher.matches())
+		{
+			return matcher.group(1);
+		}
+		
+		throw new InvalidArgumentException("Non value token encountered when value was expected: {}", valStr);
 	}
 	
 	/**
@@ -286,7 +319,12 @@ public class PropertyAccessor
 		{
 			char ch = chArr[i];
 			
-			if(ch == '(' || ch == '[')
+			/*
+			 * TODO: Disabling () expressions to access map keys. When this support is to be added,
+			 * 	it should support - string values enclosed in '', integer values and sub expressions.
+			 */
+			//if(ch == '(' || ch == '[')
+			if(ch == '[')
 			{
 				newPath = new String(chArr, 0, i);
 				addElement(curPath, newPath, builder, PathElementType.PROPERTY, elements);
@@ -312,8 +350,14 @@ public class PropertyAccessor
 				curPath = newPath;
 				continue;
 			}
-
-			builder.append(ch);
+			
+			if(Character.isAlphabetic(ch) || Character.isDigit(ch) || Character.isWhitespace(ch) || ch == '-' || ch == '@')
+			{
+				builder.append(ch);
+				continue;
+			}
+			
+			throw new InvalidStateException("Unsupported character encountered: {}", ch);
 		}
 		
 		//if any content is left over at end
@@ -421,7 +465,7 @@ public class PropertyAccessor
 					{
 						Object condValue = getValue(obj, elem.conditionPath, elem.conditionPath.size(), false);
 						
-						if(Objects.equals("" + condValue, elem.value))
+						if(Objects.equals("" + condValue, "" + elem.value))
 						{
 							matchedValue = obj;
 							break;
@@ -477,10 +521,9 @@ public class PropertyAccessor
 	 * @param bean bean on which property to be set
 	 * @param property property path to set
 	 * @param value value to set
-	 * @param addElement if true, on the list property instead of using set, add will be used.
 	 */
 	@SuppressWarnings("unchecked")
-	private static void setProperty(Object bean, String property, Object value, boolean addElement)
+	public static void setProperty(Object bean, String property, Object value)
 	{
 		List<PathElement> pathElemLst = parse(property);
 		
@@ -502,33 +545,42 @@ public class PropertyAccessor
 			}
 			case INDEX:
 			{
-				int idx = (Integer) lastElem.key;
-				
-				if(idx < 0)
+				if(!(parent instanceof Collection))
 				{
-					if(!(parent instanceof Collection))
+					throw new InvalidArgumentException("Index is used on non-collection value at: {}", lastElem.path);
+				}
+
+				Collection<Object> parentCollection = (Collection<Object>) parent;
+				
+				if(!(parentCollection instanceof List))
+				{
+					if(lastElem.addExpression)
 					{
-						throw new InvalidArgumentException("Index is used on non-collection value at: {}", lastElem.path);
+						parentCollection.add(value);
+						return;
 					}
 					
-					((Collection<Object>) parent).add(value);
-					return;
-				}
-				
-				
-				if(!(parent instanceof List))
-				{
 					throw new InvalidArgumentException("Index is used on non-list value at: {}", lastElem.path);
 				}
 				
-				if(addElement)
+				List<Object> parentList = (List<Object>) parent;
+				Integer idx = (Integer) lastElem.key;
+				
+				if(lastElem.addExpression || idx == parentList.size())
 				{
-					((List<Object>) parent).add(idx, value);
+					if(idx == null)
+					{
+						parentList.add(value);
+					}
+					else
+					{
+						parentList.add(idx, value);
+					}
 				}
 				//if set has to be done
 				else
 				{
-					((List<Object>) parent).set(idx, value);
+					parentList.set(idx, value);
 				}
 				
 				break;
@@ -541,33 +593,11 @@ public class PropertyAccessor
 	}
 
 	/**
-	 * Sets the specified composite property on specified bean. If this property indicates list property at end, set will be used.
-	 * @param bean bean on which property to be set
-	 * @param property property path to set
-	 * @param value value to set
-	 */
-	public static void setProperty(Object bean, String property, Object value)
-	{
-		setProperty(bean, property, value, false);
-	}
-
-	/**
-	 * Sets the specified composite property on specified bean. If this property indicates list property at end, add will be used.
-	 * @param bean bean on which property to be set
-	 * @param property property path to set
-	 * @param value value to set
-	 */
-	public static void addProperty(Object bean, String property, Object value)
-	{
-		setProperty(bean, property, value, true);
-	}
-
-	/**
 	 * Removes the specified property from specified bean.
 	 * @param bean bean from which property needs to be removed.
 	 * @param property property to be removed.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void removeProperty(Object bean, String property)
 	{
 		List<PathElement> pathElemLst = parse(property);
@@ -618,12 +648,21 @@ public class PropertyAccessor
 			}
 			case CONDITION:
 			{
-				if(!(parent instanceof Collection))
+				Collection<Object> collection = null;
+				
+				if(parent instanceof Map)
+				{
+					collection = ((Map) parent).entrySet();
+				}
+				else if(parent instanceof Collection)
+				{
+					collection = (Collection<Object>) parent;
+				}
+				else
 				{
 					throw new InvalidArgumentException("Condition is used on non-collection value at: {}", lastElem.path);
 				}
 				
-				Collection<Object> collection = (Collection<Object>) parent;
 				Iterator<Object> it = collection.iterator();
 				
 				while(it.hasNext())
@@ -631,10 +670,9 @@ public class PropertyAccessor
 					Object obj = it.next();
 					Object condValue = getValue(obj, lastElem.conditionPath, lastElem.conditionPath.size(), false);
 					
-					if(Objects.equals("" + condValue, lastElem.value))
+					if(Objects.equals("" + condValue, "" + lastElem.value))
 					{
 						it.remove();
-						break;
 					}
 				}
 			}

@@ -98,9 +98,9 @@ public class ServerMssgExecutionPaused implements Serializable
 	 */
 	private List<StackElement> stackTrace;
 	
-	private Map<String, byte[]> contextAttr;
+	private Map<String, KeyValue> contextAttr;
 	
-	private Map<String, byte[]> params;
+	private Map<String, KeyValue> params;
 	
 	/**
 	 * Flag indicating if this live point is created because of the error.
@@ -108,8 +108,8 @@ public class ServerMssgExecutionPaused implements Serializable
 	private boolean errorPoint;
 
 	public ServerMssgExecutionPaused(String executionId, String name, String debugFilePath, 
-			int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr,
-			Map<String, byte[]> paramMap,
+			int lineNumber, List<StackElement> stackTrace, Map<String, KeyValue> contextAttr,
+			Map<String, KeyValue> paramMap,
 			boolean errorPoint)
 	{
 		this.executionId = executionId;
@@ -147,17 +147,17 @@ public class ServerMssgExecutionPaused implements Serializable
 		return stackTrace;
 	}
 
-	public Map<String, byte[]> getContextAttr()
+	public Map<String, KeyValue> getContextAttr()
 	{
 		return contextAttr;
 	}
 	
-	public void setContextAttr(Map<String, byte[]> contextAttr)
+	public void setContextAttr(Map<String, KeyValue> contextAttr)
 	{
 		this.contextAttr = contextAttr;
 	}
 	
-	public Map<String, byte[]> getParams()
+	public Map<String, KeyValue> getParams()
 	{
 		return params;
 	}

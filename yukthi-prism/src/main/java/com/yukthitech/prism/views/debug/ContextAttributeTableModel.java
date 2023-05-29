@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.yukthitech.autox.debug.common.KeyValue;
 
 public class ContextAttributeTableModel extends AbstractTableModel
 {
@@ -28,7 +29,7 @@ public class ContextAttributeTableModel extends AbstractTableModel
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 	}
 
-	private static String columnNames[] = new String[] { "Key", "Value" };
+	private static String columnNames[] = new String[] { "Key", "Type", "Size", "Value" };
 	
 	private List<String[]> attributes = new ArrayList<>();
 
@@ -42,7 +43,7 @@ public class ContextAttributeTableModel extends AbstractTableModel
 		return false;
 	}
 	
-	public void setContextAttributes(Map<String, byte[]> attributes)
+	public void setContextAttributes(Map<String, KeyValue> attributes)
 	{
 		this.attributes.clear();
 		
@@ -54,7 +55,9 @@ public class ContextAttributeTableModel extends AbstractTableModel
 		
 		attributes.forEach((key, val) -> 
 		{
-			this.attributes.add(new String[] {key, toString(val)});
+			String size = (val.getSize() != null) ? val.getSize().toString() : "";
+			
+			this.attributes.add(new String[] {key, val.getType(), size, toString(val.getValue())});
 		});
 		
 		super.fireTableDataChanged();

@@ -61,7 +61,7 @@ public class TAutomation extends BaseTestCases
 		FinalReport exeResult = objectMapper.readValue(new File("./output/groups/test-results.json"), FinalReport.class);
 		
 		Assert.assertEquals(exeResult.getTestSuiteCount(), 2, "Found extra test suites.");
-		Assert.assertEquals(exeResult.getTestCaseCount(), 3, "Found extra test cases.");
+		Assert.assertEquals(exeResult.getTestCaseCount(), 4, "Found extra test cases.");
 		
 		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 2, "Found invalid number of success test suites.");
 	}

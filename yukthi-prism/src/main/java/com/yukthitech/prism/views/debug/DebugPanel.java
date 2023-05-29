@@ -52,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
+import com.yukthitech.autox.debug.common.KeyValue;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused.StackElement;
 import com.yukthitech.prism.IViewPanel;
@@ -545,15 +546,15 @@ public class DebugPanel extends JPanel implements IViewPanel
 		}
 
 		//Get context params and sort them
-		Map<String, byte[]> contextAttr = threadDet == null ? null : activeEnv.getContextAttributes();
+		Map<String, KeyValue> contextAttr = threadDet == null ? null : activeEnv.getContextAttributes();
 		contextAttr = (contextAttr == null) ? Collections.emptyMap() : new TreeMap<>(contextAttr);
 		
 		//get param map and sort them
-		Map<String, byte[]> paramMap = threadDet == null ? null : threadDet.getParams();
+		Map<String, KeyValue> paramMap = threadDet == null ? null : threadDet.getParams();
 		paramMap = (paramMap == null) ? Collections.emptyMap() : new TreeMap<>(paramMap);
 		
 		//build final attributes
-		Map<String, byte[]> finalAttr = new LinkedHashMap<>();
+		Map<String, KeyValue> finalAttr = new LinkedHashMap<>();
 		paramMap.forEach((key, val) -> 
 		{
 			finalAttr.put("(param) " + key, val);

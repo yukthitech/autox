@@ -11,5 +11,9 @@
 			{"label": "Transformations", "file": "/help/jel/transformations.html"},
 			{"label": "Ext. Resources", "file": "/help/jel/resource-loading.html"}
 		]
+	},
+	{
+		"label": "Property Expressions",
+		"file": "/help/prop-expr/prop-expr-doc.html"
 	}
 ]

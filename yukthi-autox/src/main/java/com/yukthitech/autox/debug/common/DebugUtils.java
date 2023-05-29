@@ -58,4 +58,61 @@ public class DebugUtils
 		
 		return SerializationUtils.serialize(strRep);
 	}
+	
+	public static KeyValue toKeyValue(String key, Object value)
+	{
+		String type = null;
+		Integer size = null;
+		byte rawBytes[] = serialize(value);
+		
+		if(value == null)
+		{
+			type = "null";
+		}
+		else if(value instanceof Collection)
+		{
+			Collection<?> col = (Collection<?>) value;
+			size = col.size();
+			
+			Object firstVal = size > 0 ? col.iterator().next() : null;
+			type = value.getClass().getName();
+			
+			if(firstVal != null)
+			{
+				type += "<" + firstVal.getClass().getName() + ">";
+			}
+			else
+			{
+				type += "<>";
+			}
+			
+		}
+		else if(value instanceof Map)
+		{
+			Map<?, ?> map = (Map<?, ?>) value;
+			size = map.size();
+			
+			Map.Entry<?, ?> firstEntry = size > 0 ? map.entrySet().iterator().next() : null;
+			type = value.getClass().getName();
+			
+			if(firstEntry != null)
+			{
+				type = String.format("%s<%s, %s>", 
+						type, 
+						(firstEntry.getKey() != null ? firstEntry.getKey().getClass().getName() : ""),
+						(firstEntry.getValue() != null ? firstEntry.getValue().getClass().getName() : "")
+						);
+			}
+			else
+			{
+				type += "<>";
+			}
+		}
+		else
+		{
+			type = value.getClass().getName();
+		}
+		
+		return new KeyValue(key, rawBytes, type, size);
+	}
 }

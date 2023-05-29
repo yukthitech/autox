@@ -383,7 +383,7 @@ public class DefaultPrefixExpressions
 				
 				if(exprType == null)
 				{
-					return Arrays.asList(parts);
+					return new ArrayList<>(Arrays.asList(parts));
 				}
 				
 				if(exprType.length > 1)

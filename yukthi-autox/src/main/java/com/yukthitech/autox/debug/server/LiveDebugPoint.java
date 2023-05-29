@@ -47,6 +47,7 @@ import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
 import com.yukthitech.autox.debug.common.DebugOp;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.DebugUtils;
+import com.yukthitech.autox.debug.common.KeyValue;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.common.ServerMssgEvalExprResult;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
@@ -182,21 +183,21 @@ public class LiveDebugPoint
 		return debugPoint;
 	}
 	
-	private Map<String, byte[]> getContextAttr()
+	private Map<String, KeyValue> getContextAttr()
 	{
-		Map<String, byte[]> contextAttr = new HashMap<>(); 
+		Map<String, KeyValue> contextAttr = new HashMap<>(); 
 		ExecutionContextManager.getExecutionContext().getAttr().forEach((key, val) ->
 		{
-			byte serData[] = DebugUtils.serialize(val);
-			contextAttr.put(key, serData);
+			KeyValue keyVal = DebugUtils.toKeyValue(key, val);
+			contextAttr.put(key, keyVal);
 		});
 
 		return contextAttr;
 	}
 	
-	private Map<String, byte[]> getParams()
+	private Map<String, KeyValue> getParams()
 	{
-		Map<String, byte[]> paramMap = new HashMap<>(); 
+		Map<String, KeyValue> paramMap = new HashMap<>(); 
 		Map<String, Object> params = ExecutionContextManager.getInstance().getExecutionContextStack().getParamForDebug();
 		
 		if(MapUtils.isEmpty(params))
@@ -206,8 +207,8 @@ public class LiveDebugPoint
 		
 		params.forEach((key, val) ->
 		{
-			byte serData[] = DebugUtils.serialize(val);
-			paramMap.put(key, serData);
+			KeyValue keyVal = DebugUtils.toKeyValue(key, val);
+			paramMap.put(key, keyVal);
 		});
 
 		return paramMap;
