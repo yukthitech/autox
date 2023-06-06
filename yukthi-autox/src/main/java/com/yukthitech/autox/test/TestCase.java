@@ -189,14 +189,15 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	 *
 	 * @param name the name
 	 */
-	public void addGroup(String name)
+	public void addGroups(String groups)
 	{
-		if(name.trim().length() == 0)
+		if(StringUtils.isBlank(groups))
 		{
 			return;
 		}
 		
-		this.groups.add(name.trim());
+		String names[] = groups.trim().split("\\s*\\,\\s*");
+		this.groups.addAll(Arrays.asList(names));
 	}
 	
 	/**

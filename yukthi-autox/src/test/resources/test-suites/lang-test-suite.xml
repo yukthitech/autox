@@ -26,7 +26,7 @@
 				Tests simple function working which does not use return.
 			</description>
 			
-			<group>group1</group>
+			<groups>group1</groups>
 
 			<f:sumWithoutReturn a="int: 10" b="int: 20"/>
 			<s:set expression="someLst" value="json: [1, 2, 3, 4]"/>
@@ -38,7 +38,7 @@
 			<description>
 				Tests expressions are replaced in test suite files properly
 			</description>
-			<group>group2</group>
+			<groups> group2, group3</groups>
 		
 			<s:set expression="testAttr" value="SimpleValue"/>
 		

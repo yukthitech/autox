@@ -8,7 +8,7 @@
 				Base test case to set first level attr.
 			</description>
 			
-			<group>group1</group>
+			<groups>group1</groups>
 			
 			<s:set expression="firstLevelAttr1" value="int: 10"/>
 			<s:set expression="firstLevelAttr2" value="int: 10"/>
@@ -19,7 +19,7 @@
 				Ensures attr from base level is accessible
 			</description>
 		
-			<group>group1</group>
+			<groups>group1</groups>
 
 			<s:assert-equals actual="attr: firstLevelAttr1" expected="int: 10"/>
 			<s:assert-equals actual="attr: firstLevelAttr2" expected="int: 10"/>

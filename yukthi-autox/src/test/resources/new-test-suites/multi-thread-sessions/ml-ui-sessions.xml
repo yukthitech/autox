@@ -186,7 +186,7 @@
 			<s:assert-true value="condition: uiIsVisible(attr.locator, null)"/>
 		</testCase>
 
-		<testCase name="testDownload" group="download">
+		<testCase name="testDownload" groups="download">
 			<description>Validates download functionality</description>
 			
 			<s:ui-goto-page uri="/form.html" />
