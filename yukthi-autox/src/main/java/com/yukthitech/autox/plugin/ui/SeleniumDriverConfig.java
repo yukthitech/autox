@@ -71,6 +71,11 @@ public class SeleniumDriverConfig implements Validateable
 	 * Profile folder to be used within data folder.
 	 */
 	private String profileFolder;
+	
+	/**
+	 * Extra comma separated arguments to be passed to the driver.
+	 */
+	private String extraArguments;
 
 	/**
 	 * Gets the name of the driver.
@@ -228,6 +233,16 @@ public class SeleniumDriverConfig implements Validateable
 	public void setUserDataDir(String userDataDir)
 	{
 		this.userDataDir = userDataDir;
+	}
+
+	public String getExtraArguments()
+	{
+		return extraArguments;
+	}
+
+	public void setExtraArguments(String extraArguments)
+	{
+		this.extraArguments = extraArguments;
 	}
 
 	/* (non-Javadoc)

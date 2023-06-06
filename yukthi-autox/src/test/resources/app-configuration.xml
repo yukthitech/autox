@@ -10,7 +10,6 @@
 	<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
 	
 	<!-- Persistence related configuration -->
-	<!--  
 	<storage-repository-factory createTables="true">
 		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="java.lang.String" ccg:params="h2">
 			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource" driverClassName="org.h2.Driver">
@@ -18,7 +17,6 @@
 			</dataSource>
 		</dataStore>
 	</storage-repository-factory>
-	-->
 
 	<!--
 		Specifies base packages to be scanned for steps and validators.
@@ -45,6 +43,9 @@
 				<driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
 					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
 					<profile-option name="enable.console.logs">true</profile-option>
+					<profile-option name="remote-allow-origins">*</profile-option>
+					
+					<extraArguments>--remote-allow-origins=*</extraArguments>
 				</driver>
 
 				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">

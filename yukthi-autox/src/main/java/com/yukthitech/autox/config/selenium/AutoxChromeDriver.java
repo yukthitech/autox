@@ -60,6 +60,16 @@ public class AutoxChromeDriver extends ChromeDriver
 			options.addArguments("--profile-directory=" + config.getProfileFolder());
 		}
 		
+		if(StringUtils.isNoneBlank(config.getExtraArguments()))
+		{
+			String argLst[] = config.getExtraArguments().trim().split("\\s*\\,\\s*");
+			
+			for(String arg : argLst)
+			{
+				options.addArguments(arg);				
+			}
+		}
+		
 		logger.debug("Creating chrome options with profile-options: {}", config.getProfileOptions());
 		
 		options.setHeadless( "true".equals(config.getProfileOptions().get("headless.execution")) );

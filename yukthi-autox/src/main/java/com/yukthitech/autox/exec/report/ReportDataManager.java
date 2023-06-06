@@ -209,7 +209,7 @@ public class ReportDataManager
 	private void generateJsonReport()
 	{
 		File reportFolder = AutomationContext.getInstance().getReportFolder();
-		File reportFile = new File(reportFolder, "test-results.json");
+		File reportFile = new File(reportFolder, "test-progress.json");
 		
 		try
 		{
