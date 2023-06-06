@@ -1,8 +1,0 @@
-<bean xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap" ccg:beanType="com.yukthitech.test.beans.SimpleComplexBean">
-	<name>Test123</name>
-	<size>234</size>
-	<description>
-		Some description with
-		multi lined text.
-	</description>
-</bean>

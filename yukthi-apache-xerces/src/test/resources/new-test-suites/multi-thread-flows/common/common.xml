@@ -1,9 +1,0 @@
-<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
-	<setup>
-		<s:set expression="globalSetup" value="1"/>
-	</setup>
-
-	<cleanup>
-		<s:log message="Message from global cleanup."/>
-	</cleanup>
-</testData>

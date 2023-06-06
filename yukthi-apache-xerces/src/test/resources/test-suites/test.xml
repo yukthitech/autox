@@ -1,8 +1,0 @@
-<test-file 
-	xmlns:s="http://autox.yukthitech.com/steps"
-	xmlns:f="http://autox.yukthitech.com/functions" 
-	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
-
-	<test a="a" c="c" b="b"/>
-
-</test-file>
