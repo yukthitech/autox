@@ -30,6 +30,7 @@ import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.http.ConnectionFailedException;
 
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.context.AutomationContext;
@@ -318,8 +319,14 @@ public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginS
 			return;
 		}
 		
-		driver.close();
-		driver.quit();
+		try
+		{
+			driver.close();
+			driver.quit();
+		}catch(NoSuchSessionException | ConnectionFailedException ex)
+		{
+			//ignore if session is already closed
+		}
 	}
 	
 	@Override
@@ -331,7 +338,7 @@ public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginS
 			{
 				driver.close();
 				driver.quit();
-			}catch(NoSuchSessionException ex)
+			}catch(NoSuchSessionException | ConnectionFailedException ex)
 			{
 				//ignore if session is already closed
 			}

@@ -61,7 +61,6 @@ public class PollAndCheckStep extends AbstractValidation
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * true.
 	 */
-	@Param(description = "Group of steps/validations to be executed as part of polling.", required = true)
 	@SkipParsing
 	private List<IStep> poll;
 

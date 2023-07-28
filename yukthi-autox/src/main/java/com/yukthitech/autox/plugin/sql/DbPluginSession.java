@@ -42,19 +42,21 @@ public class DbPluginSession extends AbstractPluginSession<DbPluginSession, DbPl
 	 */
 	public DataSource getDataSource(String name)
 	{
+		DataSource res = null;
+		
 		if(StringUtils.isBlank(name))
 		{
-			DataSource res = parentPlugin.getDefaultDataSource();
+			res = parentPlugin.getDefaultDataSource();
 			
 			if(res == null)
 			{
 				throw new InvalidStateException("No default data source specified for query execution");
 			}
-			
-			return res;
 		}
-		
-		DataSource res = parentPlugin.getDataSource(name);
+		else
+		{
+			res = parentPlugin.getDataSource(name);
+		}
 		
 		if(res == null)
 		{

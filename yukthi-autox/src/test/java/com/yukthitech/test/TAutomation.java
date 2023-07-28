@@ -66,6 +66,28 @@ public class TAutomation extends BaseTestCases
 		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 2, "Found invalid number of success test suites.");
 	}
 
+	/*
+	@Test
+	public void testMailPlugin() throws Exception
+	{
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml",
+				"-tsf", "./src/test/resources/new-test-suites/mail-test-suites",
+				"-rf", "./output/mail", 
+				"-prop", "./src/test/resources/app.properties", 
+				//"--report-opening-disabled", "true",
+				//"-ts", "rest-test-suites"
+				//"-tc", "testGroupRecursion"
+				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+			});
+		
+		FinalReport exeResult = objectMapper.readValue(new File("./output/mail/test-results.json"), FinalReport.class);
+		
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 1, "Found one more test suites.");
+		Assert.assertEquals(exeResult.getTestCaseCount(), 1, "Found one more test cases.");
+		Assert.assertEquals(exeResult.getTestCaseCount(), 1, "Found one more test cases.");
+	}
+	*/
+
 	@Test
 	public void testGlobalSetupError() throws Exception
 	{

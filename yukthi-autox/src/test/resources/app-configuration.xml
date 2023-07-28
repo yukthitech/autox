@@ -93,7 +93,32 @@
 				<default-header name="Auth-Token">${(getPluginAttr('sessionBased').authToken)!''}</default-header>
 			</connection>
 		</rest-plugin>
-			
+
+		<!--
+		<email-plugin>
+			<email-server name="testMail">
+				<smtpHost>smtp.gmail.com</smtpHost>
+				<smtpPort>465</smtpPort>
+
+				<userName>***@gmail.com</userName>
+				<oauthClientId>**</oauthClientId>
+				<oauthSecretKey>***</oauthSecretKey>
+				<oauthToken>****</oauthToken>
+				<oauthRefreshSettings>
+					<url>https://www.googleapis.com/oauth2/v4/token</url>
+					<param name="client_id">${oauthClientId}</param>
+					<param name="client_secret">${oauthSecretKey}</param>
+					<param name="refresh_token">${oauthToken}</param>
+					<param name="grant_type">refresh_token</param>
+					
+					<responseTokenProp>access_token</responseTokenProp>
+				</oauthRefreshSettings>
+				
+				<readHost>imap.gmail.com</readHost>
+				<readPort>993</readPort>
+			</email-server>
+		</email-plugin>
+		-->
 	</wrap:plugins>
 
 	<!--

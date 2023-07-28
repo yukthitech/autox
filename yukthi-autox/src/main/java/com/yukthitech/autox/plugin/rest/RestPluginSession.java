@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.event.EventManager;
 import com.yukthitech.autox.plugin.AbstractPluginSession;
@@ -29,6 +31,8 @@ import com.yukthitech.utils.rest.RestClient;
 
 public class RestPluginSession extends AbstractPluginSession<RestPluginSession, RestPlugin>
 {
+	private static Logger logger = LogManager.getLogger(RestPluginSession.class);
+	
 	private static class ConnectionDetails
 	{
 		private RestPlugin.RestConnection connection;
@@ -122,6 +126,8 @@ public class RestPluginSession extends AbstractPluginSession<RestPluginSession, 
 		
 		if(client == null)
 		{
+			logger.debug("Creating rest client with [Url: {}, Proxy: {}]", baseUrl, proxy);
+			
 			client = new RestClient(baseUrl, proxy);
 			client.setRestClientListener(new AutoxRestClientListener(connectionDetails.connection.getName(), this));
 			

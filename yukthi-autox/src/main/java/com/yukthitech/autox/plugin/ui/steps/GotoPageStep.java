@@ -48,12 +48,13 @@ public class GotoPageStep extends AbstractUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Going to page with uri - {}", uri);
-
 		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		String resUrl = seleniumSession.getResourceUrl(uri);
 		
+		exeLogger.debug("Going to page with uri - {} [URL: {}]", uri, resUrl);
+
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
-		driver.navigate().to( seleniumSession.getResourceUrl(uri) );
+		driver.navigate().to(resUrl);
 	}
 
 	/**

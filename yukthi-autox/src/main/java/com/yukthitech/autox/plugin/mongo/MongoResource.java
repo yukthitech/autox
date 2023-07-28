@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -38,6 +40,8 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  */
 public class MongoResource implements Validateable
 {
+	private static Logger logger = LogManager.getLogger(MongoResource.class);
+	
 	/**
 	 * The Constant HOST_PORT.
 	 */
@@ -47,6 +51,11 @@ public class MongoResource implements Validateable
 	 * Replicas of mongo db.
 	 */
 	private List<ServerAddress> serverAddresses = new ArrayList<>();
+	
+	/**
+	 * Server replicas to connect.
+	 */
+	private String replicas;
 	
 	/**
 	 * Name of this mongo resource.
@@ -113,6 +122,8 @@ public class MongoResource implements Validateable
 			
 			this.serverAddresses.add(new ServerAddress(matcher.group(1), Integer.parseInt(matcher.group(2))));
 		}
+		
+		this.replicas = replicas;
 	}
 
 	/**
@@ -187,7 +198,10 @@ public class MongoResource implements Validateable
 			return mongoClient;
 		}
 		
-		MongoCredential credential = (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password)) ? MongoCredential.createCredential(userName, dbName, password.toCharArray()) : null;
+		logger.debug("Connecting to mongodb: [Replicas: {}, Db: {}, User: {}]", replicas, dbName, userName);
+		
+		MongoCredential credential = (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password)) ? 
+				MongoCredential.createCredential(userName, dbName, password.toCharArray()) : null;
 		MongoClient client = null;
 		
 		if(credential != null)

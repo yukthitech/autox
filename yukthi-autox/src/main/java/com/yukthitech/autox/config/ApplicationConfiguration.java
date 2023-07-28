@@ -36,6 +36,7 @@ import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.RemoteFileLogMonitor;
 import com.yukthitech.autox.plugin.IPlugin;
+import com.yukthitech.autox.plugin.mail.EmailPlugin;
 import com.yukthitech.autox.plugin.mongo.MongoPlugin;
 import com.yukthitech.autox.plugin.rest.RestPlugin;
 import com.yukthitech.autox.plugin.sql.DbPlugin;
@@ -331,6 +332,11 @@ public class ApplicationConfiguration
 	 * @param plugin the new rest plugin
 	 */
 	public void setRestPlugin(RestPlugin plugin)
+	{
+		this.addPlugin(plugin);
+	}
+	
+	public void addEmailPlugin(EmailPlugin plugin)
 	{
 		this.addPlugin(plugin);
 	}

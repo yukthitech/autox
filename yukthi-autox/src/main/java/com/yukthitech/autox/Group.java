@@ -41,6 +41,8 @@ public enum Group
 	
 	Store,
 	
+	Mail,
+	
 	NONE
 	
 	;

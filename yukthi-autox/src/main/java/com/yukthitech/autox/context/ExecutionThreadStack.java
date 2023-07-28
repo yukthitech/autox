@@ -79,6 +79,12 @@ public class ExecutionThreadStack
 		if(session == null)
 		{
 			IPlugin<?, ?> plugin = PluginManager.getInstance().getPlugin(pluginType);
+			
+			if(plugin == null)
+			{
+				throw new InvalidStateException("No plugin found of type: {}", pluginType.getName());
+			}
+			
 			session = plugin.newSession();
 			
 			pluginSessions.put(pluginType, session);

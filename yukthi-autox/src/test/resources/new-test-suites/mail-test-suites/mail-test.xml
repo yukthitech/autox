@@ -1,0 +1,36 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="mail-test-suites">
+		<testCase name="readMails">
+			<description>
+				Checks ability to read mails.
+			</description>
+			
+			<s:delete-emails emailServerName="testMail" subjectPattern="Test from autox"/>
+
+			<s:send-email emailServerName="testMail" toAddressList="sdpenvestnet@gmail.com">
+				<subject>Test from autox</subject>
+				<content>
+					This is test content.
+				</content>
+			</s:send-email>
+
+			<s:sleep time="5" timeUnit="SECONDS"/>
+
+			<s:read-emails emailServerName="testMail" mailAttribute="mailsRead" 
+				subjectPattern="Test from autox">
+			</s:read-emails>
+
+			<s:assert-equals actual="expr: sizeOf(attr.mailsRead)" expected="int: 1"/>
+
+			<s:for-each expression="attr: mailsRead" loopVar="mail">
+				<s:log message="Read mail from ${(attr.mail.fromId.mailId)!'n/a'} with subject: ${attr.mail.subject}"/>
+			</s:for-each>
+
+			<s:delete-emails emailServerName="testMail" subjectPattern="Test from autox" deleteCountAttribute="mailDelCount"/>
+
+			<s:assert-equals actual="expr: attr.mailDelCount" expected="int: 1"/>
+		</testCase>
+		
+		
+	</testSuite>
+</testData>

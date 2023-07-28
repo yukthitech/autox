@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.yukthitech.autox.AbstractStep;
+import com.yukthitech.autox.AbstractContainerStep;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -48,7 +48,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 @Executable(name = "if", group = Group.Lang, message = "Evaluates specified condition and if evaluates to true execute 'then' otherwise execute 'else'. "
 		+ "For ease 'if' supports direct addition of steps which would be added to then block.")
-public class IfConditionStep extends AbstractStep implements IStepContainer, IMultiPartStep
+public class IfConditionStep extends AbstractContainerStep implements IStepContainer, IMultiPartStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -57,14 +57,6 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 	 */
 	@Param(description = "Freemarker condition to be evaluated.", required = true, sourceType = SourceType.CONDITION)
 	private String condition;
-
-	/**
-	 * Group of steps/validations to be executed when condition evaluated to be
-	 * true.
-	 */
-	@SkipParsing
-	@Param(description = "Group of steps/validations to be executed when condition evaluated to be true.", required = true)
-	private List<IStep> then = new ArrayList<IStep>();
 
 	/**
 	 * Else-if blocks.
@@ -96,7 +88,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 	@ChildElement(description = "Used to group steps to be executed when this if condition is true.")
 	public void setThen(Function then)
 	{
-		this.then.addAll(then.getSteps());
+		super.setSteps(then.getSteps());
 	}
 
 	/**
@@ -115,18 +107,6 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 		this.elseBlock = new ElseStep();
 		this.elseBlock.setLocation(elseGroup.getLocation(), elseGroup.getLineNumber());
 		this.elseBlock.setSteps(elseGroup.getSteps());
-	}
-	
-	@Override
-	public void addStep(IStep step)
-	{
-		then.add(step);
-	}
-
-	@Override
-	public List<IStep> getSteps()
-	{
-		return then;
 	}
 	
 	@Override
@@ -166,7 +146,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 		
 		if(res)
 		{
-			StepsExecutor.execute(then, null, null);
+			StepsExecutor.execute(super.getSteps(), null, null);
 			return;
 		}
 		

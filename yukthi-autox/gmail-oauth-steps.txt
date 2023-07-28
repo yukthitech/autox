@@ -1,0 +1,35 @@
+To send mails in gmail with oauth2 following steps has to be followed:
+
+1) Creation of oauth cred
+	Goto https://console.cloud.google.com/
+		Create a project (pre-requiste for cred)
+		Create a oauth constent page (pre-requiste for cred)
+		
+		Under credentials create new Web client cred.
+			under this new cred add redirect url - https://oauth2.dance/
+			Make note of client id and secret
+		
+2) Providing constent to above generated cred for gmail
+	Modify below url with above generate cred details
+		https://accounts.google.com/o/oauth2/auth?client_id=<client-id>
+			&redirect_uri=https://oauth2.dance/
+			&scope=https://mail.google.com/
+			&response_type=code
+			&access_type=offline
+			&prompt=consent
+	Open this url in browser and provide the consent
+	
+3) Generating the refresh code
+	Modify below url with above generate cred details
+		POST https://accounts.google.com/o/oauth2/token?client_id=<client-id>
+			&client_secret=<secret-key>
+			&redirect_uri=https://oauth2.dance/
+			&grant_type=authorization_code
+	
+	Execute above url in postman and from response copy the refresh code
+	
+4) Above refresh code has to be used while configuring email server in autox along with other details.
+	This code will be used to generate short-lived auth code at runtime
+	
+
+	
