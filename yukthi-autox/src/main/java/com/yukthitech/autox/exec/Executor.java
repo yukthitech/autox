@@ -107,6 +107,36 @@ public abstract class Executor
 		this.uniqueId = reportManager.getRep(this);
 	}
 	
+	public boolean hasSetup()
+	{
+		return (setup != null);
+	}
+	
+	public boolean hasCleanup()
+	{
+		return (cleanup != null);
+	}
+	
+	public boolean hasBeforeChild()
+	{
+		return (beforeChild != null);
+	}
+	
+	public boolean hasAfterChild()
+	{
+		return (afterChild != null);
+	}
+	
+	public TestStatus getStatus()
+	{
+		return status;
+	}
+	
+	public String getStatusMessage()
+	{
+		return statusMessage;
+	}
+	
 	public String getUniqueId()
 	{
 		return uniqueId;

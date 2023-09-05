@@ -35,6 +35,8 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.DebugServer;
+import com.yukthitech.autox.event.AutomationEventManager;
+import com.yukthitech.autox.event.AutomationEventType;
 import com.yukthitech.autox.exec.AsyncTryCatchBlock;
 import com.yukthitech.autox.exec.ExecutionPool;
 import com.yukthitech.autox.exec.FunctionExecutor;
@@ -108,11 +110,15 @@ public class AutomationLauncher
 		{
 			System.err.println("Error: " + e.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, e.getMessage());
 			System.exit(-1);
 		} catch(Exception ex)
 		{
 			ex.printStackTrace();
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
 			System.exit(-1);
 		}
 	}
@@ -130,6 +136,7 @@ public class AutomationLauncher
 			System.err.println("Error: " + ex.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
 			System.exit(-1);
 		}catch(Exception ex)
 		{
@@ -138,6 +145,7 @@ public class AutomationLauncher
 			System.err.println("Error: " + ex.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
 			System.exit(-1);
 		}
 
@@ -174,6 +182,7 @@ public class AutomationLauncher
 			System.err.println("Invalid number of arguments specified");
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, "Invalid number of arguments specified");
 			System.exit(-1);
 		}
 
@@ -184,6 +193,7 @@ public class AutomationLauncher
 			System.err.println("Invalid application configuration file - " + appConfigurationFile);
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CONFIG, "Invalid application configuration file - %s", appConfigurationFile);
 			System.exit(-1);
 		}
 		
@@ -259,6 +269,8 @@ public class AutomationLauncher
 		TestSuiteGroupExecutor executor = new TestSuiteGroupExecutor(testSuiteGroup);
 		CountDownLatch latch = new CountDownLatch(1);
 		
+		AutomationEventManager.getInstance().onInitialize(executor);
+		
 		AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
 		{
 			executor.execute(null, null, callback);
@@ -286,6 +298,8 @@ public class AutomationLauncher
 		
 		latch.await();
 		logger.debug("Automation completed...");
+		
+		AutomationEventManager.getInstance().onAppEnd(executor);
 	}
 	
 	private static void executeFunction(String functionName, AutomationContext context) throws InterruptedException
@@ -299,8 +313,9 @@ public class AutomationLauncher
 		}
 		
 		FunctionExecutor executor = new FunctionExecutor(function);
-		
 		CountDownLatch latch = new CountDownLatch(1);
+		
+		AutomationEventManager.getInstance().onInitialize(executor);
 		
 		AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
 		{
@@ -329,6 +344,8 @@ public class AutomationLauncher
 		
 		latch.await();
 		logger.debug("Automation completed...");
+		
+		AutomationEventManager.getInstance().onAppEnd(executor);
 	}
 
 	/**
@@ -340,6 +357,7 @@ public class AutomationLauncher
 	public static void main(String[] args) throws Exception
 	{
 		System.out.println("Executing main function of automation launcher...");
+		AutomationEventManager.getInstance().onAppStart();
 		
 		try
 		{
@@ -368,6 +386,8 @@ public class AutomationLauncher
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution. Error: {}", ex.getMessage(), ex);
+			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_UNHANDLED, ex.getMessage());
 			System.exit(-1);
 		}
 	}

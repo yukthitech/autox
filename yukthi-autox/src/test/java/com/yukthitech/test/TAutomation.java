@@ -18,10 +18,13 @@ package com.yukthitech.test;
 import java.io.File;
 import java.util.Arrays;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.yukthitech.autox.AutomationLauncher;
+import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.test.beans.ExecutionResult;
@@ -31,18 +34,33 @@ public class TAutomation extends BaseTestCases
 	@Test
 	public void testSuccessCases() throws Exception
 	{
-		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
-				"-rf", "./output/success", 
-				"-prop", "./src/test/resources/app.properties", 
-				//"-ts", "ui-test-suites"
-				//"-tc", "button_Click"
-				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
-			});
+		System.setProperty(IAutomationConstants.AUTOX_SYS_PROP_LISTENERS, TestAutomationListener.class.getName());
 		
-		ExecutionResult exeResult = objectMapper.readValue(new File("./output/success/test-results.json"), ExecutionResult.class);
-		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 0, "Found one more test cases errored.");
-		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
-		Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
+		try
+		{
+			AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
+					"-rf", "./output/success", 
+					"-prop", "./src/test/resources/app.properties", 
+					//"-ts", "assert-test-suites"
+					//"-tc", "button_Click"
+					//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+				});
+			
+			ExecutionResult exeResult = objectMapper.readValue(new File("./output/success/test-results.json"), ExecutionResult.class);
+			Assert.assertEquals(exeResult.getTestCaseErroredCount(), 0, "Found one more test cases errored.");
+			Assert.assertEquals(exeResult.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
+			Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
+			
+			TestAutomationListener listener = (TestAutomationListener) AutomationEventManager.getInstance().getListeners().get(0);
+			Assert.assertNotNull(listener.getStartTime());
+			Assert.assertNotNull(listener.getEndTime());
+			Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));
+			
+			listener.print();
+		}finally
+		{
+			System.setProperty(IAutomationConstants.AUTOX_SYS_PROP_LISTENERS, "");
+		}
 	}
 
 	@Test

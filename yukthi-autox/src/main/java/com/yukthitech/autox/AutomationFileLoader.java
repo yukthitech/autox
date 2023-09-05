@@ -30,6 +30,8 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.AutoxInfoException;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.event.AutomationEventManager;
+import com.yukthitech.autox.event.AutomationEventType;
 import com.yukthitech.autox.plugin.PluginManager;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
@@ -190,6 +192,8 @@ public class AutomationFileLoader
 			if(!testCaseFolder.exists() && !testCaseFolder.isDirectory())
 			{
 				System.err.println("Invalid test suite folder specified - " + testCaseFolder);
+				
+				AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_SOURCE, "Invalid test suite folder specified - " + testCaseFolder);
 				System.exit(-1);
 			}
 	
@@ -240,6 +244,7 @@ public class AutomationFileLoader
 			System.err.println(errorStr);
 			System.err.println("\n\n==============================================================");
 			
+			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_SOURCE, "Failed to load test files");
 			System.exit(-1);
 		}
 

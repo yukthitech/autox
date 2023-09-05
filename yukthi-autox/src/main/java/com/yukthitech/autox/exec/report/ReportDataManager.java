@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
+import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.FunctionExecutor;
@@ -201,6 +202,11 @@ public class ReportDataManager
 		return getExecutorDetails(executor).getLogger(executor, ExecutionType.MAIN, ".js", ".js");
 	}
 	
+	public synchronized ExecutionStatusReport getExecutionStatusReport(Executor executor)
+	{
+		return getExecutorDetails(executor).statusReport;
+	}
+	
 	public String getRep(Executor executor)
 	{
 		return reportInfoProviders.getName(executor);
@@ -264,6 +270,7 @@ public class ReportDataManager
 		}
 		
 		generateJsonReport();
+		AutomationEventManager.getInstance().executionStarted(executor, executionType);
 	}
 	
 	private void setEndDetails(ExecutionType executionType, Executor executor, TestStatus status, String mssg)
@@ -312,6 +319,7 @@ public class ReportDataManager
 		}
 		
 		generateJsonReport();
+		AutomationEventManager.getInstance().executionEnded(executor, executionType);
 	}
 	
 	public FinalReport generateReport()

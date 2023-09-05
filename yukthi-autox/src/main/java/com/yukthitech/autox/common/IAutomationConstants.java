@@ -31,6 +31,11 @@ public interface IAutomationConstants
 	String GROUP_ELEMENT = "elementGroup";
 	
 	/**
+	 * System property that can be used to specify automation event listeners.
+	 */
+	public String AUTOX_SYS_PROP_LISTENERS = "autox.eventListeners";
+	
+	/**
 	 * Used to specify if test suites should be executed parallely or not.
 	 * Overridable prop. 
 	 */
