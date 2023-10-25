@@ -17,8 +17,10 @@ package com.yukthitech.autox.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -66,6 +68,11 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	 * Groups to which this test case belong.
 	 */
 	private Set<String> groups = new HashSet<>();
+	
+	/**
+	 * Extra tags to this testcase, which will be accessible via meta data.
+	 */
+	private Map<String, String> tags = new HashMap<>();
 	
 	/**
 	 * Dependency test cases within the current test suite. Dependencies are considered valid only if they occur
@@ -198,6 +205,25 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		
 		String names[] = groups.trim().split("\\s*\\,\\s*");
 		this.groups.addAll(Arrays.asList(names));
+	}
+	
+	public void addTag(String name, String value)
+	{
+		this.tags.put(name, value);
+	}
+	
+	public Map<String, String> getTags()
+	{
+		return tags;
+	}
+	
+	public MetaInfo getMetaInfo()
+	{
+		return new MetaInfo()
+				.setFilePath(super.getLocation().getPath())
+				.setLineNumber(super.getLineNumber())
+				.setGroups(groups)
+				.setTags(tags);
 	}
 	
 	/**

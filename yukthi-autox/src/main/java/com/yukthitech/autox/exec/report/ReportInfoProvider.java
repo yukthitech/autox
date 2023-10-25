@@ -17,6 +17,8 @@ package com.yukthitech.autox.exec.report;
 
 import java.util.function.Function;
 
+import com.yukthitech.autox.test.MetaInfo;
+
 /**
  * Base interface used to extract information from different executables.
  * @author akranthikiran
@@ -37,17 +39,21 @@ public class ReportInfoProvider<T>
 	
 	private Function<T, String> authorFunc;
 	
+	private Function<T, MetaInfo> metaInfoFunc;
+	
 	public ReportInfoProvider(boolean singleLogger, 
 			Function<T, String> codeFunc, 
 			Function<T, String> nameFunc, 
 			Function<T, String> descFunc,
-			Function<T, String> authorFunc)
+			Function<T, String> authorFunc,
+			Function<T, MetaInfo> metaInfoFunc)
 	{
 		this.singleLogger = singleLogger;
 		this.codeFunc = codeFunc;
 		this.nameFunc = nameFunc;
 		this.descFunc = descFunc;
 		this.authorFunc = authorFunc;
+		this.metaInfoFunc = metaInfoFunc;
 	}
 	
 	public boolean isSingleLogger()
@@ -73,5 +79,10 @@ public class ReportInfoProvider<T>
 	public String getAuthor(T executor)
 	{
 		return authorFunc.apply(executor);
+	}
+	
+	public MetaInfo getMetaInfo(T executor)
+	{
+		return metaInfoFunc.apply(executor);
 	}
 }

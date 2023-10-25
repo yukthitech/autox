@@ -21,6 +21,7 @@ import java.util.Map;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.TestCaseExecutor;
 import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.test.MetaInfo;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestSuite;
@@ -33,10 +34,10 @@ public class ReportInfoProviders
 	
 	public ReportInfoProviders()
 	{
-		addProvider(TestSuiteGroup.class, new ReportInfoProvider<>(false, grp -> "", grp -> "global", grp -> "global", grp -> ""));
-		addProvider(TestSuite.class, new ReportInfoProvider<>(false, ts -> "ts", ts -> ts.getName(), ts -> ts.getDescription(), ts -> ts.getAuthor()));
-		addProvider(TestCase.class, new ReportInfoProvider<>(true, tc -> "tc", tc -> tc.getName(), tc -> tc.getDescription(), tc -> tc.getAuthor()));
-		addProvider(Function.class, new ReportInfoProvider<>(true, func -> "func", func -> func.getName(), func -> func.getDescription(), func -> null));
+		addProvider(TestSuiteGroup.class, new ReportInfoProvider<>(false, grp -> "", grp -> "global", grp -> "global", grp -> "", grp -> null));
+		addProvider(TestSuite.class, new ReportInfoProvider<>(false, ts -> "ts", ts -> ts.getName(), ts -> ts.getDescription(), ts -> ts.getAuthor(), ts -> ts.getMetaInfo()));
+		addProvider(TestCase.class, new ReportInfoProvider<>(true, tc -> "tc", tc -> tc.getName(), tc -> tc.getDescription(), tc -> tc.getAuthor(), tc -> tc.getMetaInfo()));
+		addProvider(Function.class, new ReportInfoProvider<>(true, func -> "func", func -> func.getName(), func -> func.getDescription(), func -> null, func -> func.getMetaInfo()));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -67,6 +68,11 @@ public class ReportInfoProviders
 		return getProvider(executor.getExecutable()).getAuthor(executor.getExecutable());
 	}
 	
+	public MetaInfo getMetaInfo(Executor executor)
+	{
+		return getProvider(executor.getExecutable()).getMetaInfo(executor.getExecutable());
+	}
+
 	public String getName(Executor executor)
 	{
 		String name = getProvider(executor.getExecutable()).getName(executor.getExecutable());

@@ -8,6 +8,8 @@
 				Base test case to set first level attr.
 			</description>
 			
+			<tag name="tag1">Some value for tag1</tag>
+			
 			<groups>group1</groups>
 			
 			<s:set expression="firstLevelAttr1" value="int: 10"/>

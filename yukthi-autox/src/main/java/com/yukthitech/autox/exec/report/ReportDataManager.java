@@ -253,6 +253,7 @@ public class ReportDataManager
 				{
 					executorDetails.statusReport.setName(reportInfoProviders.getName(executor));
 					executorDetails.statusReport.setAuthor(reportInfoProviders.getAuthor(executor));
+					executorDetails.statusReport.setMetaInfo(reportInfoProviders.getMetaInfo(executor));
 					
 					executorDetails.statusReport.setMainExecutionDetails(new ExecutionDetails());
 				}

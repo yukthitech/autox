@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yukthitech.autox.test.MetaInfo;
 import com.yukthitech.autox.test.TestStatus;
 
 /**
@@ -41,6 +42,11 @@ public class ExecutionStatusReport
 	 * Author of the execution.
 	 */
 	private String author;
+	
+	/**
+	 * Extra meta info of executable.
+	 */
+	private MetaInfo metaInfo;
 
 	/**
 	 * List of child reports.
@@ -155,6 +161,16 @@ public class ExecutionStatusReport
 	public void setCleanupExecutionDetails(ExecutionDetails cleanupExecutionDetails)
 	{
 		this.cleanupExecutionDetails = cleanupExecutionDetails;
+	}
+	
+	public MetaInfo getMetaInfo()
+	{
+		return metaInfo;
+	}
+
+	public void setMetaInfo(MetaInfo metaInfo)
+	{
+		this.metaInfo = metaInfo;
 	}
 
 	public void addChidReport(ExecutionStatusReport report)

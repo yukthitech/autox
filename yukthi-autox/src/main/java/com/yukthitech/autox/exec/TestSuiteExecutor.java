@@ -134,7 +134,7 @@ public class TestSuiteExecutor extends Executor
 			
 			if(testCase == null)
 			{
-				throw new InvalidStateException("Invalid restricted test case specified: {}", tc);
+				throw new InvalidStateException("Invalid test case name specified for execution: {}", tc);
 			}
 			
 			tcWithDep.add(tc);

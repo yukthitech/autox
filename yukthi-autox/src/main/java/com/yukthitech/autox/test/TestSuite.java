@@ -58,6 +58,11 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 	 * Description about the test suite.
 	 */
 	private String description;
+	
+	/**
+	 * Extra tags to this test suite, which will be accessible via meta data.
+	 */
+	private Map<String, String> tags = new HashMap<>();
 
 	/**
 	 * List of test cases to be executed in this test suite.
@@ -114,6 +119,24 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 			Set<String> authors = new TreeSet<>(Arrays.asList(author.trim().split("\\s*\\,\\s*")));
 			this.author = authors.stream().collect(Collectors.joining(", "));
 		}
+	}
+
+	public void addTag(String name, String value)
+	{
+		this.tags.put(name, value);
+	}
+	
+	public Map<String, String> getTags()
+	{
+		return tags;
+	}
+	
+	public MetaInfo getMetaInfo()
+	{
+		return new MetaInfo()
+				.setFilePath(super.getLocation().getPath())
+				.setLineNumber(super.getLineNumber())
+				.setTags(tags);
 	}
 
 	public boolean isParallelExecutionEnabled()

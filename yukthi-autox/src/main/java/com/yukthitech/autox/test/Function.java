@@ -134,6 +134,14 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		this.parameterDefs.add(def);
 	}
 
+	
+	public MetaInfo getMetaInfo()
+	{
+		return new MetaInfo()
+				.setFilePath(super.getLocation().getPath())
+				.setLineNumber(super.getLineNumber());
+	}
+
 	/**
 	 * Sets the parent where this function is defined.
 	 *
