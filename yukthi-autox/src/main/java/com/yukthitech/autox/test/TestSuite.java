@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -44,6 +46,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class TestSuite extends AbstractLocationBased implements Validateable, IEntryPoint
 {
+	private static Pattern UQ_ID_FORMAT = Pattern.compile("(.*)\\#(.*)");
+	
 	/**
 	 * Name of the test suite.
 	 */
@@ -136,7 +140,8 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 		return new MetaInfo()
 				.setFilePath(super.getLocation().getPath())
 				.setLineNumber(super.getLineNumber())
-				.setTags(tags);
+				.setTags(tags)
+				.setUqId(name);
 	}
 
 	public boolean isParallelExecutionEnabled()
@@ -278,12 +283,38 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 	 */
 	public TestCase getTestCase(String name)
 	{
+		Matcher matcher = UQ_ID_FORMAT.matcher(name);
+		
+		//if uq id is specified
+		if(matcher.matches())
+		{
+			if(!this.name.equals(matcher.group(1)))
+			{
+				return null;
+			}
+			
+			name = matcher.group(2);
+		}
+		
 		return testCases.get(name);
 	}
 	
 	public boolean hasAnyTestCases(Set<String> names)
 	{
-		return CollectionUtils.containsAny(testCases.keySet(), names);
+		if(CollectionUtils.isEmpty(names))
+		{
+			return true;
+		}
+		
+		for(TestCase tc : testCases.values())
+		{
+			if(names.contains(tc.getName()) || names.contains(tc.getUqId()))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
@@ -449,6 +480,11 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 		if(name == null || name.trim().length() == 0)
 		{
 			throw new ValidateException("No name is provided for test suite.");
+		}
+
+		if(name.contains("#"))
+		{
+			throw new ValidateException("Test-suite name cannot contain # symbol");
 		}
 	}
 	

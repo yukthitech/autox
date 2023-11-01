@@ -1,0 +1,48 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<testSuite name="b-test-suites">
+		<description>
+			Ensures the order of test case executions by uids.
+		</description>
+		
+		<testCase name="baseTestCase">
+			<description>
+				Basic test case without dependencies.
+			</description>
+			
+			<wrap:steps>
+				<s:execute expression="push(attr.flowCapture, 'b-test-suites#baseTestCase')"/>
+			</wrap:steps>
+		</testCase>
+	
+		<testCase name="depTestCase1" dependencies="baseTestCase">
+			<description>
+				Test case with dependencies.
+			</description>
+			
+			<wrap:steps>
+				<s:execute expression="push(attr.flowCapture, 'b-test-suites#depTestCase1')"/>
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="depTestCase2" dependencies="baseTestCase">
+			<description>
+				Test case with dependencies.
+			</description>
+			
+			<wrap:steps>
+				<s:execute expression="push(attr.flowCapture, 'b-test-suites#depTestCase2')"/>
+			</wrap:steps>
+		</testCase>
+		
+		<testCase name="depTestCase3" dependencies="depTestCase1, depTestCase2">
+			<description>
+				Test case with dependencies.
+			</description>
+			
+			<wrap:steps>
+				<s:execute expression="push(attr.flowCapture, 'b-test-suites#depTestCase3')"/>
+			</wrap:steps>
+		</testCase>
+
+	</testSuite>
+</testData>

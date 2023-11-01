@@ -17,9 +17,11 @@ package com.yukthitech.autox.exec;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,15 +61,63 @@ public class TestSuiteExecutor extends Executor
 		//add test case executors in order of dependencies
 		List<TestCase> orderedTestCases = testSuite.fetchOrderedTestCases();
 		Map<String, TestCaseExecutor> executorMap = new HashMap<>();
+		Set<String> reqTestCases = fetchRequiredTestCases(orderedTestCases, restrictedTestCases);
 		
-		ObjectWrapper<String> excludedGroup = new ObjectWrapper<>();
+		logger.debug("For test-suite '{}', got executeable testcases as: {}", testSuite.getName(), reqTestCases);
 
 		//create executor and child dependencies
 		for(TestCase testCase : orderedTestCases)
 		{
-			if(restrictedTestCases != null && !restrictedTestCases.contains(testCase.getName()))
+			if(!reqTestCases.contains(testCase.getName()))
 			{
-				logger.debug("Exluding test-case '{}' as it is NOT part of restricted test cases", testCase.getName());
+				continue;
+			}
+			
+			TestCaseExecutor executor = new TestCaseExecutor(testCase);
+			executorMap.put(testCase.getName(), executor);
+			super.addChildExector(executor);
+			
+			Set<String> depLst = testCase.getDependenciesSet();
+			
+			//if no dependencies are present
+			if(CollectionUtils.isEmpty(depLst))
+			{
+				continue;
+			}
+			
+			//for each dependency
+			for(String dep : depLst)
+			{
+				TestCaseExecutor depExecutor = executorMap.get(dep);
+				
+				//check if dependency is not present
+				if(depExecutor == null)
+				{
+					throw new InvalidStateException("For test-case '{}' required dependency test-case '{}' is not found or excluded", testCase.getName(), dep);	
+				}
+				
+				executor.addDependency(depExecutor);
+			}
+		}
+		
+		logger.debug("Got child executors as: {}", super.getChildExecutors());
+	}
+	
+	private Set<String> fetchRequiredTestCases(List<TestCase> orderedTestCases, Set<String> restrictedTestCases)
+	{
+		Map<String, TestCase> testCaseMap = orderedTestCases.stream().collect(Collectors.toMap(tc -> tc.getName(), tc -> tc));
+		Set<String> reqTestCases = new LinkedHashSet<>();
+		ObjectWrapper<String> excludedGroup = new ObjectWrapper<>();
+		
+		for(TestCase testCase : orderedTestCases)
+		{
+			String tcUqId = testCase.getUqId();
+			
+			if(restrictedTestCases != null 
+					&& !restrictedTestCases.contains(testCase.getName())
+					&& !restrictedTestCases.contains(tcUqId))
+			{
+				logger.debug("Excluding test-case '{}' [{}] as it is NOT part of restricted test cases", testCase.getName(), tcUqId);
 				continue;
 			}
 			
@@ -85,36 +135,37 @@ public class TestSuiteExecutor extends Executor
 				continue;
 			}
 			
-			TestCaseExecutor executor = new TestCaseExecutor(testCase);
-			executorMap.put(testCase.getName(), executor);
-			super.addChildExector(executor);
-			
-			Set<String> depLst = testCase.getDependenciesSet();
-			
-			if(CollectionUtils.isEmpty(depLst))
-			{
-				continue;
-			}
-			
-			for(String dep : depLst)
-			{
-				TestCaseExecutor depExecutor = executorMap.get(dep);
-				
-				if(depExecutor == null)
-				{
-					throw new InvalidStateException("For test-case '{}' required dependency test-case '{}' is not found or excluded", testCase.getName(), dep);
-				}
-				
-				executor.addDependency(depExecutor);
-			}
+			markRequired(testCase, testCaseMap, reqTestCases);
 		}
 		
-		/*
-		if(CollectionUtils.isEmpty(super.getChildExecutors()))
+		return reqTestCases;
+	}
+	
+	private void markRequired(TestCase testCase, Map<String, TestCase> testCaseMap, Set<String> reqTestCases)
+	{
+		Set<String> depLst = testCase.getDependenciesSet();
+		
+		//if no dependencies are present
+		if(CollectionUtils.isEmpty(depLst))
 		{
-			throw new InvalidStateException("For test-suite '{}' no child test cases found", testSuite.getName());
+			reqTestCases.add(testCase.getName());
+			return;
 		}
-		*/
+
+		for(String dep : depLst)
+		{
+			TestCase depTestCase = testCaseMap.get(dep);
+			
+			if(depTestCase == null)
+			{
+				throw new InvalidStateException("For test-case '{}' required dependency test-case '{}' is not found or excluded", testCase.getName(), dep);
+			}
+			
+			markRequired(depTestCase, testCaseMap, reqTestCases);
+		}
+		
+		//add current testcase after dependencies are added
+		reqTestCases.add(testCase.getName());
 	}
 	
 	private Set<String> getRestrictedTestCases()

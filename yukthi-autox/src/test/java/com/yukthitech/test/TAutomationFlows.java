@@ -18,6 +18,7 @@ package com.yukthitech.test;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -73,6 +74,47 @@ public class TAutomationFlows extends BaseTestCases
 		System.out.println(flowPoints);
 		
 		Assert.assertEquals(flowPoints, loadFlows("/data/test-flow-order.txt"));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void testFlowByIds(String tcIds, List<String> expectedFlowPoints, String rfFolder) throws Exception
+	{
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
+				"-tsf", "./src/test/resources/new-test-suites/dup-name-flows",
+				"-rf", rfFolder, 
+				"-prop", "./src/test/resources/app.properties",
+				"--report-opening-disabled", "true",
+				"-tc", tcIds
+			});
+		
+		List<String> flowPoints = (List<String>) AutomationContext.getInstance().getGlobalAttribute("flowCapture");
+		System.out.println(flowPoints);
+		
+		Assert.assertEquals(flowPoints, expectedFlowPoints);
+	}
+
+	@Test
+	public void testFlowByIds_onlyBase() throws Exception
+	{
+		testFlowByIds("baseTestCase", 
+				Arrays.asList("a-test-suites#baseTestCase", "b-test-suites#baseTestCase"), 
+				"./output/dup-flows-onlyBase");
+	}
+
+	@Test
+	public void testFlowByIds_onlyDep() throws Exception
+	{
+		testFlowByIds("depTestCase1", 
+				Arrays.asList("a-test-suites#baseTestCase", "a-test-suites#depTestCase1", "b-test-suites#baseTestCase", "b-test-suites#depTestCase1"), 
+				"./output/dup-flows-onlyDep");
+	}
+
+	@Test
+	public void testFlowByIds_deepDepByUid() throws Exception
+	{
+		testFlowByIds("b-test-suites#depTestCase3", 
+				Arrays.asList("b-test-suites#baseTestCase", "b-test-suites#depTestCase1", "b-test-suites#depTestCase2", "b-test-suites#depTestCase3"), 
+				"./output/dup-flows-byUid");
 	}
 
 	@Test

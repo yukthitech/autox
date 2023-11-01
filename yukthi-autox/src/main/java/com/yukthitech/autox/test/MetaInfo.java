@@ -9,6 +9,8 @@ public class MetaInfo
 	
 	private int lineNumber;
 	
+	private String uqId;
+	
 	private Set<String> groups;
 	
 	private Map<String, String> tags;
@@ -54,6 +56,17 @@ public class MetaInfo
 	public MetaInfo setTags(Map<String, String> tags)
 	{
 		this.tags = tags;
+		return this;
+	}
+
+	public String getUqId()
+	{
+		return uqId;
+	}
+
+	public MetaInfo setUqId(String uqId)
+	{
+		this.uqId = uqId;
 		return this;
 	}
 }

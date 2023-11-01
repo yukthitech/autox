@@ -29,6 +29,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.AbstractLocationBasedStepContainer;
 import com.yukthitech.autox.IStepContainer;
@@ -217,13 +218,19 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		return tags;
 	}
 	
+	public String getUqId()
+	{
+		return parentTestSuite.getName() + "#" + name;
+	}
+	
 	public MetaInfo getMetaInfo()
 	{
 		return new MetaInfo()
 				.setFilePath(super.getLocation().getPath())
 				.setLineNumber(super.getLineNumber())
 				.setGroups(groups)
-				.setTags(tags);
+				.setTags(tags)
+				.setUqId(getUqId());
 	}
 	
 	/**
@@ -578,6 +585,11 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		if(StringUtils.isEmpty(name))
 		{
 			throw new ValidateException("No name is provided for test case.");
+		}
+
+		if(name.contains("#"))
+		{
+			throw new InvalidArgumentException("Test-case name cannot contain # symbol");
 		}
 
 		if(StringUtils.isEmpty(description))
