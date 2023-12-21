@@ -39,6 +39,7 @@ import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.event.AutomationEventType;
 import com.yukthitech.autox.exec.AsyncTryCatchBlock;
 import com.yukthitech.autox.exec.ExecutionPool;
+import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.FunctionExecutor;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
 import com.yukthitech.autox.exec.report.FinalReport;
@@ -218,7 +219,7 @@ public class AutomationLauncher
 		return context.getTestSuiteGroup();
 	}
 	
-	private static void automationCompleted(boolean res, AutomationContext context)
+	private static void automationCompleted(boolean res, AutomationContext context, Executor executor)
 	{
 		if(!context.getBasicArguments().isReportOpeningDisalbed())
 		{
@@ -244,6 +245,8 @@ public class AutomationLauncher
 		{
 			logger.error("An error occurred while closing the resources", ex);
 		}
+		
+		AutomationEventManager.getInstance().onAppEnd(executor);
 		
 		if(systemExitEnabled)
 		{
@@ -286,7 +289,7 @@ public class AutomationLauncher
 				.getAllPlugins()
 				.forEach(plugin -> plugin.close());
 			
-			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
+			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context, executor);				
 		}).onError((callback, ex) -> 
 		{
 			logger.error("An error occurred during automation execution", ex);
@@ -298,8 +301,6 @@ public class AutomationLauncher
 		
 		latch.await();
 		logger.debug("Automation completed...");
-		
-		AutomationEventManager.getInstance().onAppEnd(executor);
 	}
 	
 	private static void executeFunction(String functionName, AutomationContext context) throws InterruptedException
@@ -332,7 +333,7 @@ public class AutomationLauncher
 				.getAllPlugins()
 				.forEach(plugin -> plugin.close());
 			
-			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
+			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context, executor);				
 		}).onError((callback, ex) -> 
 		{
 			logger.error("An error occurred during automation execution", ex);
@@ -344,8 +345,6 @@ public class AutomationLauncher
 		
 		latch.await();
 		logger.debug("Automation completed...");
-		
-		AutomationEventManager.getInstance().onAppEnd(executor);
 	}
 
 	/**

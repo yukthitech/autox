@@ -125,11 +125,11 @@ public class TestSuiteExecutor extends Executor
 			{
 				if(StringUtils.isBlank(excludedGroup.getValue()))
 				{
-					logger.debug("Exluding test-case '{}' as it is not part of executable groups.", testCase.getName());
+					logger.debug("Excluding test-case '{}' as it is not part of executable groups.", testCase.getName());
 				}
 				else
 				{
-					logger.debug("Exluding test-case '{}' as it is part of excluded group: {}", testCase.getName(), excludedGroup.getValue());
+					logger.debug("Excluding test-case '{}' as it is part of excluded group: {}", testCase.getName(), excludedGroup.getValue());
 				}
 				
 				continue;
