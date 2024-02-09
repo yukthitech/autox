@@ -29,9 +29,9 @@ import org.reflections.util.ConfigurationBuilder;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
-import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
+import com.yukthitech.utils.fmarker.doc.FreeMarkerMethodDoc;
 
 import freemarker.template.TemplateException;
 

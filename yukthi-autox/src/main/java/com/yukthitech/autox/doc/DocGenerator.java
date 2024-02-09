@@ -17,6 +17,7 @@ package com.yukthitech.autox.doc;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -40,9 +41,10 @@ import com.yukthitech.autox.plugin.ui.common.LocatorType;
 import com.yukthitech.autox.prefix.PrefixExpressionDetails;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.XMLBeanParser;
-import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
-import com.yukthitech.utils.fmarker.FreeMarkerMethodExampleDoc;
-import com.yukthitech.utils.fmarker.ParamDoc;
+import com.yukthitech.utils.annotations.Named;
+import com.yukthitech.utils.fmarker.doc.FreeMarkerMethodDoc;
+import com.yukthitech.utils.fmarker.doc.FreeMarkerMethodExampleDoc;
+import com.yukthitech.utils.fmarker.doc.ParamDoc;
 
 /**
  * Tool to generate documentation for all plugins, steps and validations.
@@ -222,6 +224,14 @@ public class DocGenerator
 		}
 	}
 	
+	private static String getGroupName(Method method)
+	{
+		Class<?> cls = method.getDeclaringClass();
+		Named named = cls.getAnnotation(Named.class);
+		
+		return (named == null) ? cls.getName() : named.value();
+	}
+	
 	private static void loadFreeMarmerMethodDocs(DocInformation docInfo, String basePackages[], ExampleCollectionFile exampleCollections)
 	{
 		FreeMarkerMethodManager.reload(null, new HashSet<>(Arrays.asList(basePackages)), true);
@@ -234,6 +244,7 @@ public class DocGenerator
 			metInfo.setName(doc.getName());
 			metInfo.setReturnDescription(doc.getReturnDescription());
 			metInfo.setReturnType(doc.getReturnType());
+			metInfo.setGroup(getGroupName(doc.getMethod()));
 			
 			if(doc.getParameters() != null)
 			{

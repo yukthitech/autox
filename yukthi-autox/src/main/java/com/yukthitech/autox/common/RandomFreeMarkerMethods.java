@@ -22,10 +22,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
+@Named("Autox Random Methods")
 public class RandomFreeMarkerMethods
 {
 	/**

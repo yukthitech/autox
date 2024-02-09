@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FilenameUtils;
 
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -31,6 +32,7 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * Common free marker methods related to files.
  * @author akiran
  */
+@Named("Autox File Methods")
 public class FileFreeMarkerMethods
 {
 	/**

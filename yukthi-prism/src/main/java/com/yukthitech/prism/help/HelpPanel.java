@@ -211,7 +211,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 			HelpNodeData methodNode = new HelpNodeData("methods", "Free Marker Methods", "", null);
 			rootNode.addHelpNode(methodNode);
-
+			
 			for(FreeMarkerMethodDocInfo method : docInformation.getFreeMarkerMethods())
 			{
 				context.put("type", "method");

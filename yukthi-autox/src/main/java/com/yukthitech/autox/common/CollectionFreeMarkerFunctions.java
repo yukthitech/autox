@@ -29,6 +29,7 @@ import org.apache.commons.collections.CollectionUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -36,6 +37,7 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * Collection related free marker functions.
  * @author akiran
  */
+@Named("Autox Collection Methods")
 public class CollectionFreeMarkerFunctions
 {
 	@FreeMarkerMethod(

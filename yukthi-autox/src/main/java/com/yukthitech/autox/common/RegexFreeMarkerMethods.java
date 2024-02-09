@@ -26,10 +26,12 @@ import java.util.regex.Pattern;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
+@Named("Autox Regex Methods")
 public class RegexFreeMarkerMethods
 {
 	/**

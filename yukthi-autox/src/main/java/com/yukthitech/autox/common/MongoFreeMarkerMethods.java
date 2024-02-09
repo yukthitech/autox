@@ -30,6 +30,7 @@ import com.yukthitech.autox.plugin.mongo.MongoPlugin;
 import com.yukthitech.autox.plugin.mongo.MongoPluginSession;
 import com.yukthitech.autox.plugin.mongo.MongoResource;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -38,6 +39,7 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * Mongo related free marker methods.
  * @author akranthikiran
  */
+@Named("Autox Mongo Methods")
 public class MongoFreeMarkerMethods
 {
 	@FreeMarkerMethod(

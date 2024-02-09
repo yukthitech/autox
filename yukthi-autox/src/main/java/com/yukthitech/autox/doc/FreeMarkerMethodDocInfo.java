@@ -59,6 +59,11 @@ public class FreeMarkerMethodDocInfo extends AbstractDocInfo
 	 * Examples of usage.
 	 */
 	private List<Example> examples;
+	
+	/**
+	 * Name of the group.
+	 */
+	private String group;
 
 	private String parameterString;
 
@@ -105,6 +110,16 @@ public class FreeMarkerMethodDocInfo extends AbstractDocInfo
 	public List<ParamInfo> getParameters()
 	{
 		return parameters;
+	}
+	
+	public String getGroup()
+	{
+		return group;
+	}
+
+	public void setGroup(String group)
+	{
+		this.group = group;
 	}
 
 	public void setParameters(List<ParamInfo> parameters)

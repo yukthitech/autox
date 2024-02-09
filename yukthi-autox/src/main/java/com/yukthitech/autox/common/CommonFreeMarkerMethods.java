@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.sql.Date;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +45,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -54,23 +54,9 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * Common free marker methods.
  * @author akiran
  */
+@Named("Autox Common Methods")
 public class CommonFreeMarkerMethods
 {
-	@FreeMarkerMethod(
-			description = "Converts specified date into millis.",
-			returnDescription = "Millis value"
-			)
-	public static Long toMillis(
-			@FmParam(name = "date", description = "Date to be converted") Date date)
-	{
-		if(date == null)
-		{
-			return null;
-		}
-		
-		return date.getTime();
-	}
-
 	/**
 	 * Fetches the value for specified xpath.
 	 * @param source source on which xpath has to be fetched.
@@ -260,103 +246,6 @@ public class CommonFreeMarkerMethods
 		return falseVal;
 	}
 	
-	@SuppressWarnings("unchecked")
-	@FreeMarkerMethod(
-			description = "Used to check if specified value is empty. "
-					+ "For collection, map and string, along with null this will check for empty value.",
-			returnDescription = "True if value is empty."
-			)
-	public static boolean isEmpty(
-			@FmParam(name = "value", description = "Value to be checked for empty") Object value)
-	{
-		if(value == null)
-		{
-			return true;
-		}
-		
-		if(value instanceof String)
-		{
-			String str = (String) value;
-			return (str.trim().length() == 0);
-		}
-		
-		if(value instanceof Collection)
-		{
-			Collection<Object> col = (Collection<Object>) value;
-			return col.isEmpty();
-		}
-
-		if(value instanceof Map)
-		{
-			Map<Object, Object> map = (Map<Object, Object>) value;
-			return map.isEmpty();
-		}
-		
-		return false;
-	}
-
-	@FreeMarkerMethod(
-			description = "Used to check if specified value is not empty. "
-					+ "For collection, map and string, along with non-null this will check for non-empty value.",
-			returnDescription = "True if value is empty."
-			)
-	public static boolean isNotEmpty(
-			@FmParam(name = "value", description = "Value to be checked for empty") Object value)
-	{
-		return !isEmpty(value);
-	}
-
-	@FreeMarkerMethod(
-			description = "Used to check if specified value is null and return approp value when null and when non-null.",
-			returnDescription = "Specified null-condition-value or non-null-condition-value."
-			)
-	public static Object nvl(
-			@FmParam(name = "value", description = "Value to be checked for empty") Object value,
-			@FmParam(name = "nullValue", description = "Value to be returned when value is null") Object nullValue,
-			@FmParam(name = "nonNullValue", description = "Value to be returned when value is non-null") Object nonNullValue
-			)
-	{
-		return (value == null) ? nullValue : nonNullValue;
-	}
-
-	@FreeMarkerMethod(
-			description = "Used to check if specified value is true and return approp value"
-					+ " Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.",
-			returnDescription = "Specified true-condition-value or false-condition-value."
-			)
-	public static Object ifTrue(
-			@FmParam(name = "value", description = "Value to be checked for true.") Object value,
-			@FmParam(name = "trueValue", description = "Value to be returned when value is true.", defaultValue = "true") Object trueValue,
-			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null.", defaultValue = "false") Object falseValue
-			)
-	{
-		trueValue = (trueValue == null) ? true : trueValue;
-		falseValue = (falseValue == null) ? false : falseValue;
-		
-		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
-		
-		return bvalue ? trueValue : falseValue;
-	}
-
-	@FreeMarkerMethod(
-			description = "Used to check if specified value is false and return approp value"
-					+ " Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false. "
-					+ "If null, the condition will be considered as false (hence returing falseValue)",
-			returnDescription = "Specified true-condition-value or false-condition-value."
-			)
-	public static Object ifFalse(
-			@FmParam(name = "value", description = "Value to be checked for false. Can be boolean true or string 'true'") Object value,
-			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null.", defaultValue = "true") Object falseValue,
-			@FmParam(name = "trueValue", description = "Value to be returned when value is true.", defaultValue = "false") Object trueValue
-			)
-	{
-		trueValue = (trueValue == null) ? false : trueValue;
-		falseValue = (falseValue == null) ? true : falseValue;
-
-		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
-		return bvalue ? trueValue : falseValue;
-	}
-
 	@FreeMarkerMethod(
 			description = "Used to check if both values are equal or not. Nulls are also allowed.",
 			returnDescription = "True if both are null or both are equal."

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -29,6 +30,7 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * String related free marker functions.
  * @author akiran
  */
+@Named("Autox String Methods")
 public class StringFreeMarkerFunctions
 {
 	@FreeMarkerMethod(
