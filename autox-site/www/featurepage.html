@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>Autox Features</title>
+		
+		<link rel="icon" type="image/png" href="autox-logo.png" />
+
+		<script type="text/javascript" src="jquery/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="bootstrap-3.4.1/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/popper/popper.min.js"></script>
+		
+		<script type="text/javascript" src="common/dyn-content.js"></script>
+
+		<link rel="stylesheet" href="bootstrap-3.4.1/css/bootstrap.min.css">
+	    <link rel="stylesheet" href="site/homepagecontent.css">
+	    
+		<style>
+			#height
+			{
+			  line-height:1;
+			}
+			#header
+			{
+			  word-spacing:-6px;
+			}
+
+			img
+			{
+				 width:100%;
+			}
+			
+			#image
+			{
+				border:1px solid black;
+				padding: 5px;
+				margin-bottom: 5px;
+			}
+
+			.active
+			{
+			  color:lightblue;
+			  padding-bottom:1px;
+			  border-bottom:1px solid white;
+			}
+		</style>
+	</head>
+	<body>
+		<div include="common/topnavbar.html"></div>
+		<div include="common/scrollingimage.html"></div>
+
+		<div class="container" style="margin-top: 3em;">
+			<div class="row ">
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image.png">
+									<img class="card-img-top" src="img/featurepage/image.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue"  data-content="Template like xml language makes autox powerful yet simple for everyone" data-placement="bottom" data-trigger="hover">
+								<b>Template Like Language</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image1.png">
+									<img class="card-img-top" src="img/featurepage/image1.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue"  
+								data-content="In all attributes and text contents (including cdata sections) freemarker template support is inbuilt.
+									Making autox making more dynamic,
+									this feature is mostly used in defining dynamic queries or payloads.
+									In standard programming languages this takes up lot of boiler plate coding or extra load of external resource management" 
+								data-placement="bottom" data-trigger="hover">
+								<b>Embedded Templates</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image2.png">
+									<img class="card-img-top" src="img/featurepage/image2.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue" 
+								data-content="DML query steps support question (?) expressions which works similar to free marker expressions,
+									but instead of replacing the value directly, the value will be passed as prepare statement parameter" 
+								data-placement="bottom" data-trigger="hover">
+								<b>Question Expressions</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image3.png">
+									<img class="card-img-top" src="img/featurepage/image3.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue" 
+								data-content="In attributes and text contents,
+								  expression prefixes can be used to parse/process followed content in dynamic ways like parsing,
+								  loading files/resources, parsing json, xpath search, property search etc.
+								  And pipes (like unix syntax) can be used to pass the output of one parser to next parser." 
+								data-placement="bottom" data-trigger="hover">
+								<b>Expression Parsers &amp; Pipes</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image4.png">
+									<img class="card-img-top" src="img/featurepage/image4.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue" 
+								data-content="High informative log reports will be generated.
+									Each step in the test case will result in detailed log information.These logs are searchable" 
+								data-placement="bottom" data-trigger="hover">
+								<b>Log Reports</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image5.png">
+									<img class="card-img-top" src="img/featurepage/image5.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue" 
+								data-content="Log monitors can be used to fetch logs from local machine or remote machines for the duration of each test case individually.
+									This helps in ease of debugging when testing distributed architecture." 
+								data-placement="bottom" data-trigger="hover">
+								<b>Log Monitors</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image6.png">
+									<img class="card-img-top" src="img/featurepage/image6.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue" 
+								data-content="Inbuilt support for ui automation is provided using selenium.
+								  And elements can be located using different locators like id based, css based, name based, xpath based etc all with simple expression syntax string.
+								  And also screen shots of the current browser state can be taken,
+								  which would be part of the log as shown below" 
+								data-placement="bottom" data-trigger="hover">
+								<b>Selenium Based UI Automation</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image7.png">
+									<img class="card-img-top" src="img/featurepage/image7.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue" 
+								data-content="custom steps or validations can be created in Java by implementing IStep/IValidation interfaces 
+									directly or indirectly and adding simple annotations for meta information." 
+								data-placement="bottom" data-trigger="hover">
+								<b>Pluggable Custom steps/validations</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image" >
+								<a  href="img/featurepage/image8.png">
+									<img class="card-img-top" src="img/featurepage/image8.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+							
+							<a class="card-list-title" style="color:blue" 
+								data-content="New expressions parses can be added in java by a simple public method with @ExpressionParser annotation providing meta information" 
+								data-placement="bottom" data-trigger="hover">
+								<b>Pluggable Expression Parsers</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Added extra breaks to accommodate tooltips in last row -->
+		<br/><br/><br/><br/><br/><br/><br/>
+
+		<script>
+			$(function () {
+				$('[data-toggle="popover"]').popover()
+			});
+			
+			$(function(){
+				$('[data-trigger="hover"]').popover()
+			});
+		</script>
+	</body>
+</html>
+

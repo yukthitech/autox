@@ -7,7 +7,8 @@
 
 		<script type="text/javascript" src="jquery/jquery-3.4.1.min.js"></script>
 		<script type="text/javascript" src="bootstrap-3.4.1/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="/popper/popper.min.js"></script>
+		<script type="text/javascript" src="popper/popper.min.js"></script>
+		<script type="text/javascript" src="common/dyn-content.js"></script>
 
 		<link rel="stylesheet" href="bootstrap-3.4.1/css/bootstrap.min.css">
 	    <link rel="stylesheet" href="site/homepagecontent.css">
@@ -35,11 +36,8 @@
 		</style>
 	</head>
 	<body data-spy="scroll" data-target="#myScrollspy" data-offset="40">
-		<?php
-			  $color='red';
-			  include('common/topnavbar.php');
-			  include('common/scrollingimage.php');
-			  include('homepagecontent.php');
-		 ?>
+		<div include="common/topnavbar.html"></div>
+		<div include="common/scrollingimage.html"></div>
+		<div include="homepagecontent.html"></div>
 	</body>
 </html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>Autox Ide Features</title>
+		
+		<link rel="icon" type="image/png" href="autox-logo.png" />
+
+		<script type="text/javascript" src="jquery/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="bootstrap-3.4.1/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="popper/popper.min.js"></script>
+		
+		<script type="text/javascript" src="common/dyn-content.js"></script>
+
+		<link rel="stylesheet" href="bootstrap-3.4.1/css/bootstrap.min.css">
+	    <link rel="stylesheet" href="site/homepagecontent.css">
+
+		<style>
+			#height
+			{
+			  line-height:1;
+			}
+			#header
+			{
+			  word-spacing:-6px;
+			}
+
+			img
+			{
+				 width:100%;
+			}
+			
+			#image
+			{
+				border:1px solid black;
+				padding: 5px;
+				margin-bottom: 5px;
+			}
+
+			.active
+			{
+			  color:lightblue;
+			  padding-bottom:1px;
+			  border-bottom:1px solid white;
+			}
+		</style>
+	</head>
+	<body>
+		<div include="common/topnavbar.html"></div>
+		<div include="common/scrollingimage.html"></div>
+
+		<div  class="container" style="margin-top: 3em;">
+			<div class="row ">
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image"  >
+								<a href="img/idefeature/image.png">
+									<img class="card-img-top" src="img/idefeature/image.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+				
+							<a class="card-list-title"  style="color:blue" 
+								data-content="Provides common ide featueres like project explorer, multi file editing,
+									multi poject management etc." 
+								data-placement="bottom" data-trigger="hover">
+								<b>Basic Ide with multi file editing</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image"  >
+								<a href="img/idefeature/image1.png">
+									<img class="card-img-top" src="img/idefeature/image1.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+				
+							<a class="card-list-title"  style="color:blue" 
+								data-content="Provides basic xml syntax highlighting.
+									And also provides autox based errors and warnings for effective development." 
+								data-placement="bottom" data-trigger="hover">
+								<b>Syntax highlighting with errors and warnings</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image"  >
+								<a href="img/idefeature/image2.png">
+									<img class="card-img-top" src="img/idefeature/image2.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+				
+							<a class="card-list-title"  style="color:blue" 
+								data-content="All the available steps, validations,
+									functions etc are provided as auto-complete options along with documentation." 
+								data-placement="bottom" data-trigger="hover">
+								<b>Auto completion support</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image"  >
+								<a href="img/idefeature/image3.png">
+									<img class="card-img-top" src="img/idefeature/image3.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+				
+							<a class="card-list-title"  style="color:blue" 
+								data-content="With simple short keys ide provides means of executing test suites or test cases in place.
+								  And the console output, report ouput, context attributes created as part of the execution can be viewed within ide.
+								  Full report can be displayed in browser with a click of button" 
+								data-placement="bottom" data-trigger="hover">
+								<b>Test suite/test cases execution</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image"  >
+								<a href="img/idefeature/image4.png">
+									<img class="card-img-top" src="img/idefeature/image4.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+				
+							<a class="card-list-title"  style="color:blue" 
+								data-content="Development of test cases can be done interactively.
+								  Developer can code a step, execute it analyze the result,
+								  if require make modifications or proceed with next step coding.
+								  All this without saving the file. And the resultant console logs,
+								  attributes and report entries can be viewed within the ide." 
+								data-placement="bottom" data-trigger="hover">
+								<b>Interactive Development</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card-list">
+						<div class="card-body" style="margin: 1em; text-align: center; width: 300px;">
+							<div id="image"  >
+								<a href="img/idefeature/image5.png">
+									<img class="card-img-top" src="img/idefeature/image5.png" style="height: auto; width: 100%;">
+								</a>
+							</div>
+				
+							<a class="card-list-title"  style="color:blue" 
+								data-content="Documentation of all available steps,
+								  validations, functions etc are provided within the ide.
+								  And for ease of usage, lucene based search is provided" 
+								data-placement="bottom" data-trigger="hover">
+								<b>Docs and Help</b>
+							</a><br/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Added extra breaks to accommodate tooltips in last row -->
+		<br/><br/><br/><br/><br/><br/><br/>
+		
+		<script>
+			$(function () {
+				$('[data-toggle="popover"]').popover()
+			});
+			
+			$(function(){
+				$('[data-trigger="hover"]').popover()
+			});
+		</script>
+	</body>
+</html>
+
+
