@@ -1,3 +1,20 @@
+Failed to load test files because of below errors: 
+
+File: C:\SDP\automation\test-suites\CustomerDetails\StackImportExportAllEnvironmentCombination.xml
+Location: [Line: 91, Column: 20]
+Error: java.lang.ExceptionInInitializerError
+	com.yukthitech.utils.exceptions.InvalidStateException: A directive and method are found with same name - [Directive: com.yukthitech.utils.fmarker.met.CommonDirectives.trim(), Method: com.yodlee.common.FreeMarkerCommonMethod.trim()]
+File: C:\SDP\automation\test-suites\sdp\configJson\upgradePlan-tests.xml
+Location: [Line: 46, Column: 20]
+Error: java.lang.NoClassDefFoundError: Could not initialize class com.yukthitech.autox.common.IAutomationConstants
+File: C:\SDP\automation\test-suites\CustomerDetails\stackExportImport.xml
+Location: [Line: 97, Column: 20]
+Error: java.lang.NoClassDefFoundError: Could not initialize class com.yukthitech.autox.common.IAutomationConstants
+File: C:\SDP\automation\test-suites\sdp\configJson\configJson-tests.xml
+Location: [Line: 24, Column: 20]
+Error: java.lang.NoClassDefFoundError: Could not initialize class com.yukthitech.autox.common.IAutomationConstants
+
+
 11/10
 	STATS
 	=====
