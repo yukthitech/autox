@@ -25,13 +25,14 @@ import org.apache.commons.collections.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.autox.test.MetaInfo;
 import com.yukthitech.autox.test.TestStatus;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Represents an execution status report.
  * @author akranthikiran
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ExecutionStatusReport
+public class ExecutionStatusReport implements Cloneable
 {
 	/**
 	 * Name of execution.
@@ -280,5 +281,16 @@ public class ExecutionStatusReport
 	public void setMonitorLogs(Map<String, String> monitorLogs)
 	{
 		this.monitorLogs = monitorLogs;
+	}
+	
+	public ExecutionStatusReport clone()
+	{
+		try
+		{
+			return (ExecutionStatusReport) super.clone();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred during report cloning", ex);
+		}
 	}
 }

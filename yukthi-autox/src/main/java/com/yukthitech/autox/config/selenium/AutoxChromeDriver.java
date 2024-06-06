@@ -26,7 +26,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
-import org.openqa.selenium.remote.CapabilityType;
 
 import com.yukthitech.autox.plugin.ui.SeleniumDriverConfig;
 
@@ -72,13 +71,16 @@ public class AutoxChromeDriver extends ChromeDriver
 		
 		logger.debug("Creating chrome options with profile-options: {}", config.getProfileOptions());
 		
-		options.setHeadless( "true".equals(config.getProfileOptions().get("headless.execution")) );
+		if("true".equals(config.getProfileOptions().get("headless.execution")))
+		{
+			options.addArguments("--headless");
+		}
 		
 		if("true".equals( config.getProfileOptions().get("enable.console.logs") ))
 		{
 			LoggingPreferences logPrefs = new LoggingPreferences();
 	        logPrefs.enable(LogType.BROWSER, Level.ALL);
-	        options.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+	        options.setCapability("goog:loggingPrefs", logPrefs);
 		}
 		
 		return options;

@@ -46,6 +46,7 @@ import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.SummaryNotificationConfig;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.ResourceManager;
 import com.yukthitech.autox.test.ResourceManager.ResourceFilter;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -96,6 +97,16 @@ public class ReportGenerator
 
 			FileUtils.write(new File(reportFolder, "test-results.json"), jsonContent, Charset.defaultCharset());
 			FileUtils.write(new File(reportFolder, "test-results.js"), jsContent, Charset.defaultCharset());
+			
+			ExecutionSuite activeExecutionSuite = automationContext.getActiveExecutionSuite();
+			
+			if(activeExecutionSuite != null)
+			{
+				FinalExecutionSuiteReport executionSuiteReport = new FinalExecutionSuiteReport(activeExecutionSuite, finalReport);
+				jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(executionSuiteReport);
+				
+				FileUtils.write(new File(reportFolder, "execution-suite-results.json"), jsonContent, Charset.defaultCharset());
+			}
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while generating test result report");

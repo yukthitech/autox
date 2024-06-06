@@ -47,12 +47,16 @@ import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.PluginManager;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.ExecutionSuite;
+import com.yukthitech.autox.test.ExecutionSuiteEntry;
 import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
 import com.yukthitech.utils.cli.OptionsFactory;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Main class which executes the test suites of tha application.
@@ -149,6 +153,16 @@ public class AutomationLauncher
 			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
 			System.exit(-1);
 		}
+		
+		if(basicArguments != null && StringUtils.isNotBlank(basicArguments.getExecutionSuite()))
+		{
+			if(StringUtils.isNotBlank(basicArguments.getTestSuites()) || StringUtils.isNotBlank(basicArguments.getTestCases()))
+			{
+				logger.warn("As execution suite is specified, ignoring test-suites and test-cases limits specified in command line arguments.");
+				basicArguments.setTestSuites("");
+				basicArguments.setTestCases("");
+			}
+		}
 
 		File reportFolder = new File(basicArguments.getReportsFolder());
 
@@ -215,6 +229,47 @@ public class AutomationLauncher
 		boolean loadTestSuites = true;
 		// load test suites
 		AutomationFileLoader.loadTestSuites(context, loadTestSuites);
+		
+		// check and set execution suite if any
+		if(StringUtils.isNotBlank(context.getBasicArguments().getExecutionSuite()))
+		{
+			context.getBasicArguments().setTestSuites(null);
+			context.getBasicArguments().setTestCases(null);
+
+			ExecutionSuite exeSuite = context.getExecutionSuite(context.getBasicArguments().getExecutionSuite());
+			
+			if(exeSuite == null)
+			{
+				TestSuite testSuite = context.getTestSuiteGroup().getTestSuite(context.getBasicArguments().getExecutionSuite());
+				
+				if(testSuite == null)
+				{
+					System.err.println("ERROR: Invalid execution/test suite specified: " + context.getBasicArguments().getExecutionSuite());
+					
+					AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, 
+							"Invalid execution suite specified: %s", context.getBasicArguments().getExecutionSuite());
+					System.exit(-1);
+				}
+			
+				exeSuite = new ExecutionSuite();
+				exeSuite.setName(testSuite.getName());
+				exeSuite.addEntry(new ExecutionSuiteEntry(testSuite.getName()));
+			}
+			
+			try
+			{
+				exeSuite.validateAndBuild(context.getTestSuiteGroup());
+			}catch(InvalidStateException ex)
+			{
+				System.err.println(ex.getMessage());
+				
+				AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, 
+						"Encountered invalid configuration in execution suite: %s", context.getBasicArguments().getExecutionSuite());
+				System.exit(-1);
+			}
+			
+			context.setActiveExecutionSuite(exeSuite);
+		}
 		
 		return context.getTestSuiteGroup();
 	}

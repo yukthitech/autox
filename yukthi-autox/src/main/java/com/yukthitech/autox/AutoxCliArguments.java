@@ -39,6 +39,12 @@ public class AutoxCliArguments
 	private String testSuiteFolders;
 	
 	/**
+	 * If specified the execution will be limited only for this test suites and test-cases of this execution suite.
+	 */
+	@CliArgument(name = "es", longName = "execution-suite", description = "Execution suite to be executed", required = false)
+	private String executionSuite;
+
+	/**
 	 * If specified the execution will be limited only for this test suites.
 	 */
 	@CliArgument(name = "ts", longName = "test-suites", description = "Test suites to be executed (comma separated)", required = false)
@@ -85,6 +91,30 @@ public class AutoxCliArguments
 	 */
 	@CliArgument(name = "flmt", longName = "folder-limits", description = "Comma separated folder paths to which execution should be limited.", required = false)
 	private String folderLimits;
+
+	/**
+	 * Sets the if specified the execution will be limited only for this test
+	 * suites and test-cases of this execution suite.
+	 *
+	 * @param executionSuite the new if specified the execution will be limited
+	 *        only for this test suites and test-cases of this execution suite
+	 */
+	public void setExecutionSuite(String executionSuite)
+	{
+		this.executionSuite = executionSuite;
+	}
+	
+	/**
+	 * Gets the if specified the execution will be limited only for this test
+	 * suites and test-cases of this execution suite.
+	 *
+	 * @return the if specified the execution will be limited only for this test
+	 *         suites and test-cases of this execution suite
+	 */
+	public String getExecutionSuite()
+	{
+		return executionSuite;
+	}
 
 	/**
 	 * Gets the test suites folder from where test suites has to be loaded. This
@@ -240,11 +270,22 @@ public class AutoxCliArguments
 		this.reportOpeningDisalbed = reportOpeningDisalbed;
 	}
 
+	/**
+	 * Gets the if specified, debugging will get enabled on specified port.
+	 *
+	 * @return the if specified, debugging will get enabled on specified port
+	 */
 	public int getDebugPort()
 	{
 		return debugPort;
 	}
 
+	/**
+	 * Sets the if specified, debugging will get enabled on specified port.
+	 *
+	 * @param debugPort the new if specified, debugging will get enabled on
+	 *        specified port
+	 */
 	public void setDebugPort(int debugPort)
 	{
 		this.debugPort = debugPort;
@@ -270,11 +311,25 @@ public class AutoxCliArguments
 		this.folderLimits = folderLimits;
 	}
 	
+	/**
+	 * Gets the if specified, function only with specified name will be
+	 * executed.
+	 *
+	 * @return the if specified, function only with specified name will be
+	 *         executed
+	 */
 	public String getFunction()
 	{
 		return function;
 	}
 
+	/**
+	 * Sets the if specified, function only with specified name will be
+	 * executed.
+	 *
+	 * @param function the new if specified, function only with specified name
+	 *        will be executed
+	 */
 	public void setFunction(String function)
 	{
 		this.function = function;

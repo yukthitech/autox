@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +42,7 @@ import com.yukthitech.autox.exec.FunctionExecutor;
 import com.yukthitech.autox.exec.TestCaseExecutor;
 import com.yukthitech.autox.exec.report.FinalReport.FunctionResult;
 import com.yukthitech.autox.logmon.LogMonitorContext;
+import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -214,7 +216,8 @@ public class ReportDataManager
 	
 	private void generateJsonReport()
 	{
-		File reportFolder = AutomationContext.getInstance().getReportFolder();
+		AutomationContext context = AutomationContext.getInstance();
+		File reportFolder = context.getReportFolder();
 		File reportFile = new File(reportFolder, "test-progress.json");
 		
 		try
@@ -225,6 +228,35 @@ public class ReportDataManager
 			}
 			
 			objectMapper.writeValue(reportFile, rootExecutorDetails.statusReport);
+			
+			ExecutionSuite executionSuite = context.getActiveExecutionSuite();
+			
+			if(executionSuite != null)
+			{
+				ExecutionStatusReport progressReport = new ExecutionStatusReport(executionSuite.getName(), null, null, ExecutionStatusReportType.STANDARD);
+				
+				if(CollectionUtils.isNotEmpty(rootExecutorDetails.statusReport.getChildReports()))
+				{
+					for(ExecutionStatusReport tsReport : rootExecutorDetails.statusReport.getChildReports())
+					{
+						if(CollectionUtils.isEmpty(tsReport.getChildReports()))
+						{
+							continue;
+						}
+						
+						for(ExecutionStatusReport tcReport : tsReport.getChildReports())
+						{
+							ExecutionStatusReport tcClone = tcReport.clone();
+							tcClone.setName(tsReport.getName() + "#" + tcReport.getName());
+							progressReport.addChidReport(tcClone);
+						}
+					}
+				}
+				
+				reportFile = new File(reportFolder, "execution-suite-progress.json");
+				objectMapper.writeValue(reportFile, progressReport);
+			}
+			
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("Failed to generate report file: " + reportFile.getPath(), ex);

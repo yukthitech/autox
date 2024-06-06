@@ -1,0 +1,30 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<execution-suite name="executionSuite1">
+		<entry testSuite="lang-test-suites">
+			<test-case>testSimpleFunc</test-case>
+			<test-case>testSubmapFunction</test-case>
+		</entry>
+		
+		
+		<entry testSuite="attr-test-suites">
+			<!-- Below test case has dependency on baseTestCase -->
+			<test-case>firstLevelTest</test-case>
+		</entry>
+
+		<!--  In this case combination of 3 test-cases should get executed -->
+		<entry testSuite="jobj-test-suites">
+			<test-case>invokeMethodOnAppBean</test-case>
+		</entry>
+		<entry testSuite="jobj-test-suites">
+			<test-case>invoke_method_On_Bean_Copy</test-case>
+			<test-case>invoke_Method_On_Suite_Bean1</test-case>
+		</entry>
+
+		<!--  As empty test-suite is included all test-cases should get executed -->
+		<entry testSuite="assert-test-suites">
+			<test-case>assertEquals</test-case>
+		</entry>
+		<entry testSuite="assert-test-suites">
+		</entry>
+	</execution-suite>
+</testData>

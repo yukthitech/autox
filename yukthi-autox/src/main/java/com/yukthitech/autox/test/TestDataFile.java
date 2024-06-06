@@ -154,6 +154,17 @@ public class TestDataFile
 	}
 	
 	/**
+	 * Adds value to {@link #executionSuites executionSuites}
+	 *
+	 * @param executionSuite
+	 *            executionSuite to be added
+	 */
+	public void addExecutionSuite(ExecutionSuite executionSuite)
+	{
+		context.addExecutionSuite(executionSuite);
+	}
+	
+	/**
 	 * Adds specified test group.
 	 * @param function group to add.
 	 */

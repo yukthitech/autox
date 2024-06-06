@@ -38,9 +38,11 @@ import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.storage.PersistenceStorage;
+import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -77,6 +79,11 @@ public class AutomationContext
 	private Map<String, Function> nameToFunction = new HashMap<>();
 	
 	/**
+	 * Name to execution suite mapping.
+	 */
+	private Map<String, ExecutionSuite> nameToExecutionSuite = new HashMap<>();
+
+	/**
 	 * Persistence storage to persist data across the executions.
 	 */
 	private PersistenceStorage persistenceStorage;
@@ -106,6 +113,11 @@ public class AutomationContext
 	 * Executable group names.
 	 */
 	private Set<String> executableGroups;
+	
+	/**
+	 * Execution suite being executed, if any.
+	 */
+	private ExecutionSuite activeExecutionSuite;
 	
 	/**
 	 * Constructor.
@@ -426,7 +438,12 @@ public class AutomationContext
 		
 		if(nameToFunction.containsKey(function.getName()))
 		{
-			throw new InvalidStateException("Duplicate function name encountered: {}", function.getName());
+			Function existing = nameToFunction.get(function.getName());
+			
+			throw new InvalidConfigurationException("Duplicate global-function encountered with name '{}'. [Location1: {}:{}, Location2: {}:{}]", 
+					function.getName(), 
+					existing.getLocation(), existing.getLineNumber(), 
+					function.getLocation(), function.getLineNumber());
 		}
 		
 		nameToFunction.put(function.getName(), function);
@@ -440,6 +457,26 @@ public class AutomationContext
 		}
 		
 		nameToFunction.put(function.getName(), function);
+	}
+	
+	public void addExecutionSuite(ExecutionSuite executionSuite)
+	{
+		if(nameToExecutionSuite.containsKey(executionSuite.getName()))
+		{
+			ExecutionSuite existing = nameToExecutionSuite.get(executionSuite.getName());
+			
+			throw new InvalidConfigurationException("Duplicate execution suite encountered with name '{}'. [Location1: {}:{}, Location2: {}:{}]", 
+					executionSuite.getName(), 
+					existing.getLocation(), existing.getLineNumber(), 
+					executionSuite.getLocation(), executionSuite.getLineNumber());
+		}
+		
+		nameToExecutionSuite.put(executionSuite.getName(), executionSuite);
+	}
+	
+	public ExecutionSuite getExecutionSuite(String name)
+	{
+		return nameToExecutionSuite.get(name);
 	}
 
 	/**
@@ -569,5 +606,15 @@ public class AutomationContext
 		}
 		
 		return appConfiguration.getApplicationProperties().get(name);
+	}
+
+	public ExecutionSuite getActiveExecutionSuite()
+	{
+		return activeExecutionSuite;
+	}
+
+	public void setActiveExecutionSuite(ExecutionSuite activeExecutionSuite)
+	{
+		this.activeExecutionSuite = activeExecutionSuite;
 	}
 }

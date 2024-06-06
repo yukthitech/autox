@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.ObjectWrapper;
@@ -170,7 +171,12 @@ public class TestSuiteExecutor extends Executor
 	
 	private Set<String> getRestrictedTestCases()
 	{
-		Set<String> restrictedTestCases = AutomationContext.getInstance().getBasicArguments().getTestCasesSet();
+		AutomationContext context = AutomationContext.getInstance();
+		ExecutionSuite executionSuite = context.getActiveExecutionSuite();
+		
+		Set<String> restrictedTestCases = executionSuite != null ?
+				executionSuite.getTestSuiteMap().get(testSuite.getName()) :
+				context.getBasicArguments().getTestCasesSet();
 		
 		if(CollectionUtils.isEmpty(restrictedTestCases))
 		{

@@ -22,6 +22,7 @@ import org.apache.commons.collections.CollectionUtils;
 import com.yukthitech.autox.AutoxCliArguments;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 
 /**
@@ -42,8 +43,11 @@ public class TestSuiteGroupExecutor extends Executor
 		super.parallelExecutionEnabled = "true".equalsIgnoreCase(parallelExecutionEnabled);
 		
 		AutoxCliArguments basicArguments = context.getBasicArguments();
-		Set<String> limitedTestSuites = basicArguments.getTestSuitesSet();
-		Set<String> restrictedTestCases = basicArguments.getTestCasesSet();
+		
+		ExecutionSuite executionSuite = context.getActiveExecutionSuite();
+		
+		Set<String> limitedTestSuites = executionSuite == null ? basicArguments.getTestSuitesSet() : null;
+		Set<String> restrictedTestCases = executionSuite == null ? basicArguments.getTestCasesSet() : null;
 		
 		testSuiteGroup
 			.getTestSuites()
@@ -56,6 +60,11 @@ public class TestSuiteGroupExecutor extends Executor
 				}
 				
 				if(restrictedTestCases != null && !ts.hasAnyTestCases(restrictedTestCases))
+				{
+					return false;
+				}
+				
+				if(executionSuite != null && !executionSuite.getTestSuiteMap().containsKey(ts.getName()))
 				{
 					return false;
 				}
