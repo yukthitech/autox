@@ -268,6 +268,7 @@ public class AutomationLauncher
 				System.exit(-1);
 			}
 			
+			logger.debug("Limiting execution to execution-suite: {}", exeSuite.getName());
 			context.setActiveExecutionSuite(exeSuite);
 		}
 		

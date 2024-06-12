@@ -50,6 +50,11 @@ public class FinalExecutionSuiteReport extends FinalReport
 				continue;
 			}
 			
+			if(suiteResult.getReport() == null || suiteResult.getReport().getChildReports() == null)
+			{
+				continue;
+			}
+			
 			suiteResult
 				.getReport()
 				.getChildReports()

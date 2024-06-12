@@ -331,6 +331,21 @@ public class CommonFreeMarkerMethods
 	}
 	
 	@FreeMarkerMethod(
+			description = "Trims input string.",
+			returnDescription = "Trimmed value."
+			)
+	public static String strTrim(
+			@FmParam(name = "str", description = "String to be trimmed") String str)
+	{
+		if(str == null)
+		{
+			return null;
+		}
+		
+		return str.trim();
+	}
+
+	@FreeMarkerMethod(
 			description = "Converts specified string value into long value.",
 			returnDescription = "Converted long value."
 			)
