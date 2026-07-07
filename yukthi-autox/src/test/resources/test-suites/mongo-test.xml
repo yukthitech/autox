@@ -50,7 +50,7 @@
 			</s:assert-deep-equals>
 
 			<s:assert-deep-equals ignoreExtraProperties="true">
-				<actual>mongoJs: return db.AUTOX_TEST.find({"name" : "test1"})</actual>
+				<actual>mongoJs: return db.AUTOX_TEST.find({"name" : "test1"}, {"_id": 0})</actual>
 				<expected>json:
 					[
 						{"name": "test1", "entry": 1}

@@ -31,8 +31,8 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.StackFrameExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.ccg.xml.DynamicDataAcceptor;
 import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
+import com.yukthitech.ccg.xml.IDynamicNodeAcceptor;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -40,7 +40,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "functionRef", group = Group.Lang, message = "Reference step to execute target function with specified parameters.")
-public class FunctionRef extends AbstractStep implements IDynamicAttributeAcceptor, DynamicDataAcceptor, IStackableStep
+public class FunctionRef extends AbstractStep implements IDynamicAttributeAcceptor, IDynamicNodeAcceptor, IStackableStep
 {
 	private static final long serialVersionUID = 1L;
 	

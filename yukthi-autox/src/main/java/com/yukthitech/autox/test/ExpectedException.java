@@ -175,7 +175,7 @@ public class ExpectedException implements Serializable
 
 		if(!type.equals(ex.getClass()))
 		{
-			throw new InvalidArgumentException(ex, "Expected exception type {} and actual exception type are not matching", type.getName(), ex.getClass().getName());
+			throw new InvalidArgumentException("Expected exception type {} and actual exception type are not matching", type.getName(), ex.getClass().getName(), ex);
 		}
 		
 		String actualValue = null;
@@ -187,21 +187,21 @@ public class ExpectedException implements Serializable
 				actualValue = BeanUtils.getProperty(ex, prop.name);
 			}catch(Exception bex)
 			{
-				throw new InvalidArgumentException(bex, "An error occurred while fetching property '{}' of exception: {}", prop.name, ex.getClass().getName());
+				throw new InvalidArgumentException("An error occurred while fetching property '{}' of exception: {}", prop.name, ex.getClass().getName(), bex);
 			}
 			
 			if(prop.value == null)
 			{
 				if(actualValue != null)
 				{
-					throw new InvalidArgumentException(ex, "Property value of exception is not matching expected value [Exception: {}, Property: {}, Actual Value: {}, Expected Value: {}]", 
-							type.getName(), prop.name, actualValue, prop.value);
+					throw new InvalidArgumentException("Property value of exception is not matching expected value [Exception: {}, Property: {}, Actual Value: {}, Expected Value: {}]", 
+							type.getName(), prop.name, actualValue, prop.value, ex);
 				}
 			}
 			else if(!prop.value.equals(actualValue))
 			{
-				throw new InvalidArgumentException(ex, "Property value of exception is not matching expected value [Exception: {}, Property: {}, Actual Value: {}, Expected Value: {}]", 
-						type.getName(), prop.name, actualValue, prop.value);
+				throw new InvalidArgumentException("Property value of exception is not matching expected value [Exception: {}, Property: {}, Actual Value: {}, Expected Value: {}]", 
+						type.getName(), prop.name, actualValue, prop.value, ex);
 			}
 		}
 	}

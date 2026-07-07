@@ -130,7 +130,7 @@ public class FileLogMonitorSession implements ILogMonitorSession
 			inputFile.close();
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while creating monitoring log.");
+			throw new InvalidStateException("An error occurred while creating monitoring log.", ex);
 		}
 		
 		return Arrays.asList(tempFile);

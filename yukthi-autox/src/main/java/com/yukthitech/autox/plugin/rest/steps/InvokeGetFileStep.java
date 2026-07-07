@@ -20,8 +20,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -68,11 +66,9 @@ public class InvokeGetFileStep extends AbstractRestStep
 	
 			logger.debug("Got response-status as {}", status);
 			
-			HttpEntity entity = response.getEntity();
-
 			try
 			{
-				value = entity != null? EntityUtils.toByteArray(entity): null;
+				value = response.getBodyAsByteArray();
 			}catch(Exception ex)
 			{
 				logger.warn("An error occurred while fetching response content", ex);

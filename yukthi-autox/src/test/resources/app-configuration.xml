@@ -41,20 +41,14 @@
 			
 			<wrap:drivers>
 				<driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
-					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
+					<system-property name="webdriver.chrome.driver">./drivers/149.0.7827.53/chromedriver-win64/chromedriver.exe</system-property>
+					<profile-option name="chrome.binary">./drivers/149.0.7827.53/chrome-win64/chrome.exe</profile-option>
 					<profile-option name="enable.console.logs">true</profile-option>
 					<profile-option name="remote-allow-origins">*</profile-option>
 					
 					<extraArguments>--remote-allow-origins=*</extraArguments>
 				</driver>
 
-				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
-					<system-property name="webdriver.gecko.driver">./drivers/geckodriver.exe</system-property>
-				</driver>
-
-				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
-					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
-				</driver>
 			</wrap:drivers>
 		</selenium-plugin>
 	

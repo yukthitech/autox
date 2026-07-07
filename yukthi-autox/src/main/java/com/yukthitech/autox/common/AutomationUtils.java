@@ -73,8 +73,8 @@ import com.yukthitech.autox.resource.ResourceFactory;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.DynamicBeanParserHandler;
+import com.yukthitech.ccg.xml.IXmlConstants;
 import com.yukthitech.ccg.xml.XMLBeanParser;
-import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -374,8 +374,8 @@ public class AutomationUtils
 				throw ex;
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while parsing expressions in field: {}.{}", 
-					object.getClass().getName(), field.getName());
+				throw new InvalidStateException("An error occurred while parsing expressions in field: {}.{}", 
+					object.getClass().getName(), field.getName(), ex);
 			}
 		}
 		
@@ -822,8 +822,8 @@ public class AutomationUtils
 			return false;
 		}
 		
-		return XMLConstants.CCG_URI.equals(namespace)
-				|| XMLConstants.NEW_CCG_URI.equals(namespace)
+		return IXmlConstants.CCG_URI.equals(namespace)
+				|| IXmlConstants.NEW_CCG_URI.equals(namespace)
 				|| IAutomationConstants.STEP_NAME_SPACE.equals(namespace);
 	}
 	

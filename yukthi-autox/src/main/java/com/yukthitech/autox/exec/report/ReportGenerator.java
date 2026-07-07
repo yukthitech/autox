@@ -109,7 +109,7 @@ public class ReportGenerator
 			}
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while generating test result report");
+			throw new InvalidStateException("An error occurred while generating test result report", ex);
 		}
 
 		// generate summary report
@@ -147,7 +147,7 @@ public class ReportGenerator
 			}
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while generating summary report", ex);
+			throw new InvalidStateException("An error occurred while generating summary report", ex);
 		}
 		
 	}

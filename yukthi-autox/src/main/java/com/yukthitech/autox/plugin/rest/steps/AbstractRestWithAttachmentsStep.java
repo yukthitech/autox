@@ -126,7 +126,6 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 		}
 		
 		T postRestRequest = newRequest(uri);
-		postRestRequest.setMultipartRequest(true);
 		
 		IResource partResource = null;
 		

@@ -7,7 +7,8 @@ Copy the full user-data-dir (C:\Users\akranthikiran\AppData\Local\Google\Chrome\
 
 In autox configure chrome driver something like below
 	<driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
-		<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
+		<system-property name="webdriver.chrome.driver">./drivers/149.0.7827.53/chromedriver-win64/chromedriver.exe</system-property>
+		<profile-option name="chrome.binary">./drivers/149.0.7827.53/chrome-win64/chrome.exe</profile-option>
 		<profile-option name="enable.console.logs">true</profile-option>
 		<downloadFolder>E:\auto-config\downloads</downloadFolder>
 

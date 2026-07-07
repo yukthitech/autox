@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,45 +137,6 @@ public class CommonFreeMarkerMethods
 		return AutomationContext.getInstance().getPersistenceStorage().get(key);
 	}
 	
-	/**
-	 * Compares the specified values and returns the comparison result as int.
-	 * @param value1
-	 * @param value2
-	 * @return
-	 */
-	@FreeMarkerMethod(
-			description = "Compares the specified values and returns the comparison result as int.",
-			returnDescription = "Comparison result."
-			)
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static int compare(
-			@FmParam(name = "value1", description = "Value1 to compare") Object value1,
-			@FmParam(name = "value2", description = "Value2 to compare") Object value2
-			)
-	{
-		if(value1 == null && value2 == null)
-		{
-			return 0;
-		}
-		
-		if(value1 == value2)
-		{
-			return 0;
-		}
-		
-		if(!(value1 instanceof Comparable))
-		{
-			throw new InvalidArgumentException("Non comparable object is specified as value1: {}", value1);
-		}
-
-		if(!(value2 instanceof Comparable))
-		{
-			throw new InvalidArgumentException("Non comparable object is specified as value1: {}", value1);
-		}
-		
-		return ((Comparable)value1).compareTo(value2);
-	}
-	
 	@FreeMarkerMethod(
 			description = "Used to set value as content attribute. This function will always return empty string.",
 			returnDescription = "Always empty string."
@@ -246,18 +206,6 @@ public class CommonFreeMarkerMethods
 		return falseVal;
 	}
 	
-	@FreeMarkerMethod(
-			description = "Used to check if both values are equal or not. Nulls are also allowed.",
-			returnDescription = "True if both are null or both are equal."
-			)
-	public static boolean isEqual(
-			@FmParam(name = "value1", description = "Value1 to compare") Object value1,
-			@FmParam(name = "value2", description = "Value2 to compare") Object value2
-			)
-	{
-		return AutomationUtils.equals(value1, value2);
-	}
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@FreeMarkerMethod(
 			description = "Evaluates json expressions in the input template and returns the result json. To input context, automation-context will be added with name 'context'.",
@@ -276,103 +224,6 @@ public class CommonFreeMarkerMethods
 
 		String resJson = IAutomationConstants.JSON_EXPR_ENGINE.processJson(templateStr, localContext);
 		return resJson;
-	}
-	
-	@SuppressWarnings({ "unchecked"})
-	@FreeMarkerMethod(
-			description = "Checks whether specified value is present in specified collection/map. If map, value will be searched as key. "
-					+ "If collection is null or non-collection and non-map, then nullValue will be returned.",
-			returnDescription = "True if value/key is present in collection/map."
-			)
-	public static Boolean contains(
-			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
-			@FmParam(name = "value", description = "Value/key to be searched") Object value,
-			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type", defaultValue = "false") Boolean nullVal
-			) throws Exception
-	{
-		nullVal = (nullVal == null) ? false : nullVal;
-		
-		if(collection instanceof Collection)
-		{
-			Collection<Object> col = (Collection<Object>) collection;
-			return col.contains(value);
-		}
-		
-		if(collection instanceof Map)
-		{
-			Map<Object, Object> map = (Map<Object, Object>) collection;
-			return map.containsKey(value);
-		}
-		
-		return nullVal;
-	}
-
-	@FreeMarkerMethod(
-			description = "Checks whether specified value is NOT present in specified collection/map. If map, value will be searched as key. "
-					+ "If collection is null or non-collection and non-map, then nullValue will be returned.",
-			returnDescription = "True if value/key is NOT present in collection/map."
-			)
-	public static Boolean notContains(
-			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
-			@FmParam(name = "value", description = "Value/key to be searched") Object value,
-			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type", defaultValue = "true") Boolean nullVal
-			) throws Exception
-	{
-		nullVal = (nullVal == null) ? true : nullVal;
-		
-		Boolean res = contains(collection, value, null);
-		
-		if(res == null)
-		{
-			return nullVal;
-		}
-
-		return res;
-	}
-	
-	@FreeMarkerMethod(
-			description = "Trims input string.",
-			returnDescription = "Trimmed value."
-			)
-	public static String strTrim(
-			@FmParam(name = "str", description = "String to be trimmed") String str)
-	{
-		if(str == null)
-		{
-			return null;
-		}
-		
-		return str.trim();
-	}
-
-	@FreeMarkerMethod(
-			description = "Converts specified string value into long value.",
-			returnDescription = "Converted long value."
-			)
-	public static Long toLong(
-			@FmParam(name = "str", description = "String value to be converted") String str)
-	{
-		return Long.parseLong(str);
-	}
-
-	@FreeMarkerMethod(
-			description = "Converts specified string value into int value.",
-			returnDescription = "Converted int value."
-			)
-	public static Integer toInt(
-			@FmParam(name = "str", description = "String value to be converted") String str)
-	{
-		return Integer.parseInt(str);
-	}
-
-	@FreeMarkerMethod(
-			description = "Converts specified string value into boolean value.",
-			returnDescription = "Converted boolean value."
-			)
-	public static Boolean toBoolean(
-			@FmParam(name = "str", description = "String value to be converted") String str)
-	{
-		return "true".equalsIgnoreCase(str);
 	}
 	
 	@FreeMarkerMethod(
@@ -478,15 +329,6 @@ public class CommonFreeMarkerMethods
 		return str;
 	}
 
-	@FreeMarkerMethod(
-			description = "Creates an empty map and returns the same.",
-			returnDescription = "Empty map"
-			)
-	public static Map<Object, Object> emptyMap()
-	{
-		return new HashMap<Object, Object>();
-	}
-	
 	@FreeMarkerMethod(
 			description = "Escapes special characters for specified html content.",
 			returnDescription = "Escape html content"

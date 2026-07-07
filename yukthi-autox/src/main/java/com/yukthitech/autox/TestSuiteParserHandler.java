@@ -19,6 +19,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.xml.XMLConstants;
+
 import org.apache.commons.beanutils.BeanUtils;
 
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -30,8 +32,8 @@ import com.yukthitech.autox.ref.ContextAttributeReference;
 import com.yukthitech.autox.ref.ContextAttributeXpathReference;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
+import com.yukthitech.ccg.xml.IXmlConstants;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
-import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.util.StringUtil;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -56,8 +58,8 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 		reservedNameSpaces.add(IAutomationConstants.STEP_NAME_SPACE);
 		reservedNameSpaces.add(IAutomationConstants.FUNC_NAME_SPACE);
 		
-		reservedNameSpaces.add(XMLConstants.CCG_URI);
-		reservedNameSpaces.add(XMLConstants.NEW_CCG_URI);
+		reservedNameSpaces.add(IXmlConstants.CCG_URI);
+		reservedNameSpaces.add(IXmlConstants.NEW_CCG_URI);
 	}
 	
 	/**

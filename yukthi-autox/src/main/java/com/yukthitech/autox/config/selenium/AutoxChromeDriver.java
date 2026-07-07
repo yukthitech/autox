@@ -15,6 +15,7 @@
  */
 package com.yukthitech.autox.config.selenium;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -28,6 +29,7 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 
 import com.yukthitech.autox.plugin.ui.SeleniumDriverConfig;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class AutoxChromeDriver extends ChromeDriver
 {
@@ -42,6 +44,22 @@ public class AutoxChromeDriver extends ChromeDriver
 	{
 		ChromeOptions options = new ChromeOptions();
 		options.setAcceptInsecureCerts(true);
+		
+		Object chromeBinary = config.getProfileOptions().get("chrome.binary");
+		
+		if(chromeBinary instanceof String && StringUtils.isNotBlank((String) chromeBinary))
+		{
+			try
+			{
+				String binaryPath = new File((String) chromeBinary).getCanonicalPath();
+				options.setBinary(binaryPath);
+				logger.debug("Using Chrome binary: {}", binaryPath);
+			}
+			catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while resolving Chrome binary path: {}", chromeBinary, ex);
+			}
+		}
 		
 		if(StringUtils.isNotBlank(config.getDownloadFolder()))
 		{
