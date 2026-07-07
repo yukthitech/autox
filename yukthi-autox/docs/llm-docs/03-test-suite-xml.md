@@ -1,0 +1,99 @@
+# Test Suite XML Files
+
+Test suite XML files are the root artifact for AutoX automation. They are parsed from the folder configured in `app-configuration.xml` `<testSuiteFolder>`.
+
+## Root element
+
+```xml
+<testData xmlns:s="http://autox.yukthitech.com/steps"
+          xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap"
+          xmlns:f="http://autox.yukthitech.com/functions">
+```
+
+## Top-level elements
+
+| Element | Description |
+|---------|-------------|
+| `<setup>` | Global setup — runs once before any suite (max one across all XML files) |
+| `<cleanup>` | Global cleanup — runs once after all suites (max one across all XML files) |
+| `<testSuite>` | Group of test cases |
+| `<execution-suite>` | Selective execution of specific test cases from named suites |
+| `<function>` | Reusable step groups callable via `<f:functionName>` or `<s:function-ref>` |
+
+## Global setup and cleanup
+
+```xml
+<testData xmlns:s="http://autox.yukthitech.com/steps"
+          xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+    <setup>
+        <s:log message="Global setup"/>
+        <!-- DDL, seed data, etc. -->
+    </setup>
+
+    <testSuite name="my-suite">
+        <!-- test cases -->
+    </testSuite>
+
+    <cleanup>
+        <s:log message="Global cleanup"/>
+    </cleanup>
+</testData>
+```
+
+Only one global `<setup>` and one global `<cleanup>` are allowed across all XML files in the test suite folder.
+
+## Execution order
+
+1. **Global setup** — from the single `<setup>` element
+2. **Test suites** — generally alphabetical; dependency ordering applies when suites depend on each other
+3. **Global cleanup** — from the single `<cleanup>` element
+
+Within a suite: `<setup>` → `<beforeTestCase>` → test cases → `<afterTestCase>` → `<cleanup>`.
+
+## Test suite element
+
+```xml
+<testSuite name="rest-test-suites" author="team" description="REST API tests"
+           parallelExecutionEnabled="false">
+    <setup><!-- suite-level setup --></setup>
+    <beforeTestCase><!-- runs before each test case --></beforeTestCase>
+
+    <wrap:data-beans>
+        <data-bean s:beanType="com.example.Helper" id="helper"/>
+    </wrap:data-beans>
+
+    <testCase name="testPost">
+        <description>Test post api</description>
+        <!-- steps -->
+    </testCase>
+
+    <afterTestCase><!-- runs after each test case --></afterTestCase>
+    <cleanup><!-- suite-level cleanup --></cleanup>
+</testSuite>
+```
+
+## Execution suite (selective runs)
+
+Run only specific test cases from named suites:
+
+```xml
+<execution-suite name="smokeTests">
+    <entry testSuite="rest-test-suites">
+        <test-case>testPost</test-case>
+        <test-case>testGet</test-case>
+    </entry>
+    <entry testSuite="ui-test-suites">
+        <!-- empty entry = run all test cases in that suite -->
+    </entry>
+</execution-suite>
+```
+
+## FreeMarker in test XML
+
+String content in test suite XML supports FreeMarker `${...}` expressions. Property placeholders from `app.properties` use `#{prop.name}` and are resolved at parse time.
+
+```xml
+<s:set expression="testAttr" value="string: Value: #{test.app.prop}"/>
+```
+
+See [06-expressions.md](06-expressions.md) for expression details.

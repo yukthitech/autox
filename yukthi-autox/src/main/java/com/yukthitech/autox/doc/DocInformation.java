@@ -277,12 +277,25 @@ public class DocInformation implements Serializable
 		this.prefixExpressions.put(parser.getName(), parser);
 	}
 	
+	public Set<StepInfo> getStepsForGroup(String group)
+	{
+		return steps.values()
+				.stream()
+				.filter(step -> group.equals(step.getGroup()))
+				.collect(Collectors.toCollection(TreeSet::new));
+	}
+
+	public Set<ValidationInfo> getValidationsForGroup(String group)
+	{
+		return validations.values()
+				.stream()
+				.filter(validation -> group.equals(validation.getGroup()))
+				.collect(Collectors.toCollection(TreeSet::new));
+	}
+
 	public Set<StepInfo> getStepsWithGroup(String group)
 	{
-		Set<StepInfo> filSteps = steps.values()
-				.stream()
-				.filter(step -> step.getGroup().equals(group))
-				.collect(Collectors.toSet());
+		Set<StepInfo> filSteps = getStepsForGroup(group);
 
 		Set<StepInfo> filVal = validations.values()
 				.stream()

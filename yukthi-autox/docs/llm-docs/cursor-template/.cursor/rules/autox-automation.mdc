@@ -1,0 +1,65 @@
+---
+description: Guidelines for authoring AutoX XML test automation
+globs:
+  - "**/test-suites/**/*.xml"
+  - "**/app-configuration.xml"
+  - "**/test/**/*.xml"
+alwaysApply: false
+---
+
+# AutoX Test Automation
+
+When writing or editing AutoX test XML in this project, follow these rules.
+
+## Required reading
+
+Before creating or modifying test suite XML, read:
+
+1. `docs/autox-llm/README.md` — documentation index
+2. `docs/autox-llm/reference/README.md` — API reference index by Group
+3. The relevant how-to guide and API reference for your task type (see table below)
+
+## Task → documentation lookup
+
+| Task | How-to guide | API reference (steps) | API reference (validations) |
+|------|--------------|----------------------|----------------------------|
+| Control flow / loops / if | `11-language-steps.md` | `reference/steps-lang.md` | `reference/validations-lang.md` |
+| SQL / database | `12-sql-automation.md` | `reference/steps-rdbms.md` | `reference/validations-rdbms.md` |
+| MongoDB | `13-mongo-automation.md` | `reference/steps-mongodb.md` | `reference/validations-mongodb.md` |
+| HTTP mock server | `14-mock-server.md` | `reference/steps-mock.md` | `reference/validations-mock.md` |
+| REST API | `07-rest-automation.md` | `reference/steps-rest-api.md` | `reference/validations-rest-api.md` |
+| UI / Selenium | `08-ui-automation.md` | `reference/steps-ui.md` | `reference/validations-ui.md` |
+| Data-driven tests | `05-data-providers.md` | (per step group) | (per step group) |
+| Expressions / `${...}` | `06-expressions.md` | `reference/prefix-expressions.md`, `reference/freemarker-methods.md` | — |
+| UI locators | `08-ui-automation.md` | `reference/ui-locators.md` | — |
+| Plugin config | `02-app-configuration.md` | `reference/plugins.md` | — |
+| File I/O | — | `reference/steps-io.md` | `reference/validations-io.md` |
+| Email | — | `reference/steps-mail.md` | `reference/validations-mail.md` |
+| Common utilities | — | `reference/steps-common.md` | `reference/validations-common.md` |
+
+Before using a step, read the matching `reference/steps-{group-slug}.md` file for attributes, child elements, and examples. Group slugs use lowercase with hyphens (e.g. `Rest_Api` → `rest-api`).
+
+## XML conventions
+
+Always use these namespaces on the root `<testData>` element:
+
+```xml
+<testData xmlns:s="http://autox.yukthitech.com/steps"
+          xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap"
+          xmlns:f="http://autox.yukthitech.com/functions">
+```
+
+## Rules
+
+- Every `<testCase>` must have a `name` attribute (no `#`), a `<description>`, and at least one step or validation.
+- Use `s:` prefix for steps (e.g. `s:rest-invoke-post`, `s:ui-click`, `s:assert-equals`).
+- Use `wrap:steps` and `wrap:validations` to group steps when helpful.
+- Data provider iteration data: `${attr.{providerName}.field}`.
+- REST response body: `attr.response`; status code: `prop: attr.result.statusCode`.
+- UI locators: `type:value` format (e.g. `id: button`, `xpath: //input[@name='fld']`).
+- End tests with at least one validation/assertion.
+- UI suites should include `<cleanup><s:ui-quit-session/></cleanup>` at suite level.
+
+## Full schema
+
+Use `docs/autox-llm/doc-information.json` when you need the complete machine-readable schema.

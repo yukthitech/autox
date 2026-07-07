@@ -20,9 +20,11 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -32,6 +34,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
@@ -52,6 +56,29 @@ import com.yukthitech.utils.fmarker.doc.ParamDoc;
  */
 public class DocGenerator
 {
+	private static final ObjectMapper DOC_JSON_MAPPER = new ObjectMapper()
+			.enable(SerializationFeature.INDENT_OUTPUT);
+
+	private static final String DOC_JSON_FILE_NAME = "doc-information.json";
+
+	private static final String[] BASIC_DOC_FILES = {
+			"README.md",
+			"01-getting-started.md",
+			"02-app-configuration.md",
+			"03-test-suite-xml.md",
+			"04-test-cases.md",
+			"05-data-providers.md",
+			"06-expressions.md",
+			"07-rest-automation.md",
+			"08-ui-automation.md",
+			"09-functions-and-reuse.md",
+			"10-running-tests.md",
+			"11-language-steps.md",
+			"12-sql-automation.md",
+			"13-mongo-automation.md",
+			"14-mock-server.md"
+	};
+
 	/**
 	 * Loads the examples from all the autox example resources.
 	 */
@@ -334,12 +361,52 @@ public class DocGenerator
 		}		
 	}
 
+	private static List<BasicDocs.Document> loadBasicDocs(File outFolder) throws Exception
+	{
+		List<BasicDocs.Document> documents = new ArrayList<>();
+
+		for(String fileName : BASIC_DOC_FILES)
+		{
+			File docFile = new File(outFolder, fileName);
+
+			if(!docFile.isFile())
+			{
+				System.out.println("Skipping missing basic doc: " + docFile.getAbsolutePath());
+				continue;
+			}
+
+			BasicDocs.Document doc = new BasicDocs.Document();
+			doc.setFile(fileName);
+			doc.setTitle(fileName.replace(".md", "").replaceFirst("^\\d+-", "").replace("-", " "));
+			doc.setContent(FileUtils.readFileToString(docFile, Charset.defaultCharset()));
+			documents.add(doc);
+		}
+
+		return documents;
+	}
+
+	private static void generateDocJson(File outFolder, DocInformation docInformation) throws Exception
+	{
+		FileUtils.forceMkdir(outFolder);
+
+		File jsonFile = new File(outFolder, DOC_JSON_FILE_NAME);
+		DOC_JSON_MAPPER.writeValue(jsonFile, docInformation);
+
+		System.out.println("Generated doc json: " + jsonFile.getAbsolutePath());
+	}
+
+	private static void generateLlmDocs(File outFolder, DocInformation docInformation) throws Exception
+	{
+		LlmMarkdownGenerator.generate(outFolder, docInformation);
+	}
+
 	public static void main(String[] args) throws Exception
 	{
 		if(args.length != 2)
 		{
 			System.err.println("Invalid number of arguments specified.");
 			System.err.println("Syntax: java " + DocGenerator.class.getName() + " <comma-separated-packages-to-scan> <out-folder>");
+			System.exit(-1);
 		}
 		
 		String packStr = args[0];
@@ -348,11 +415,15 @@ public class DocGenerator
 		String basePackages[] = packStr.split("\\s*\\,\\s*");
 		
 		DocInformation docInformation = buildDocInformation(basePackages);
-		//docInformation.setBasicDocuments(loadBasicDocs());
 
-		//convert data into json
 		File outFolderFile = new File(outFolder);
-		copyDocResources(outFolderFile, docInformation);
+		if(!outFolderFile.getName().equals("llm-docs"))
+		{
+			copyDocResources(outFolderFile, docInformation);
+		}
+		docInformation.setBasicDocuments(loadBasicDocs(outFolderFile));
+		generateLlmDocs(outFolderFile, docInformation);
+		generateDocJson(outFolderFile, docInformation);
 		
 		
 		System.out.println("Files are generate to folder: " + outFolder);

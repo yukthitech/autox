@@ -84,7 +84,7 @@
 								<a href="#parsers">Expression Types</a>
 								
 								<ul class="nav nav-stacked" style="margin-left: 10px">
-									<#list parsers as parser>
+									<#list prefixExpressions as parser>
 										<li>
 											<a href="#parser-${parser.name}">${parser.name}</a>
 										</li>
@@ -148,7 +148,7 @@
 						<h1>Expression Types</h1>
 						<p>Defines the steps of autox for all functionalities</p>
 						
-						<#list parsers as parser>
+						<#list prefixExpressions as parser>
 							<div id="parser-${parser.name}" class="dataSection2">
 								<h2>Expression Type - ${parser.name}</h2>
 								<@addDocumentation docInfo=parser/>
