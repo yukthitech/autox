@@ -44,6 +44,11 @@ import com.yukthitech.autox.doc.PrefixExpressionDoc;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
+import com.yukthitech.autox.prefix.ExpressionToken;
+import com.yukthitech.autox.prefix.PrefixExpressionContentType;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.ccg.xml.IXmlConstants;
+import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.prism.context.IdeContext;
 import com.yukthitech.prism.editor.FileEditor;
 import com.yukthitech.prism.editor.IIdeCompletionProvider;
@@ -52,11 +57,6 @@ import com.yukthitech.prism.index.FileParseCollector;
 import com.yukthitech.prism.model.Project;
 import com.yukthitech.prism.services.GlobalStateManager;
 import com.yukthitech.prism.services.SpringServiceProvider;
-import com.yukthitech.autox.prefix.ExpressionToken;
-import com.yukthitech.autox.prefix.PrefixExpressionContentType;
-import com.yukthitech.autox.prefix.PrefixExpressionFactory;
-import com.yukthitech.ccg.xml.XMLConstants;
-import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.beans.BeanProperty;
 import com.yukthitech.utils.beans.BeanPropertyInfo;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
@@ -95,7 +95,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 	{
 		StringBuilder builder = new StringBuilder();
 		String nodeName = null;
-		String prefix = location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI);
+		String prefix = location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, IXmlConstants.NEW_CCG_URI, IXmlConstants.CCG_URI);
 		
 		if(location.getCurrentToken() == null)
 		{

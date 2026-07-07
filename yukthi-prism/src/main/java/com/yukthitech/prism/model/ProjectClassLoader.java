@@ -18,9 +18,7 @@ package com.yukthitech.prism.model;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -32,7 +30,9 @@ public class ProjectClassLoader extends URLClassLoader
 {
 	public ProjectClassLoader(Set<String> projectClassPath)
 	{
-		super(getProjectClassPath(projectClassPath), null);
+		// Use system class loader as parent so JDK/platform modules (for example java.sql)
+		// remain visible on JDK 9+.
+		super(getProjectClassPath(projectClassPath), ClassLoader.getSystemClassLoader());
 	}
 
 	/**
@@ -41,8 +41,7 @@ public class ProjectClassLoader extends URLClassLoader
 	 */
 	public static URL[] getProjectClassPath(Set<String> projectClassPath)
 	{
-		ClassLoader cl = ClassLoader.getSystemClassLoader();
-		List<URL> resUrls = new ArrayList<>();
+		Set<URL> resUrls = new LinkedHashSet<>();
 		
 		if(CollectionUtils.isNotEmpty(projectClassPath))
 		{
@@ -60,8 +59,30 @@ public class ProjectClassLoader extends URLClassLoader
 			}
 		}
 		
-		resUrls.addAll(Arrays.asList( ((URLClassLoader)cl).getURLs() ));
+		// On JDK 9+ the system class loader is no longer guaranteed to be a URLClassLoader.
+		String classPath = System.getProperty("java.class.path");
 		
+		if(classPath != null && !classPath.isEmpty())
+		{
+			String classPathEntries[] = classPath.split(java.util.regex.Pattern.quote(File.pathSeparator));
+			
+			for(String entry : classPathEntries)
+			{
+				if(entry == null || entry.isBlank())
+				{
+					continue;
+				}
+				
+				try
+				{
+					resUrls.add(new File(entry).toURI().toURL());
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException("An error occurrred while converting classpath entry into url: {}", entry, ex);
+				}
+			}
+		}
+
         return resUrls.toArray(new URL[0]);
 	}
 	

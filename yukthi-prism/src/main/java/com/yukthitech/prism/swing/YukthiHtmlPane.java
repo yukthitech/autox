@@ -73,6 +73,7 @@ public class YukthiHtmlPane extends JTextPane
 			listenerManager.get().onClick(new HyperLinkEvent(href));
 		}
 
+		@SuppressWarnings("deprecation")
 		private Element getHyperlinkElement(MouseEvent event)
 		{
 			JEditorPane editor = (JEditorPane) event.getSource();

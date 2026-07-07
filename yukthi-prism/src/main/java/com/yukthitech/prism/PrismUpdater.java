@@ -75,6 +75,7 @@ public class PrismUpdater
 		return latestVer;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private File downloadFile(String urlStr, String prefix, String extension) throws Exception
 	{
 		urlStr = String.format(urlStr, Version.getVersionMap().getIdeVersion());

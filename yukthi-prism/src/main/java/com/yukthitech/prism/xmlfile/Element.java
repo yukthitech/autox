@@ -55,7 +55,7 @@ import com.yukthitech.autox.test.CustomPrefixExpression;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
-import com.yukthitech.ccg.xml.XMLConstants;
+import com.yukthitech.ccg.xml.IXmlConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.beans.BeanProperty;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
@@ -774,7 +774,7 @@ public class Element implements INode
 	{
 		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
 		
-		if(XMLConstants.CCG_WRAP_URI.equals(namespace) || XMLConstants.NEW_CCG_WRAP_URI.equals(namespace))
+		if(IXmlConstants.CCG_WRAP_URI.equals(namespace) || IXmlConstants.NEW_CCG_WRAP_URI.equals(namespace))
 		{
 			this.elementType = parentElementType;
 		}

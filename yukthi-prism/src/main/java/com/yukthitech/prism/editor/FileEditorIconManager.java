@@ -154,6 +154,7 @@ public class FileEditorIconManager
 		iconInfo.setDebugPoint(debugPoint);
 	}
 
+	@SuppressWarnings("deprecation")
 	public int getLineNo(Point point)
 	{
 		int viewPort = syntaxTextArea.viewToModel(point);

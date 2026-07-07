@@ -674,6 +674,7 @@ public class FileEditor extends JPanel
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	private String getToolTip(RTextArea textArea, MouseEvent e)
 	{
 		int offset = textArea.viewToModel(e.getPoint());
