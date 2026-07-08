@@ -64,6 +64,7 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.dataprovider.BeanReserveNodeHandler;
 import com.yukthitech.autox.dataprovider.CloneReserveNodeHandler;
+import com.yukthitech.autox.dataprovider.PropertyReserveNodeHandler;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
@@ -912,6 +913,7 @@ public class AutomationUtils
 			parserHandler.setExpressionEnabled(false);			
 			parserHandler.registerReserveNodeHandler(new BeanReserveNodeHandler());
 			parserHandler.registerReserveNodeHandler(new CloneReserveNodeHandler());
+			parserHandler.registerReserveNodeHandler(new PropertyReserveNodeHandler());
 			
 			ByteArrayInputStream bis = new ByteArrayInputStream(data.getBytes());
 			res = XMLBeanParser.parse(bis, res, parserHandler);

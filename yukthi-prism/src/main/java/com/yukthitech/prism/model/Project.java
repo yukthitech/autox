@@ -274,6 +274,7 @@ public class Project implements Serializable
 		File baseFolder = getBaseFolder();
 
 		//add main resources and config folders
+		pathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "test-suites").getPath());
 		pathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
 		pathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
 		pathEntries.add(new File(baseFolder, "target" + File.separator + "classes").getPath());

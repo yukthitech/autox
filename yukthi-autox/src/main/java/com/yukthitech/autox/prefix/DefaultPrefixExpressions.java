@@ -788,7 +788,13 @@ public class DefaultPrefixExpressions
 			@Override
 			public Object getValue() throws Exception
 			{
-				return loadInputStream(loadFile(expression), expression, exprType, parserContext);
+				try
+				{
+					return loadInputStream(loadFile(expression), expression, exprType, parserContext);
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException("An error occurred while loading file: {}", expression, ex);
+				}
 			}
 			
 			@Override
@@ -848,36 +854,42 @@ public class DefaultPrefixExpressions
 			@Override
 			public Object getValue() throws Exception
 			{
-				parserContext.getAutomationContext().getExecutionLogger().debug("Loading text content from resource: {}", expression);
-				
-				String data = null;
-				
-				if("$".equals(expression.trim()))
+				try
 				{
-					Object curVal = parserContext.getCurrentValue();
+					parserContext.getAutomationContext().getExecutionLogger().debug("Loading text content from resource: {}", expression);
 					
-					if(curVal == null || !(curVal instanceof String))
+					String data = null;
+					
+					if("$".equals(expression.trim()))
 					{
-						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
+						Object curVal = parserContext.getCurrentValue();
+						
+						if(curVal == null || !(curVal instanceof String))
+						{
+							throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
+						}
+						
+						data = curVal.toString();
+					}
+					else
+					{
+						InputStream is = DefaultPrefixExpressions.class.getResourceAsStream(expression); 
+	
+						if(is == null)
+						{
+							throw new ResourceNotFoundException(ResourceType.RESOURCE, expression);
+						}
+						
+						data = IOUtils.toString(is, Charset.defaultCharset());
+						is.close();
 					}
 					
-					data = curVal.toString();
-				}
-				else
+					Object object = loadInputStream(data, expression, exprType, parserContext);
+					return object;
+				}catch(Exception ex)
 				{
-					InputStream is = DefaultPrefixExpressions.class.getResourceAsStream(expression); 
-
-					if(is == null)
-					{
-						throw new ResourceNotFoundException(ResourceType.RESOURCE, expression);
-					}
-					
-					data = IOUtils.toString(is, Charset.defaultCharset());
-					is.close();
+					throw new InvalidStateException("An error occurred while loading resource: {}", expression, ex);
 				}
-				
-				Object object = loadInputStream(data, expression, exprType, parserContext);
-				return object;
 			}
 		};
 	}
@@ -891,42 +903,48 @@ public class DefaultPrefixExpressions
 			@Override
 			public Object getValue() throws Exception
 			{
-				parserContext.getAutomationContext().getExecutionLogger().debug("Loading binary content from resource: {}", expression);
-				
-				byte data[] = null;
-				
-				if("$".equals(expression.trim()))
+				try
 				{
-					Object curVal = parserContext.getCurrentValue();
+					parserContext.getAutomationContext().getExecutionLogger().debug("Loading binary content from resource: {}", expression);
 					
-					if(curVal == null || (!(curVal instanceof String) && !(curVal instanceof byte[])) )
-					{
-						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
-					}
+					byte data[] = null;
 					
-					if(curVal instanceof String)
+					if("$".equals(expression.trim()))
 					{
-						data = ((String) curVal).getBytes();
+						Object curVal = parserContext.getCurrentValue();
+						
+						if(curVal == null || (!(curVal instanceof String) && !(curVal instanceof byte[])) )
+						{
+							throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
+						}
+						
+						if(curVal instanceof String)
+						{
+							data = ((String) curVal).getBytes();
+						}
+						else
+						{
+							data = (byte[]) curVal;
+						}
 					}
 					else
 					{
-						data = (byte[]) curVal;
-					}
-				}
-				else
-				{
-					InputStream is = DefaultPrefixExpressions.class.getResourceAsStream(expression); 
-
-					if(is == null)
-					{
-						throw new ResourceNotFoundException(ResourceType.RESOURCE, expression);
+						InputStream is = DefaultPrefixExpressions.class.getResourceAsStream(expression); 
+	
+						if(is == null)
+						{
+							throw new ResourceNotFoundException(ResourceType.RESOURCE, expression);
+						}
+						
+						data = IOUtils.toByteArray(is);
+						is.close();
 					}
 					
-					data = IOUtils.toByteArray(is);
-					is.close();
+					return data;
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException("An error occurred while loading binary resource: {}", expression, ex);
 				}
-				
-				return data;
 			}
 		};
 	}

@@ -51,6 +51,8 @@ public class AutomationFileLoader
 	
 	private static void handleLoadError(File xmlFile, Set<String> errors, Exception ex)
 	{
+		logger.error("An error occurred while loading resources", ex);
+		
 		String error = null;
 		
 		if(ex instanceof XMLLoadException)

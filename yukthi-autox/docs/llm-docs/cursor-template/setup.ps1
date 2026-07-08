@@ -16,11 +16,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$TargetDir = Resolve-Path $TargetDir -ErrorAction SilentlyContinue
-if (-not $TargetDir) {
-    $TargetDir = (New-Item -ItemType Directory -Force -Path $TargetDir).FullName
+$TargetPath = $TargetDir
+$resolved = Resolve-Path -LiteralPath $TargetPath -ErrorAction SilentlyContinue
+if ($resolved) {
+    $TargetDir = $resolved.Path
 } else {
-    $TargetDir = $TargetDir.Path
+    $TargetDir = (New-Item -ItemType Directory -Force -Path $TargetPath).FullName
 }
 
 $DocsDest = Join-Path $TargetDir "docs\autox-llm"
