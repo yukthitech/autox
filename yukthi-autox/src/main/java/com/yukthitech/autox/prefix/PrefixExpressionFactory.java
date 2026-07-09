@@ -663,6 +663,7 @@ public class PrefixExpressionFactory
 			return result;
 		}catch(Exception ex)
 		{
+			logger.error("An error occurred during expression evaluation: \n{}", expression, ex);
 			exeLogger.error("Evaluation of expression {} resulted in error: \n{}", expression, CommonUtils.getRootCauseMessages(ex));
 			
 			if(ex instanceof AutoxInfoException)

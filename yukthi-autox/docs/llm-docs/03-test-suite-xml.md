@@ -97,3 +97,21 @@ String content in test suite XML supports FreeMarker `${...}` expressions. Prope
 ```
 
 See [06-expressions.md](06-expressions.md) for expression details.
+
+## XML value specification
+
+AutoX XML is parsed with **XmlBeanParser**, which maps elements to Java beans. For any property on any element (test suites, test cases, steps, data providers, data files), you can specify the value in three equivalent ways:
+
+| Form | When to use | Example |
+|------|-------------|---------|
+| **Attribute** | Identifiers (`name`, `id`, `beanId`) and simple scalar values | `<testCase name="myTest" parallelExecutionEnabled="true">` |
+| **Child text node** | Multi-line values | `<description>First line\nSecond line</description>` |
+| **CDATA** | Values containing XML-special characters (`<`, `&`, etc.) | `<body><![CDATA[{"key": "<value>"}]]></body>` |
+
+**Guidelines:**
+
+- Prefer **attributes** for ids, names, flags, and short conditions.
+- Prefer **child text** or **CDATA** for long or structured content (JSON bodies, SQL, descriptions).
+- Attribute, child text, and CDATA are interchangeable for the same bean property — XmlBeanParser normalizes them to the same setter.
+
+This applies across all AutoX XML: test suites, test cases, steps, validations, plugin configuration, and external data provider files.

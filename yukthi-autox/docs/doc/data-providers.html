@@ -102,3 +102,26 @@ The most commonly used data-provider is list data-provider which can be used to 
 </code></pre>
 <BR/><BR/>
 
+<B>Dynamic data provider (runtime evaluation)</B>
+<p>
+Loads an external <code>test-data-list</code> XML file. Each <code>&lt;test-case-data&gt;</code> is evaluated at runtime when the iteration starts.
+Properties and clones are processed in order. Properties declared before a <code>&lt;clone&gt;</code> are available on <code>_this</code> when the bean is evaluated.
+</p>
+<pre><code class="xml">
+&lt;dynamic-data-provider name="regData" stepDataList="res:/data/dynamic-data-provider-basic.xml"/&gt;
+</code></pre>
+<p>Bean example using <code>json(jel=true)</code> and <code>@fmarker:</code> to read earlier properties from <code>_this</code>:</p>
+<pre><code class="xml">
+&lt;bean id="payload"&gt;
+    &lt;value&gt;json(jel=true): {
+        "active": "@fmarker: ifTrue(_this.statusCode == 200, true, false)",
+        "captcha": "@fmarker: _this.useValidCaptcha"
+    }&lt;/value&gt;
+&lt;/bean&gt;
+
+&lt;property name="useValidCaptcha" value="boolean: true"/&gt;
+&lt;property name="statusCode" value="int: 200"/&gt;
+&lt;clone beanId="payload" property="input"/&gt;
+</code></pre>
+<BR/><BR/>
+

@@ -254,8 +254,14 @@ public abstract class Executor
 				}
 				
 				beforeChildCompleted.setValue(true);
-	
-				preexecute();
+				
+				if(!ExecutorUtils.executeRunnable(() -> 
+					{
+						preexecute();					
+					}, ExecutionType.MAIN, "preexcute", Executor.this))
+				{
+					return false;
+				}
 	
 				//Execute setup
 				if(!ExecutorUtils.executeSetup(setup, "Setup", Executor.this,
@@ -316,7 +322,11 @@ public abstract class Executor
 				{
 					ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this,
 							obj -> {reload(); return afterChildFromParent;});
-					postExecute();
+
+					ExecutorUtils.executeRunnable(() -> 
+					{
+						postExecute();					
+					}, ExecutionType.MAIN, "postexcute", Executor.this);
 				}
 				
 				closeReportManager();

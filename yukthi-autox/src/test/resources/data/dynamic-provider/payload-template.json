@@ -1,0 +1,4 @@
+{
+	"useValidCaptcha": ${_this.useValidCaptcha?c},
+	"label": "${_this.label}"
+}

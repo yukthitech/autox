@@ -17,6 +17,7 @@ Common prefixes:
 |--------|---------|-------------|
 | `attr:` | `attr: response` | Context attribute value |
 | `prop:` | `prop: attr.result.statusCode` | Java bean property access |
+| `prop:` | `prop: _this.useValidCaptcha` | Current object being loaded (dynamic data provider) |
 | `xpath:` | `xpath: //id` | XPath on XML/string |
 | `json:` | `json: ${attr.data}` | Parse as JSON |
 | `int:` | `int: 200` | Parse as integer |
@@ -78,6 +79,39 @@ enabled="${attr.extDataProvider.exception?c}"
 ```
 
 See [reference/freemarker-methods.md](reference/freemarker-methods.md) for available methods like `uiValue()`, `uiIsVisible()`, `getPluginAttr()`.
+
+### `_this` during dynamic data provider loading
+
+When a [dynamic data provider](05-data-providers.md) evaluates `<test-case-data>`, each `<property>` is processed in order and added to an in-progress map on `AutomationContext._this`.
+
+**Later property referencing an earlier one:**
+
+```xml
+<property name="useValidCaptcha" value="boolean: true"/>
+<property name="derivedFlag" value="prop: _this.useValidCaptcha"/>
+```
+
+**Bean loaded by `<clone>` referencing properties declared before the clone** — use `json(jel=true)` with `@fmarker:`:
+
+```xml
+<property name="useValidCaptcha" value="boolean: true"/>
+<property name="statusCode" value="int: 200"/>
+<clone beanId="payload" property="input"/>
+
+<!-- bean definition -->
+<bean id="payload">
+    <value>json(jel=true): {
+        "active": "@fmarker: ifTrue(_this.statusCode == 200, true, false)",
+        "captcha": "@fmarker: _this.useValidCaptcha"
+    }</value>
+</bean>
+```
+
+When `<clone>` runs, `_this` already contains `useValidCaptcha` and `statusCode` from the properties above it.
+
+**External `res(template=true)` JSON** can also use FreeMarker `${_this.field}` syntax.
+
+`_this` is cleared after each test-case-data entry finishes loading. It is not available as `attr._this` in test steps — use `attr.{providerName}.field` after the iteration starts.
 
 ## Setting context attributes
 

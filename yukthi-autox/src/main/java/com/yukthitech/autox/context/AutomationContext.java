@@ -120,6 +120,12 @@ public class AutomationContext
 	private ExecutionSuite activeExecutionSuite;
 	
 	/**
+	 * Object currently being loaded (e.g. test-case-data map during dynamic data provider evaluation).
+	 * Accessible via prop: _this.* expressions and FreeMarker ${ _this.* } in templates.
+	 */
+	private Object _this;
+	
+	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
 	 */
@@ -205,6 +211,20 @@ public class AutomationContext
 	public AutoxCliArguments getBasicArguments()
 	{
 		return basicArguments;
+	}
+	
+	public Object get_this()
+	{
+		return _this;
+	}
+	
+	/**
+	 * Sets the object currently being loaded.
+	 * @param _this current object being loaded
+	 */
+	public void set_this(Object _this)
+	{
+		this._this = _this;
 	}
 	
 	/**

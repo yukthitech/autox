@@ -1,0 +1,55 @@
+<test-data-list>
+
+	<bean id="payload">
+		<value>json(jel=true): {
+			"name": "test-user",
+			"active": "@fmarker: ifTrue(_this.statusCode == 200, true, false)",
+			"captcha": "@fmarker: _this.useValidCaptcha"
+		}</value>
+	</bean>
+	
+	<test-case-data name="successfulCase">
+		<description>
+			Basic dynamic data provider test with properties and clone
+		</description>
+		<value>
+			<property name="useValidCaptcha" value="boolean: true"/>
+			<property name="statusCode" value="int: 200"/>
+
+			<clone beanId="payload" property="input"/>
+
+			<property name="expected">
+				<value>
+					json: {
+						"name": "test-user",
+						"active": true,
+						"captcha": true
+					}
+				</value>
+			</property>
+		</value>
+	</test-case-data>
+
+	<test-case-data name="invalidCase">
+		<description>
+			Second iteration with different property values
+		</description>
+		<value>
+			<property name="useValidCaptcha" value="boolean: false"/>
+			<property name="statusCode" value="int: 400"/>
+
+			<clone beanId="payload" property="input"/>
+
+			<property name="expected">
+				<value>
+					json: {
+						"name": "test-user",
+						"active": false,
+						"captcha": false
+					}
+				</value>
+			</property>
+		</value>
+	</test-case-data>
+
+</test-data-list>

@@ -17,7 +17,7 @@ This folder contains documentation for LLMs (Cursor, Claude, etc.) to author Aut
 | [02-app-configuration.md](02-app-configuration.md) | `app-configuration.xml`, REST and Selenium plugins |
 | [03-test-suite-xml.md](03-test-suite-xml.md) | `<testData>`, global setup/cleanup, execution order |
 | [04-test-cases.md](04-test-cases.md) | `<testCase>` anatomy, dependencies, groups, validations |
-| [05-data-providers.md](05-data-providers.md) | List, default, and range data providers |
+| [05-data-providers.md](05-data-providers.md) | List, default, dynamic, and range data providers |
 | [06-expressions.md](06-expressions.md) | Prefix expressions, FreeMarker, resource types |
 | [07-rest-automation.md](07-rest-automation.md) | REST API test patterns (`Group.Rest_Api`) |
 | [08-ui-automation.md](08-ui-automation.md) | Selenium UI test patterns (`Group.Ui`) |

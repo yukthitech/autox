@@ -351,7 +351,7 @@ public class PropertyAccessor
 				continue;
 			}
 			
-			if(Character.isAlphabetic(ch) || Character.isDigit(ch) || Character.isWhitespace(ch) || ch == '-' || ch == '@')
+			if(Character.isAlphabetic(ch) || Character.isDigit(ch) || Character.isWhitespace(ch) || ch == '-' || ch == '@' || ch == '_')
 			{
 				builder.append(ch);
 				continue;

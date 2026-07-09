@@ -17,7 +17,7 @@ package com.yukthitech.autox.dataprovider;
 
 import java.util.List;
 
-import com.yukthitech.autox.test.TestCaseData;
+import com.yukthitech.autox.test.ITestCaseData;
 
 /**
  * Abstraction of data provider.
@@ -36,7 +36,7 @@ public interface IDataProvider
 	 * Provides the list of step data using which test case needs to be repeated.
 	 * @return list of step data.
 	 */
-	public List<TestCaseData> getStepData();
+	public List<ITestCaseData> getStepData();
 	
 	/**
 	 * If enabled, expressions will be parsed before test-case/step execution at data level.

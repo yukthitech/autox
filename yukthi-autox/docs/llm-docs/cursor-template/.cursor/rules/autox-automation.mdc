@@ -49,12 +49,24 @@ Always use these namespaces on the root `<testData>` element:
           xmlns:f="http://autox.yukthitech.com/functions">
 ```
 
+### Value specification (attributes, text, CDATA)
+
+XmlBeanParser maps XML to Java beans. The same property can be set via **attribute**, **child text**, or **CDATA**:
+
+- Prefer **attributes** for ids (`name`, `id`, `beanId`) and simple scalars/conditions.
+- Prefer **child text** or **CDATA** for multi-line values or content with `<`, `&`, etc.
+- Applies to test suites, test cases, steps, data providers, and external data files.
+
+See `03-test-suite-xml.md` for details.
+
 ## Rules
 
 - Every `<testCase>` must have a `name` attribute (no `#`), a `<description>`, and at least one step or validation.
 - Use `s:` prefix for steps (e.g. `s:rest-invoke-post`, `s:ui-click`, `s:assert-equals`).
 - Use `wrap:steps` and `wrap:validations` to group steps when helpful.
 - Data provider iteration data: `${attr.{providerName}.field}`.
+- Dynamic data provider external XML: `<dynamic-data-provider stepDataList="res:/data/..."/>`.
+- Properties before `<clone>` are on `_this` when the bean loads. Use `prop: _this.field` in properties, or `json(jel=true)` with `@fmarker: _this.field` in beans.
 - REST response body: `attr.response`; status code: `prop: attr.result.statusCode`.
 - UI locators: `type:value` format (e.g. `id: button`, `xpath: //input[@name='fld']`).
 - End tests with at least one validation/assertion.

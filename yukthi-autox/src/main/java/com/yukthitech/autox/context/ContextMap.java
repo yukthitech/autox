@@ -37,5 +37,6 @@ public class ContextMap extends HashMap<String, Object>
 		}
 		
 		super.put("prop", Collections.unmodifiableMap(context.getProp()));
+		super.put("_this", context.get_this());
 	}
 }

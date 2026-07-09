@@ -930,6 +930,28 @@ public class AutomationUtils
 	}
 	
 	/**
+	 * Loads XML content into the specified root bean using XmlBeanParser without reserved-node handlers.
+	 * Used for dynamic data provider files where plain property/clone elements map to POJOs.
+	 */
+	public static <T> T loadXmlBean(String data, T rootBean, IExecutionLogger logger) throws Exception
+	{
+		if(logger != null)
+		{
+			logger.debug("Processing input as xml bean: {}", rootBean.getClass().getName());
+		}
+		
+		DefaultParserHandler parserHandler = new DefaultParserHandler();
+		parserHandler.setExpressionEnabled(false);
+		
+		ByteArrayInputStream bis = new ByteArrayInputStream(data.getBytes());
+		
+		@SuppressWarnings("unchecked")
+		T res = (T) XMLBeanParser.parse(bis, rootBean, parserHandler);
+		
+		return res;
+	}
+	
+	/**
 	 * Makes current thread for specified time.
 	 * @param timeInMillis
 	 */

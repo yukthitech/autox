@@ -18,6 +18,7 @@ package com.yukthitech.autox.dataprovider;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.yukthitech.autox.test.ITestCaseData;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -62,9 +63,9 @@ public class RangeDataProvider extends AbstractDataProvider implements Validatea
 	 * @see com.yukthitech.automation.test.IDataProvider#getStepData()
 	 */
 	@Override
-	public List<TestCaseData> getStepData()
+	public List<ITestCaseData> getStepData()
 	{
-		List<TestCaseData> rangeValues = new LinkedList<>();
+		List<ITestCaseData> rangeValues = new LinkedList<>();
 		
 		for(int i = start; i <= end; i++)
 		{

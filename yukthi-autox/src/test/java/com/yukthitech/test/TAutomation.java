@@ -43,7 +43,7 @@ public class TAutomation extends BaseTestCases
 					"-rf", "./output/success", 
 					"-prop", "./src/test/resources/app.properties",
 					//"-ts", "mongoTestSuite"
-					//"-tc", "button_Click"
+					//"-tc", "testDynamicDataProviderBasic"
 					//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 				});
 			

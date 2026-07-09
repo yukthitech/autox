@@ -185,4 +185,24 @@ public class ExecutorUtils
 			executor.activeExecutionLogger.clearMode();
 		}
 	}
+
+	public static boolean executeRunnable(Runnable runnable, ExecutionType executionType,  String mode, Executor executor)
+	{
+		ReportDataManager reportManager = ReportDataManager.getInstance();
+		executor.activeExecutionLogger = reportManager.getSetupExecutionLogger(executor);
+		executor.activeExecutionLogger.setMode(mode);
+		
+		try
+		{
+			runnable.run();
+			return true;
+		}catch(Exception ex)
+		{
+			executor.setStatus(TestStatus.ERRORED, "Execution failed with error: " + ex.getMessage());
+			return false;
+		}finally
+		{
+			executor.activeExecutionLogger.clearMode();
+		}
+	}
 }

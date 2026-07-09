@@ -36,6 +36,8 @@ A `<testCase>` is a single test definition containing steps and/or validations.
 
 Steps can be placed directly under `<testCase>` or grouped in `<wrap:steps>` / `<wrap:validations>`.
 
+For XML attribute vs text vs CDATA conventions, see [03-test-suite-xml.md](03-test-suite-xml.md#xml-value-specification).
+
 ## Attributes
 
 | Attribute | Description |

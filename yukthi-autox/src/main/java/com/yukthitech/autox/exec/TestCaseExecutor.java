@@ -29,14 +29,14 @@ import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCase;
-import com.yukthitech.autox.test.TestCaseData;
+import com.yukthitech.autox.test.ITestCaseData;
 import com.yukthitech.autox.test.TestStatus;
 
 public class TestCaseExecutor extends Executor
 {
 	private TestCase testCase;
 	
-	private TestCaseData testCaseData;
+	private ITestCaseData testCaseData;
 	
 	private List<TestCaseExecutor> dependencies;
 	
@@ -75,7 +75,7 @@ public class TestCaseExecutor extends Executor
 		}
 	}
 	
-	private TestCaseExecutor(TestCase testCase, TestCaseData testCaseData)
+	private TestCaseExecutor(TestCase testCase, ITestCaseData testCaseData)
 	{
 		super(testCase, null);
 		
@@ -101,7 +101,7 @@ public class TestCaseExecutor extends Executor
 		return (testCaseData == null && testCase.getDataProvider() != null);
 	}
 	
-	public TestCaseData getTestCaseData()
+	public ITestCaseData getTestCaseData()
 	{
 		return testCaseData;
 	}
@@ -155,12 +155,12 @@ public class TestCaseExecutor extends Executor
 		return true;
 	}
 	
-	private List<TestCaseData> executeDataProvider(IDataProvider dataProvider)
+	private List<ITestCaseData> executeDataProvider(IDataProvider dataProvider)
 	{
 		super.activeExecutionLogger = ReportDataManager.getInstance().getSetupExecutionLogger(this);
 		super.activeExecutionLogger.setMode("Data-Provider");
 		
-		List<TestCaseData> data = dataProvider.getStepData();
+		List<ITestCaseData> data = dataProvider.getStepData();
 		
 		if(CollectionUtils.isEmpty(data))
 		{
@@ -193,7 +193,7 @@ public class TestCaseExecutor extends Executor
 			return false;
 		}
 		
-		List<TestCaseData> dataLst = executeDataProvider(dataProvider);
+		List<ITestCaseData> dataLst = executeDataProvider(dataProvider);
 		
 		if(CollectionUtils.isEmpty(dataLst))
 		{
@@ -203,7 +203,7 @@ public class TestCaseExecutor extends Executor
 		
 		boolean shareContext = (testCase.isSharedContext() && !testCase.isParallelExecutionEnabled());
 		
-		for(TestCaseData data : dataLst)
+		for(ITestCaseData data : dataLst)
 		{
 			TestCaseExecutor newExecutor = new TestCaseExecutor(testCase, data);
 			newExecutor.parentContextShared = shareContext;

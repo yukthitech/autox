@@ -39,6 +39,7 @@ import com.yukthitech.autox.dataprovider.DefaultDataProvider;
 import com.yukthitech.autox.dataprovider.IDataProvider;
 import com.yukthitech.autox.dataprovider.ListDataProvider;
 import com.yukthitech.autox.dataprovider.RangeDataProvider;
+import com.yukthitech.autox.dataprovider.dyn.DynamicDataProvider;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.ObjectWrapper;
@@ -380,6 +381,15 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	 * @param dataProvider
 	 */
 	public void setDefaultDataProvider(DefaultDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
+	}
+	
+	/**
+	 * Sets the dynamic data provider for this test case.
+	 * @param dataProvider dynamic data provider to set
+	 */
+	public void setDynamicDataProvider(DynamicDataProvider dataProvider)
 	{
 		this.setDataProvider(dataProvider);
 	}

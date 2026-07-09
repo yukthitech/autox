@@ -23,7 +23,7 @@ import com.yukthitech.autox.exec.TestCaseExecutor;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.MetaInfo;
 import com.yukthitech.autox.test.TestCase;
-import com.yukthitech.autox.test.TestCaseData;
+import com.yukthitech.autox.test.ITestCaseData;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -80,7 +80,7 @@ public class ReportInfoProviders
 		if(executor instanceof TestCaseExecutor)
 		{
 			TestCaseExecutor tcExecutor = (TestCaseExecutor) executor;
-			TestCaseData testCaseData = tcExecutor.getTestCaseData();
+			ITestCaseData testCaseData = tcExecutor.getTestCaseData();
 			
 			if(testCaseData != null)
 			{
@@ -107,7 +107,7 @@ public class ReportInfoProviders
 			
 			name = testCase.getParentTestSuite().getName() + "_" + name;
 					
-			TestCaseData testCaseData = tcExecutor.getTestCaseData();
+			ITestCaseData testCaseData = tcExecutor.getTestCaseData();
 			
 			if(testCaseData != null)
 			{
@@ -123,7 +123,7 @@ public class ReportInfoProviders
 		if(executor instanceof TestCaseExecutor)
 		{
 			TestCaseExecutor tcExecutor = (TestCaseExecutor) executor;
-			TestCaseData testCaseData = tcExecutor.getTestCaseData();
+			ITestCaseData testCaseData = tcExecutor.getTestCaseData();
 			
 			if(testCaseData != null)
 			{

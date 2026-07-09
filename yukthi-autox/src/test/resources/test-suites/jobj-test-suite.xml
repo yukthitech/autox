@@ -150,6 +150,30 @@
 			<s:assert-deep-equals actual="prop: attr.dataProvider.payload" expected="json: ${attr.dataProvider.expectedResult}"/>
 		</testCase>
 
+		<testCase name="testDynamicDataProviderBasic">
+			<description>
+				Tests dynamic data provider with deferred runtime evaluation of properties and clones.
+			</description>
+		
+			<dynamic-data-provider name="regData" stepDataList="res:/data/dynamic-data-provider-basic.xml"/>
+
+			<s:log level="INFO" message="Checking if dyn loading is working.."/>
+			<s:assert-deep-equals actual="prop: attr.regData.input" expected="prop: attr.regData.expected"/>
+			
+		</testCase>
+
+		<testCase name="testDynamicDataProviderThis">
+			<description>
+				Tests _this references in dynamic data provider property and template clone.
+			</description>
+		
+			<dynamic-data-provider name="regData" stepDataList="res:/data/dynamic-data-provider-this.xml"/>
+			
+			<s:assert-equals actual="prop: attr.regData.derivedFlag" expected="boolean: true"/>
+			<s:assert-equals actual="prop: attr.regData.input.useValidCaptcha" expected="boolean: true"/>
+			<s:assert-equals actual="prop: attr.regData.input.label" expected="registration"/>
+		</testCase>
+
 		<testCase name="invoke_Method_With_Ext_Data_Provder">
 			<description>
 				Invokes simple method on bean with externalized data provider and

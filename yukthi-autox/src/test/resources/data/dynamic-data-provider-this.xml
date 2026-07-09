@@ -1,0 +1,18 @@
+<test-data-list>
+
+	<bean id="inputPayload" value="res(template=true): /data/dynamic-provider/payload-template.json"/>
+	
+	<test-case-data name="thisReferenceCase">
+		<description>
+			Tests _this references across properties and template-based clone
+		</description>
+		<value>
+			<property name="useValidCaptcha" value="boolean: true"/>
+			<property name="label" value="string: registration"/>
+			<property name="derivedFlag" value="prop: _this.useValidCaptcha"/>
+
+			<clone beanId="inputPayload" property="input"/>
+		</value>
+	</test-case-data>
+
+</test-data-list>

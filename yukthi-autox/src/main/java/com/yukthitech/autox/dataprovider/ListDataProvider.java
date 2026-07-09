@@ -22,6 +22,7 @@ import java.util.List;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.prefix.ExpressionConfig;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.ITestCaseData;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestCaseDataList;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -37,7 +38,7 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	/**
 	 * List of objects to be passed for test case.
 	 */
-	private List<TestCaseData> dataLst = new ArrayList<>();
+	private List<ITestCaseData> dataLst = new ArrayList<>();
 	
 	/**
 	 * Adds new data object for this data provider.
@@ -86,7 +87,7 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	}
 	
 	@Override
-	public List<TestCaseData> getStepData()
+	public List<ITestCaseData> getStepData()
 	{
 		return dataLst;
 	}

@@ -22,6 +22,7 @@ import java.util.List;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.prefix.ExpressionConfig;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.test.ITestCaseData;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestCaseDataList;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -49,7 +50,7 @@ public class DefaultDataProvider extends AbstractDataProvider implements Validat
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private void processDataList(Object data, List<TestCaseData> testCaseDataLst)
+	private void processDataList(Object data, List<ITestCaseData> testCaseDataLst)
 	{
 		PrefixExpressionFactory expressionFactory = PrefixExpressionFactory.getExpressionFactory();
 		Object result = expressionFactory.getValueByExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
@@ -73,9 +74,9 @@ public class DefaultDataProvider extends AbstractDataProvider implements Validat
 	}
 	
 	@Override
-	public List<TestCaseData> getStepData()
+	public List<ITestCaseData> getStepData()
 	{
-		List<TestCaseData> testCaseData = new LinkedList<TestCaseData>();
+		List<ITestCaseData> testCaseData = new LinkedList<ITestCaseData>();
 		
 		for(Object data : this.dataLst)
 		{

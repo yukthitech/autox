@@ -29,7 +29,7 @@ import com.yukthitech.ccg.xml.DynamicBean;
  * Represents data for test case execution. 
  * @author akiran
  */
-public class TestCaseData
+public class TestCaseData implements ITestCaseData
 {
 	/**
 	 * Dynamic map used to evaluate expressions during fetch.
