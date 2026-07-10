@@ -69,6 +69,8 @@ See `03-test-suite-xml.md` for details.
 - Properties before `<clone>` are on `_this` when the bean loads. Use `prop: _this.field` in properties, or `json(jel=true)` with `@fmarker: _this.field` in beans.
 - REST response body: `attr.response`; status code: `prop: attr.result.statusCode`.
 - UI locators: `type:value` format (e.g. `id: button`, `xpath: //input[@name='fld']`).
+- Custom prefixes: define `<custom-prefix-expression>` / `<custom-ui-locator>` in `test-suites/common/`; use with `c:` (e.g. `c:app: key`, `c:srchDropDown:vehicle`). See `06-expressions.md`.
+- Prefer `<s:ui-fill-form>` to fill forms; use custom UI locator keys in form data JSON for non-standard widgets.
 - End tests with at least one validation/assertion.
 - UI suites should include `<cleanup><s:ui-quit-session/></cleanup>` at suite level.
 

@@ -44,6 +44,22 @@ Auto-generated reference for `Group.Lang` steps. Use step tags with the `s:` nam
 - `disable-logging` — Flag indicating if logging has to be disabled for current step. Default: false Type: `boolean`
 - `error-attr` (mandatory) — Attribute name for error. Default: error Type: `java.lang.String`
 
+**Example:**
+
+*Catching exceptions thrown from try block*
+
+```xml
+<s:try>
+					<s:log message="This is from try block"/>
+					<s:throw message="Error mssg" value="int: 100"/>
+				</s:try>
+				<s:catch errorAttr="ex">
+					<s:log message="This is from catch block"/>
+					<s:set expression="var" value="catch-${attr.ex.value!c}"/>
+				</s:catch>
+```
+
+
 ### s:continue
 
 - **Title**: continue
@@ -54,6 +70,21 @@ Auto-generated reference for `Group.Lang` steps. Use step tags with the `s:` nam
 **Attributes:**
 
 - `disable-logging` — Flag indicating if logging has to be disabled for current step. Default: false Type: `boolean`
+
+**Example:**
+
+*Skipping current loop iteration*
+
+```xml
+<s:for start="1" end="5">
+					<s:if condition="attr.loopVar % 2 != 0">
+						<s:continue/>
+					</s:if>
+
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for>
+```
+
 
 ### s:else
 
@@ -66,6 +97,23 @@ Auto-generated reference for `Group.Lang` steps. Use step tags with the `s:` nam
 
 - `disable-logging` — Flag indicating if logging has to be disabled for current step. Default: false Type: `boolean`
 
+**Example:**
+
+*Else branch in stacked if conditions*
+
+```xml
+<s:if condition="param.input == 1">
+					<s:return value="int: 10"/>
+				</s:if>
+				<s:else-if condition="param.input == 2">
+					<s:return value="int: 20"/>
+				</s:else-if>
+				<s:else>
+					<s:return value="int: 100"/>
+				</s:else>
+```
+
+
 ### s:else-if
 
 - **Title**: else if
@@ -77,6 +125,23 @@ Auto-generated reference for `Group.Lang` steps. Use step tags with the `s:` nam
 
 - `condition` (mandatory) — Freemarker condition to be evaluated. Type: `java.lang.String`
 - `disable-logging` — Flag indicating if logging has to be disabled for current step. Default: false Type: `boolean`
+
+**Example:**
+
+*Else-if branch in stacked if conditions*
+
+```xml
+<s:if condition="param.input == 1">
+					<s:return value="int: 10"/>
+				</s:if>
+				<s:else-if condition="param.input == 2">
+					<s:return value="int: 20"/>
+				</s:else-if>
+				<s:else>
+					<s:return value="int: 100"/>
+				</s:else>
+```
+
 
 ### s:execute
 
@@ -296,6 +361,15 @@ Auto-generated reference for `Group.Lang` steps. Use step tags with the `s:` nam
 - `message` — Message to be used to throw as part of error Type: `java.lang.String`
 - `value` — Value to be sent along with error. Type: `java.lang.Object`
 
+**Example:**
+
+*Throwing exception with message and value*
+
+```xml
+<s:throw message="Error mssg" value="int: 100"/>
+```
+
+
 ### s:try
 
 - **Title**: try
@@ -306,6 +380,21 @@ Auto-generated reference for `Group.Lang` steps. Use step tags with the `s:` nam
 **Attributes:**
 
 - `disable-logging` — Flag indicating if logging has to be disabled for current step. Default: false Type: `boolean`
+
+**Example:**
+
+*Executing steps in try block*
+
+```xml
+<s:try>
+					<s:log message="This is from try block"/>
+					<s:set expression="var" value="try"/>
+				</s:try>
+				<s:catch errorAttr="ex">
+					<s:set expression="var" value="catch-${attr.ex.value!c}"/>
+				</s:catch>
+```
+
 
 ### s:while
 

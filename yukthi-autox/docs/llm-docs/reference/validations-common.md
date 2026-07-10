@@ -21,6 +21,15 @@ Default: true Type: `java.lang.String`
 - `ignore-extra-properties` — If true, extra properties in actual will be ignored and will only ensure expected structure is found in actual object. Default: false Type: `boolean`
 - `list-keys` — Comma separated key names that can be used to identify list objects in error paths. Type: `java.lang.String`
 
+**Example:**
+
+*Deep equals comparison of complex objects*
+
+```xml
+<s:assert-deep-equals actual="attr: attr1" expected="attr: attr2"/>
+```
+
+
 ### s:assert-equals
 
 - **Title**: assert equals

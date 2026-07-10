@@ -133,10 +133,91 @@ When `<clone>` runs, `_this` already contains `useValidCaptcha` and `statusCode`
 
 ## Custom prefix expressions
 
-Projects can register custom prefix parsers. Example custom locator prefix:
+AutoX supports **custom prefixes** that behave like functions but merge with the prefix expression grammar. Use the `c:` (or `custom:`) marker to tell the framework you are invoking a project-defined prefix rather than a built-in one.
+
+### Defining a custom prefix
+
+Define `<custom-prefix-expression>` at file level (outside `<testSuite>`). Each definition has a `name`, a `<set-function>` for writes, and a `<get-function>` for reads:
+
+```xml
+<testData xmlns:s="http://autox.yukthitech.com/steps"
+          xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+
+    <custom-prefix-expression name="app">
+        <set-function>
+            <s:sql-dml-query>
+                <query>
+                    INSERT INTO APP_ATTR(NAME, VALUE)
+                    VALUES (?{param.context.effectiveExpression}, ?{param.context.value})
+                </query>
+            </s:sql-dml-query>
+            <s:log message="Inserted an entry into app attr table"/>
+        </set-function>
+
+        <get-function>
+            <s:log message="Reading an entry from app attr table"/>
+            <s:return value="sqlVal: SELECT VALUE FROM APP_ATTR WHERE NAME = ?{param.context.effectiveExpression}"/>
+        </get-function>
+    </custom-prefix-expression>
+
+    <!-- test suites -->
+</testData>
+```
+
+Inside set/get/remove functions, `param.context` exposes:
+
+| Property | Description |
+|----------|-------------|
+| `param.context.value` | Value being written (set/remove only) |
+| `param.context.expression` | Expression text after the custom prefix |
+| `param.context.effectiveExpression` | Parsed string value of the expression |
+| `param.context.effectiveContext` | Effective context object for the prefix chain |
+
+Use `<s:return>` in get-function to return a value. Set-function may also return `false` to signal failure.
+
+### Using a custom prefix
+
+Reference the custom prefix with `c:` followed by the registered name and the expression argument:
+
+```xml
+<s:set expression="c:app: test1" value="Value1"/>
+<s:set expression="c:app: test2" value="Value2"/>
+<s:assert-equals actual="c: app: test2" expected="Value2"/>
+```
+
+The syntax `c:app: test1` is equivalent to calling the `app` custom prefix with expression `test1`. Whitespace around `:` is tolerated (`c: app: test2`).
+
+### Custom UI locators
+
+For application-specific UI widgets (non-standard components such as Select2 dropdowns), define `<custom-ui-locator>` instead. These integrate with UI steps and locators the same way built-in locator types do:
+
+```xml
+<custom-ui-locator name="srchDropDown">
+    <set-function>
+        <s:ui-click locator="id: select2-${param.context.effectiveExpression}-container"/>
+        <s:set expression="uiVal: class: select2-search__field" value="prop: param.context.value"/>
+        <s:ui-click locator="xpath: //ul[@class='select2-results__options']//li[text() = '${param.context.value}']"/>
+    </set-function>
+
+    <get-function>
+        <s:return value="uiVal: id: ${param.context.effectiveExpression}"/>
+    </get-function>
+</custom-ui-locator>
+```
+
+Usage in UI steps:
 
 ```xml
 <s:ui-set-value locator="c:srchDropDown : vehicle" value="Rocket"/>
+<s:ui-assert-value locator="c:srchDropDown: vehicle" value="boat"/>
 ```
 
-See [reference/prefix-expressions.md](reference/prefix-expressions.md) for built-in parsers and [reference/ui-locators.md](reference/ui-locators.md) for standard locator types.
+Custom UI locators also work as field keys inside `<s:ui-fill-form>` — see [08-ui-automation.md](08-ui-automation.md).
+
+### Where to maintain custom prefixes
+
+Place shared custom prefixes and UI locators under a `common/` subfolder inside `test-suites/` (for example `test-suites/common/common-prefix-expr.xml`). All XML files under `testSuiteFolder` are scanned recursively at load time, so definitions in `common/` are available application-wide without explicit imports.
+
+Keep one file (or a small set of files) for cross-suite prefixes; avoid duplicating the same `name` in multiple files.
+
+See [reference/prefix-expressions.md](reference/prefix-expressions.md) for built-in parsers and [reference/ui-locators.md](reference/ui-locators.md) for standard and custom locator types.

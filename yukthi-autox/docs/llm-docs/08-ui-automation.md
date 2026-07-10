@@ -63,6 +63,8 @@ See [reference/ui-locators.md](reference/ui-locators.md) for all types.
 
 ## Form filling
 
+**Prefer `<s:ui-fill-form>`** to fill entire forms in one step. This keeps test cases compact and easy to read compared to many individual `ui-set-value` / `ui-click` calls.
+
 ```xml
 <s:ui-goto-page uri="/form.html"/>
 <s:ui-fill-form locator="id:sampleForm">
@@ -71,14 +73,28 @@ See [reference/ui-locators.md](reference/ui-locators.md) for all types.
             "name": "kranthi",
             "id:genderDropDown": "male",
             "address": "line1\nline2",
-            "color": ["red", "green", "blue"]
+            "color": ["red", "green", "blue"],
+            "c:srchDropDown:vehicle": "Boat",
+            "c:srchDropDown:ranking": "Nine"
         }
     </data>
 </s:ui-fill-form>
 <s:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
 ```
 
-Field keys can be element names or locators (`id:genderDropDown`).
+Field keys can be:
+
+- Element **names** (`"name"`, `"address"`)
+- Standard **locators** (`"id:genderDropDown"`)
+- **Custom UI locators** (`"c:srchDropDown:vehicle"`) — for application-specific widgets; see [06-expressions.md](06-expressions.md#custom-ui-locators)
+
+Array values populate multi-select fields. Use `\n` in strings for multi-line text areas.
+
+For a single non-standard widget outside a form fill, `s:ui-set-value` with a custom locator is fine:
+
+```xml
+<s:ui-set-value locator="c:srchDropDown : vehicle" value="Rocket"/>
+```
 
 ## Set and get values
 

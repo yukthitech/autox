@@ -90,6 +90,16 @@
 		</example>
 	</collection>
 
+	<collection name="com.yukthitech.autox.test.assertion.AssertDeepEqualsStep">
+		<example>
+			<description>Deep equals comparison of complex objects</description>
+			
+			<content><![CDATA[
+				<s:assert-deep-equals actual="attr: attr1" expected="attr: attr2"/>
+			]]></content>
+		</example>
+	</collection>
+
 	<collection name="com.yukthitech.autox.test.assertion.AssertTrueStep">
 		<example>
 			<description>Any object reference expression can be used</description>

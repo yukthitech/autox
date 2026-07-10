@@ -1,0 +1,76 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.mongo.MongoQueryStep">
+		<example>
+			<description>Executing mongo query command</description>
+			
+			<content><![CDATA[
+				<s:mongo-query mongoResourceName="mongoResource">
+					<query>
+						{ 
+							"delete": "AUTOX_TEST",
+							"deletes": [
+								{"q": {"name": "test1"}, "limit": 1}
+							]
+						}
+					</query>
+				</s:mongo-query>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.mongo.MongoMultiQueryStep">
+		<example>
+			<description>Executing multiple mongo commands in single step</description>
+			
+			<content><![CDATA[
+				<s:mongo-multi-query mongoResourceName="mongoResource">
+					<query>
+						{ 
+							"insert": "AUTOX_TEST", 
+							"documents" : [
+								{"name": "test1", "entry": 1},
+								{"name": "test2", "entry": 2},
+								{"name": "test3", "entry": 3}
+							] 
+						}
+					</query>
+				</s:mongo-multi-query>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.mongo.MongoJsStep">
+		<example>
+			<description>Executing mongo javascript and storing result</description>
+			
+			<content><![CDATA[
+				<s:mongo-js mongoResourceName="mongoResource" resultAttribute="objFromDb">
+					<script>
+						return db.AUTOX_TEST.findOne({"name": "testObj"}, {"_id": 0});
+					</script>
+				</s:mongo-js>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.mongo.AssertMongoStep">
+		<example>
+			<description>Validating mongo query result</description>
+			
+			<content><![CDATA[
+				<s:assert-mongo mongoResourceName="mongoResource">
+					<query>
+						{ "count": "AUTOX_TEST" }
+					</query>
+					<expected>
+						json: {
+							"n": 3
+						}
+					</expected>
+				</s:assert-mongo>
+			]]></content>
+		</example>
+	</collection>
+</examples>

@@ -34,12 +34,76 @@
 		</example>
 	</collection>
 
+	<collection name="com.yukthitech.autox.test.ui.steps.FillFormStep">
+		<example>
+			<description>Filling html form using field locators and json data</description>
+			
+			<content><![CDATA[
+				<s:ui-goto-page uri="/form.html" />
+
+				<s:ui-fill-form locator="id:sampleForm">
+					<data>
+						{
+							"name": "kranthi",
+							"id:genderDropDown": "male",
+							"address": "line1\nline2",
+							"color": ["red", "green", "blue"],
+							"c:srchDropDown:vehicle": "Boat",
+							"c:srchDropDown:ranking": "Nine"
+						}
+					</data>
+				</s:ui-fill-form>
+
+				<s:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
+			]]></content>
+		</example>
+	</collection>
+
 	<collection name="com.yukthitech.autox.test.ui.steps.GotoPageStep">
 		<example>
 			<description>Filling html form</description>
 			
 			<content><![CDATA[
 				<s:ui-goto-page uri="/index.html" />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.HandleAlertStep">
+		<example>
+			<description>Validating and accepting alert prompt</description>
+			
+			<content><![CDATA[
+				<s:ui-click locator="id: alertBut"/>
+				<s:sleep time="100"/>
+
+				<s:ui-handle-alert expectedMessage="Test Alert Message!!!"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.HandleConfirmStep">
+		<example>
+			<description>Validating and accepting confirm prompt</description>
+			
+			<content><![CDATA[
+				<s:ui-click locator="id: confirmBut"/>
+				<s:sleep time="100"/>
+
+				<s:ui-handle-confirm expectedMessage="Choose your button..." accept="true"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.HandlePromptStep">
+		<example>
+			<description>Validating and feeding text into prompt</description>
+			
+			<content><![CDATA[
+				<s:ui-click locator="id: promptBut"/>
+				<s:sleep time="100"/>
+
+				<s:ui-handle-prompt expectedMessage="Provide a value..." accept="true" text="Kranthi"/>
 			]]></content>
 		</example>
 	</collection>
@@ -73,6 +137,46 @@
 				<s:ui-switch-window locator="Index"/>
 				<s:ui-is-visible locator="id: button" name="visibFlag1"/>
 				<s:ui-close-window />
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.RecordVideoStep">
+		<example>
+			<description>Recording video of ui steps execution</description>
+			
+			<content><![CDATA[
+				<s:record-video name="form-filling">
+					<s:ui-goto-page uri="/form.html" />
+
+					<s:ui-fill-form locator="id:sampleForm">
+						<data>
+							{
+								"name": "kranthi",
+								"id:genderDropDown": "male",
+								"address": "line1\nline2",
+								"color": ["red", "green", "blue"]
+							}
+						</data>
+					</s:ui-fill-form>
+
+					<s:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
+				</s:record-video>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.SwitchWindow">
+		<example>
+			<description>Switching between browser windows</description>
+			
+			<content><![CDATA[
+				<s:ui-open-window url="/index.html" name="Index"/>
+				<s:ui-switch-window locator="Index"/>
+				<s:ui-is-visible locator="id: button" name="visibFlag1"/>
+
+				<s:ui-switch-window />
+				<s:ui-assert-visibility locator="id: downloadLink"/>
 			]]></content>
 		</example>
 	</collection>
@@ -111,13 +215,22 @@
 		</example>
 	</collection>
 
-
 	<collection name="com.yukthitech.autox.test.ui.assertion.AssertVisibility">
 		<example>
 			<description>Asserts the visibility of ui element</description>
 			
 			<content><![CDATA[
 				<s:ui-assert-visibility locator="id: downloadLink"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.assertion.UiAssertValue">
+		<example>
+			<description>Asserts value of ui element</description>
+			
+			<content><![CDATA[
+				<s:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
 			]]></content>
 		</example>
 	</collection>

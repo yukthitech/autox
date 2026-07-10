@@ -32,6 +32,7 @@ my-automation-project/
     app.properties             # Environment-specific values
     app-configuration.xml      # Framework configuration
     test-suites/               # Test suite XML files (recursive scan)
+      common/                  # Shared setup, custom prefixes, functions
     data/                      # External data for data providers
   test-reports/                # Generated reports (output)
   drivers/                     # Browser drivers (for UI tests)

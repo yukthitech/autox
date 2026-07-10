@@ -158,4 +158,18 @@
 			]]></content>
 		</example>
 	</collection>
+
+	<collection name="com.yukthitech.autox.test.sql.assertion.SqlAssertValue">
+		<example>
+			<description>Fetching single value using query and validating it</description>
+			
+			<content><![CDATA[
+				<s:sql-assert-value dataSourceName="dataSource" expectedValue="long: 1">
+					<query>
+						SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'
+					</query>
+				</s:sql-assert-value>
+			]]></content>
+		</example>
+	</collection>
 </examples>

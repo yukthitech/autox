@@ -175,4 +175,99 @@
 			]]></content>
 		</example>
 	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.CatchStep">
+		<example>
+			<description>Catching exceptions thrown from try block</description>
+			
+			<content><![CDATA[
+				<s:try>
+					<s:log message="This is from try block"/>
+					<s:throw message="Error mssg" value="int: 100"/>
+				</s:try>
+				<s:catch errorAttr="ex">
+					<s:log message="This is from catch block"/>
+					<s:set expression="var" value="catch-${attr.ex.value!c}"/>
+				</s:catch>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ContinueStep">
+		<example>
+			<description>Skipping current loop iteration</description>
+			
+			<content><![CDATA[
+				<s:for start="1" end="5">
+					<s:if condition="attr.loopVar % 2 != 0">
+						<s:continue/>
+					</s:if>
+
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ElseIfStep">
+		<example>
+			<description>Else-if branch in stacked if conditions</description>
+			
+			<content><![CDATA[
+				<s:if condition="param.input == 1">
+					<s:return value="int: 10"/>
+				</s:if>
+				<s:else-if condition="param.input == 2">
+					<s:return value="int: 20"/>
+				</s:else-if>
+				<s:else>
+					<s:return value="int: 100"/>
+				</s:else>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ElseStep">
+		<example>
+			<description>Else branch in stacked if conditions</description>
+			
+			<content><![CDATA[
+				<s:if condition="param.input == 1">
+					<s:return value="int: 10"/>
+				</s:if>
+				<s:else-if condition="param.input == 2">
+					<s:return value="int: 20"/>
+				</s:else-if>
+				<s:else>
+					<s:return value="int: 100"/>
+				</s:else>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.ThrowStep">
+		<example>
+			<description>Throwing exception with message and value</description>
+			
+			<content><![CDATA[
+				<s:throw message="Error mssg" value="int: 100"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.lang.steps.TryStep">
+		<example>
+			<description>Executing steps in try block</description>
+			
+			<content><![CDATA[
+				<s:try>
+					<s:log message="This is from try block"/>
+					<s:set expression="var" value="try"/>
+				</s:try>
+				<s:catch errorAttr="ex">
+					<s:set expression="var" value="catch-${attr.ex.value!c}"/>
+				</s:catch>
+			]]></content>
+		</example>
+	</collection>
 </examples>

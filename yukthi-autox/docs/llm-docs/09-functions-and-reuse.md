@@ -134,9 +134,31 @@ Functions are commonly used for login/session setup referenced by plugin events:
 </function>
 ```
 
+## Custom prefixes and UI locators
+
+For reusable **get/set behavior** that plugs into prefix expression syntax (rather than explicit function calls), use `<custom-prefix-expression>` and `<custom-ui-locator>`. These behave like functions but are invoked through the `c:` prefix in expressions and locators.
+
+```xml
+<!-- Definition (typically in test-suites/common/) -->
+<custom-prefix-expression name="app">
+    <set-function><!-- steps using param.context.value, param.context.effectiveExpression --></set-function>
+    <get-function><s:return value="sqlVal: SELECT VALUE FROM APP_ATTR WHERE NAME = ?{param.context.effectiveExpression}"/></get-function>
+</custom-prefix-expression>
+
+<!-- Usage in any test case -->
+<s:set expression="c:app: myKey" value="myValue"/>
+<s:assert-equals actual="c:app: myKey" expected="myValue"/>
+```
+
+Custom UI locators wrap non-standard widgets (Select2, custom date pickers, etc.) so forms can be filled with `<s:ui-fill-form>` using keys like `"c:srchDropDown:vehicle"`.
+
+Maintain shared custom prefixes in `test-suites/common/` — see [06-expressions.md](06-expressions.md#custom-prefix-expressions).
+
 ## Best practices
 
 - Keep functions focused on one reusable operation.
 - Prefer functions over copy-pasting step sequences.
 - Use suite-level beans for test data helpers; app-level beans for shared services.
 - Name functions clearly — they are callable from any suite in the same XML file tree.
+- Use custom prefixes for repeated get/set patterns that fit prefix grammar; use `<function>` for multi-step workflows with explicit parameters.
+- Prefer `<s:ui-fill-form>` over many individual UI steps when filling forms.

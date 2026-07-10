@@ -19,6 +19,8 @@ Test suite XML files are the root artifact for AutoX automation. They are parsed
 | `<testSuite>` | Group of test cases |
 | `<execution-suite>` | Selective execution of specific test cases from named suites |
 | `<function>` | Reusable step groups callable via `<f:functionName>` or `<s:function-ref>` |
+| `<custom-prefix-expression>` | Project-defined prefix for get/set via `c:name: ...` expressions |
+| `<custom-ui-locator>` | Project-defined UI locator for application-specific widgets |
 
 ## Global setup and cleanup
 
@@ -97,6 +99,27 @@ String content in test suite XML supports FreeMarker `${...}` expressions. Prope
 ```
 
 See [06-expressions.md](06-expressions.md) for expression details.
+
+## Shared definitions in `common/`
+
+Files under `test-suites/common/` (or any subfolder) are loaded with the rest of the test suite folder. Use this folder for definitions shared across the application:
+
+- Global `<setup>` / `<cleanup>` (only one of each allowed across all files)
+- `<custom-prefix-expression>` and `<custom-ui-locator>` definitions
+- Shared `<function>` definitions
+
+Example layout:
+
+```
+test-suites/
+  common/
+    common.xml                 # global setup/cleanup
+    common-prefix-expr.xml     # custom prefixes and UI locators
+  my-feature/
+    feature-tests.xml
+```
+
+Custom prefixes registered in `common/` are available in every suite. See [06-expressions.md](06-expressions.md#custom-prefix-expressions).
 
 ## XML value specification
 
