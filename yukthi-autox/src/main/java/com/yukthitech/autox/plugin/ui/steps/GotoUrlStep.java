@@ -20,6 +20,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -38,8 +39,8 @@ public class GotoUrlStep extends AbstractUiStep
 	/**
 	 * Url to which browser should be taken.
 	 */
-	@Param(description = "URL of the page to load")
-	private String url;
+	@Param(description = "URL of the page to load", sourceType = SourceType.EXPRESSION)
+	private Object url;
 
 	/**
 	 * Takes the browser to specified page url.
@@ -53,7 +54,7 @@ public class GotoUrlStep extends AbstractUiStep
 		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
-		driver.navigate().to(url);
+		driver.navigate().to(String.valueOf(url));
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class GotoUrlStep extends AbstractUiStep
 	 */
 	public String getUri()
 	{
-		return url;
+		return url != null ? String.valueOf(url) : null;
 	}
 
 	/**
@@ -71,7 +72,7 @@ public class GotoUrlStep extends AbstractUiStep
 	 *
 	 * @param url the new url to which browser should be taken
 	 */
-	public void setUrl(String url)
+	public void setUrl(Object url)
 	{
 		this.url = url;
 	}

@@ -21,6 +21,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -40,8 +41,8 @@ public class HandleConfirmStep extends AbstractUiStep
 	/**
 	 * Messaged expected in alert. If specified, alert message will be validated with this message..
 	 */
-	@Param(description = "Messaged expected in alert. If specified, alert message will be validated with this message.", required = false)
-	private String expectedMessage;
+	@Param(description = "Messaged expected in alert. If specified, alert message will be validated with this message.", required = false, sourceType = SourceType.EXPRESSION)
+	private Object expectedMessage;
 	
 	/**
 	 * Flag used to accept or cancel confirm box. Default: true.
@@ -54,7 +55,7 @@ public class HandleConfirmStep extends AbstractUiStep
 	 *
 	 * @param expectedMessage the new messaged expected in alert
 	 */
-	public void setExpectedMessage(String expectedMessage)
+	public void setExpectedMessage(Object expectedMessage)
 	{
 		this.expectedMessage = expectedMessage;
 	}
@@ -87,7 +88,8 @@ public class HandleConfirmStep extends AbstractUiStep
 		
 		if(expectedMessage != null)
 		{
-			if(expectedMessage.trim().equals(alert.getText().trim()))
+			String expected = String.valueOf(expectedMessage);
+			if(expected.trim().equals(alert.getText().trim()))
 			{
 				exeLogger.debug("Found confirm message to be as expected");
 			}

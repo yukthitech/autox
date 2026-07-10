@@ -80,8 +80,8 @@ public class AssertFormFields extends AbstractValidation
 		/**
 		 * Expected value of the field.
 		 */
-		@Param(description = "Expected value of the field.")
-		private String value;
+		@Param(description = "Expected value of the field.", sourceType = SourceType.EXPRESSION)
+		private Object value;
 
 		/**
 		 * Gets the locator of the field.
@@ -193,7 +193,7 @@ public class AssertFormFields extends AbstractValidation
 		 */
 		public String getValue()
 		{
-			return value;
+			return value != null ? String.valueOf(value) : null;
 		}
 
 		/**
@@ -202,7 +202,7 @@ public class AssertFormFields extends AbstractValidation
 		 * @param value
 		 *            the new expected value of the field
 		 */
-		public void setValue(String value)
+		public void setValue(Object value)
 		{
 			this.value = value;
 		}

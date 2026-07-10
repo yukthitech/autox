@@ -21,6 +21,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -40,14 +41,14 @@ public class HandlePromptStep extends AbstractUiStep
 	/**
 	 * Messaged expected in alert. If specified, alert message will be validated with this message..
 	 */
-	@Param(description = "Messaged expected in alert. If specified, alert message will be validated with this message.", required = false)
-	private String expectedMessage;
+	@Param(description = "Messaged expected in alert. If specified, alert message will be validated with this message.", required = false, sourceType = SourceType.EXPRESSION)
+	private Object expectedMessage;
 	
 	/**
 	 * If specified, feeds the specified text to the prompt.
 	 */
-	@Param(description = "If specified, feeds the specified text to the prompt", required = false)
-	private String text;
+	@Param(description = "If specified, feeds the specified text to the prompt", required = false, sourceType = SourceType.EXPRESSION)
+	private Object text;
 	
 	/**
 	 * Flag used to accept or cancel confirm box. Default: true.
@@ -60,7 +61,7 @@ public class HandlePromptStep extends AbstractUiStep
 	 *
 	 * @param expectedMessage the new messaged expected in alert
 	 */
-	public void setExpectedMessage(String expectedMessage)
+	public void setExpectedMessage(Object expectedMessage)
 	{
 		this.expectedMessage = expectedMessage;
 	}
@@ -70,7 +71,7 @@ public class HandlePromptStep extends AbstractUiStep
 		this.accept = accept;
 	}
 	
-	public void setText(String text)
+	public void setText(Object text)
 	{
 		this.text = text;
 	}
@@ -98,7 +99,8 @@ public class HandlePromptStep extends AbstractUiStep
 		
 		if(expectedMessage != null)
 		{
-			if(expectedMessage.trim().equals(alert.getText().trim()))
+			String expected = String.valueOf(expectedMessage);
+			if(expected.trim().equals(alert.getText().trim()))
 			{
 				exeLogger.debug("Found confirm message to be as expected");
 			}
@@ -111,7 +113,7 @@ public class HandlePromptStep extends AbstractUiStep
 		
 		if(text != null)
 		{
-			alert.sendKeys(text);
+			alert.sendKeys(String.valueOf(text));
 		}
 	
 		if(accept)

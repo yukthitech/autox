@@ -615,7 +615,10 @@ public class AutomationUtils
 	 * @param source source to be passed
 	 * @param defaultType Default type expected as result. Can be null.
 	 * @return parsed value
+	 * 
+	 * @deprecated Instead of using this use Expressions {@link PrefixExpressionFactory#getValueByExpression(AutomationContext, Object)}
 	 */
+	@Deprecated
 	public static Object parseObjectSource(AutomationContext context, IExecutionLogger exeLogger, Object source, JavaType defaultType)
 	{
 		if(source instanceof IReference)

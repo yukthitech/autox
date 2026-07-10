@@ -45,8 +45,8 @@ public class UiAssertValue extends AbstractParentUiAssert
 	/**
 	 * Value expected in the target element.
 	 */
-	@Param(description = "Expected value of the element.")
-	private String value;
+	@Param(description = "Expected value of the element.", sourceType = SourceType.EXPRESSION)
+	private Object value;
 
 	@Param(description = "If set to true, instead of value, display value will be fetched (currently non-select fields will return value itself).", required = false)
 	private boolean displayValue = false;
@@ -56,7 +56,7 @@ public class UiAssertValue extends AbstractParentUiAssert
 		this.locator = locator;
 	}
 
-	public void setValue(String value)
+	public void setValue(Object value)
 	{
 		this.value = value;
 	}
@@ -92,10 +92,12 @@ public class UiAssertValue extends AbstractParentUiAssert
 					UiFreeMarkerMethods.uiDisplayValue(locator, parentElement, driverName) : 
 					UiFreeMarkerMethods.uiValue(locator, parentElement, driverName);
 	
-			if(!value.equals(elementValue))
+			String expectedValue = String.valueOf(value);
+	
+			if(!expectedValue.equals(elementValue))
 			{
-				exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator: {}", value, elementValue, getLocatorWithParent(locator));
-				throw new AutoxValidationException(this, "Expected value '{}' is not matching with actual value '{}' for locator: {}", value, elementValue, getLocatorWithParent(locator));
+				exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator: {}", expectedValue, elementValue, getLocatorWithParent(locator));
+				throw new AutoxValidationException(this, "Expected value '{}' is not matching with actual value '{}' for locator: {}", expectedValue, elementValue, getLocatorWithParent(locator));
 			}
 		} catch (AutoxValidationException ex) 
 		{

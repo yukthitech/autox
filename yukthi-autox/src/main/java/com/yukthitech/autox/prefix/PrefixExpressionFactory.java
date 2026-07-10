@@ -286,6 +286,11 @@ public class PrefixExpressionFactory
 	
 	public Object getValueByExpressionString(AutomationContext context, String expression)
 	{
+		if(isStandardProtocolValue(expression))
+		{
+			return expression;
+		}
+		
 		//if no prefix is used, by default use expr prefix
 		if(!isExpression(expression))
 		{
@@ -317,6 +322,11 @@ public class PrefixExpressionFactory
 		if(expression.trim().length() == 0)
 		{
 			return expression;
+		}
+		
+		if(isStandardProtocolValue(expression))
+		{
+			return expressionObj;
 		}
 			
 		
@@ -355,11 +365,30 @@ public class PrefixExpressionFactory
 	public static boolean isExpression(String str)
 	{
 		str = str.trim();
+		
+		if(isStandardProtocolValue(str))
+		{
+			return false;
+		}
 
 		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(str);
 		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(str);
 		
 		return (matcher.find() || matcherWithType.find());
+	}
+	
+	/**
+	 * Returns true if the value starts with a standard URI protocol prefix (e.g. http://, https://).
+	 * Such values should be treated as literals and not parsed as prefix expressions.
+	 */
+	public static boolean isStandardProtocolValue(String str)
+	{
+		if(StringUtils.isBlank(str))
+		{
+			return false;
+		}
+		
+		return IAutomationConstants.STANDARD_PROTOCOL_URL_PATTERN.matcher(str.trim()).find();
 	}
 	
 	/*
@@ -419,6 +448,11 @@ public class PrefixExpressionFactory
 
 	private PrefixEpression parseExpressionPath(PrefixExpressionContext context, String expression, Function<String, CustomPrefixExpression> customPrefixProvider)
 	{
+		if(isStandardProtocolValue(expression))
+		{
+			return null;
+		}
+		
 		AutomationContext automationContext = context.getAutomationContext();
 		IExecutionLogger exeLogger = automationContext == null ? DummyExecutionLogger.getInstance() : automationContext.getExecutionLogger();
 		

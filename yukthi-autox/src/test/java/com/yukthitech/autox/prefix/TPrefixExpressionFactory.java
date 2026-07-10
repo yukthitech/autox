@@ -17,6 +17,7 @@ package com.yukthitech.autox.prefix;
 
 import java.util.List;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class TPrefixExpressionFactory
@@ -26,5 +27,24 @@ public class TPrefixExpressionFactory
 	{
 		List<ExpressionToken> tokens = PrefixExpressionFactory.parseExpressionTokens("  attr:  test124   |   prop: d.test124  |xpath: /df/df");
 		System.out.println(tokens);
+	}
+	
+	@Test
+	public void testStandardProtocolValuesAreNotExpressions()
+	{
+		Assert.assertTrue(PrefixExpressionFactory.isStandardProtocolValue("http://example.com"));
+		Assert.assertTrue(PrefixExpressionFactory.isStandardProtocolValue("https://example.com/path"));
+		Assert.assertTrue(PrefixExpressionFactory.isStandardProtocolValue("ftp://files.example.com"));
+		Assert.assertTrue(PrefixExpressionFactory.isStandardProtocolValue("file:///C:/temp/data.txt"));
+		Assert.assertTrue(PrefixExpressionFactory.isStandardProtocolValue("jdbc:mysql://localhost:3306/db"));
+		Assert.assertTrue(PrefixExpressionFactory.isStandardProtocolValue("mailto:user@example.com"));
+		
+		Assert.assertFalse(PrefixExpressionFactory.isStandardProtocolValue("prop: user.name"));
+		Assert.assertFalse(PrefixExpressionFactory.isStandardProtocolValue("file: ./src/test/data.json"));
+		Assert.assertFalse(PrefixExpressionFactory.isStandardProtocolValue("OPEN"));
+		
+		Assert.assertFalse(PrefixExpressionFactory.isExpression("http://example.com"));
+		Assert.assertFalse(PrefixExpressionFactory.isExpression("https://example.com/page"));
+		Assert.assertTrue(PrefixExpressionFactory.isExpression("prop: user.name"));
 	}
 }

@@ -219,6 +219,7 @@ public class TestCaseData implements ITestCaseData
 	 *
 	 * @param value the new value of this test case data
 	 */
+	@SuppressWarnings("deprecation")
 	public void setValue(Object value)
 	{
 		this.value = AutomationUtils.parseObjectSource(AutomationContext.getInstance(), null, value, null);

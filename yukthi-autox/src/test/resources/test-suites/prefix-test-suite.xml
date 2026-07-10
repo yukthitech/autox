@@ -43,6 +43,15 @@
 			<s:ui-assert-value locator="c:srchDropDown: ranking" value="9"/>
 		</testCase>
 
+		<testCase name="uiSetValueExpression">
+			<description>Validates ui-set-value and ui-assert-value support expression values</description>
+
+			<s:ui-goto-page uri="/form.html" />
+			<s:set expression="expectedName" value="exprDynamic"/>
+			<s:ui-set-value locator="xpath: //input[@name='name']" value="attr: expectedName"/>
+			<s:ui-assert-value locator="xpath: //input[@name='name']" value="attr: expectedName"/>
+		</testCase>
+
 	</test-suite>
 
 </test-file>

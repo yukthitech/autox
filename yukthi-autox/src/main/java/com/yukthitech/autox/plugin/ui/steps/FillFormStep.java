@@ -173,11 +173,17 @@ public class FillFormStep extends AbstractParentUiStep
 	 * @param context
 	 *            Current automation context
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		Object resObj = AutomationUtils.parseObjectSource(context, exeLogger, data, null);
+		Object resObj = data;
+		
+		// For backward compatibility
+		if(resObj instanceof String)
+		{
+			resObj = AutomationUtils.parseObjectSource(context, exeLogger, data, null);
+		}
 		
 		if(resObj instanceof Map)
 		{

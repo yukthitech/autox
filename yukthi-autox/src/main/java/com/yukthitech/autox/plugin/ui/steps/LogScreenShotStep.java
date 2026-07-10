@@ -25,6 +25,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ReportLogFile;
@@ -45,14 +46,14 @@ public class LogScreenShotStep extends AbstractUiStep
 	/**
 	 * Name of the file provided by the user.
 	 */
-	@Param(description = "Name of the screenshot image file to be created")
-	private String name;
+	@Param(description = "Name of the screenshot image file to be created", sourceType = SourceType.EXPRESSION)
+	private Object name;
 	
 	/**
 	 * Message to be logged along with image;
 	 */
-	@Param(description = "Message to be logged along with image", required = false)
-	private String message;
+	@Param(description = "Message to be logged along with image", required = false, sourceType = SourceType.EXPRESSION)
+	private Object message;
 
 	/**
 	 * Logging level.
@@ -65,7 +66,7 @@ public class LogScreenShotStep extends AbstractUiStep
 	 *
 	 * @param fileName the new name of the file provided by the user
 	 */
-	public void setName(String fileName) 
+	public void setName(Object fileName) 
 	{
 		this.name = fileName;
 	}
@@ -75,7 +76,7 @@ public class LogScreenShotStep extends AbstractUiStep
 	 *
 	 * @param message the new message to be logged along with image;
 	 */
-	public void setMessage(String message)
+	public void setMessage(Object message)
 	{
 		this.message = message;
 	}
@@ -97,10 +98,11 @@ public class LogScreenShotStep extends AbstractUiStep
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-		ReportLogFile reportLogFile = context.newLogFile(name, FilenameUtils.getExtension(file.getName()));
+		String nameStr = String.valueOf(name);
+		ReportLogFile reportLogFile = context.newLogFile(nameStr, FilenameUtils.getExtension(file.getName()));
 		reportLogFile.copyContent(file);
 		
-		exeLogger.logImage(message, reportLogFile, level);
+		exeLogger.logImage(message != null ? String.valueOf(message) : null, reportLogFile, level);
 	}
 	
 	/* (non-Javadoc)

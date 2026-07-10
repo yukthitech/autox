@@ -84,8 +84,8 @@ public class ClickAndDownloadStep extends AbstractParentUiStep
 	/**
 	 * Comma separated supported extensions. If specified, once file is found with any of these extensions, the wait will end.
 	 */
-	@Param(description = "Comma separated supported extensions. If specified, once file is found with any of these extensions, the wait will end.", required = false)
-	private String extensions;
+	@Param(description = "Comma separated supported extensions. If specified, once file is found with any of these extensions, the wait will end.", required = false, sourceType = SourceType.EXPRESSION)
+	private Object extensions;
 
 	/**
 	 * Sets the number of retries to happen. Default: 5.
@@ -138,7 +138,7 @@ public class ClickAndDownloadStep extends AbstractParentUiStep
 		this.locator = locator;
 	}
 	
-	public void setExtensions(String extensions)
+	public void setExtensions(Object extensions)
 	{
 		this.extensions = extensions;
 	}
@@ -188,13 +188,15 @@ public class ClickAndDownloadStep extends AbstractParentUiStep
 			
 			File file = null;
 			
-			if(StringUtils.isBlank(extensions))
+			String extensionsStr = extensions != null ? String.valueOf(extensions) : null;
+			
+			if(StringUtils.isBlank(extensionsStr))
 			{
 				file = waitAndDownload(seleniumSession.getDownloadFolder(driverName));
 			}
 			else
 			{
-				file = pollAndDownload(seleniumSession.getDownloadFolder(driverName), extensions);
+				file = pollAndDownload(seleniumSession.getDownloadFolder(driverName), extensionsStr);
 			}
 			
 			if(file == null)

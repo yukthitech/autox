@@ -23,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -45,8 +46,8 @@ public class OpenWindowStep extends AbstractUiStep
 	/**
 	 * Url to be opened.
 	 */
-	@Param(description = "Url to be opened.")
-	private String url;
+	@Param(description = "Url to be opened.", sourceType = SourceType.EXPRESSION)
+	private Object url;
 	
 	/**
 	 * Name of the window being opened.
@@ -59,7 +60,7 @@ public class OpenWindowStep extends AbstractUiStep
 	 *
 	 * @param url the new url to be opened
 	 */
-	public void setUrl(String url)
+	public void setUrl(Object url)
 	{
 		this.url = url;
 	}
@@ -85,7 +86,8 @@ public class OpenWindowStep extends AbstractUiStep
 		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
-		String openScript = String.format("window.open('%s', '%s')", url, name);
+		String urlStr = String.valueOf(url);
+		String openScript = String.format("window.open('%s', '%s')", urlStr, name);
 		
 		((JavascriptExecutor) driver).executeScript(openScript);
 		

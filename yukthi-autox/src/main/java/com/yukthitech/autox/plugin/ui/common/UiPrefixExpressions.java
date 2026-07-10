@@ -53,7 +53,7 @@ public class UiPrefixExpressions
 						parserContext.getParameter("driver"), 
 						parserContext.getParameter("parentElement"), 
 						expression, 
-						(String) value, 
+						value, 
 						"true".equals(parserContext.getParameter("pressEnter")));
 				
 				if(!successful)

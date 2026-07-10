@@ -42,6 +42,7 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
@@ -77,8 +78,8 @@ public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 	/**
 	 * Name of the video file to be created.
 	 */
-	@Param(description = "Name of the video file to be created. May get suffixed to create unique file.")
-	private String name;
+	@Param(description = "Name of the video file to be created. May get suffixed to create unique file.", sourceType = SourceType.EXPRESSION)
+	private Object name;
 	
 	/**
 	 * Video speed in frames per second. Defaults to 1.
@@ -101,7 +102,7 @@ public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 		return steps;
 	}
 	
-	public void setName(String name)
+	public void setName(Object name)
 	{
 		this.name = name;
 	}
@@ -119,9 +120,10 @@ public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
-		exeLogger.debug("Recording started with name: {}", name);
+		String nameStr = String.valueOf(name);
+		exeLogger.debug("Recording started with name: {}", nameStr);
 		
-		ReportLogFile videoFile = exeLogger.createFile(name, ".mp4"); 
+		ReportLogFile videoFile = exeLogger.createFile(nameStr, ".mp4"); 
 		SeekableByteChannel channel = NIOUtils.writableChannel(videoFile.getFile());
 		
 		AWTSequenceEncoder encoder = new AWTSequenceEncoder(channel, Rational.R(framesPerSec, 1));

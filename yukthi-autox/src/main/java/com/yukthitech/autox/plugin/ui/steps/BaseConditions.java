@@ -24,6 +24,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
 
 /**
@@ -47,8 +48,8 @@ public abstract class BaseConditions extends AbstractParentUiStep
 
 	public static class ValueCondition extends BaseCondition
 	{
-		@Param(description = "Value to be used.")
-		String value;
+		@Param(description = "Value to be used.", sourceType = SourceType.EXPRESSION)
+		Object value;
 	}
 
 	public static class LocatorCondition extends BaseCondition
@@ -59,17 +60,17 @@ public abstract class BaseConditions extends AbstractParentUiStep
 
 	public static class LocatorValueCondition extends LocatorCondition
 	{
-		@Param(description = "Value to be checked.")
-		String value;
+		@Param(description = "Value to be checked.", sourceType = SourceType.EXPRESSION)
+		Object value;
 	}
 
 	public static class AttributeCondition extends LocatorCondition
 	{
-		@Param(description = "Name of the attribute")
-		String name;
+		@Param(description = "Name of the attribute", sourceType = SourceType.EXPRESSION)
+		Object name;
 		
-		@Param(description = "Value of the attribute")
-		String value;
+		@Param(description = "Value of the attribute", sourceType = SourceType.EXPRESSION)
+		Object value;
 	}
 
 	protected List<BaseCondition> conditions = new ArrayList<BaseCondition>();
@@ -82,7 +83,7 @@ public abstract class BaseConditions extends AbstractParentUiStep
 	@ChildElement(description = "Condition to check page title")
 	public void addTitleIs(ValueCondition wrapper)
 	{
-		wrapper.condition = ExpectedConditions.titleIs(wrapper.value);
+		wrapper.condition = ExpectedConditions.titleIs(String.valueOf(wrapper.value));
 		conditions.add(wrapper);
 	}
 
@@ -94,7 +95,7 @@ public abstract class BaseConditions extends AbstractParentUiStep
 	 */
 	public void addTitleContains(ValueCondition wrapper)
 	{
-		wrapper.condition = ExpectedConditions.titleContains(wrapper.value);
+		wrapper.condition = ExpectedConditions.titleContains(String.valueOf(wrapper.value));
 		conditions.add(wrapper);
 	}
 
@@ -105,7 +106,7 @@ public abstract class BaseConditions extends AbstractParentUiStep
 	 */
 	public void addUrlToBe(ValueCondition wrapper)
 	{
-		wrapper.condition = ExpectedConditions.urlToBe(wrapper.value);
+		wrapper.condition = ExpectedConditions.urlToBe(String.valueOf(wrapper.value));
 		conditions.add(wrapper);
 	}
 
@@ -116,7 +117,7 @@ public abstract class BaseConditions extends AbstractParentUiStep
 	 */
 	public void addUrlMatchesRegex(ValueCondition wrapper)
 	{
-		wrapper.condition = ExpectedConditions.urlToBe(wrapper.value);
+		wrapper.condition = ExpectedConditions.urlToBe(String.valueOf(wrapper.value));
 		conditions.add(wrapper);
 	}
 
@@ -183,7 +184,7 @@ public abstract class BaseConditions extends AbstractParentUiStep
 	public void addTextPresentIn(LocatorValueCondition wrapper)
 	{
 		By locator = UiAutomationUtils.getLocator(wrapper.locator);
-		wrapper.condition = ExpectedConditions.textToBePresentInElementLocated(locator, wrapper.value);
+		wrapper.condition = ExpectedConditions.textToBePresentInElementLocated(locator, String.valueOf(wrapper.value));
 		conditions.add(wrapper);
 	}
 
@@ -196,14 +197,14 @@ public abstract class BaseConditions extends AbstractParentUiStep
 	public void addTextPresentInElementValue(LocatorValueCondition wrapper)
 	{
 		By locator = UiAutomationUtils.getLocator(wrapper.locator);
-		wrapper.condition = ExpectedConditions.textToBePresentInElementValue(locator, wrapper.value);
+		wrapper.condition = ExpectedConditions.textToBePresentInElementValue(locator, String.valueOf(wrapper.value));
 		conditions.add(wrapper);
 	}
 	
 	public void addAttributeValueIs(AttributeCondition wrapper)
 	{
 		By locator = UiAutomationUtils.getLocator(wrapper.locator);
-		wrapper.condition = ExpectedConditions.attributeToBe(locator, wrapper.name, wrapper.value);
+		wrapper.condition = ExpectedConditions.attributeToBe(locator, String.valueOf(wrapper.name), String.valueOf(wrapper.value));
 		conditions.add(wrapper);
 	}
 

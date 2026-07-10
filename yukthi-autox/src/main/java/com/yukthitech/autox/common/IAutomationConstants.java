@@ -72,6 +72,13 @@ public interface IAutomationConstants
 	
 	public Pattern EXPRESSION_WITH_PARAMS_PATTERN = Pattern.compile("^\\s*(?<custom>(c|custom)\\s*\\:)?\\s*(?<exprType>\\w+)\\(\\s*(?<params>.+?)\\s*\\)\\s*\\:\\s*");
 	
+	/**
+	 * Matches standard URI protocol prefixes (e.g. http://, https://, file://, jdbc:mysql://, mailto:)
+	 * so they are not mistaken for prefix expressions.
+	 */
+	public Pattern STANDARD_PROTOCOL_URL_PATTERN = Pattern.compile(
+			"^(?i)((https?|ftp|ftps|file|ws|wss)://|jdbc:[^:/]+://|mailto:)");
+	
 	public Pattern KEY_VALUE_PATTERN = Pattern.compile("\\s*(?<key>\\w+)\\s*\\=\\s*(?<value>.+)\\s*");
 
 	public int TWO_SECONDS = 2;

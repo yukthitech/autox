@@ -54,8 +54,8 @@ public class UiSetValueStep extends AbstractParentUiStep
 	/**
 	 * Value to be filled. 
 	 */
-	@Param(description = "Value to be filled with. Defaults to empty string.", required = false)
-	private String value;
+	@Param(description = "Value to be filled with. Defaults to empty string.", required = false, sourceType = SourceType.EXPRESSION)
+	private Object value;
 
 	/**
 	 * PressEnterAtEnd if true then for the provided action or else ignore.
@@ -81,7 +81,7 @@ public class UiSetValueStep extends AbstractParentUiStep
 	 *
 	 * @param value the new value to be filled
 	 */
-	public void setValue(String value)
+	public void setValue(Object value)
 	{
 		this.value = value;
 	}
@@ -98,7 +98,7 @@ public class UiSetValueStep extends AbstractParentUiStep
 		this.pressEnterAtEnd = pressEnterAtEnd;
 	}
 	
-	public static boolean setUiValue(AutomationContext context, String driver, Object parentElement, String locator, String value, boolean pressEnter)
+	public static boolean setUiValue(AutomationContext context, String driver, Object parentElement, String locator, Object value, boolean pressEnter)
 	{
 		if(value == null)
 		{

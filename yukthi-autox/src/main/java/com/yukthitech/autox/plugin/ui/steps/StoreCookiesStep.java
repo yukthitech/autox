@@ -26,6 +26,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -48,15 +49,15 @@ public class StoreCookiesStep extends AbstractUiStep
 	/**
 	 * Path of the file where cookies should be persisted.
 	 */
-	@Param(description = "Path of the file where cookies should be persisted. Default: " + IUiConstants.COOKIE_FILE, required = false)
-	private String path = IUiConstants.COOKIE_FILE;
+	@Param(description = "Path of the file where cookies should be persisted. Default: " + IUiConstants.COOKIE_FILE, required = false, sourceType = SourceType.EXPRESSION)
+	private Object path = IUiConstants.COOKIE_FILE;
 
 	/**
 	 * Sets the path of the file where cookies should be persisted.
 	 *
 	 * @param path the new path of the file where cookies should be persisted
 	 */
-	public void setPath(String path)
+	public void setPath(Object path)
 	{
 		this.path = path;
 	}
@@ -64,7 +65,8 @@ public class StoreCookiesStep extends AbstractUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.trace("Stroring current cookies into file: {}", path);
+		String pathStr = String.valueOf(path);
+		exeLogger.trace("Stroring current cookies into file: {}", pathStr);
 
 		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
@@ -77,7 +79,7 @@ public class StoreCookiesStep extends AbstractUiStep
 			return;
 		}
 		
-		File cookieFile = new File(path);
+		File cookieFile = new File(pathStr);
 
 		try
 		{

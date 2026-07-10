@@ -213,6 +213,14 @@
 				<s:ui-set-value locator="xpath: //input[@name='statusFld']" value="OPEN"/>
 			]]></content>
 		</example>
+		<example>
+			<description>Setting value using expression</description>
+			
+			<content><![CDATA[
+				<s:set expression="fieldValue" value="OPEN"/>
+				<s:ui-set-value locator="xpath: //input[@name='statusFld']" value="attr: fieldValue"/>
+			]]></content>
+		</example>
 	</collection>
 
 	<collection name="com.yukthitech.autox.test.ui.assertion.AssertVisibility">

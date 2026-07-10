@@ -26,6 +26,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -47,15 +48,15 @@ public class LoadCookiesStep extends AbstractUiStep
 	/**
 	 * Path of the file where cookies should be persisted.
 	 */
-	@Param(description = "Path of the file where cookies should be loaded from. Default: " + IUiConstants.COOKIE_FILE, required = false)
-	private String path = IUiConstants.COOKIE_FILE;
+	@Param(description = "Path of the file where cookies should be loaded from. Default: " + IUiConstants.COOKIE_FILE, required = false, sourceType = SourceType.EXPRESSION)
+	private Object path = IUiConstants.COOKIE_FILE;
 
 	/**
 	 * Sets the path of the file where cookies should be persisted.
 	 *
 	 * @param path the new path of the file where cookies should be persisted
 	 */
-	public void setPath(String path)
+	public void setPath(Object path)
 	{
 		this.path = path;
 	}
@@ -64,13 +65,14 @@ public class LoadCookiesStep extends AbstractUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.trace("Loading cookies from file: {}", path);
+		String pathStr = String.valueOf(path);
+		exeLogger.trace("Loading cookies from file: {}", pathStr);
 
-		File cookieFile = new File(path);
+		File cookieFile = new File(pathStr);
 
 		if(!cookieFile.exists())
 		{
-			exeLogger.debug("No cookie file exist at path '{}'. Ignoring load request.", path);
+			exeLogger.debug("No cookie file exist at path '{}'. Ignoring load request.", pathStr);
 			return;
 		}
 		
@@ -88,11 +90,11 @@ public class LoadCookiesStep extends AbstractUiStep
 
 		if(cookies == null || cookies.isEmpty())
 		{
-			exeLogger.debug("No cookies found in file - {}. Ignoring load request.", path);
+			exeLogger.debug("No cookies found in file - {}. Ignoring load request.", pathStr);
 			return;
 		}
 		
-		exeLogger.debug("Loading {} cookies from file - {}", cookies.size(), path);
+		exeLogger.debug("Loading {} cookies from file - {}", cookies.size(), pathStr);
 		
 		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
