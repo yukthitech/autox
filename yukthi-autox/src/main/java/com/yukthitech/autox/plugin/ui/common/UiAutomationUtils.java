@@ -33,6 +33,7 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
 import com.yukthitech.autox.prefix.PrefixEpression;
@@ -600,5 +601,108 @@ public class UiAutomationUtils
 		}
 		
 		return false;
+	}
+
+	/**
+	 * Finds element and checks if it matches the expected availability (visible or hidden).
+	 * Returns true when the condition is met, false when the caller should retry.
+	 *
+	 * @param driverName driver name to use
+	 * @param parentElement parent element or parent locator
+	 * @param locator locator of the target element
+	 * @param expectVisible when true, element must be present and visible; when false, element must be absent or hidden
+	 * @param exeLogger optional execution logger
+	 * @return true if availability condition is met
+	 */
+	public static boolean isElementAvailable(String driverName, Object parentElement, String locator, boolean expectVisible, IExecutionLogger exeLogger)
+	{
+		WebElement element = findElementSafely(driverName, parentElement, locator, exeLogger);
+
+		if(expectVisible)
+		{
+			if(element != null && isElementDisplayed(element, locator, exeLogger))
+			{
+				logDebug(exeLogger, "Found locator '{}' to be visible.", locator);
+				return true;
+			}
+		}
+		else if(element == null || !isElementDisplayed(element, locator, exeLogger))
+		{
+			logDebug(exeLogger, "Found locator '{}' to be hidden", locator);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Finds a visible element. Returns null when the element is not found, not visible, or stale,
+	 * indicating the caller should retry.
+	 *
+	 * @param driverName driver name to use
+	 * @param parentElement parent element or parent locator
+	 * @param locator locator of the target element
+	 * @param exeLogger optional execution logger
+	 * @return visible element, or null if not yet available
+	 */
+	public static WebElement findVisibleElement(String driverName, Object parentElement, String locator, IExecutionLogger exeLogger)
+	{
+		WebElement element = findElementSafely(driverName, parentElement, locator, exeLogger);
+
+		if(element != null && isElementDisplayed(element, locator, exeLogger))
+		{
+			logDebug(exeLogger, "Found locator '{}' to be visible.", locator);
+			return element;
+		}
+
+		return null;
+	}
+
+	private static WebElement findElementSafely(String driverName, Object parentElement, String locator, IExecutionLogger exeLogger)
+	{
+		try
+		{
+			return findElement(driverName, parentElement, locator);
+		}
+		catch(Exception ex)
+		{
+			if(isElementNotAvailableException(ex))
+			{
+				logDebug(exeLogger, "Found locator '{}' to be not accessible or available. Hence assuming element is not available. Error: {}", locator, "" + ex);
+				return null;
+			}
+
+			logError(exeLogger, "An error occurred while trying to find element with locator - {}. Error: {}", locator, "" + ex);
+			return null;
+		}
+	}
+
+	private static boolean isElementDisplayed(WebElement element, String locator, IExecutionLogger exeLogger)
+	{
+		try
+		{
+			return element.isDisplayed();
+		}
+		catch(StaleElementReferenceException ex)
+		{
+			logDebug(exeLogger, "Locator '{}' check resulted in stale exception. Which is going to be ignored", locator);
+			return false;
+		}
+	}
+
+	private static void logDebug(IExecutionLogger exeLogger, String message, Object... args)
+	{
+		if(exeLogger != null)
+		{
+			exeLogger.debug(message, args);
+		}
+	}
+
+	private static void logError(IExecutionLogger exeLogger, String message, Object... args)
+	{
+		if(exeLogger != null)
+		{
+			exeLogger.error(message, args);
+		}
 	}
 }

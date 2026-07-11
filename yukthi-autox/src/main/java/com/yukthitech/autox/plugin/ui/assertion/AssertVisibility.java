@@ -178,15 +178,8 @@ public class AssertVisibility extends AbstractParentUiAssert
 		
 		UiAutomationUtils.validateWithWait(() -> 
 		{
-			WebElement element = UiAutomationUtils.findElement(driverName, parentElement, locator);
-
-			if(!"true".equals(visible))
-			{
-				return (element == null || !element.isDisplayed());
-			}
-
-			return (element != null && element.isDisplayed());
-		} , retryCount, retryTimeGapMillis, 
+			return UiAutomationUtils.isElementAvailable(driverName, parentElement, locator, "true".equals(visible), exeLogger);
+		} , retryCount, retryTimeGapMillis,
 				"Waiting for element: " + getLocatorWithParent(locator), 
 				new InvalidStateException("Failed to find element - " + getLocatorWithParent(locator)));
 

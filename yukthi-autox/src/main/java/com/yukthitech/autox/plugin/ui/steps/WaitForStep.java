@@ -18,9 +18,6 @@ package com.yukthitech.autox.plugin.ui.steps;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebElement;
-
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -102,50 +99,14 @@ public class WaitForStep extends AbstractParentUiStep
 			{
 				for(String locator : this.locators)
 				{
-					WebElement element = null;
-					
-					try
+					if(UiAutomationUtils.isElementAvailable(driverName, parentElement, locator, !"true".equals(hidden), exeLogger))
 					{
-						element = UiAutomationUtils.findElement(driverName, parentElement, locator);
-					}catch(Exception ex)
-					{
-						if(UiAutomationUtils.isElementNotAvailableException(ex))
-						{
-							exeLogger.debug("Found locator '{}' to be not accessible or available. Hence assuming element is not available. Error: {}", locator, "" + ex);
-							element = null;
-						}
-						else
-						{
-							exeLogger.error("An error occurred while trying to find element with locator - {}. Error: {}", locator, "" + ex);
-							return false;
-						}
-					}
-					
-					//if element needs to be checked for invisibility
-					try
-					{
-						if("true".equals(hidden))
-						{
-							if(element == null || !element.isDisplayed())
-							{
-								exeLogger.debug("Found locator '{}' to be hidden", getLocatorWithParent(locator));
-								return true;
-							}
-						}
-						//if element needs to be checked for visibility
-						else if(element != null && element.isDisplayed())
-						{
-							exeLogger.debug("Found locator '{}' to be visible.", getLocatorWithParent(locator));
-							return true;
-						}
-					}catch(StaleElementReferenceException ex)
-					{
-						exeLogger.debug("Locator '{}' check resulted in stale exception. Which is going to be ignored", getLocatorWithParent(locator));
+						return true;
 					}
 				}
 				
 				return false;
-			}, retryCount, retryTimeGapMillis, "Waiting for element: " + locators, 
+			}, retryCount, retryTimeGapMillis, "Waiting for element: " + locators,
 				new InvalidStateException("Failed to find element - " + locators));
 			
 		} catch(InvalidStateException ex)

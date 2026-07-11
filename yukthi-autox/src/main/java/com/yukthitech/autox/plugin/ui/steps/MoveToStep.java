@@ -116,12 +116,11 @@ public class MoveToStep extends AbstractParentUiStep
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
-				WebElement webElement = UiAutomationUtils.findElement(driverName, super.parentElement, locator);
+				WebElement webElement = UiAutomationUtils.findVisibleElement(driverName, super.parentElement, locator, exeLogger);
 
 				if(webElement == null)
 				{
-					exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-					throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+					return false;
 				}
 
 				SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
@@ -173,12 +172,12 @@ public class MoveToStep extends AbstractParentUiStep
 			}catch(Exception ex)
 			{}
 
-			WebElement webElement = UiAutomationUtils.findElement(driverName, super.parentElement, locator);
+			WebElement webElement = UiAutomationUtils.findVisibleElement(driverName, super.parentElement, locator, exeLogger);
 
 			if(webElement == null)
 			{
-				exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-				throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+				exeLogger.error("Failed to find visible element with locator: {}", getLocatorWithParent(locator));
+				throw new NullPointerException("Failed to find visible element with locator: " + getLocatorWithParent(locator));
 			}
 
 			webElement.click();
