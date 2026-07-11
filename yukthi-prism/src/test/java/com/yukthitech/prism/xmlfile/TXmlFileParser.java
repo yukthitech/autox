@@ -61,4 +61,25 @@ public class TXmlFileParser
 		Assert.assertEquals(child.getEndLocation().getEndColumnNumber(), 9);
 		Assert.assertEquals(child.getEndLocation().getEndOffset(), 31);
 	}
+
+	@Test
+	public void testLeadingBomIsSkipped()
+	{
+		String content = "\uFEFF<root><child/></root>";
+		XmlFile file = XmlFileParser.parse(content, null);
+
+		Assert.assertNotNull(file);
+		Element root = file.getRootElement();
+		Assert.assertEquals(root.getName(), "root");
+		Assert.assertNotNull(root.getElementWithName("child"));
+		// BOM remains in the source buffer; root tag starts at offset 1
+		Assert.assertEquals(root.getStartLocation().getStartOffset(), 1);
+	}
+
+	@Test
+	public void testBomOnlyContentIsBlank()
+	{
+		Assert.assertNull(XmlFileParser.parse("\uFEFF", null));
+		Assert.assertNull(XmlFileParser.parse("\uFEFF  \n\t", null));
+	}
 }

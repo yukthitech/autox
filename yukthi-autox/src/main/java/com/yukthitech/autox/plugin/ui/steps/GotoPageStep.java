@@ -64,9 +64,9 @@ public class GotoPageStep extends AbstractUiStep
 	 *
 	 * @return the url to which browser should be taken
 	 */
-	public String getUri()
+	public Object getUri()
 	{
-		return uri != null ? String.valueOf(uri) : null;
+		return uri;
 	}
 
 	/**

@@ -191,9 +191,9 @@ public class AssertFormFields extends AbstractValidation
 		 *
 		 * @return the expected value of the field
 		 */
-		public String getValue()
+		public Object getValue()
 		{
-			return value != null ? String.valueOf(value) : null;
+			return value;
 		}
 
 		/**

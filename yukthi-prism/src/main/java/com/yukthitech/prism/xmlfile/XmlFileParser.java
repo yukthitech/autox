@@ -61,6 +61,12 @@ public class XmlFileParser
 	public static Pattern PATTERN_PREFIX_NAME = Pattern.compile("([\\w-]+)\\:([\\w\\-\\.]+)");
 	
 	public static Pattern PATTERN_WHITE_SPACE = Pattern.compile("\\s*");
+
+	/**
+	 * UTF-8 BOM (U+FEFF). Not matched by {@code \s} / {@link Character#isWhitespace(char)},
+	 * but commonly present at the start of files saved as "UTF-8 with BOM".
+	 */
+	public static Pattern PATTERN_BOM = Pattern.compile("\uFEFF");
 	
 	public static Pattern PATTERN_NAME = Pattern.compile("([\\w\\-\\:\\.]+)");
 	
@@ -141,14 +147,19 @@ public class XmlFileParser
 		this.scanner = new PatternScanner(content);
 	}
 	
-	private boolean isXmlChar(char ch)
+	/**
+	 * Checks whether the given Unicode code point is a valid XML 1.0 character
+	 * per the Char production:
+	 * Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+	 */
+	private boolean isXmlChar(int codePoint)
 	{
-		if(ch == '\n' || ch == '\r' || ch == '\t')
-		{
-			return true;
-		}
-		
-		return (ch >= 32 && ch <= 126);
+		return codePoint == 0x9
+				|| codePoint == 0xA
+				|| codePoint == 0xD
+				|| (codePoint >= 0x20 && codePoint <= 0xD7FF)
+				|| (codePoint >= 0xE000 && codePoint <= 0xFFFD)
+				|| (codePoint >= 0x10000 && codePoint <= 0x10FFFF);
 	}
 	
 	private Range[] fetchLineRanges(char content[])
@@ -157,20 +168,28 @@ public class XmlFileParser
 		int start = 0;
 		List<Range> ranges = new ArrayList<>();
 		
-		for(int i = 0; i < content.length; i++)
+		for(int i = 0; i < content.length; )
 		{
 			if(content[i] == '\n')
 			{
 				ranges.add(new Range(line, start, i));
 				start = i + 1;
 				line++;
+				i++;
 				continue;
 			}
 			
-			if(collector != null && !isXmlChar(content[i]))
+			int codePoint = Character.codePointAt(content, i);
+			int charCount = Character.charCount(codePoint);
+			
+			if(collector != null && !isXmlChar(codePoint))
 			{
-				collector.addMessage(new FileParseMessage(MessageType.WARNING, "Non ASCII or non-printable character is used.", line, i, i + 1));
+				collector.addMessage(new FileParseMessage(MessageType.WARNING,
+						String.format("Invalid XML character (U+%04X) is used.", codePoint),
+						line, i, i + charCount));
 			}
+			
+			i += charCount;
 		}
 		
 		if(start < content.length)
@@ -479,6 +498,17 @@ public class XmlFileParser
 			LocationRange loc = new LocationRange(curPos, range.line, col);
 			setCurrentPositionAsEnd(loc, true);
 			
+			if(currentElement == null)
+			{
+				Range errLine = getLineRange(curPos);
+				int errCol = curPos - errLine.start;
+				
+				throw new XmlParseException(new XmlFile(rootElement), 
+						curPos, curPos + 1,
+						errLine.line, errCol, 
+						"Found text content outside element");
+			}
+			
 			currentElement.addNode(new TextNode(textContent, loc));
 		}
 
@@ -508,15 +538,30 @@ public class XmlFileParser
 	
 	private Element parseElement()
 	{
+		// Skip leading BOM without removing it from content so offsets stay aligned with the source buffer
+		scanner.skip(PATTERN_BOM);
 		scanner.skip(PATTERN_WHITE_SPACE);
 		parseNextContent();
 		
 		return rootElement;
 	}
+
+	/**
+	 * Returns content without a leading UTF-8 BOM, if present.
+	 */
+	private static String stripLeadingBom(String content)
+	{
+		if(content != null && !content.isEmpty() && content.charAt(0) == '\uFEFF')
+		{
+			return content.substring(1);
+		}
+
+		return content;
+	}
 	
 	public static XmlFile parse(String content, FileParseCollector collector)
 	{
-		if(StringUtils.isBlank(content))
+		if(StringUtils.isBlank(stripLeadingBom(content)))
 		{
 			return null;
 		}

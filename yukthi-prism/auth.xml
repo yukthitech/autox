@@ -1,0 +1,202 @@
+﻿<testData 
+	xmlns:s="http://autox.yukthitech.com/steps" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" 
+	xmlns:f="http://autox.yukthitech.com/functions">
+	
+	<testSuite name="sethu4u-common-auth" author="sethu4u" description="WebUtils auth - password login, forgot/reset/change password">
+		<setup>
+			<s:sql-multi-dml-query>
+				<query>
+					DELETE FROM USER
+					WHERE EMAIL LIKE 'autox.js.auth%' AND CUSTOM_SPACE = 'jobSeeker'
+				</query>
+			</s:sql-multi-dml-query>
+
+			<!-- Password plain text: Admin@123 (same jasypt hash as bootstrap admin) -->
+			<s:sql-multi-dml-query>
+				<query>
+					INSERT INTO USER (NAME, EMAIL, MOBILE, PASSWORD, CUSTOM_SPACE, IS_ACTIVE, CREATED_ON, UPDATED_ON)
+					VALUES (
+						'Auth Test User',
+						'autox.js.auth@yukthitech.org',
+						'9000000001',
+						'hsMPM5Iu1uzRXMwuBwh8bJR8LRHSS2FOeE9g+bhRQw8pnMKehvbiDicL+MhhOQsv',
+						'jobSeeker',
+						true,
+						CURRENT_TIMESTAMP,
+						CURRENT_TIMESTAMP
+					)
+				</query>
+				<query>
+					INSERT INTO JOB_SEEKER (USER_ID, GENDER, LOCATION, ADDRESS, ZIP, STATUS)
+					SELECT ID, 'MALE', 'Hyderabad', 'Auth test address', '500001', 'REGISTERED'
+					FROM USER
+					WHERE EMAIL = 'autox.js.auth@yukthitech.org' AND CUSTOM_SPACE = 'jobSeeker'
+				</query>
+			</s:sql-multi-dml-query>
+		</setup>
+
+		<testCase name="passwordLoginEmail">
+			<description>TC-AUTH-01 - Password login with email username</description>
+
+			<s:rest-invoke-post uri="/auth/login">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"password": "Admin@123",
+					"userSpace": "jobSeeker"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:assert-not-null value="prop: attr.response.authToken"/>
+		</testCase>
+
+		<testCase name="passwordLoginMobile">
+			<description>TC-AUTH-01b - Password login with mobile username</description>
+
+			<s:rest-invoke-post uri="/auth/login">
+				<body><![CDATA[{
+					"username": "9000000001",
+					"password": "Admin@123",
+					"userSpace": "jobSeeker"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:assert-not-null value="prop: attr.response.authToken"/>
+		</testCase>
+
+		<testCase name="passwordLoginWrongPassword">
+			<description>TC-AUTH-02 - Wrong password returns 401</description>
+
+			<s:rest-invoke-post uri="/auth/login">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"password": "WrongPass1",
+					"userSpace": "jobSeeker"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 401"/>
+		</testCase>
+
+		<testCase name="passwordLoginWrongSpace">
+			<description>TC-AUTH-03 - Wrong user space returns 401</description>
+
+			<s:rest-invoke-post uri="/auth/login">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"password": "Admin@123",
+					"userSpace": "employer"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 401"/>
+		</testCase>
+
+		<testCase name="forgotAndResetPassword">
+			<description>TC-AUTH-06 - Forgot + reset password with OTP from FORM_TOKEN</description>
+
+			<s:rest-invoke-post uri="/auth/forgot-password">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"userSpace": "jobSeeker"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:set expression="otpToken" value="prop: attr.response.value.token"/>
+
+			<s:sql-fetch-value-query context-attribute="otpCode">
+				<query><![CDATA[
+					SELECT SUBSTRING_INDEX(VALUE, ';', -1)
+					FROM FORM_TOKEN
+					WHERE TOKEN = '${attr.otpToken}'
+					AND EXPIRES_AT > CURRENT_TIMESTAMP
+				]]></query>
+			</s:sql-fetch-value-query>
+
+			<s:rest-invoke-post uri="/auth/reset-password">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"userSpace": "jobSeeker",
+					"newPassword": "NewPass@123",
+					"otp": {
+						"token": "${attr.otpToken}",
+						"value": "${attr.otpCode}",
+						"valueToVerify": "autox.js.auth@yukthitech.org"
+					}
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+
+			<s:rest-invoke-post uri="/auth/login">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"password": "NewPass@123",
+					"userSpace": "jobSeeker"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:assert-not-null value="prop: attr.response.authToken"/>
+			<s:set expression="authToken" value="prop: attr.response.authToken"/>
+
+			<s:rest-invoke-post uri="/auth/change-password">
+				<request-header name="Authorization" value="Bearer ${attr.authToken}"/>
+				<body><![CDATA[{
+					"currentPassword": "NewPass@123",
+					"newPassword": "Admin@123"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+		</testCase>
+
+		<testCase name="changePassword">
+			<description>TC-AUTH-07 - Change password while logged in</description>
+
+			<s:rest-invoke-post uri="/auth/login">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"password": "Admin@123",
+					"userSpace": "jobSeeker"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:set expression="authToken" value="prop: attr.response.authToken"/>
+
+			<s:rest-invoke-post uri="/auth/change-password">
+				<request-header name="Authorization" value="Bearer ${attr.authToken}"/>
+				<body><![CDATA[{
+					"currentPassword": "Admin@123",
+					"newPassword": "Changed@123"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+
+			<s:rest-invoke-post uri="/auth/login">
+				<body><![CDATA[{
+					"username": "autox.js.auth@yukthitech.org",
+					"password": "Changed@123",
+					"userSpace": "jobSeeker"
+				}]]></body>
+			</s:rest-invoke-post>
+
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:set expression="authToken" value="prop: attr.response.authToken"/>
+
+			<s:rest-invoke-post uri="/auth/change-password">
+				<request-header name="Authorization" value="Bearer ${attr.authToken}"/>
+				<body><![CDATA[{
+					"currentPassword": "Changed@123",
+					"newPassword": "Admin@123"
+				}]]></body>
+			</s:rest-invoke-post>
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+		</testCase>
+	</testSuite>
+</testData>
