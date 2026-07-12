@@ -104,6 +104,29 @@
 
 		<!--
 			=================================
+			Test with csv file
+			-=======================================
+		-->
+		<testCase name="load_csv">
+			<description>
+				Loads csv on to context as list of maps and validates the same.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="csvList" value="res:/data/data.csv"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="prop: attr.csvList[0].name" expected="John"/>
+				<s:assert-equals actual="prop: attr.csvList[0].age" expected="30"/>
+				<s:assert-equals actual="prop: attr.csvList[0].city" expected="New York"/>
+				<s:assert-equals actual="prop: attr.csvList[1].name" expected="Jane"/>
+				<s:assert-equals actual="prop: attr.csvList[2].city" expected="Paris"/>
+			</wrap:validations>
+		</testCase>
+
+		<!--
+			=================================
 			Test with text file
 			-=======================================
 		-->

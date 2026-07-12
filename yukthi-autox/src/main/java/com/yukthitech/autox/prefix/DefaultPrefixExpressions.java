@@ -771,7 +771,8 @@ public class DefaultPrefixExpressions
 
 	@PrefixExpressionAnnot(type = "file", description = "Parses specified expression as file path and loads it as object. "
 			+ "As part of 'set', the specified content will be converted to string and will be writtern to file. "
-			+ "Supported object file types: xml, json, properties", 
+			+ "Supported object file types: xml, json, properties, csv. "
+			+ "For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.", 
 			example = "file: /tmp/data.json",
 			params = {
 				@PrefixExprParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
@@ -837,7 +838,9 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "res", description = "Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties",
+	@PrefixExpressionAnnot(type = "res", description = "Parses specified expression as resource path and loads it as object. "
+			+ "Supported file types: xml, json, properties, csv. "
+			+ "For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.",
 			example = "res: /tmp/data.json",
 			params = {
 				@PrefixExprParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),

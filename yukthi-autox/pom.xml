@@ -78,6 +78,13 @@
 			<version>1.10.0</version>
 		</dependency>
 
+		<!-- Used for loading csv files via file:/res: expressions -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+
 		<!-- for remote file monitoring -->
 		<dependency>
 			<groupId>com.jcraft</groupId>

@@ -50,6 +50,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -253,7 +256,7 @@ public class AutomationUtils
 			
 			try
 			{
-				resCollection = (Collection<Object>) executableType.newInstance();
+				resCollection = (Collection<Object>) executableType.getConstructor().newInstance();
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("An error occurred while parsing expressions", ex);
@@ -284,7 +287,7 @@ public class AutomationUtils
 			
 			try
 			{
-				resMap = (Map<Object, Object>) executableType.newInstance();
+				resMap = (Map<Object, Object>) executableType.getConstructor().newInstance();
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("An error occurred while parsing expressions", ex);
@@ -400,7 +403,7 @@ public class AutomationUtils
 				return input;
 			}
 			
-			Collection<Object> res = (Collection<Object>) input.getClass().newInstance();
+			Collection<Object> res = (Collection<Object>) input.getClass().getConstructor().newInstance();
 			
 			for(Object inputVal : input)
 			{
@@ -419,7 +422,7 @@ public class AutomationUtils
 				return input;
 			}
 			
-			Map<Object, Object> res = (Map<Object, Object>) input.getClass().newInstance();
+			Map<Object, Object> res = (Map<Object, Object>) input.getClass().getConstructor().newInstance();
 			
 			for(Object key : input.keySet())
 			{
@@ -905,7 +908,7 @@ public class AutomationUtils
 			
 			if(type != null)
 			{
-				res = type.newInstance();
+				res = type.getConstructor().newInstance();
 				parserHandler = new DefaultParserHandler();
 			}
 			else
@@ -929,7 +932,70 @@ public class AutomationUtils
 			return res;
 		}
 		
+		if(name.toLowerCase().endsWith(".csv"))
+		{
+			if(logger != null)
+			{
+				logger.debug("Processing input file as csv file: {} [Type: {}]", name, type);
+			}
+			
+			return loadCsvContent(data, type);
+		}
+		
 		throw new com.yukthitech.utils.exceptions.UnsupportedOperationException("Unsupported input specified for bean loading: '{}'", name);
+	}
+	
+	/**
+	 * Loads CSV content where row-0 is treated as column headers (property names/keys)
+	 * and each subsequent row becomes one map or bean with corresponding cell values.
+	 * 
+	 * @param data CSV text content
+	 * @param type optional row element type; when null or Map/Object/Collection, rows are maps.
+	 *        Otherwise each row is converted to the specified bean type.
+	 * @return list of row maps or beans
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static Object loadCsvContent(String data, Class<?> type) throws Exception
+	{
+		CSVFormat format = CSVFormat.DEFAULT.builder()
+				.setHeader()
+				.setSkipHeaderRecord(true)
+				.setIgnoreEmptyLines(true)
+				.setTrim(true)
+				.build();
+		
+		List<Map<String, Object>> rows = new ArrayList<>();
+		
+		try(CSVParser parser = CSVParser.parse(data, format))
+		{
+			for(CSVRecord record : parser)
+			{
+				Map<String, Object> row = new LinkedHashMap<>();
+				
+				for(Map.Entry<String, String> entry : record.toMap().entrySet())
+				{
+					row.put(entry.getKey(), entry.getValue());
+				}
+				
+				rows.add(row);
+			}
+		}
+		
+		// default / map / collection type => list of maps
+		if(type == null || type == Object.class || Map.class.isAssignableFrom(type) || Collection.class.isAssignableFrom(type))
+		{
+			return rows;
+		}
+		
+		// treat specified type as row bean type
+		List beans = new ArrayList();
+		
+		for(Map<String, Object> row : rows)
+		{
+			beans.add(objectMapper.convertValue(row, type));
+		}
+		
+		return beans;
 	}
 	
 	/**
