@@ -45,7 +45,7 @@ public abstract class AbstractRestWithBodyStep<T extends RestRequestWithBody<T>>
 	/**
 	 * Content char set.
 	 */
-	@Param(description = "Content char set to be used for body.", required = false)
+	@Param(description = "Content char set to be used for body.", required = false, sourceType = SourceType.EXPRESSION, expectedType = String.class)
 	private String contentCharset;
 	
 	/**

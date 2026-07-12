@@ -63,9 +63,9 @@ public abstract class AbstractRestStep extends AbstractStep
 		private String name;
 		
 		/**
-		 * Value.
+		 * Value. Supports FreeMarker (${...}) and prefix expressions.
 		 */
-		@Param(description = "Value.", required = true)
+		@Param(description = "Value. Supports FreeMarker (${...}) and prefix expressions.", required = true, sourceType = SourceType.EXPRESSION, expectedType = String.class)
 		private String value;
 		
 		/**
@@ -167,7 +167,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	/**
 	 * Request content type to be used. default: null.
 	 */
-	@Param(description = "Request content type to be used. default: " + IRestConstants.JSON_CONTENT_TYPE, required = false)
+	@Param(description = "Request content type to be used. default: " + IRestConstants.JSON_CONTENT_TYPE, required = false, sourceType = SourceType.EXPRESSION, expectedType = String.class)
 	protected String contentType = IRestConstants.JSON_CONTENT_TYPE;
 	
 	/**

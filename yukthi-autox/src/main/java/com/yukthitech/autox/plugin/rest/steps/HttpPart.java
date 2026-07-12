@@ -47,10 +47,10 @@ public class HttpPart implements Serializable, Validateable
 	/**
 	 * Content type of the part. By default is is json part.
 	 */
-	@Param(name = "contentType", description = "Content type of the part. By default is is json part.", required = false)
+	@Param(name = "contentType", description = "Content type of the part. By default is is json part.", required = false, sourceType = SourceType.EXPRESSION, expectedType = String.class)
 	private String contentType = IRestConstants.JSON_CONTENT_TYPE;
 
-	@Param(name = "charset", description = "Charset to be used for this part. By default no char set will be used.", required = false)
+	@Param(name = "charset", description = "Charset to be used for this part. By default no char set will be used.", required = false, sourceType = SourceType.EXPRESSION, expectedType = String.class)
 	private String charset;
 
 	/**

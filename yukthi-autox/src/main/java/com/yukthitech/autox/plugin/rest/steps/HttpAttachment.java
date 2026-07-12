@@ -43,14 +43,15 @@ public class HttpAttachment implements Validateable, Serializable
 	
 	/**
 	 * File of the attachment.
+	 * Resource expressions (file:/res:/string: etc.) are resolved later by ResourceFactory, not via SourceType.EXPRESSION.
 	 */
-	@Param(name = "file", description = "Resource to be added as attachment. Should be resource expression.", required = true)
+	@Param(name = "file", description = "Resource to be added as attachment. Should be resource expression (file:/res:/string:). FreeMarker ${...} is supported.", required = true)
 	private String file;
 	
 	/**
 	 * File name to be used for attachment.
 	 */
-	@Param(name = "fileName", description = "File name to be used for attachment", required = false)
+	@Param(name = "fileName", description = "File name to be used for attachment. FreeMarker ${...} is supported.", required = false)
 	private String fileName;
 	
 	/**
