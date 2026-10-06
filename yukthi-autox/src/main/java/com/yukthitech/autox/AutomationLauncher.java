@@ -39,7 +39,9 @@ import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.event.AutomationEventType;
 import com.yukthitech.autox.exec.AsyncTryCatchBlock;
 import com.yukthitech.autox.exec.ExecutionPool;
+import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.Executor;
+import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.FunctionExecutor;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
 import com.yukthitech.autox.exec.report.FinalReport;
@@ -79,6 +81,7 @@ public class AutomationLauncher
 		ExecutionPool.reset();
 		
 		DebugFlowManager.getInstance().reset();
+		ExecutionServices.reset();
 		
 		if(DebugServer.getInstance() != null)
 		{
@@ -413,6 +416,8 @@ public class AutomationLauncher
 	{
 		System.out.println("Executing main function of automation launcher...");
 		AutomationEventManager.getInstance().onAppStart();
+		ExecutionServices.setStepsExecutor(StepsExecutor.getDefault());
+		ExecutionServices.setDebugFlowManager(DebugFlowManager.getInstance());
 		
 		try
 		{

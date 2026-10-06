@@ -19,7 +19,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.collections.MapUtils;
-import org.openqa.selenium.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Used to reload app properties.

@@ -226,7 +226,7 @@ public class ExecutionPool
 		
 		for(Map.Entry<Executor, ExecutorRunnable> entry : runnableMap.entrySet())
 		{
-			List<Executor> dependencies = entry.getKey().getDependencies();
+			List<? extends IExecutor> dependencies = entry.getKey().getDependencies();
 			
 			if(CollectionUtils.isEmpty(dependencies))
 			{
@@ -236,7 +236,7 @@ public class ExecutionPool
 			
 			dependencies.forEach(dependency -> 
 			{
-				runnableMap.get(dependency).addDependent(entry.getValue());
+				runnableMap.get((Executor) dependency).addDependent(entry.getValue());
 			});
 		}
 		

@@ -170,7 +170,7 @@ public class ReportDataManager
 			
 			if(executor.getParentExecutor() != null)
 			{
-				ExecutorDetails parentDetails = getExecutorDetails(executor.getParentExecutor());
+				ExecutorDetails parentDetails = getExecutorDetails((Executor) executor.getParentExecutor());
 				parentDetails.statusReport.addChidReport(details.statusReport);
 			}
 			

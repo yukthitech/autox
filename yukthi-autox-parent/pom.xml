@@ -112,6 +112,17 @@
 	</build>
 
 	<modules>
+		<module>../yukthi-autox-common</module>
+		<module>../yukthi-autox-lang</module>
+		<module>../yukthi-autox-sql</module>
+		<module>../yukthi-autox-mongo</module>
+		<module>../yukthi-autox-rest</module>
+		<module>../yukthi-autox-ui-selenium</module>
+		<module>../yukthi-autox-webutils</module>
+		<module>../yukthi-autox-mail</module>
+		<module>../yukthi-autox-ssh</module>
+		<module>../yukthi-autox-mock</module>
+		<module>../yukthi-autox-all</module>
 		<module>../yukthi-autox</module>
 	</modules>
 </project>

@@ -45,7 +45,7 @@ import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
-public abstract class Executor
+public abstract class Executor implements IExecutor
 {
 	private static Logger logger = LogManager.getLogger(Executor.class);
 	
@@ -137,11 +137,13 @@ public abstract class Executor
 		return statusMessage;
 	}
 	
+	@Override
 	public String getUniqueId()
 	{
 		return uniqueId;
 	}
 
+	@Override
 	public IExecutionLogger getActiveExecutionLogger()
 	{
 		return activeExecutionLogger;
@@ -155,7 +157,8 @@ public abstract class Executor
 	 * @return Dependency executor for which executor is waiting for. Null if this executor is ready
 	 * to execute.
 	 */
-	public List<Executor> getDependencies()
+	@Override
+	public List<? extends IExecutor> getDependencies()
 	{
 		return null;
 	}
@@ -169,6 +172,7 @@ public abstract class Executor
 		return true;
 	}
 	
+	@Override
 	public boolean isParentContextShared()
 	{
 		return parentContextShared;
@@ -188,12 +192,19 @@ public abstract class Executor
 		return (status != null);
 	}
 	
+	@Override
 	public Object getExecutable()
 	{
 		return executable;
 	}
 	
-	public Executor getParentExecutor()
+	@Override
+	public IExecutor getParentExecutor()
+	{
+		return parentExecutor;
+	}
+	
+	public Executor getParentExecutorAsExecutor()
 	{
 		return parentExecutor;
 	}
@@ -453,7 +464,7 @@ public abstract class Executor
 			{
 				StackFrameExecutor.newExecutor(uniqueId, childSteps, (steps, stackFrameId) -> 
 				{
-					StepsExecutor.execute(steps, currentStep, stackFrameId);
+					StepsExecutor.getDefault().execute(steps, currentStep, stackFrameId);
 					setStatus(TestStatus.SUCCESSFUL, null);
 				}).onReload(steps -> 
 				{

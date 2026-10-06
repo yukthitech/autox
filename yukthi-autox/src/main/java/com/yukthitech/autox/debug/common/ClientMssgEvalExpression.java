@@ -18,7 +18,7 @@ package com.yukthitech.autox.debug.common;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Used to evaluate expression as part of current debug thread.

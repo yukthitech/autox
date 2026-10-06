@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.openqa.selenium.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
@@ -123,7 +123,7 @@ public class TestCaseExecutor extends Executor
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public List<Executor> getDependencies()
+	public List<? extends IExecutor> getDependencies()
 	{
 		return (List) dependencies;
 	}

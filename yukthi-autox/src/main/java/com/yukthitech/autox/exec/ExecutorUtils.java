@@ -117,7 +117,7 @@ public class ExecutorUtils
 			
 			StackFrameExecutor.newExecutor("Setup", setup, (setupObj, stackFrameId) -> 
 			{
-				StepsExecutor.execute(setupObj.getSteps(), currentStep, stackFrameId);
+				StepsExecutor.getDefault().execute(setupObj.getSteps(), currentStep, stackFrameId);
 			}).onReload(reloader)
 			.execute();
 		
@@ -161,7 +161,7 @@ public class ExecutorUtils
 			
 			StackFrameExecutor.newExecutor("Cleanup", cleanup, (cleanupObj, stackFrameId) -> 
 			{
-				StepsExecutor.execute(cleanupObj.getSteps(), currentStep, stackFrameId);
+				StepsExecutor.getDefault().execute(cleanupObj.getSteps(), currentStep, stackFrameId);
 			}).onReload(reloader)
 			.execute();
 			

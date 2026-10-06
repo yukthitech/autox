@@ -375,7 +375,7 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			StepsExecutor.execute(steps, null, null);
+			StepsExecutor.getDefault().execute(steps, null, null);
 			
 			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, true, getContextAttr(), null));
 		} catch(Exception ex)

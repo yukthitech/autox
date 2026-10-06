@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Used in interactive environments to execute steps.

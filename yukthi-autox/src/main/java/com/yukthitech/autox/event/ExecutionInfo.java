@@ -138,7 +138,7 @@ public class ExecutionInfo
 	 */
 	public ExecutionInfo getParentExecution()
 	{
-		Executor parent = executor.getParentExecutor();
+		Executor parent = (Executor) executor.getParentExecutor();
 		
 		if(parent == null)
 		{

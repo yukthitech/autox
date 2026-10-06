@@ -41,20 +41,29 @@ import com.yukthitech.utils.event.EventListenerManager;
  * Executor for steps.
  * @author akranthikiran
  */
-public class StepsExecutor
+public class StepsExecutor implements IStepsExecutor
 {
+	private static final StepsExecutor DEFAULT = new StepsExecutor();
+	
 	private static Logger logger = LogManager.getLogger(StepsExecutor.class);
 	
 	private static ThreadLocal<Boolean> topLevelStep = new ThreadLocal<>();
 	
 	private static EventListenerManager<IStepListener> stepListeners = EventListenerManager.newEventListenerManager(IStepListener.class, false);
 	
-	public static void addStepListener(IStepListener listener)
+	public static StepsExecutor getDefault()
+	{
+		return DEFAULT;
+	}
+	
+	@Override
+	public void addStepListener(IStepListener listener)
 	{
 		stepListeners.addListener(listener);
 	}
 	
-	public static void removeStepListener(IStepListener listener)
+	@Override
+	public void removeStepListener(IStepListener listener)
 	{
 		stepListeners.removeListener(listener);
 	}
@@ -106,7 +115,7 @@ public class StepsExecutor
 
 		try
 		{
-			DebugFlowManager.getInstance().checkForDebugPoint(step);
+			ExecutionServices.getDebugFlowManager().checkForDebugPoint(step);
 
 			AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
 
@@ -158,7 +167,8 @@ public class StepsExecutor
 
 	}
 	
-	public static void execute(List<IStep> steps, ObjectWrapper<IStep> currentStep, String parentFrameId) throws Exception
+	@Override
+	public void execute(List<IStep> steps, ObjectWrapper<IStep> currentStep, String parentFrameId) throws Exception
 	{
 		if(CollectionUtils.isEmpty(steps))
 		{

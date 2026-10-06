@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
-import org.openqa.selenium.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Used in debug environment when a changed file is save and needs a reload.

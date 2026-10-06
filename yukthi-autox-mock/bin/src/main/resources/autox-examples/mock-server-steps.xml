@@ -1,0 +1,90 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.proxy.steps.StartMockServerStep">
+		<example>
+			<description>Starting mock server with specified name at specified port</description>
+			
+			<content><![CDATA[
+				<s:mock-server-start name="testMockServer" port="9944"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.proxy.steps.MockResponseStep">
+		<example>
+			<description>Mocking a post request</description>
+			
+			<content><![CDATA[
+				<s:mock-response method="POST" name="testMockServer" responseStatusCode="200" uri="/test/job">
+					<response-header name="Content-Type">application/json</response-header>
+				
+					<responseBody>
+						{
+							"code" : 0,
+							"message": "some test message from response"
+						}
+					</responseBody>
+				</s:mock-response>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.proxy.steps.MockResponseStep">
+		<example>
+			<description>Mocking a response for a POST api</description>
+			
+			<content><![CDATA[
+				<s:mock-response method="POST" name="testMockServer" responseStatusCode="200" uri="/test/job">
+					<response-header name="Content-Type">application/json</response-header>
+				
+					<responseBody>
+						{
+							"code" : 0,
+							"message": "some test message from response"
+						}
+					</responseBody>
+				</s:mock-response>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.proxy.steps.MockFetchRequestStep">
+		<example>
+			<description>
+				Fetching mock requests received on specified mock-server (from last reser or start)
+				with specified request filter criteria.
+				
+				Below example fetches POST requests from "testMockServer" for uri  "/test/job"
+			</description>
+			
+			<content><![CDATA[
+				<s:mock-fetch-request name="testMockServer" attributeName="mockRequests" uriFilter="/test/job" methodFilter="POST"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.proxy.steps.ResetMockServerStep">
+		<example>
+			<description>
+				Reseting the mock server, that is cleaning up all mocked responses and requests.
+			</description>
+			
+			<content><![CDATA[
+				<s:mock-server-reset name="testMockServer"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.proxy.steps.StopMockServerStep">
+		<example>
+			<description>
+				Stopping specified mock server.
+			</description>
+			
+			<content><![CDATA[
+				<s:mock-server-stop name="testMockServer"/>
+			]]></content>
+		</example>
+	</collection>
+</examples>
