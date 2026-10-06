@@ -1,15 +1,25 @@
 $.application.controller("monitorController", function($scope){
 
 	/**
+	 * Escape text so ng-bind-html shows it as plain content (not HTML tags).
+	 * Content is read via jQuery .text() which decodes entities from the server-escaped pre block.
+	 */
+	function escapeHtml(text) {
+		return String(text)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+	}
+
+	/**
 	 * Create dummy records
 	 */
 	$scope.initContent = function(){
 		
 		var content = $("#logContentContainer").text().trim();
-		content = content.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
-		content = content.replace(/\ /g, "&nbsp;");
-
-		var contentArr = content.split("\n")
+		var contentArr = content.split("\n");
 		
 		var messages = [];
 		
@@ -17,14 +27,18 @@ $.application.controller("monitorController", function($scope){
 		{
 			var line = contentArr[i];
 			
-			// replace
-			line = line.trim();
-			
-			if(line.length > 0)
+			// Skip blank lines but keep leading indentation (stack frames).
+			if(!line || /^\s*$/.test(line))
 			{
-				var obj = {"lineNo" : (i + 1), "line" : line};
-				messages.push(obj);
+				continue;
 			}
+
+			var escaped = escapeHtml(line);
+			escaped = escaped.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
+			escaped = escaped.replace(/ /g, "&nbsp;");
+			
+			var obj = {"lineNo" : (i + 1), "line" : escaped};
+			messages.push(obj);
 		}
 		
 		$scope.messages = messages;
