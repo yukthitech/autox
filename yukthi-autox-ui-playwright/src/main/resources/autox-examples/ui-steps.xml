@@ -128,6 +128,16 @@
 		</example>
 	</collection>
 
+	<collection name="com.yukthitech.autox.plugin.ui.steps.LogHtmlSnapshotStep">
+		<example>
+			<description>Taking MHTML snapshot of the page</description>
+			
+			<content><![CDATA[
+				<s:ui-log-html-snapshot name="page-snapshot.mhtml" />
+			]]></content>
+		</example>
+	</collection>
+
 	<collection name="com.yukthitech.autox.test.ui.steps.OpenWindowStep">
 		<example>
 			<description>Opening a new window</description>

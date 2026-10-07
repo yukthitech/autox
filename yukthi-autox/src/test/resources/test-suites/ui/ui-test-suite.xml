@@ -117,6 +117,7 @@
 
 			<s:set expression="uiVal: id:genderDropDown" value="female"/>
 			<s:ui-log-screen-shot name="filledForm-1.png" />
+			<s:ui-log-html-snapshot name="filledForm-1.mhtml" />
 
 			<s:ui-fill-form locator="id:sampleForm">
 				<data>
