@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -32,7 +32,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 import com.yukthitech.prism.format.XmlFormatter;
 import com.yukthitech.utils.doc.Doc;
 
@@ -257,7 +257,7 @@ public class XmlElement
 		{
 			Attribute attr = this.attributes.get(i);
 			
-			if(Objects.equal(prefix, attr.prefix) && Objects.equal(name, attr.name))
+			if(Objects.equals(prefix, attr.prefix) && Objects.equals(name, attr.name))
 			{
 				attr.value = value;
 				return;
@@ -283,7 +283,7 @@ public class XmlElement
 		{
 			Attribute attr = this.attributes.get(i);
 			
-			if(Objects.equal(prefix, attr.prefix) && Objects.equal(name, attr.name))
+			if(Objects.equals(prefix, attr.prefix) && Objects.equals(name, attr.name))
 			{
 				this.attributes.remove(i);
 				return attr;
@@ -318,7 +318,7 @@ public class XmlElement
 				.stream()
 				.filter(obj -> (obj instanceof XmlElement))
 				.map(obj -> (XmlElement) obj)
-				.filter(elem -> Objects.equal(prefix, elem.prefix) && Objects.equal(name, elem.name))
+				.filter(elem -> Objects.equals(prefix, elem.prefix) && Objects.equals(name, elem.name))
 				.findFirst()
 				.orElse(null);
 		
@@ -416,7 +416,7 @@ public class XmlElement
 			
 			XmlElement child = (XmlElement) childObj;
 			
-			if(Objects.equal(prefix, child.prefix) && Objects.equal(name, child.name))
+			if(Objects.equals(prefix, child.prefix) && Objects.equals(name, child.name))
 			{
 				this.childNodes.remove(i);
 				return child;
@@ -450,7 +450,7 @@ public class XmlElement
 			
 			XmlElement child = (XmlElement) childObj;
 			
-			if(Objects.equal(prefix, child.prefix) && Objects.equal(name, child.name))
+			if(Objects.equals(prefix, child.prefix) && Objects.equals(name, child.name))
 			{
 				this.childNodes.remove(i);
 				removeElements.add(child);

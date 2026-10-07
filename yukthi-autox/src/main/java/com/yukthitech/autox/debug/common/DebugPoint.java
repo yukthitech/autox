@@ -16,8 +16,7 @@
 package com.yukthitech.autox.debug.common;
 
 import java.io.Serializable;
-
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * Represents debug point.
@@ -123,6 +122,6 @@ public class DebugPoint implements Serializable
 	@Override
 	public int hashCode()
 	{
-		return Objects.hashCode(filePath, lineNumber);
+		return Objects.hash(filePath, lineNumber);
 	}
 }

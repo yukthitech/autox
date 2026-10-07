@@ -15,17 +15,25 @@
 	</properties>
 
 	<dependencies>
-		<!-- For selenium based steps and validations -->
+		<!-- Autox core + all plugins (IDE documents and runs full step set) -->
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-automation</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-webmvc</artifactId>
 					<groupId>org.springframework</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-autox-all</artifactId>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
 
 		<dependency>

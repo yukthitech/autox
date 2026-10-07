@@ -16,7 +16,6 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-autox-common</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

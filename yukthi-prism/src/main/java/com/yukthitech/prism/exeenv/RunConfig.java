@@ -18,7 +18,7 @@ package com.yukthitech.prism.exeenv;
 import java.io.File;
 import java.io.Serializable;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * Run configuration.
@@ -176,10 +176,10 @@ public class RunConfig implements Serializable
 		}
 
 		RunConfig other = (RunConfig) obj;
-		return Objects.equal(projectName, other.projectName)
-				&& Objects.equal(testSuiteFolder, other.testSuiteFolder)
-				&& Objects.equal(executionType, other.executionType)
-				&& Objects.equal(executableName, other.executableName);
+		return Objects.equals(projectName, other.projectName)
+				&& Objects.equals(testSuiteFolder, other.testSuiteFolder)
+				&& Objects.equals(executionType, other.executionType)
+				&& Objects.equals(executableName, other.executableName);
 	}
 
 	/* (non-Javadoc)
@@ -188,7 +188,7 @@ public class RunConfig implements Serializable
 	@Override
 	public int hashCode()
 	{
-		return Objects.hashCode(projectName, testSuiteFolder, 
+		return Objects.hash(projectName, testSuiteFolder, 
 				executionType, executableName);
 	}
 }

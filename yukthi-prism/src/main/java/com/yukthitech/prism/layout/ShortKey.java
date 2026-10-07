@@ -20,9 +20,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import org.openqa.selenium.InvalidArgumentException;
-
 import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
 /**

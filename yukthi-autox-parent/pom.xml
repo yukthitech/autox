@@ -48,7 +48,300 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+
+		<!-- Autox reactor modules -->
+		<autox.version>3.0.0-SNAPSHOT</autox.version>
+
+		<!-- External Yukthi libraries -->
+		<yukthi-utils.version>1.3.12-SNAPSHOT</yukthi-utils.version>
+		<yukthi-json-expr.version>1.0.15-SNAPSHOT</yukthi-json-expr.version>
+		<yukthi-xml-mapper.version>1.3.14-SNAPSHOT</yukthi-xml-mapper.version>
+		<yukthi-data.version>1.3.13-SNAPSHOT</yukthi-data.version>
+		<yukthi-mongojs.version>2.1.0-SNAPSHOT</yukthi-mongojs.version>
+
+		<!-- Third-party -->
+		<log4j.version>2.22.0</log4j.version>
+		<commons-text.version>1.10.0</commons-text.version>
+		<commons-csv.version>1.10.0</commons-csv.version>
+		<commons-jxpath.version>1.3</commons-jxpath.version>
+		<commons-collections.version>3.2.2</commons-collections.version>
+		<commons-io.version>2.11.0</commons-io.version>
+		<commons-cli.version>1.5.0</commons-cli.version>
+		<commons-dbutils.version>1.7</commons-dbutils.version>
+		<commons-dbcp2.version>2.9.0</commons-dbcp2.version>
+		<commons-fileupload.version>1.4</commons-fileupload.version>
+		<spring.version>5.3.22</spring.version>
+		<selenium.version>4.18.1</selenium.version>
+		<jcodec.version>0.2.5</jcodec.version>
+		<jsch.version>0.1.55</jsch.version>
+		<javax.mail.version>1.5.5</javax.mail.version>
+		<httpclient5.version>5.6.1</httpclient5.version>
+		<javaee-api.version>8.0.1</javaee-api.version>
+		<jetty.version>9.4.45.v20220203</jetty.version>
+		<derby.version>10.14.2.0</derby.version>
+		<h2.version>2.1.210</h2.version>
+		<mysql-connector.version>8.0.20</mysql-connector.version>
+		<testng.version>6.9.10</testng.version>
+		<mockito-all.version>1.10.19</mockito-all.version>
+		<javax.annotation-api.version>1.3.2</javax.annotation-api.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Autox reactor modules -->
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-common</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-lang</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-sql</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-mongo</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-rest</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-ui-selenium</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-webutils</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-mail</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-ssh</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-mock</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-all</artifactId>
+				<version>${autox.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-automation</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+
+			<!-- External Yukthi libraries -->
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-utils</artifactId>
+				<version>${yukthi-utils.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-json-expr</artifactId>
+				<version>${yukthi-json-expr.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-xml-mapper</artifactId>
+				<version>${yukthi-xml-mapper.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-data</artifactId>
+				<version>${yukthi-data.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-mongojs</artifactId>
+				<version>${yukthi-mongojs.version}</version>
+			</dependency>
+
+			<!-- Logging -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<!-- Apache Commons -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>${commons-text.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-csv</artifactId>
+				<version>${commons-csv.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-jxpath</groupId>
+				<artifactId>commons-jxpath</artifactId>
+				<version>${commons-jxpath.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-collections</groupId>
+				<artifactId>commons-collections</artifactId>
+				<version>${commons-collections.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-cli</groupId>
+				<artifactId>commons-cli</artifactId>
+				<version>${commons-cli.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-dbutils</groupId>
+				<artifactId>commons-dbutils</artifactId>
+				<version>${commons-dbutils.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-dbcp2</artifactId>
+				<version>${commons-dbcp2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>${commons-fileupload.version}</version>
+			</dependency>
+
+			<!-- Spring -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<!-- UI / Selenium -->
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>selenium-java</artifactId>
+				<version>${selenium.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jcodec</groupId>
+				<artifactId>jcodec</artifactId>
+				<version>${jcodec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jcodec</groupId>
+				<artifactId>jcodec-javase</artifactId>
+				<version>${jcodec.version}</version>
+			</dependency>
+
+			<!-- Mail / SSH / HTTP -->
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>${javax.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.jcraft</groupId>
+				<artifactId>jsch</artifactId>
+				<version>${jsch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>${httpclient5.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax</groupId>
+				<artifactId>javaee-api</artifactId>
+				<version>${javaee-api.version}</version>
+			</dependency>
+
+			<!-- Jetty (mock) -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-webapp</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlet</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+
+			<!-- SQL drivers -->
+			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derby</artifactId>
+				<version>${derby.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derbyclient</artifactId>
+				<version>${derby.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>${h2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql-connector.version}</version>
+			</dependency>
+
+			<!-- Test -->
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>${testng.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>${mockito-all.version}</version>
+			</dependency>
+
+			<!-- Annotations (used by Prism / Spring lifecycle) -->
+			<dependency>
+				<groupId>javax.annotation</groupId>
+				<artifactId>javax.annotation-api</artifactId>
+				<version>${javax.annotation-api.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 	</dependencies>

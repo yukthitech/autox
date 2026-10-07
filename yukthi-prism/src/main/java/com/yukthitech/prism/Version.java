@@ -18,9 +18,8 @@ package com.yukthitech.prism;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.openqa.selenium.InvalidArgumentException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 public class Version
 {

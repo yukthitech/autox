@@ -18,7 +18,7 @@ package com.yukthitech.prism.exeenv.debug;
 import java.io.File;
 import java.io.Serializable;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * Represents a debug point.
@@ -108,6 +108,6 @@ public class IdeDebugPoint implements Serializable
 	@Override
 	public int hashCode()
 	{
-		return Objects.hashCode(file, lineNo);
+		return Objects.hash(file, lineNo);
 	}
 }
