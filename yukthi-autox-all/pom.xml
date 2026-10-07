@@ -31,7 +31,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.yukthitech</groupId>
-			<artifactId>yukthi-autox-ui-selenium</artifactId>
+			<artifactId>yukthi-autox-ui-playwright</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.yukthitech</groupId>

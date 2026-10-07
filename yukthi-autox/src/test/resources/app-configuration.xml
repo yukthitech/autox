@@ -34,23 +34,33 @@
 		will be used by steps and validators. 
 	 -->
 	<wrap:plugins>
+
+		<!-- Selenium plugin for web based automation -->  
+		<!--
+        <selenium-plugin maxSessions="3">
+            <base-url>#{base.url}</base-url>
+            
+            <wrap:drivers>
+                <driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
+                    <system-property name="webdriver.chrome.driver">./drivers/149.0.7827.53/chromedriver-win64/chromedriver.exe</system-property>
+                    <profile-option name="chrome.binary">./drivers/149.0.7827.53/chrome-win64/chrome.exe</profile-option>
+                    <profile-option name="enable.console.logs">true</profile-option>
+                    <profile-option name="remote-allow-origins">*</profile-option>
+                    
+                    <extraArguments>- -remote-allow-origins=*</extraArguments>
+                </driver>
+            </wrap:drivers>
+        </selenium-plugin>
+		-->
 	
-		<!-- Selenium plugin for web based automation -->	
-		<selenium-plugin maxSessions="3">
+		<!-- Playwright plugin for web based automation -->
+		<playwright-plugin maxSessions="3">
 			<base-url>#{base.url}</base-url>
 			
 			<wrap:drivers>
-				<driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
-					<system-property name="webdriver.chrome.driver">./drivers/149.0.7827.53/chromedriver-win64/chromedriver.exe</system-property>
-					<profile-option name="chrome.binary">./drivers/149.0.7827.53/chrome-win64/chrome.exe</profile-option>
-					<profile-option name="enable.console.logs">true</profile-option>
-					<profile-option name="remote-allow-origins">*</profile-option>
-					
-					<extraArguments>--remote-allow-origins=*</extraArguments>
-				</driver>
-
+				<driver name="autoxChrome" browser-type="chromium" default="true" headless="false"/>
 			</wrap:drivers>
-		</selenium-plugin>
+		</playwright-plugin>
 	
 		<!-- Db plugin for sql base steps -->
 		<db-plugin defaultDataSource="dataSource">

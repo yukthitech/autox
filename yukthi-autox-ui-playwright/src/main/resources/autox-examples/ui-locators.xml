@@ -1,0 +1,23 @@
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
+
+	<collection name="$uilocators.id">
+		<example>
+			<description>Accessing ui element with id locator</description>
+			
+			<content><![CDATA[
+				<s:ui-click locator="id: button"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$uilocators.xpath">
+		<example>
+			<description>Accessing ui element with xpath locator</description>
+			
+			<content><![CDATA[
+				<s:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+			]]></content>
+		</example>
+	</collection>
+</examples>

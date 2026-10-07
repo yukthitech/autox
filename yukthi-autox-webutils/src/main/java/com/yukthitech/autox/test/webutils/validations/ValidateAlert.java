@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.test.webutils.validations;
 
-import org.openqa.selenium.WebElement;
-
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
@@ -24,14 +22,15 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
+import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
 import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
+import com.yukthitech.autox.plugin.ui.common.UiElement;
 import com.yukthitech.autox.plugin.ui.steps.WaitForStep;
 
 /**
  * Validates alert box is displayed and closes the dialog.
  */
-@Executable(name = "validateAlert", group = Group.NONE, requiredPluginTypes = SeleniumPlugin.class, message = "Validates an webutils-specific alert comes up with specified message")
+@Executable(name = "validateAlert", group = Group.NONE, requiredPluginTypes = PlaywrightPlugin.class, message = "Validates an webutils-specific alert comes up with specified message")
 public class ValidateAlert extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
@@ -80,12 +79,13 @@ public class ValidateAlert extends AbstractValidation
 		
 		//wait and validate alert box is displayed
 		WaitForStep waitStep = new WaitForStep();
-		waitStep.addLocator("//div[@id='webutilsAlertDialog']");
+		waitStep.setDriverName(driverName);
+		waitStep.addLocator("xpath: //div[@id='webutilsAlertDialog']");
 		waitStep.execute(context, exeLogger);
 		
 		//ensure alert has required message
-		WebElement alertBox = UiAutomationUtils.findElement(driverName, (WebElement) null, "id: webutilsAlertDialog");
-		WebElement bodyElement = UiAutomationUtils.findElement(driverName, alertBox, "xpath: .//div[@class='modal-body']");
+		UiElement alertBox = UiAutomationUtils.findElement(driverName, (UiElement) null, "id: webutilsAlertDialog");
+		UiElement bodyElement = UiAutomationUtils.findElement(driverName, alertBox, "xpath: .//div[@class='modal-body']");
 		String bodyText = bodyElement.getAttribute("innerHTML");
 		
 		if(!bodyText.equals(message))
@@ -96,7 +96,7 @@ public class ValidateAlert extends AbstractValidation
 					bodyText, message);
 		}
 		
-		WebElement buttonElement = UiAutomationUtils.findElement(driverName, alertBox, "xpath: .//button");
+		UiElement buttonElement = UiAutomationUtils.findElement(driverName, alertBox, "xpath: .//button");
 		buttonElement.click();
 	}
 	

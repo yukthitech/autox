@@ -160,7 +160,15 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 					continue;
 				}
 
-				nameToStepType.put(executable.name(), stepType);
+				Class<? extends IStep> existing = nameToStepType.put(executable.name(), stepType);
+
+				if(existing != null && existing != stepType)
+				{
+					throw new InvalidStateException(
+							"Duplicate @Executable name '{}': already registered by {} and also found on {}. "
+							+ "Ensure only one UI module (selenium or playwright) is on the classpath.",
+							executable.name(), existing.getName(), stepType.getName());
+				}
 			}
 		}
 		

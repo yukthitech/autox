@@ -72,6 +72,7 @@
 		<commons-fileupload.version>1.4</commons-fileupload.version>
 		<spring.version>5.3.22</spring.version>
 		<selenium.version>4.18.1</selenium.version>
+		<playwright.version>1.63.0</playwright.version>
 		<jcodec.version>0.2.5</jcodec.version>
 		<jsch.version>0.1.55</jsch.version>
 		<javax.mail.version>1.5.5</javax.mail.version>
@@ -117,6 +118,11 @@
 			<dependency>
 				<groupId>com.yukthitech</groupId>
 				<artifactId>yukthi-autox-ui-selenium</artifactId>
+				<version>${autox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-autox-ui-playwright</artifactId>
 				<version>${autox.version}</version>
 			</dependency>
 			<dependency>
@@ -244,11 +250,16 @@
 				<version>${spring.version}</version>
 			</dependency>
 
-			<!-- UI / Selenium -->
+			<!-- UI / Selenium / Playwright -->
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>selenium-java</artifactId>
 				<version>${selenium.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.microsoft.playwright</groupId>
+				<artifactId>playwright</artifactId>
+				<version>${playwright.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jcodec</groupId>
@@ -411,6 +422,7 @@
 		<module>../yukthi-autox-mongo</module>
 		<module>../yukthi-autox-rest</module>
 		<module>../yukthi-autox-ui-selenium</module>
+		<module>../yukthi-autox-ui-playwright</module>
 		<module>../yukthi-autox-webutils</module>
 		<module>../yukthi-autox-mail</module>
 		<module>../yukthi-autox-ssh</module>

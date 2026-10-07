@@ -170,7 +170,17 @@ public class PrefixExpressionFactory
 								paramAnnot.defaultValue(), paramAnnot.required(), paramAnnot.description()));
 					}
 					
-					factory.prefixExpressions.put(parserDet.getType(), parserDet);
+					PrefixExpressionDetails existing = factory.prefixExpressions.put(parserDet.getType(), parserDet);
+
+					if(existing != null)
+					{
+						throw new InvalidStateException(
+								"Duplicate prefix-expression type '{}': already registered by {}.{} and also found on {}.{}. "
+								+ "Ensure only one UI module (selenium or playwright) is on the classpath.",
+								parserDet.getType(),
+								existing.getMethod().getDeclaringClass().getName(), existing.getMethod().getName(),
+								method.getDeclaringClass().getName(), method.getName());
+					}
 				}
 			}
 		}
