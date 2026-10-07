@@ -135,6 +135,29 @@
 			<s:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
 		</testCase>
 
+		<testCase name="captureTracing">
+			<description>Validates form filling is working</description>
+			
+			<s:ui-capture-tracing name="filledForm-1.zip">
+				<s:ui-goto-page uri="/form.html" />
+
+				<s:set expression="uiVal: id:genderDropDown" value="female"/>
+
+				<s:ui-fill-form locator="id:sampleForm">
+					<data>
+						{
+							"name": "kranthi",
+							"id:genderDropDown": "male",
+							"address": "line1\nline2",
+							"color": ["red", "green", "blue"]
+						}
+					</data>
+				</s:ui-fill-form>
+			</s:ui-capture-tracing>
+			
+			<s:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
+		</testCase>
+
 		<testCase name="videoRecording">
 			<description>Validates video generation</description>
 			

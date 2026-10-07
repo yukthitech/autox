@@ -117,11 +117,15 @@
 					       <img alt="HTML Snapshot" src="./img/mhtml-file.png" 
 					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
 					    </a>
+						<a ng-if="message.fileName && message.fileName.endsWith('.zip')" href="./logs/{{message.fileName}}" target="_blank">
+					       <img alt="Trace Zip" src="./img/zip-file.png" 
+					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
+					    </a>
 						<a ng-if="message.fileName && message.fileName.endsWith('.mp4')" href="./logs/{{message.fileName}}">
 					       <img alt="Log" src="./img/mp4-file.png" 
 					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
 					    </a>
-						<a ng-if="message.fileName && !message.fileName.endsWith('.mp4') && !message.fileName.endsWith('.mhtml')" href="./logs/{{message.fileName}}">
+						<a ng-if="message.fileName && !message.fileName.endsWith('.mp4') && !message.fileName.endsWith('.mhtml') && !message.fileName.endsWith('.zip')" href="./logs/{{message.fileName}}">
 					       <img alt="Log" src="./img/log-file.png" 
 					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
 					    </a>

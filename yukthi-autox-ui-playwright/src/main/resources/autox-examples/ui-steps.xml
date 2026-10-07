@@ -176,6 +176,26 @@
 		</example>
 	</collection>
 
+	<collection name="com.yukthitech.autox.plugin.ui.steps.CaptureTracingStep">
+		<example>
+			<description>Capturing Playwright tracing for ui steps execution</description>
+			
+			<content><![CDATA[
+				<s:capture-tracing name="filledForm-1.zip">
+					<s:ui-goto-page uri="/form.html" />
+					<s:ui-fill-form locator="id:sampleForm">
+						<data>
+							{
+								"name": "kranthi",
+								"id:genderDropDown": "male"
+							}
+						</data>
+					</s:ui-fill-form>
+				</s:capture-tracing>
+			]]></content>
+		</example>
+	</collection>
+
 	<collection name="com.yukthitech.autox.test.ui.steps.SwitchWindow">
 		<example>
 			<description>Switching between browser windows</description>
