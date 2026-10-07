@@ -148,7 +148,7 @@ expr: today()
 
 ### file:
 
-- **Description**: Parses specified expression as file path and loads it as object. As part of 'set', the specified content will be converted to string and will be writtern to file. Supported object file types: xml, json, properties
+- **Description**: Parses specified expression as file path and loads it as object. As part of 'set', the specified content will be converted to string and will be writtern to file. Supported object file types: xml, json, properties, csv. For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.
 - **Content type**: NONE
 
 **Parameters:**
@@ -455,7 +455,7 @@ prop: attr.bean.value1
 
 ### res:
 
-- **Description**: Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties
+- **Description**: Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties, csv. For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.
 - **Content type**: NONE
 
 **Parameters:**

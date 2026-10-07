@@ -635,6 +635,11 @@ Methods available in `${...}` expressions.
 - `nullCheck` — object to be checked for null Type: `java.lang.Object`
 - `ifNull` — object to be returned if null Type: `java.lang.Object`
 
+### nullValue()
+
+- **Description**: Simply returns null. Helpful in defining null values in xml
+- **Returns**: `java.lang.Object` — null
+
 ### nvl()
 
 - **Description**: Used to check if specified value is null and return approp value when null and when non-null.
@@ -668,30 +673,48 @@ Methods available in `${...}` expressions.
 
 ### toBoolean()
 
-- **Description**: Converts specified string value into boolean value.
-- **Returns**: `java.lang.Boolean` — Converted boolean value.
+- **Description**: Convert specified object into boolean value.
+- **Returns**: `java.lang.Boolean` — Converted value.
 
 **Parameters:**
 
-- `str` — String value to be converted Type: `java.lang.String`
+- `value` — Value to be converted. Type: `java.lang.Object`
+
+### toDouble()
+
+- **Description**: Convert specified object into double value.
+- **Returns**: `java.lang.Double` — Converted value.
+
+**Parameters:**
+
+- `value` — Value to be converted. Type: `java.lang.Object`
+
+### toFloat()
+
+- **Description**: Convert specified object into float value.
+- **Returns**: `java.lang.Float` — Converted value.
+
+**Parameters:**
+
+- `value` — Value to be converted. Type: `java.lang.Object`
 
 ### toInt()
 
-- **Description**: Converts specified string value into int value.
-- **Returns**: `java.lang.Integer` — Converted int value.
+- **Description**: Convert specified object into int value.
+- **Returns**: `java.lang.Integer` — Converted value.
 
 **Parameters:**
 
-- `str` — String value to be converted Type: `java.lang.String`
+- `value` — Value to be converted. Type: `java.lang.Object`
 
 ### toLong()
 
-- **Description**: Converts specified string value into long value.
-- **Returns**: `java.lang.Long` — Converted long value.
+- **Description**: Convert specified object into long value.
+- **Returns**: `java.lang.Long` — Converted value.
 
 **Parameters:**
 
-- `str` — String value to be converted Type: `java.lang.String`
+- `value` — Value to be converted. Type: `java.lang.Object`
 
 ### toText()
 
@@ -988,7 +1011,7 @@ Methods available in `${...}` expressions.
 ### uiBrowserPosition()
 
 - **Description**: Fetches the position of the browser
-- **Returns**: `org.openqa.selenium.Point` — Position of the browser
+- **Returns**: `com.yukthitech.autox.plugin.ui.common.Point` — Position of the browser
 
 **Parameters:**
 
@@ -997,7 +1020,7 @@ Methods available in `${...}` expressions.
 ### uiBrowserSize()
 
 - **Description**: Fetches the size of the browser
-- **Returns**: `org.openqa.selenium.Dimension` — Size of the browser
+- **Returns**: `com.yukthitech.autox.plugin.ui.common.Dimension` — Size of the browser
 
 **Parameters:**
 
@@ -1010,8 +1033,8 @@ Methods available in `${...}` expressions.
 
 **Parameters:**
 
-- `locator` — Locator/Webelement of the ui element whose display value needs to be fetched. Type: `java.lang.Object`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `locator` — Locator/Ui-element of the ui element whose display value needs to be fetched. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ### uiElemAttr()
@@ -1022,30 +1045,30 @@ Methods available in `${...}` expressions.
 **Parameters:**
 
 - `attrName` — Name of the attribute whose value to be fetched. Type: `java.lang.String`
-- `locator` — Locator/Webelement of the ui element whose attribute value needs to be fetched. Type: `java.lang.Object`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `locator` — Locator/Ui-element of the ui element whose attribute value needs to be fetched. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ### uiGetElement()
 
 - **Description**: Fetches first element of specified locator.
-- **Returns**: `org.openqa.selenium.WebElement` — Matching web element
+- **Returns**: `com.yukthitech.autox.plugin.ui.common.UiElement` — Matching ui element
 
 **Parameters:**
 
 - `locator` — Locator of the ui element whose element needs to be fetched. Type: `java.lang.String`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ### uiGetElements()
 
 - **Description**: Fetches all elements matching specified locator.
-- **Returns**: `java.util.List` — Matching web elements
+- **Returns**: `java.util.List` — Matching ui elements
 
 **Parameters:**
 
 - `locator` — Locator of the ui element whose element needs to be fetched. Type: `java.lang.String`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ### uiInnerHtml()
@@ -1055,8 +1078,8 @@ Methods available in `${...}` expressions.
 
 **Parameters:**
 
-- `locator` — Locator/Webelement of the ui element whose element needs to be fetched. Type: `java.lang.Object`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `locator` — Locator/Ui-element of the ui element whose element needs to be fetched. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ### uiIsPresent()
@@ -1066,8 +1089,8 @@ Methods available in `${...}` expressions.
 
 **Parameters:**
 
-- `locator` — Locator/Webelement of the ui element whose attribute value needs to be fetched. Type: `java.lang.Object`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `locator` — Locator/Ui-element of the ui element whose presence needs to be checked. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ### uiIsVisible()
@@ -1077,8 +1100,8 @@ Methods available in `${...}` expressions.
 
 **Parameters:**
 
-- `locator` — Locator/Webelement of the ui element whose attribute value needs to be fetched. Type: `java.lang.Object`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `locator` — Locator/Ui-element of the ui element whose visibility needs to be checked. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ### uiValue()
@@ -1088,8 +1111,8 @@ Methods available in `${...}` expressions.
 
 **Parameters:**
 
-- `locator` — Locator/Webelement of the ui element whose element needs to be fetched. Type: `java.lang.Object`
-- `parent` — Optional. Webelement or ui-locator or attr-name of parent web-element. Type: `java.lang.Object`
+- `locator` — Locator/Ui-element of the ui element whose element needs to be fetched. Type: `java.lang.Object`
+- `parent` — Optional. Ui-element or ui-locator or attr-name of parent ui-element. Type: `java.lang.Object`
 - `driverName` — Optional. Name of ui driver to use. Type: `java.lang.String`
 
 ## com.yukthitech.jexpr.JelFmarkerMethods

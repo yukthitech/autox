@@ -76,7 +76,8 @@ public class DocGenerator
 			"11-language-steps.md",
 			"12-sql-automation.md",
 			"13-mongo-automation.md",
-			"14-mock-server.md"
+			"14-mock-server.md",
+			"15-module-structure.md"
 	};
 
 	/**

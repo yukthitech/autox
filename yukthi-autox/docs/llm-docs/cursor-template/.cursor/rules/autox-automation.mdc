@@ -28,7 +28,7 @@ Before creating or modifying test suite XML, read:
 | MongoDB | `13-mongo-automation.md` | `reference/steps-mongodb.md` | `reference/validations-mongodb.md` |
 | HTTP mock server | `14-mock-server.md` | `reference/steps-mock.md` | `reference/validations-mock.md` |
 | REST API | `07-rest-automation.md` | `reference/steps-rest-api.md` | `reference/validations-rest-api.md` |
-| UI / Selenium | `08-ui-automation.md` | `reference/steps-ui.md` | `reference/validations-ui.md` |
+| UI / Playwright | `08-ui-automation.md` | `reference/steps-ui.md` | `reference/validations-ui.md` |
 | Data-driven tests | `05-data-providers.md` | (per step group) | (per step group) |
 | Expressions / `${...}` | `06-expressions.md` | `reference/prefix-expressions.md`, `reference/freemarker-methods.md` | — |
 | UI locators | `08-ui-automation.md` | `reference/ui-locators.md` | — |
@@ -69,6 +69,7 @@ See `03-test-suite-xml.md` for details.
 - Properties before `<clone>` are on `_this` when the bean loads. Use `prop: _this.field` in properties, or `json(jel=true)` with `@fmarker: _this.field` in beans.
 - REST response body: `attr.response`; status code: `prop: attr.result.statusCode`.
 - UI locators: `type:value` format (e.g. `id: button`, `xpath: //input[@name='fld']`).
+- UI plugin: configure `<playwright-plugin>` (default). Playwright-only steps: `s:ui-log-html-snapshot`, `s:ui-capture-tracing`. See `08-ui-automation.md` and `15-module-structure.md`.
 - Custom prefixes: define `<custom-prefix-expression>` / `<custom-ui-locator>` in `test-suites/common/`; use with `c:` (e.g. `c:app: key`, `c:srchDropDown:vehicle`). See `06-expressions.md`.
 - Prefer `<s:ui-fill-form>` to fill forms; use custom UI locator keys in form data JSON for non-standard widgets.
 - End tests with at least one validation/assertion.

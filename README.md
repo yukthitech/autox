@@ -11,7 +11,7 @@ AutoX is a Java-based automation framework where test flows are authored in XML 
 - Execution is hierarchical: suite-group -> suite -> test-case -> steps, with setup/cleanup hooks at multiple levels.
 - Test cases support dependency ordering, data-driven expansion, and optional parallel execution.
 - Runtime context supports expressions, attributes/params, plugin session data, and reporting.
-- Plugin architecture enables integrations like Selenium-based UI automation and SQL operations.
+- Plugin architecture enables integrations like Playwright-based UI automation, REST, and SQL operations.
 
 Primary implementation lives under `yukthi-autox`.
 
@@ -30,10 +30,13 @@ Prism is intentionally specialized for AutoX workflows rather than being a gener
 
 ## Key modules
 
-- `yukthi-autox`: AutoX framework core, parser, execution engine, plugins, and tests.
+- `yukthi-autox-parent`: Parent POM and reactor for all AutoX library modules.
+- `yukthi-autox-common` / `yukthi-autox-lang` / `yukthi-autox-rest` / …: Split AutoX libraries (see `yukthi-autox/docs/llm-docs/15-module-structure.md`).
+- `yukthi-autox-ui-playwright`: Default UI automation (Playwright). Opt-in alternative: `yukthi-autox-ui-selenium`.
+- `yukthi-autox-all`: Batteries-included aggregator (includes Playwright UI).
+- `yukthi-autox`: Artifact `yukthi-automation` — launcher/core jar and framework tests.
 - `yukthi-prism`: Prism IDE (UI, editor, run/debug integration, help/search).
 - `docs`: AutoX documentation and configuration references.
-- `yukthi-autox-parent`: Parent/build aggregation module.
 
 ## Getting oriented
 
@@ -42,13 +45,152 @@ Prism is intentionally specialized for AutoX workflows rather than being a gener
 - Review `yukthi-autox/src/test/resources/test-suites` and `yukthi-autox/src/test/java` for practical XML flow examples.
 - Review `yukthi-prism/src/main/java` for IDE architecture and `yukthi-prism/src/test/java` for XML editor/parser behavior.
 
+## Maven dependencies for applications
+
+Current AutoX version: **`4.0.0-SNAPSHOT`** (`groupId`: `com.yukthitech`).
+
+Add the Yukthi repository (required for snapshots):
+
+```xml
+<repository>
+    <id>yukthitech</id>
+    <name>yukthitech</name>
+    <url>https://oss.sonatype.org/content/groups/public</url>
+    <snapshots>
+        <enabled>true</enabled>
+    </snapshots>
+</repository>
+```
+
+### Recommended: full stack (Playwright UI)
+
+Use the launcher plus the batteries-included aggregator:
+
+```xml
+<!-- Runtime / AutomationLauncher -->
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-automation</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+
+<!-- Lang, REST, SQL, Mongo, Playwright UI, mail, SSH, mock, webutils -->
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-all</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+    <type>pom</type>
+</dependency>
+```
+
+`yukthi-autox-all` includes Playwright UI (`yukthi-autox-ui-playwright`), not Selenium.
+
+### Pick modules by purpose
+
+Always include the launcher, then add only the feature modules you need:
+
+```xml
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-automation</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+| Purpose | Artifact | Plugin / notes |
+|---------|----------|----------------|
+| Control flow (`if`, `for`, `try`, …) | `yukthi-autox-lang` | Always useful; pulled by most other modules’ consumers via common usage |
+| REST API tests | `yukthi-autox-rest` | `<rest-plugin>` |
+| SQL / RDBMS | `yukthi-autox-sql` | `<db-plugin>` |
+| MongoDB | `yukthi-autox-mongo` | `<mongo-plugin>` |
+| UI (Playwright, default) | `yukthi-autox-ui-playwright` | `<playwright-plugin>` |
+| UI (Selenium, opt-in) | `yukthi-autox-ui-selenium` | `<selenium-plugin>` — **do not** combine with Playwright |
+| Email | `yukthi-autox-mail` | `<email-plugin>` |
+| SSH | `yukthi-autox-ssh` | SSH plugin / steps |
+| HTTP mock server | `yukthi-autox-mock` | Mock server steps |
+| Webutils helpers | `yukthi-autox-webutils` | Shared web helpers |
+
+Example — REST + Playwright UI only:
+
+```xml
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-automation</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-lang</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-rest</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-ui-playwright</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+Example — REST + SQL (no UI):
+
+```xml
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-automation</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-lang</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-rest</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-sql</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+Example — Selenium UI instead of Playwright (exclude Playwright from the classpath):
+
+```xml
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-automation</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-lang</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-autox-ui-selenium</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+Do **not** put both `yukthi-autox-ui-playwright` and `yukthi-autox-ui-selenium` on the classpath (duplicate `ui-*` step names).
+
+Feature modules transitively depend on `yukthi-autox-common`. Full module map: [`15-module-structure.md`](yukthi-autox/docs/llm-docs/15-module-structure.md).
+
 ## Using AutoX with Cursor in a new project
 
 Use the LLM docs hosted in this repo so Cursor can author correct AutoX XML for REST and UI automation.
 
 ### 1. Create a Maven automation project
 
-Add the Yukthi repository and `yukthi-automation` dependency to your `pom.xml`. See [`yukthi-autox/docs/llm-docs/01-getting-started.md`](yukthi-autox/docs/llm-docs/01-getting-started.md) for the full project layout.
+Add the Yukthi repository and the [Maven dependencies](#maven-dependencies-for-applications) above (typically `yukthi-automation` + `yukthi-autox-all`). See [`yukthi-autox/docs/llm-docs/01-getting-started.md`](yukthi-autox/docs/llm-docs/01-getting-started.md) for the full project layout.
 
 Create these files under `src/test/resources/`:
 
@@ -94,7 +236,7 @@ This installs:
 Enable the plugins you need in `app-configuration.xml`:
 
 - **REST** — `<rest-plugin>` with `<baseUrl>`
-- **UI** — `<selenium-plugin>` with `<base-url>` and driver config
+- **UI** — `<playwright-plugin>` with `<base-url>` and driver config (`browser-type`, etc.)
 
 See [`07-rest-automation.md`](yukthi-autox/docs/llm-docs/07-rest-automation.md) and [`08-ui-automation.md`](yukthi-autox/docs/llm-docs/08-ui-automation.md).
 
@@ -117,19 +259,23 @@ See [`10-running-tests.md`](yukthi-autox/docs/llm-docs/10-running-tests.md) for 
 
 ### 6. Refresh docs when upgrading AutoX
 
-Re-run the setup script after upgrading the `yukthi-automation` dependency. Compare `docs/autox-llm/autox-version.txt` with your dependency version to confirm docs are current.
+Re-run the setup script after upgrading the `yukthi-autox-all` dependency. Compare `docs/autox-llm/autox-version.txt` with your dependency version to confirm docs are current.
 
 ### Custom steps
 
 If your project defines custom `@Executable` steps, add your package to `<basePackage>` in `app-configuration.xml` and regenerate docs locally:
 
 ```bash
-mvn -pl yukthi-autox -q compile exec:java \
+# From yukthi-autox-parent; use an absolute out path so docs land in your project
+mvn -pl ../yukthi-autox -q -DskipTests exec:java \
+  -Dexec.classpathScope=test \
   -Dexec.mainClass="com.yukthitech.autox.doc.DocGenerator" \
-  -Dexec.args="com.yukthitech,com.mycompany.autox ./docs/autox-llm"
+  -Dexec.args="com.yukthitech,com.mycompany.autox /absolute/path/to/docs/autox-llm"
 ```
 
 
-## Driver download
+## Browser drivers
 
-Chrome driver can be downloaded from [Chrome Driver](https://autox.yukthitech.com/downloads/chrome-driver-149.0.7827.53.zip).
+Playwright (default UI module) installs and manages browsers itself — no separate chromedriver download is required for `<playwright-plugin>`.
+
+If you opt into Selenium (`yukthi-autox-ui-selenium`), Chrome driver can be downloaded from [Chrome Driver](https://autox.yukthitech.com/downloads/chrome-driver-149.0.7827.53.zip).

@@ -54,9 +54,27 @@ Required for `s:rest-*` steps.
 - `baseUrl` on `<rest-plugin>` sets the default connection.
 - Named `<connection>` elements support session-based auth via plugin events (`initialize`, `unauthorized`). See [reference/plugins.md](reference/plugins.md).
 
-## Selenium (UI) plugin
+## Playwright (UI) plugin
 
-Required for `s:ui-*` steps.
+Required for `s:ui-*` steps when using the default Playwright UI module (`yukthi-autox-all` / `yukthi-autox-ui-playwright`).
+
+```xml
+<playwright-plugin maxSessions="3">
+    <base-url>#{base.url}</base-url>
+    <wrap:drivers>
+        <driver name="autoxChrome" browser-type="chromium" default="true" headless="false"/>
+    </wrap:drivers>
+</playwright-plugin>
+```
+
+- `base-url` is required; prepended to `s:ui-goto-page` URI values.
+- `maxSessions` limits concurrent browser sessions.
+- `browser-type`: `chromium` (default), `firefox`, or `webkit`. Optional: `headless`, `channel`, `user-data-dir`, `download-folder`, `extra-arguments`, `slow-mo`.
+- See [08-ui-automation.md](08-ui-automation.md) for UI steps (including Playwright-only `ui-log-html-snapshot` and `ui-capture-tracing`).
+
+### Selenium (UI) plugin (opt-in)
+
+Only if you depend on `yukthi-autox-ui-selenium` instead of Playwright. Do not use both UI modules together.
 
 ```xml
 <selenium-plugin maxSessions="3">
@@ -71,8 +89,7 @@ Required for `s:ui-*` steps.
 </selenium-plugin>
 ```
 
-- `base-url` is required; prepended to `s:ui-goto-page` URI values.
-- `maxSessions` limits concurrent browser sessions.
+See [15-module-structure.md](15-module-structure.md).
 
 ## Database plugin
 

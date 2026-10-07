@@ -13,21 +13,21 @@ This folder contains documentation for LLMs (Cursor, Claude, etc.) to author Aut
 
 | File | Topic |
 |------|-------|
-| [01-getting-started.md](01-getting-started.md) | Maven setup, project layout, `app.properties`, launch command |
-| [02-app-configuration.md](02-app-configuration.md) | `app-configuration.xml`, REST and Selenium plugins |
+| [01-getting-started.md](01-getting-started.md) | Maven setup (`yukthi-autox-all`), project layout, launch command |
+| [02-app-configuration.md](02-app-configuration.md) | `app-configuration.xml`, REST and Playwright (UI) plugins |
 | [03-test-suite-xml.md](03-test-suite-xml.md) | `<testData>`, global setup/cleanup, execution order |
 | [04-test-cases.md](04-test-cases.md) | `<testCase>` anatomy, dependencies, groups, validations |
 | [05-data-providers.md](05-data-providers.md) | List, default, dynamic, and range data providers |
 | [06-expressions.md](06-expressions.md) | Prefix expressions, custom prefixes (`c:`), FreeMarker, resource types |
 | [07-rest-automation.md](07-rest-automation.md) | REST API test patterns (`Group.Rest_Api`) |
-| [08-ui-automation.md](08-ui-automation.md) | Selenium UI tests, `ui-fill-form`, custom UI locators (`Group.Ui`) |
+| [08-ui-automation.md](08-ui-automation.md) | Playwright UI tests, `ui-fill-form`, tracing/MHTML (`Group.Ui`) |
 | [09-functions-and-reuse.md](09-functions-and-reuse.md) | Reusable functions, beans, data-beans |
 | [10-running-tests.md](10-running-tests.md) | CLI arguments, filtering, reports |
 | [11-language-steps.md](11-language-steps.md) | Loops, if/else, try/catch (`Group.Lang`) |
 | [12-sql-automation.md](12-sql-automation.md) | SQL/DDL/DML steps (`Group.Rdbms`) |
 | [13-mongo-automation.md](13-mongo-automation.md) | MongoDB steps (`Group.Mongodb`) |
 | [14-mock-server.md](14-mock-server.md) | HTTP mock server (`Group.Mock`) |
-| [15-ui-driver-migration.md](15-ui-driver-migration.md) | UI module split (`autox-ui` / selenium / playwright), driver abstraction, migration phases |
+| [15-module-structure.md](15-module-structure.md) | Maven modules, Playwright vs Selenium, consumer dependency choices |
 
 ## Reference index (auto-generated)
 

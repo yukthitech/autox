@@ -1,21 +1,37 @@
-# UI Automation
+# UI Automation (Playwright)
 
-UI tests use `s:ui-*` steps with the `selenium-plugin` configured in `app-configuration.xml`.
+UI tests use `s:ui-*` steps with the **`playwright-plugin`** configured in `app-configuration.xml`.
+
+`yukthi-autox-all` includes Playwright by default. Locator syntax and most step names match the earlier Selenium UI API so existing suites stay readable; configure `<playwright-plugin>` instead of `<selenium-plugin>`.
 
 ## Prerequisites
 
 ```xml
-<selenium-plugin maxSessions="3">
+<playwright-plugin maxSessions="3">
     <base-url>#{base.url}</base-url>
     <wrap:drivers>
-        <driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
-            <system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
-            <profile-option name="chrome.binary">./drivers/chrome.exe</profile-option>
-            <extraArguments>--remote-allow-origins=*</extraArguments>
-        </driver>
+        <driver name="autoxChrome" browser-type="chromium" default="true" headless="false"/>
     </wrap:drivers>
-</selenium-plugin>
+</playwright-plugin>
 ```
+
+Driver attributes:
+
+| Attribute | Description |
+|-----------|-------------|
+| `name` | Driver id used by steps (`driver-name`) |
+| `browser-type` | `chromium` (default), `firefox`, or `webkit` |
+| `default` | Use as the default driver when unset |
+| `headless` | Launch headless (default `false`) |
+| `channel` | Chromium channel (`chrome`, `msedge`, …) |
+| `user-data-dir` | Persistent profile directory |
+| `download-folder` | Expected download directory |
+| `extra-arguments` | Comma-separated browser args |
+| `slow-mo` | Slow down actions by N milliseconds |
+
+No external chromedriver binary is required. Optional CLI: `-wd` / `--webdriver` to select a named driver.
+
+**Do not** put both `yukthi-autox-ui-playwright` and `yukthi-autox-ui-selenium` on the classpath. For Selenium instead, see [15-module-structure.md](15-module-structure.md).
 
 ## Locator format
 
@@ -28,10 +44,9 @@ css: div>a
 class: errElem
 name: saveButton
 tag: button
-js: div.red
 ```
 
-See [reference/ui-locators.md](reference/ui-locators.md) for all types.
+See [reference/ui-locators.md](reference/ui-locators.md) for all types. Prefer the types above; `js:` is not supported by the Playwright plugin.
 
 ## Navigate and click
 
@@ -50,7 +65,7 @@ See [reference/ui-locators.md](reference/ui-locators.md) for all types.
 </testCase>
 ```
 
-`uri` is relative to `base-url` in selenium plugin config.
+`uri` is relative to `base-url` in the playwright plugin config.
 
 ## Visibility and waits
 
@@ -105,6 +120,8 @@ For a single non-standard widget outside a form fill, `s:ui-set-value` with a cu
 
 ## Alerts and dialogs
 
+Playwright queues dialogs. Alerts may be accepted as they appear so the triggering action is not blocked; confirm/prompt stay pending until you handle them.
+
 ```xml
 <s:ui-click locator="id: alertBut"/>
 <s:ui-handle-alert expectedMessage="Test Alert Message!!!"/>
@@ -125,23 +142,45 @@ For a single non-standard widget outside a form fill, `s:ui-set-value` with a cu
 <s:ui-switch-window/>
 ```
 
-## Screenshots and video
+## Screenshots, MHTML, video, and tracing
 
 ```xml
+<!-- PNG screenshot in the execution log -->
 <s:ui-log-screen-shot name="test.png"/>
 
+<!-- MHTML page snapshot (CDP; best on Chromium). Playwright-only. -->
+<s:ui-log-html-snapshot name="page-snapshot.mhtml"/>
+
+<!-- Screen recording of nested steps -->
 <s:record-video name="form-filling">
     <s:ui-goto-page uri="/form.html"/>
     <s:ui-fill-form locator="id:sampleForm">
         <data>{"name": "kranthi"}</data>
     </s:ui-fill-form>
 </s:record-video>
+
+<!-- Playwright tracing zip (screenshots + DOM snapshots + sources). Playwright-only. -->
+<s:ui-capture-tracing name="filledForm-1.zip">
+    <s:ui-goto-page uri="/form.html"/>
+    <s:ui-fill-form locator="id:sampleForm">
+        <data>{"name": "kranthi", "id:genderDropDown": "male"}</data>
+    </s:ui-fill-form>
+</s:ui-capture-tracing>
 ```
+
+Open a tracing zip with the [Playwright Trace Viewer](https://playwright.dev/docs/trace-viewer).
+
+### Playwright-only steps
+
+| Step | Purpose |
+|------|---------|
+| `s:ui-log-html-snapshot` | Save current page as MHTML in the log (`name`, optional `message`, `level`) |
+| `s:ui-capture-tracing` | Wrap child steps; write a Playwright `.zip` trace to the log (`name`) |
 
 ## Download
 
 ```xml
-<s:ui-clickAndDownload locator="id: downloadLink" pathName="filePath"/>
+<s:ui-click-and-download locator="id: downloadLink" pathName="filePath"/>
 <s:assert-file-exists path="${attr.filePath}"/>
 ```
 
@@ -167,4 +206,4 @@ Always quit the browser session in suite cleanup:
 
 ## Step reference
 
-See [reference/steps-ui.md](reference/steps-ui.md) for all UI steps.
+See [reference/steps-ui.md](reference/steps-ui.md) for all UI steps and [reference/validations-ui.md](reference/validations-ui.md) for assertions.

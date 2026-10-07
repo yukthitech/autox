@@ -23,6 +23,10 @@ Locator format: `<type>:<value>`
 <s:ui-click locator="id: button"/>
 ```
 
+```
+<s:ui-click locator="id: button"/>
+```
+
 
 ### js
 
@@ -45,6 +49,10 @@ Locator format: `<type>:<value>`
 - **Example**: `xpath: ...`
 
 **Examples:**
+
+```
+<s:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+```
 
 ```
 <s:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>

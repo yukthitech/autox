@@ -24,6 +24,17 @@ Auto-generated reference for AutoX plugins. Configure these in `app-configuratio
 - `email-settings-map` (mandatory) — Name to setting mapping for different email servers. Type: `java.util.Map<java.lang.Stringcom.yukthitech.autox.plugin.mail.EmailServerSettings>`
 - `max-sessions` (mandatory) — Maximum number of sessions that can be opened simultaneously. Defaults to 10. Type: `int`
 
+## PlaywrightPlugin
+
+- **Description**: Plugin needed by playwright/ui-automation based steps or validators.
+- **Java type**: `com.yukthitech.autox.plugin.ui.PlaywrightPlugin`
+
+### Parameters
+
+- `base-url` (mandatory) — Base url to be used for ui automation Type: `java.lang.String`
+- `drivers` (mandatory) — Name to basic configuration to be used for different drivers. Like - name, browser-type, headless, etc. Type: `java.util.Map<java.lang.Stringcom.yukthitech.autox.plugin.ui.PlaywrightDriverConfig>`
+- `max-sessions` (mandatory) — Maximum number of sessions that can be opened simultaneously. Defaults to 10. Type: `int`
+
 ## RestPlugin
 
 - **Description**: Plugin for REST based steps and validations.
@@ -54,15 +65,4 @@ Auto-generated reference for AutoX plugins. Configure these in `app-configuratio
 - `request` — Rest Request which resulted in unauthorized status. Test cases can send special values in form of headers or params, when session invalidation is being simulated.
 - `result` — Current rest result which has unauthorized status.
 
-
-## SeleniumPlugin
-
-- **Description**: Plugin needed by selenium/ui-automation based steps or validators.
-- **Java type**: `com.yukthitech.autox.plugin.ui.SeleniumPlugin`
-
-### Parameters
-
-- `base-url` (mandatory) — Base url to be used for ui automation Type: `java.lang.String`
-- `drivers` (mandatory) — Name to basic configuration to be used for different drivers. Like - name, class-name and default system properties to set. Type: `java.util.Map<java.lang.Stringcom.yukthitech.autox.plugin.ui.SeleniumDriverConfig>`
-- `max-sessions` (mandatory) — Maximum number of sessions that can be opened simultaneously. Defaults to 10. Type: `int`
 

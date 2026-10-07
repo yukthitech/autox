@@ -181,7 +181,7 @@
 			<description>Capturing Playwright tracing for ui steps execution</description>
 			
 			<content><![CDATA[
-				<s:capture-tracing name="filledForm-1.zip">
+				<s:ui-capture-tracing name="filledForm-1.zip">
 					<s:ui-goto-page uri="/form.html" />
 					<s:ui-fill-form locator="id:sampleForm">
 						<data>
@@ -191,7 +191,7 @@
 							}
 						</data>
 					</s:ui-fill-form>
-				</s:capture-tracing>
+				</s:ui-capture-tracing>
 			]]></content>
 		</example>
 	</collection>

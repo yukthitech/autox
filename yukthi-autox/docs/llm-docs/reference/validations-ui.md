@@ -8,7 +8,7 @@ Auto-generated reference for `Group.Ui` assertion/validation steps.
 - **Group**: Ui
 - **Description**: Validates specified form fields are present
 - **Java type**: `com.yukthitech.autox.plugin.ui.assertion.AssertFormFields`
-- **Required plugins**: SeleniumPlugin
+- **Required plugins**: PlaywrightPlugin
 
 **Attributes:**
 
@@ -28,7 +28,7 @@ Default: true Type: `java.lang.String`
 - **Group**: Ui
 - **Description**: Validates specified element has specified value/text
 - **Java type**: `com.yukthitech.autox.plugin.ui.assertion.UiAssertValue`
-- **Required plugins**: SeleniumPlugin
+- **Required plugins**: PlaywrightPlugin
 
 **Attributes:**
 
@@ -39,7 +39,7 @@ Default: true Type: `java.lang.String`
 Default: true Type: `java.lang.String`
 - `locator` (mandatory) — Locator of the element to be validated. Type: `java.lang.String`
 - `parent-element` — Name of the parent element under which locator needs to be searched. If not specified, fetches globally. Type: `java.lang.String`
-- `value` (mandatory) — Expected value of the element. Type: `java.lang.String`
+- `value` (mandatory) — Expected value of the element. Type: `java.lang.Object`
 
 ### s:ui-assert-visibility
 
@@ -47,7 +47,7 @@ Default: true Type: `java.lang.String`
 - **Group**: Ui
 - **Description**: Validates specified element is visible/hidden
 - **Java type**: `com.yukthitech.autox.plugin.ui.assertion.AssertVisibility`
-- **Required plugins**: SeleniumPlugin
+- **Required plugins**: PlaywrightPlugin
 
 **Attributes:**
 
