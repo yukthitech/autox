@@ -43,7 +43,6 @@ import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ReportLogFile;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
@@ -123,7 +122,7 @@ public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 		SeekableByteChannel channel = NIOUtils.writableChannel(videoFile.getFile());
 		
 		AWTSequenceEncoder encoder = new AWTSequenceEncoder(channel, Rational.R(framesPerSec, 1));
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 	
 		IStepListener listener = new IStepListener()
 		{
@@ -200,11 +199,11 @@ public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 			}
 		};
 		
-		ExecutionServices.getStepsExecutor().addStepListener(listener);
+		AutomationContext.getInstance().getStepsExecutor().addStepListener(listener);
 		
 		try
 		{
-			ExecutionServices.getStepsExecutor().execute(steps, null, null);
+			AutomationContext.getInstance().getStepsExecutor().execute(steps, null, null);
 
 			// Finalize the encoding, i.e. clear the buffers, write the header, etc.
 		    encoder.finish();
@@ -217,7 +216,7 @@ public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 		} finally
 		{
 			NIOUtils.closeQuietly(channel);
-			ExecutionServices.getStepsExecutor().removeStepListener(listener);
+			AutomationContext.getInstance().getStepsExecutor().removeStepListener(listener);
 		}
 	}
 }

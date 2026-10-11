@@ -154,7 +154,7 @@ public class QueryUtils
 	
 	private static <T> T executeFetch(AutomationContext context, String dataSourceName, String query, ResultSetHandler<T> handler) throws SQLException
 	{
-		DbPluginSession dbSession = ExecutionContextManager.getInstance().getPluginSession(DbPlugin.class);
+		DbPluginSession dbSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(DbPlugin.class);
 		DataSource dataSource = dbSession.getDataSource(dataSourceName);
 
 		if(dataSource == null)

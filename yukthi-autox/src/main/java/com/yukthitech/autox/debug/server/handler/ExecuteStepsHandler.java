@@ -24,11 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.ClientMssgExecuteSteps;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.debug.server.DebugFlowManager;
-import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.debug.server.LiveDebugPoint;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.test.CustomPrefixExpression;
@@ -64,19 +61,18 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 	@Override
 	public void processData(ClientMssgExecuteSteps steps)
 	{
-		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(steps.getExecutionId());
+		LiveDebugPoint livepoint = debugFlowManager.getLiveDebugPoint(steps.getExecutionId());
 		
 		if(livepoint == null)
 		{
 			logger.warn("Invalid execution id specified: " + steps.getExecutionId());
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "Invalid live point id specified: %s", steps.getExecutionId()));
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "Invalid live point id specified: %s", steps.getExecutionId()));
 			return;
 		}
 		
 		StepHolder stepHolder = parseSteps(steps.getStepsToExecute());
 		stepHolder.updateLocations(steps.getSourceFile(), steps.getStartLineNumber());
 		
-		AutomationContext automationContext = AutomationContext.getInstance();
 		boolean reloadingDone = false;
 		
 		if(CollectionUtils.isNotEmpty(stepHolder.getCustomUiLocators()))
@@ -114,7 +110,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 				if(targetTestSuite == null)
 				{
 					logger.warn("Invalid test suite name specified for function reload: {}", targetTestSuiteName);
-					DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, 
+					debugFlowManager.sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, 
 							"Invalid test suite name specified for function reload: %s", targetTestSuiteName));
 					return;
 				}
@@ -141,11 +137,11 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 		{
 			if(reloadingDone)
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), true, "Reloading completed successfully"));
+				debugFlowManager.sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), true, "Reloading completed successfully"));
 			}
 			else
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "No steps found to execute: %s", steps.getExecutionId()));
+				debugFlowManager.sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "No steps found to execute: %s", steps.getExecutionId()));
 			}
 			
 			return;
@@ -165,7 +161,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 		try
 		{
 			ByteArrayInputStream bis = new ByteArrayInputStream(stepXml.getBytes());
-			XMLBeanParser.parse(bis, stepHolder, AutomationContext.getInstance().getTestSuiteParserHandler());
+			XMLBeanParser.parse(bis, stepHolder, automationContext.getTestSuiteParserHandler());
 			
 			return stepHolder;
 		} catch(Exception ex)

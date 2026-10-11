@@ -93,7 +93,7 @@ public class LoadCookiesStep extends AbstractUiStep
 		
 		exeLogger.debug("Loading {} cookies from file - {}", cookies.size(), pathStr);
 		
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		BrowserContext browserContext = session.getBrowserContext(driverName);
 
 		for(CookieData cookie : cookies)

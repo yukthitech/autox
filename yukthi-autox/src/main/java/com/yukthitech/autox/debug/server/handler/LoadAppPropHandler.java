@@ -18,10 +18,8 @@ package com.yukthitech.autox.debug.server.handler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.ClientMssgLoadAppProperties;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.debug.server.DebugServer;
 
 /**
  * Used to update debug points.
@@ -41,8 +39,8 @@ public class LoadAppPropHandler extends AbstractServerDataHandler<ClientMssgLoad
 	{
 		logger.debug("Reloading app properties...");
 		
-		AutomationContext.getInstance().getAppConfiguration().setApplicationProperties(data.getProperties());
+		automationContext.getAppConfiguration().setApplicationProperties(data.getProperties());
 		
-		DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
+		debugFlowManager.sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
 	}
 }

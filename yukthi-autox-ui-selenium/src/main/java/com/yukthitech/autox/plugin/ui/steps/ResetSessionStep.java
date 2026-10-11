@@ -37,7 +37,7 @@ public class ResetSessionStep extends AbstractUiStep
 	{
 		exeLogger.debug("Resetting current session");
 		
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		seleniumSession.resetDriver(driverName);
 	}
 	

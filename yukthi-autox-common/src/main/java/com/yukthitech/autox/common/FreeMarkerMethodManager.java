@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.common;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
@@ -59,7 +61,8 @@ public class FreeMarkerMethodManager
 	
 	private static Set<String> getBasePackages()
 	{
-		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
+		AutomationContext ctx = AutomationContext.getInstance();
+		ApplicationConfiguration applicationConfiguration = ctx != null ? ctx.getAppConfiguration() : null;
 		Set<String> basePackages = applicationConfiguration != null ? applicationConfiguration.getBasePackages() : null;
 
 		if(basePackages == null)

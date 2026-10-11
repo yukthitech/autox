@@ -22,36 +22,32 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.plugin.PluginEvent;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Central managing points for events.
+ * Central managing points for plugin events.
  * @author akranthikiran
  */
 public class EventManager
 {
-	private static EventManager instance;
-	
 	private Set<String> supportedEventNames = new HashSet<>();
 	
 	private Map<String, EventHandler> eventHandlers = new HashMap<>();
 	
-	public static synchronized EventManager getInstance()
+	public EventManager(ApplicationConfiguration appConfiguration)
 	{
-		if(instance != null)
+		Collection<IPlugin<?, ?>> plugins = appConfiguration != null ? appConfiguration.getAllPlugins() : null;
+		
+		if(plugins == null)
 		{
-			return instance;
+			return;
 		}
-		
-		instance = new EventManager();
-		
-		Collection<IPlugin<?, ?>> plugins = AutomationContext.getInstance().getAppConfiguration().getAllPlugins();
 		
 		for(IPlugin<?, ?> plugin : plugins)
 		{
@@ -64,11 +60,14 @@ public class EventManager
 			
 			for(PluginEvent event : events)
 			{
-				instance.supportedEventNames.add(plugin.getName() + "." + event.name());
+				supportedEventNames.add(plugin.getName() + "." + event.name());
 			}
 		}
-		
-		return instance;
+	}
+	
+	public synchronized void reset()
+	{
+		eventHandlers.clear();
 	}
 	
 	public synchronized void addEventHandler(EventHandler handler)
@@ -100,7 +99,7 @@ public class EventManager
 			return null;
 		}
 		
-		ExecutionContext context = ExecutionContextManager.getExecutionContext();
+		ExecutionContext context = AutomationContext.getInstance().getExecutionContextManager().getExecutionContext();
 		context.pushActivePlugin(pluginSession);
 		
 		try

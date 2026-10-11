@@ -32,23 +32,18 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
-import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.event.AutomationEventType;
 import com.yukthitech.autox.exec.AsyncTryCatchBlock;
-import com.yukthitech.autox.exec.ExecutionPool;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.Executor;
-import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.FunctionExecutor;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.plugin.IPlugin;
-import com.yukthitech.autox.plugin.PluginManager;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.autox.session.AutoxSession;
 import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.ExecutionSuiteEntry;
 import com.yukthitech.autox.test.Function;
@@ -75,17 +70,11 @@ public class AutomationLauncher
 	
 	public static void resetState() throws Exception
 	{
-		AutomationContext.reset();
-		ExecutionContextManager.reset();
-		ReportDataManager.reset();
-		ExecutionPool.reset();
+		AutomationContext context = AutomationContext.getInstance();
 		
-		DebugFlowManager.getInstance().reset();
-		ExecutionServices.reset();
-		
-		if(DebugServer.getInstance() != null)
+		if(context != null)
 		{
-			DebugServer.getInstance().reset();
+			context.reset();
 		}
 	}
 	
@@ -97,7 +86,7 @@ public class AutomationLauncher
 	private static void validateCommandLineArguments(AutomationContext context, String extendedCommandLineArgs[])
 	{
 		//fetch the argument configuration types required
-		Collection<IPlugin<?, ?>> plugins = PluginManager.getInstance().getPlugins();
+		Collection<IPlugin<?, ?>> plugins = AutomationContext.getInstance().getPluginManager().getPlugins();
  		List<Class<?>> argBeanTypes = plugins.stream()
 				.map(config -> config.getArgumentBeanType())
 				.filter(type -> (type != null))
@@ -119,19 +108,29 @@ public class AutomationLauncher
 			System.err.println("Error: " + e.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, e.getMessage());
+			automationEventManager().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, e.getMessage());
 			System.exit(-1);
 		} catch(Exception ex)
 		{
 			ex.printStackTrace();
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
+			automationEventManager().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
 			System.exit(-1);
 		}
 	}
 	
+	private static AutomationEventManager automationEventManager()
+	{
+		return (AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager();
+	}
+	
 	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[]) throws Exception
+	{
+		return loadAutomationContext(appConfigurationFile, extendedCommandLineArgs, null);
+	}
+	
+	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[], AutomationEventManager eventManager) throws Exception
 	{
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(AutoxCliArguments.class);
 		AutoxCliArguments basicArguments = null;
@@ -144,7 +143,10 @@ public class AutomationLauncher
 			System.err.println("Error: " + ex.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
+			if(eventManager != null)
+			{
+				eventManager.onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
+			}
 			System.exit(-1);
 		}catch(Exception ex)
 		{
@@ -153,7 +155,10 @@ public class AutomationLauncher
 			System.err.println("Error: " + ex.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
+			if(eventManager != null)
+			{
+				eventManager.onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, ex.getMessage());
+			}
 			System.exit(-1);
 		}
 		
@@ -187,7 +192,18 @@ public class AutomationLauncher
 		return context;
 	}
 	
-	public static TestSuiteGroup loadTestFiles(String args[]) throws Exception
+	/**
+	 * Loads app configuration into a new {@link AutoxSession}, then loads test suites.
+	 *
+	 * @param args CLI args: app-config file plus extended args
+	 * @return started session (caller must {@link AutoxSession#close()})
+	 */
+	public static AutoxSession loadTestFiles(String args[]) throws Exception
+	{
+		return loadTestFiles(args, new AutomationEventManager());
+	}
+	
+	public static AutoxSession loadTestFiles(String args[], AutomationEventManager eventManager) throws Exception
 	{
 		File currentFolder = new File(".");
 		
@@ -200,7 +216,7 @@ public class AutomationLauncher
 			System.err.println("Invalid number of arguments specified");
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, "Invalid number of arguments specified");
+			eventManager.onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, "Invalid number of arguments specified");
 			System.exit(-1);
 		}
 
@@ -211,7 +227,7 @@ public class AutomationLauncher
 			System.err.println("Invalid application configuration file - " + appConfigurationFile);
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CONFIG, "Invalid application configuration file - %s", appConfigurationFile);
+			eventManager.onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CONFIG, "Invalid application configuration file - %s", appConfigurationFile);
 			System.exit(-1);
 		}
 		
@@ -223,62 +239,74 @@ public class AutomationLauncher
 			extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
 		}
 		
-		//load automation context
-		AutomationContext context = loadAutomationContext(appConfigurationFile, extendedCommandLineArgs);
+		AutoxSession session = AutoxSession.start(appConfigurationFile, extendedCommandLineArgs, eventManager);
 		
-		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
-		validateCommandLineArguments(context, extendedCommandLineArgs);
-		
-		boolean loadTestSuites = true;
-		// load test suites
-		AutomationFileLoader.loadTestSuites(context, loadTestSuites);
-		
-		// check and set execution suite if any
-		if(StringUtils.isNotBlank(context.getBasicArguments().getExecutionSuite()))
+		try
 		{
-			context.getBasicArguments().setTestSuites(null);
-			context.getBasicArguments().setTestCases(null);
-
-			ExecutionSuite exeSuite = context.getExecutionSuite(context.getBasicArguments().getExecutionSuite());
+			AutomationContext context = session.getAutomationContext();
 			
-			if(exeSuite == null)
+			logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
+			validateCommandLineArguments(context, extendedCommandLineArgs);
+			
+			boolean loadTestSuites = true;
+			// load test suites
+			AutomationFileLoader.loadTestSuites(context, loadTestSuites);
+			
+			// check and set execution suite if any
+			if(StringUtils.isNotBlank(context.getBasicArguments().getExecutionSuite()))
 			{
-				TestSuite testSuite = context.getTestSuiteGroup().getTestSuite(context.getBasicArguments().getExecutionSuite());
+				context.getBasicArguments().setTestSuites(null);
+				context.getBasicArguments().setTestCases(null);
+
+				ExecutionSuite exeSuite = context.getExecutionSuite(context.getBasicArguments().getExecutionSuite());
 				
-				if(testSuite == null)
+				if(exeSuite == null)
 				{
-					System.err.println("ERROR: Invalid execution/test suite specified: " + context.getBasicArguments().getExecutionSuite());
+					TestSuite testSuite = context.getTestSuiteGroup().getTestSuite(context.getBasicArguments().getExecutionSuite());
 					
-					AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, 
-							"Invalid execution suite specified: %s", context.getBasicArguments().getExecutionSuite());
+					if(testSuite == null)
+					{
+						System.err.println("ERROR: Invalid execution/test suite specified: " + context.getBasicArguments().getExecutionSuite());
+						
+						automationEventManager().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, 
+								"Invalid execution suite specified: %s", context.getBasicArguments().getExecutionSuite());
+						System.exit(-1);
+					}
+				
+					exeSuite = new ExecutionSuite();
+					exeSuite.setName(testSuite.getName());
+					exeSuite.addEntry(new ExecutionSuiteEntry(testSuite.getName()));
+				}
+				
+				try
+				{
+					exeSuite.validateAndBuild(context.getTestSuiteGroup());
+				}catch(InvalidStateException ex)
+				{
+					System.err.println(ex.getMessage());
+					
+					automationEventManager().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, 
+							"Encountered invalid configuration in execution suite: %s", context.getBasicArguments().getExecutionSuite());
 					System.exit(-1);
 				}
-			
-				exeSuite = new ExecutionSuite();
-				exeSuite.setName(testSuite.getName());
-				exeSuite.addEntry(new ExecutionSuiteEntry(testSuite.getName()));
-			}
-			
-			try
-			{
-				exeSuite.validateAndBuild(context.getTestSuiteGroup());
-			}catch(InvalidStateException ex)
-			{
-				System.err.println(ex.getMessage());
 				
-				AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_CMD_ARG, 
-						"Encountered invalid configuration in execution suite: %s", context.getBasicArguments().getExecutionSuite());
-				System.exit(-1);
+				logger.debug("Limiting execution to execution-suite: {}", exeSuite.getName());
+				context.setActiveExecutionSuite(exeSuite);
 			}
 			
-			logger.debug("Limiting execution to execution-suite: {}", exeSuite.getName());
-			context.setActiveExecutionSuite(exeSuite);
+			return session;
+		}catch(Exception ex)
+		{
+			session.close();
+			throw ex;
 		}
-		
-		return context.getTestSuiteGroup();
 	}
 	
-	private static void automationCompleted(boolean res, AutomationContext context, Executor executor)
+	/**
+	 * Post-execution housekeeping (report browser, storage, app-end event).
+	 * Does not close the {@link AutoxSession} or call {@code System.exit}.
+	 */
+	private static void automationCompleted(AutomationContext context, Executor executor)
 	{
 		if(!context.getBasicArguments().isReportOpeningDisalbed())
 		{
@@ -305,12 +333,7 @@ public class AutomationLauncher
 			logger.error("An error occurred while closing the resources", ex);
 		}
 		
-		AutomationEventManager.getInstance().onAppEnd(executor);
-		
-		if(systemExitEnabled)
-		{
-			System.exit( res ? 0 : -1 );
-		}
+		automationEventManager().onAppEnd(executor);
 	}
 	
 	private static void printSummary(FinalReport report)
@@ -326,29 +349,25 @@ public class AutomationLauncher
 		System.out.println(summary);
 	}
 	
-	private static void executeTestSuiteGroup(TestSuiteGroup testSuiteGroup, AutomationContext context) throws InterruptedException
+	/**
+	 * @return {@code true} if execution was successful
+	 */
+	private static boolean executeTestSuiteGroup(TestSuiteGroup testSuiteGroup, AutomationContext context) throws InterruptedException
 	{
 		TestSuiteGroupExecutor executor = new TestSuiteGroupExecutor(testSuiteGroup);
 		CountDownLatch latch = new CountDownLatch(1);
 		
-		AutomationEventManager.getInstance().onInitialize(executor);
+		automationEventManager().onInitialize(executor);
 		
 		AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
 		{
 			executor.execute(null, null, callback);
 		}).onComplete(callback -> 
 		{
-			FinalReport finalReport = ReportDataManager.getInstance().generateReport();
+			FinalReport finalReport = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).generateReport();
 			printSummary(finalReport);
 			
-			ExecutionContextManager.getInstance().close();
-			
-			AutomationContext.getInstance()
-				.getAppConfiguration()
-				.getAllPlugins()
-				.forEach(plugin -> plugin.close());
-			
-			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context, executor);				
+			automationCompleted(context, executor);				
 		}).onError((callback, ex) -> 
 		{
 			logger.error("An error occurred during automation execution", ex);
@@ -360,9 +379,13 @@ public class AutomationLauncher
 		
 		latch.await();
 		logger.debug("Automation completed...");
+		return ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).isSuccessful();
 	}
 	
-	private static void executeFunction(String functionName, AutomationContext context) throws InterruptedException
+	/**
+	 * @return {@code true} if execution was successful
+	 */
+	private static boolean executeFunction(String functionName, AutomationContext context) throws InterruptedException
 	{
 		Function function = context.getGlobalFunction(functionName);
 		
@@ -375,24 +398,17 @@ public class AutomationLauncher
 		FunctionExecutor executor = new FunctionExecutor(function);
 		CountDownLatch latch = new CountDownLatch(1);
 		
-		AutomationEventManager.getInstance().onInitialize(executor);
+		automationEventManager().onInitialize(executor);
 		
 		AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
 		{
 			executor.execute(null, null, callback);
 		}).onComplete(callback -> 
 		{
-			FinalReport finalReport = ReportDataManager.getInstance().generateReport();
+			FinalReport finalReport = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).generateReport();
 			printSummary(finalReport);
 			
-			ExecutionContextManager.getInstance().close();
-			
-			AutomationContext.getInstance()
-				.getAppConfiguration()
-				.getAllPlugins()
-				.forEach(plugin -> plugin.close());
-			
-			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context, executor);				
+			automationCompleted(context, executor);				
 		}).onError((callback, ex) -> 
 		{
 			logger.error("An error occurred during automation execution", ex);
@@ -404,6 +420,7 @@ public class AutomationLauncher
 		
 		latch.await();
 		logger.debug("Automation completed...");
+		return ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).isSuccessful();
 	}
 
 	/**
@@ -415,40 +432,53 @@ public class AutomationLauncher
 	public static void main(String[] args) throws Exception
 	{
 		System.out.println("Executing main function of automation launcher...");
-		AutomationEventManager.getInstance().onAppStart();
-		ExecutionServices.setStepsExecutor(StepsExecutor.getDefault());
-		ExecutionServices.setDebugFlowManager(DebugFlowManager.getInstance());
+		AutomationEventManager eventManager = new AutomationEventManager();
+		eventManager.onAppStart();
+		
+		AutoxSession session = null;
+		boolean success = false;
 		
 		try
 		{
-			// load test suites
-			TestSuiteGroup testSuiteGroup = loadTestFiles(args);
-			AutomationContext context = AutomationContext.getInstance();
+			session = loadTestFiles(args, eventManager);
+			AutomationContext context = session.getAutomationContext();
+			TestSuiteGroup testSuiteGroup = context.getTestSuiteGroup();
 			
 			int debugPort = context.getBasicArguments().getDebugPort();
 	
 			//execute test suites
 			if(debugPort > 0)
 			{
-				DebugServer.start(debugPort);
+				((DebugFlowManager) context.getDebugFlowManager()).startDebugServer(debugPort);
 			}
 			
 			String funcToExecute = context.getBasicArguments().getFunction();
 			
 			if(StringUtils.isNotBlank(funcToExecute))
 			{
-				executeFunction(funcToExecute, context);
+				success = executeFunction(funcToExecute, context);
 			}
 			else
 			{
-				executeTestSuiteGroup(testSuiteGroup, context);
+				success = executeTestSuiteGroup(testSuiteGroup, context);
 			}
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution. Error: {}", ex.getMessage(), ex);
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_UNHANDLED, ex.getMessage());
-			System.exit(-1);
+			eventManager.onAppError(AutomationEventType.AUTOMATION_ERR_UNHANDLED, ex.getMessage());
+			success = false;
+		}finally
+		{
+			if(session != null)
+			{
+				session.close();
+			}
+		}
+		
+		if(systemExitEnabled)
+		{
+			System.exit(success ? 0 : -1);
 		}
 	}
 }

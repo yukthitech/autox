@@ -25,8 +25,6 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.AutomationFileLoader;
 import com.yukthitech.autox.debug.common.ClientMssgReloadFile;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.debug.server.DebugFlowManager;
-import com.yukthitech.autox.debug.server.DebugServer;
 
 /**
  * Used to handle reload file request.
@@ -51,8 +49,8 @@ public class ReloadFileHandler extends AbstractServerDataHandler<ClientMssgReloa
 		
 		if(errors.isEmpty())
 		{
-			DebugFlowManager.getInstance().setDebugPoints(data.getDebugPoints());
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
+			debugFlowManager.setDebugPoints(data.getDebugPoints());
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
 		}
 		else
 		{
@@ -60,7 +58,7 @@ public class ReloadFileHandler extends AbstractServerDataHandler<ClientMssgReloa
 			
 			logger.error("Loading of file '{}' failed with below errors: \\n\\t{}", data.getFile().getName(), errStr);
 			
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), false, "Loading of file '%s' failed with below errors: \n\t%s", 
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), false, "Loading of file '%s' failed with below errors: \n\t%s", 
 					data.getFile().getName(), errStr));
 		}
 	}

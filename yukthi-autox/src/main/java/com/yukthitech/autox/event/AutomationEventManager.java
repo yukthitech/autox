@@ -9,35 +9,26 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 
-
-public class AutomationEventManager
+public class AutomationEventManager implements IAutomationEventManager
 {
 	private static Logger logger = LogManager.getLogger(AutomationEventManager.class);
-	
-	private static AutomationEventManager instance;
 	
 	private List<IAutomationListener> listeners = new ArrayList<>();
 	
 	private IdentityHashMap<Executor, ExecutionInfo> executionInfoMap = new IdentityHashMap<>();
 	
-	public static synchronized AutomationEventManager getInstance()
+	public AutomationEventManager()
 	{
-		if(instance != null)
-		{
-			return instance;
-		}
-		
-		instance = new AutomationEventManager();
-		
 		String listenerNamesStr = System.getProperty(IAutomationConstants.AUTOX_SYS_PROP_LISTENERS);
 		
 		if(StringUtils.isBlank(listenerNamesStr))
 		{
-			return instance;
+			return;
 		}
 		
 		String listenerNames[] = listenerNamesStr.trim().split("\\s*\\,\\s*");
@@ -64,10 +55,15 @@ public class AutomationEventManager
 				System.exit(-1);
 			}
 			
-			instance.listeners.add((IAutomationListener) listener);
+			listeners.add((IAutomationListener) listener);
 		}
-		
-		return instance;
+	}
+	
+	@Override
+	public void reset()
+	{
+		listeners.clear();
+		executionInfoMap.clear();
 	}
 	
 	public List<IAutomationListener> getListeners()
@@ -150,7 +146,7 @@ public class AutomationEventManager
 	
 	public void onAppEnd(Executor rootExecutor)
 	{
-		boolean successful = ReportDataManager.getInstance().isSuccessful();
+		boolean successful = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).isSuccessful();
 		raiseEvent(
 				new AutomationEvent(AutomationEventType.AUTOMATION_ENDED)
 					.setSuccessful(successful)

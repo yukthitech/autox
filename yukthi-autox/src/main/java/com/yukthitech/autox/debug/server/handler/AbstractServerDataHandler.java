@@ -17,15 +17,23 @@ package com.yukthitech.autox.debug.server.handler;
 
 import java.io.Serializable;
 
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.IServerDataHandler;
 
 public abstract class AbstractServerDataHandler<D extends Serializable> implements IServerDataHandler<D>
 {
 	private Class<D> dataType;
+	
+	protected final AutomationContext automationContext;
+	
+	protected final DebugFlowManager debugFlowManager;
 
 	public AbstractServerDataHandler(Class<D> dataType)
 	{
 		this.dataType = dataType;
+		this.automationContext = AutomationContext.getInstance();
+		this.debugFlowManager = (DebugFlowManager) automationContext.getDebugFlowManager();
 	}
 	
 	@Override

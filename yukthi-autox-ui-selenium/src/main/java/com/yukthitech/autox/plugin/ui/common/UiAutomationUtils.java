@@ -406,7 +406,7 @@ public class UiAutomationUtils
 	{
 		logger.trace("Trying to find element with location '{}' under parent - {}", locator, parent);
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		By locatorBy = getLocator(locator);

@@ -61,7 +61,7 @@ public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginS
 		super(parentPlugin);
 		this.defaultDriverName = defaultDriverName;
 		
-		EventManager.getInstance().invokePluginEventHandler(this, IUiEvent.EVENT_INIT, null);
+		AutomationContext.getInstance().getEventManager().invokePluginEventHandler(this, IUiEvent.EVENT_INIT, null);
 	}
 	
 	/**

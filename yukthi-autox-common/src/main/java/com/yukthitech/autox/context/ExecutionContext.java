@@ -223,7 +223,7 @@ public class ExecutionContext
 			throw new InvalidStateException("Monitors are already started");
 		}
 		
-		Collection<ILogMonitor> monitors = LogMonitorManager.getInstance().getLogMonitors();
+		Collection<ILogMonitor> monitors = AutomationContext.getInstance().getLogMonitorManager().getLogMonitors();
 		
 		if(CollectionUtils.isEmpty(monitors))
 		{

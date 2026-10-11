@@ -101,7 +101,7 @@ public class ClickStep extends AbstractPostCheckStep
 	
 	private boolean clickWithJs(WebElement webElement, AutomationContext context, IExecutionLogger exeLogger)
 	{
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);

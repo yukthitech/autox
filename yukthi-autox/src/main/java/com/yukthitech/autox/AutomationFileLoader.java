@@ -195,7 +195,7 @@ public class AutomationFileLoader
 			{
 				System.err.println("Invalid test suite folder specified - " + testCaseFolder);
 				
-				AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_SOURCE, "Invalid test suite folder specified - " + testCaseFolder);
+				((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_SOURCE, "Invalid test suite folder specified - " + testCaseFolder);
 				System.exit(-1);
 			}
 	
@@ -246,11 +246,11 @@ public class AutomationFileLoader
 			System.err.println(errorStr);
 			System.err.println("\n\n==============================================================");
 			
-			AutomationEventManager.getInstance().onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_SOURCE, "Failed to load test files");
+			((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).onAppError(AutomationEventType.AUTOMATION_ERR_INVALID_SOURCE, "Failed to load test files");
 			System.exit(-1);
 		}
 
-		logger.debug("Found required plugins by this context to be: {}", PluginManager.getInstance().getPlugins());
+		logger.debug("Found required plugins by this context to be: {}", AutomationContext.getInstance().getPluginManager().getPlugins());
 	}
 
 }

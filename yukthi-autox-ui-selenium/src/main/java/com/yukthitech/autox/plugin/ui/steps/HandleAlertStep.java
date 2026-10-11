@@ -70,7 +70,7 @@ public class HandleAlertStep extends AbstractUiStep
 			exeLogger.debug("Handling alert without validation of message..");
 		}
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		Alert alert = driver.switchTo().alert();

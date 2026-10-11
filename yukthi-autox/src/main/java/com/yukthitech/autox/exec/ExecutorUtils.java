@@ -45,7 +45,7 @@ public class ExecutorUtils
 		logger.debug( "Invoking plugin error handling for executable: {}", executable.name() );
 		
 		AutomationContext context = AutomationContext.getInstance();
-		Collection<IPluginSession> pluginSessions = ExecutionContextManager.getInstance().getExecutionContextStack().getPluginSessions();
+		Collection<IPluginSession> pluginSessions = AutomationContext.getInstance().getExecutionContextManager().getExecutionContextStack().getPluginSessions();
 		
 		if(pluginSessions == null)
 		{
@@ -105,7 +105,7 @@ public class ExecutorUtils
 			return true;
 		}
 		
-		ReportDataManager reportManager = ReportDataManager.getInstance();
+		ReportDataManager reportManager = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager());
 		executor.activeExecutionLogger = reportManager.getSetupExecutionLogger(executor);
 		executor.activeExecutionLogger.setMode(mode);
 		
@@ -117,7 +117,7 @@ public class ExecutorUtils
 			
 			StackFrameExecutor.newExecutor("Setup", setup, (setupObj, stackFrameId) -> 
 			{
-				StepsExecutor.getDefault().execute(setupObj.getSteps(), currentStep, stackFrameId);
+				AutomationContext.getInstance().getStepsExecutor().execute(setupObj.getSteps(), currentStep, stackFrameId);
 			}).onReload(reloader)
 			.execute();
 		
@@ -149,7 +149,7 @@ public class ExecutorUtils
 			return true;
 		}
 
-		ReportDataManager reportManager = ReportDataManager.getInstance();
+		ReportDataManager reportManager = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager());
 		executor.activeExecutionLogger = reportManager.getCleanupExecutionLogger(executor);
 		executor.activeExecutionLogger.setMode(mode);
 		
@@ -161,7 +161,7 @@ public class ExecutorUtils
 			
 			StackFrameExecutor.newExecutor("Cleanup", cleanup, (cleanupObj, stackFrameId) -> 
 			{
-				StepsExecutor.getDefault().execute(cleanupObj.getSteps(), currentStep, stackFrameId);
+				AutomationContext.getInstance().getStepsExecutor().execute(cleanupObj.getSteps(), currentStep, stackFrameId);
 			}).onReload(reloader)
 			.execute();
 			
@@ -188,7 +188,7 @@ public class ExecutorUtils
 
 	public static boolean executeRunnable(Runnable runnable, ExecutionType executionType,  String mode, Executor executor)
 	{
-		ReportDataManager reportManager = ReportDataManager.getInstance();
+		ReportDataManager reportManager = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager());
 		executor.activeExecutionLogger = reportManager.getSetupExecutionLogger(executor);
 		executor.activeExecutionLogger.setMode(mode);
 		

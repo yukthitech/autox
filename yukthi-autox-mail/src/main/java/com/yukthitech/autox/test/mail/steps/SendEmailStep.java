@@ -134,7 +134,7 @@ public class SendEmailStep extends AbstractStep
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		exeLogger.debug("Sending email with [From: {}, Subject: {}]", fromAddress, subject);
-		MailSession mailSession = ExecutionContextManager.getInstance().getPluginSession(EmailPlugin.class);
+		MailSession mailSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(EmailPlugin.class);
 		
 		SessionTransport session = mailSession.getSessionForSend(emailServerName);
 		MimeMessage msg = new MimeMessage(session.getSession());

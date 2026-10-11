@@ -48,7 +48,7 @@ public class SwitchWindow extends AbstractUiStep
 	{
 		exeLogger.trace("Switching to window: {}", locator);
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		if(StringUtils.isBlank(locator))

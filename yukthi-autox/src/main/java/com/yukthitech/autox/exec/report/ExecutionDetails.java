@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.exec.report;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -110,7 +112,7 @@ public class ExecutionDetails
 	
 	public String getStartTimeStr()
 	{
-		return ApplicationConfiguration.getInstance().getTimeFormatObject().format(startTime);
+		return AutomationContext.getInstance().getAppConfiguration().getTimeFormatObject().format(startTime);
 	}
 
 	public String getEndTimeStr()
@@ -120,6 +122,6 @@ public class ExecutionDetails
 			return "";
 		}
 		
-		return ApplicationConfiguration.getInstance().getTimeFormatObject().format(endTime);
+		return AutomationContext.getInstance().getAppConfiguration().getTimeFormatObject().format(endTime);
 	}
 }

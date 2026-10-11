@@ -316,7 +316,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		}
 		
 		IPlugin<?, ?> plugin = null;
-		PluginManager pluginManager = PluginManager.getInstance();
+		PluginManager pluginManager = AutomationContext.getInstance().getPluginManager();
 		
 		for(Class<? extends IPlugin> pluginType : executable.requiredPluginTypes())
 		{

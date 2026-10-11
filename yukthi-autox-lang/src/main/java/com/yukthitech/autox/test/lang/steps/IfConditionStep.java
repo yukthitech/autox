@@ -34,7 +34,6 @@ import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -145,19 +144,19 @@ public class IfConditionStep extends AbstractContainerStep implements IStepConta
 		
 		if(res)
 		{
-			ExecutionServices.getStepsExecutor().execute(super.getSteps(), null, null);
+			AutomationContext.getInstance().getStepsExecutor().execute(super.getSteps(), null, null);
 			return;
 		}
 		
 		boolean matched = false;
-		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+		ExecutionStack executionStack = AutomationContext.getInstance().getExecutionContextManager().getExecutionStack();
 		
 		if(CollectionUtils.isNotEmpty(elseIfBlocks))
 		{
 			for(ElseIfStep elseIfBlock : this.elseIfBlocks)
 			{
 				executionStack.push(elseIfBlock);
-				ExecutionServices.getDebugFlowManager().checkForDebugPoint(elseIfBlock);
+				AutomationContext.getInstance().getDebugFlowManager().checkForDebugPoint(elseIfBlock);
 				
 				try
 				{
@@ -167,7 +166,7 @@ public class IfConditionStep extends AbstractContainerStep implements IStepConta
 					if(res)
 					{
 						matched = true;
-						ExecutionServices.getStepsExecutor().execute(elseIfBlock.getSteps(), null, null);
+						AutomationContext.getInstance().getStepsExecutor().execute(elseIfBlock.getSteps(), null, null);
 						break;
 					}
 				}finally
@@ -180,12 +179,12 @@ public class IfConditionStep extends AbstractContainerStep implements IStepConta
 		if(!matched && elseBlock != null)
 		{
 			executionStack.push(elseBlock);
-			ExecutionServices.getDebugFlowManager().checkForDebugPoint(elseBlock);
+			AutomationContext.getInstance().getDebugFlowManager().checkForDebugPoint(elseBlock);
 			
 			try
 			{
 				exeLogger.trace("Executing else block");
-				ExecutionServices.getStepsExecutor().execute(elseBlock.getSteps(), null, null);
+				AutomationContext.getInstance().getStepsExecutor().execute(elseBlock.getSteps(), null, null);
 			}finally
 			{
 				executionStack.pop(elseBlock);

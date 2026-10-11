@@ -23,7 +23,6 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
@@ -64,12 +63,12 @@ public class WhileLoopStep extends AbstractContainerStep implements IStepContain
 			//from second time check for debug point for current step
 			if(index > 0)
 			{
-				ExecutionServices.getDebugFlowManager().checkForDebugPoint(this);
+				AutomationContext.getInstance().getDebugFlowManager().checkForDebugPoint(this);
 			}
 
 			try
 			{
-				ExecutionServices.getStepsExecutor().execute(steps, null, null);
+				AutomationContext.getInstance().getStepsExecutor().execute(steps, null, null);
 			}catch(Exception ex)
 			{
 				if(ex instanceof BreakException)

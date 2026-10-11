@@ -324,7 +324,7 @@ public class UiFreeMarkerMethods
 			)
 	public static Dimension uiBrowserSize(@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName)
 	{
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		return session.getBrowserSize(driverName);
 	}
 
@@ -334,7 +334,7 @@ public class UiFreeMarkerMethods
 			)
 	public static Point uiBrowserPosition(@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName)
 	{
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		return session.getBrowserPosition(driverName);
 	}
 }

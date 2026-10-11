@@ -30,7 +30,6 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -182,7 +181,7 @@ public class ForEachLoopStep extends AbstractContainerStep implements IStepConta
 			//from second time check for debug point for current step
 			if(index > 0)
 			{
-				ExecutionServices.getDebugFlowManager().checkForDebugPoint(this);
+				AutomationContext.getInstance().getDebugFlowManager().checkForDebugPoint(this);
 			}
 			
 			context.setAttribute(loopVar, obj);
@@ -190,7 +189,7 @@ public class ForEachLoopStep extends AbstractContainerStep implements IStepConta
 			
 			try
 			{
-				ExecutionServices.getStepsExecutor().execute(steps, null, null);
+				AutomationContext.getInstance().getStepsExecutor().execute(steps, null, null);
 			}catch(Exception ex)
 			{
 				if(ex instanceof BreakException)

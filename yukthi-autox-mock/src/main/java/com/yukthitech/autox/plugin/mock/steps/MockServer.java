@@ -30,6 +30,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import com.yukthitech.autox.context.IDynAutomationService;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -37,7 +38,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * and requests received (till reset() is called).
  * @author akiran
  */
-public class MockServer 
+public class MockServer implements IDynAutomationService
 {
 	/**
 	 * Request handler for mock requests.
@@ -111,7 +112,7 @@ public class MockServer
 	/**
 	 * Stop the jetty server.
 	 */
-	void stop()
+	public void stop()
 	{
 		try 
 		{
@@ -120,6 +121,12 @@ public class MockServer
 		{
 			throw new InvalidStateException("An error occurred while stopping the server", e);
 		}
+	}
+	
+	@Override
+	public void close()
+	{
+		stop();
 	}
 	
 	/**

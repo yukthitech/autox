@@ -84,7 +84,7 @@ public class HandleConfirmStep extends AbstractUiStep
 			exeLogger.debug("Handling confirm without validation of message..");
 		}
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		PendingDialog confirm = session.pollDialog(driverName, DIALOG_WAIT_MILLIS);
 		
 		if(confirm == null)

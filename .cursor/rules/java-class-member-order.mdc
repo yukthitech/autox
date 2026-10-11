@@ -1,0 +1,53 @@
+---
+description: Standard Java class member ordering for AutoX
+alwaysApply: true
+---
+
+# Java class member order
+
+Within a class, keep members in this order:
+
+1. **Static constant fields** (`static final`, or uppercase compile-time/loaded constants)
+2. **Static fields**
+3. **Static blocks**
+4. **Nested classes** (static or inner)
+5. **Instance fields**
+6. **Constructors**
+7. **Methods**
+8. **Special methods** last (`equals`, `hashCode`, `toString`, `compareTo`, `clone`, etc.)
+
+```java
+public class Example
+{
+	private static final String CONST = "x";
+
+	private static Logger logger = LogManager.getLogger(Example.class);
+
+	static
+	{
+		// init
+	}
+
+	private static class Helper
+	{
+	}
+
+	private String name;
+
+	public Example()
+	{
+	}
+
+	public void doWork()
+	{
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		// ...
+	}
+}
+```
+
+Apply this when creating or substantially editing a Java class. Do not rearrange unrelated files solely for order unless asked.

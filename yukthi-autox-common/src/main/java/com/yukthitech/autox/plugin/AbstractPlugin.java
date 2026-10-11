@@ -79,6 +79,7 @@ public abstract class AbstractPlugin<AT, S extends IPluginSession> implements IP
 		if(sessionCache != null)
 		{
 			sessionCache.close();
+			sessionCache = null;
 		}
 	}
 	

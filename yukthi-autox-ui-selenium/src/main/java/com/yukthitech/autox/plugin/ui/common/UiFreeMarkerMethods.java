@@ -327,7 +327,7 @@ public class UiFreeMarkerMethods
 			)
 	public static Dimension uiBrowserSize(@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName)
 	{
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		return seleniumSession.getWebDriver(driverName).manage().window().getSize();
 	}
 
@@ -337,7 +337,7 @@ public class UiFreeMarkerMethods
 			)
 	public static Point uiBrowserPosition(@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName)
 	{
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		return seleniumSession.getWebDriver(driverName).manage().window().getPosition();
 	}
 }

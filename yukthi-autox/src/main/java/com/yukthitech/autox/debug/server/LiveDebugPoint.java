@@ -40,7 +40,6 @@ import com.yukthitech.autox.IStackableStep;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepIntegral;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack.StackElement;
 import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
 import com.yukthitech.autox.debug.common.ClientMssgDropToFrame;
@@ -54,7 +53,6 @@ import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
 import com.yukthitech.autox.debug.common.ServerMssgStepExecuted;
 import com.yukthitech.autox.exec.HandledException;
-import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.test.DropToStackFrameException;
 import com.yukthitech.autox.test.IgnoreErrorException;
@@ -134,8 +132,14 @@ public class LiveDebugPoint
 	 */
 	private boolean errorPoint;
 	
+	private final AutomationContext automationContext;
+	
+	private final DebugFlowManager debugFlowManager;
+	
 	private LiveDebugPoint(ILocationBased location, DebugPoint debugPoint, Consumer<LiveDebugPoint> callback, boolean errorPoint)
 	{
+		this.automationContext = AutomationContext.getInstance();
+		this.debugFlowManager = (DebugFlowManager) this.automationContext.getDebugFlowManager();
 		this.debugPoint = debugPoint;
 		this.threadOnHold = Thread.currentThread();
 		this.errorPoint = errorPoint;
@@ -186,7 +190,7 @@ public class LiveDebugPoint
 	private Map<String, KeyValue> getContextAttr()
 	{
 		Map<String, KeyValue> contextAttr = new HashMap<>(); 
-		ExecutionContextManager.getExecutionContext().getAttr().forEach((key, val) ->
+		automationContext.getExecutionContextManager().getExecutionContext().getAttr().forEach((key, val) ->
 		{
 			KeyValue keyVal = DebugUtils.toKeyValue(key, val);
 			contextAttr.put(key, keyVal);
@@ -198,7 +202,7 @@ public class LiveDebugPoint
 	private Map<String, KeyValue> getParams()
 	{
 		Map<String, KeyValue> paramMap = new HashMap<>(); 
-		Map<String, Object> params = ExecutionContextManager.getInstance().getExecutionContextStack().getParamForDebug();
+		Map<String, Object> params = automationContext.getExecutionContextManager().getExecutionContextStack().getParamForDebug();
 		
 		if(MapUtils.isEmpty(params))
 		{
@@ -225,7 +229,7 @@ public class LiveDebugPoint
 		{
 			dropableFrameIds.clear();
 			
-			for(StackElement elem : ExecutionContextManager.getInstance().getExecutionStack().getStackTrace())
+			for(StackElement elem : automationContext.getExecutionContextManager().getExecutionStack().getStackTrace())
 			{
 				index++;
 				
@@ -303,7 +307,7 @@ public class LiveDebugPoint
 				lastPauseLocation.getLineNumber(), stackTrace, getContextAttr(),
 				getParams(),
 				errorPoint);
-		DebugServer.getInstance().sendClientMessage(pausedMssg);
+		debugFlowManager.sendClientMessage(pausedMssg);
 	}
 	
 	/**
@@ -327,7 +331,7 @@ public class LiveDebugPoint
 			}
 			
 			this.lastPauseLocation = location;
-			this.lastPauseStackSize = ExecutionContextManager.getInstance().getExecutionStack().getStackSize();
+			this.lastPauseStackSize = automationContext.getExecutionContextManager().getExecutionStack().getStackSize();
 			
 			sendOnHoldMssg();
 			
@@ -356,7 +360,7 @@ public class LiveDebugPoint
 			}
 		} catch(DropToStackFrameException | IgnoreErrorException ex)
 		{
-			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
+			debugFlowManager.sendClientMessage(new ServerMssgExecutionReleased(id));
 			throw ex;
 		} catch(Exception ex)
 		{
@@ -364,7 +368,7 @@ public class LiveDebugPoint
 		} finally
 		{
 			logger.trace("LivePOINT: Pause released at location: {}:{}", lastPauseLocation.getLocation().getName(), lastPauseLocation.getLineNumber());
-			DebugServer.getInstance().sendClientMessage(new ServerMssgExecutionReleased(id));
+			debugFlowManager.sendClientMessage(new ServerMssgExecutionReleased(id));
 
 			onPause.set(false);
 			pauseLock.unlock();
@@ -375,9 +379,9 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			StepsExecutor.getDefault().execute(steps, null, null);
+			automationContext.getStepsExecutor().execute(steps, null, null);
 			
-			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, true, getContextAttr(), null));
+			debugFlowManager.sendClientMessage(new ServerMssgStepExecuted(reqId, id, true, getContextAttr(), null));
 		} catch(Exception ex)
 		{
 			if(ex instanceof HandledException)
@@ -389,7 +393,7 @@ public class LiveDebugPoint
 				logger.error("An error occurred during dynamic step execution", ex);
 			}
 			
-			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, false, getContextAttr(), 
+			debugFlowManager.sendClientMessage(new ServerMssgStepExecuted(reqId, id, false, getContextAttr(), 
 					"An error occurred during dynamic step execution:\n  " + ex));
 		}
 	}
@@ -398,12 +402,12 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			Object res = PrefixExpressionFactory.getExpressionFactory().getValueByExpressionString(AutomationContext.getInstance(), expression);
-			DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(reqId, true, res, null));
+			Object res = PrefixExpressionFactory.getExpressionFactory().getValueByExpressionString(automationContext, expression);
+			debugFlowManager.sendClientMessage(new ServerMssgEvalExprResult(reqId, true, res, null));
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred during expression evaluation: {}", expression, ex);
-			DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(reqId, false, null, 
+			debugFlowManager.sendClientMessage(new ServerMssgEvalExprResult(reqId, false, null, 
 					"An error occurred during expression evaluation:\n  " + ex));
 		}
 	}
@@ -490,7 +494,7 @@ public class LiveDebugPoint
 		{
 			if(!onPause.get())
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, id, false, null, 
+				debugFlowManager.sendClientMessage(new ServerMssgStepExecuted(reqId, id, false, null, 
 						"Current live-point is not in paused state"));
 				return;
 			}
@@ -511,7 +515,7 @@ public class LiveDebugPoint
 		{
 			if(!onPause.get())
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(reqId, false, null, "Current live-point is not in paused state"));
+				debugFlowManager.sendClientMessage(new ServerMssgEvalExprResult(reqId, false, null, "Current live-point is not in paused state"));
 				return;
 			}
 			
@@ -535,7 +539,7 @@ public class LiveDebugPoint
 		{
 			if(!onPause.get())
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+				debugFlowManager.sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
 						"Current live-point is not in paused state"));
 				return false;
 			}
@@ -544,7 +548,7 @@ public class LiveDebugPoint
 			{
 				if(!dropableFrameIds.contains(dropToFrame.getStackElementId()))
 				{
-					DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+					debugFlowManager.sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
 							"Invalid frame id specified for drop"));
 					return false;
 				}
@@ -572,14 +576,14 @@ public class LiveDebugPoint
 		{
 			if(!onPause.get())
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+				debugFlowManager.sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
 						"Current live-point is not in paused state"));
 				return false;
 			}
 			
 			if(!errorPoint)
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
+				debugFlowManager.sendClientMessage(new ServerMssgEvalExprResult(dropToFrame.getRequestId(), false, null, 
 						"Current break point is not halted on error"));
 				return false;
 			}
@@ -627,7 +631,7 @@ public class LiveDebugPoint
 
 			if(!onPause.get())
 			{
-				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(request.getRequestId(), false, "Current live-point is not in paused state"));
+				debugFlowManager.sendClientMessage(new ServerMssgConfirmation(request.getRequestId(), false, "Current live-point is not in paused state"));
 				return false;
 			}
 			
@@ -642,7 +646,7 @@ public class LiveDebugPoint
 				}
 				else if(debugOp != DebugOp.RESUME)
 				{
-					DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(request.getRequestId(), false, 
+					debugFlowManager.sendClientMessage(new ServerMssgConfirmation(request.getRequestId(), false, 
 							String.format("Current error-point does not support specified operation. [Op: %s, Ignore Error: %s]", debugOp, request.isIgnoreErrorEnabled())
 							));
 					return false;
@@ -711,7 +715,7 @@ public class LiveDebugPoint
 			else if(lastDebugOp == DebugOp.STEP_OVER)
 			{
 				boolean subExecution = (lastPauseLocation instanceof IStackableStep) && 
-						ExecutionContextManager.getInstance().getExecutionStack().isSubexecutionOf(lastPauseLocation);
+						automationContext.getExecutionContextManager().getExecutionStack().isSubexecutionOf(lastPauseLocation);
 				
 				if(!subExecution)
 				{
@@ -732,7 +736,7 @@ public class LiveDebugPoint
 			//  on stack size. Stack size should be less than that of previous pause
 			else if(lastDebugOp == DebugOp.STEP_RETURN)
 			{
-				int newStackSize = ExecutionContextManager.getInstance().getExecutionStack().getStackSize();
+				int newStackSize = automationContext.getExecutionContextManager().getExecutionStack().getStackSize();
 				
 				if(lastPauseStackSize > newStackSize)
 				{
@@ -773,7 +777,7 @@ public class LiveDebugPoint
 		}
 		
 		released = true;
-		DebugFlowManager.getInstance().removeLivePoint(id);
+		debugFlowManager.removeLivePoint(id);
 	}
 	
 	public void clearThread()

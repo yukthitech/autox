@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.ui.common;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +116,7 @@ public class UiElement
 	{
 		try
 		{
-			PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+			PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 			return session != null && session.hasPendingDialog(driverName);
 		}catch(Exception ex)
 		{

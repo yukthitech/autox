@@ -20,8 +20,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.debug.common.ClientMssgDebugPoints;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.debug.server.DebugFlowManager;
-import com.yukthitech.autox.debug.server.DebugServer;
 
 /**
  * Used to update debug points.
@@ -41,7 +39,7 @@ public class DebugPointsHandler extends AbstractServerDataHandler<ClientMssgDebu
 	{
 		logger.debug("Executing debug points command: {}", data);
 		
-		DebugFlowManager.getInstance().setDebugPoints(data.getDebugPoints());
-		DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
+		debugFlowManager.setDebugPoints(data.getDebugPoints());
+		debugFlowManager.sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
 	}
 }

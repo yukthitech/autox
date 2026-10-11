@@ -20,8 +20,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.debug.server.DebugFlowManager;
-import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.debug.server.LiveDebugPoint;
 
 /**
@@ -42,11 +40,11 @@ public class DebugOpHandler extends AbstractServerDataHandler<ClientMssgDebugOp>
 	{
 		logger.debug("Executing debug OP command: {}", data);
 		
-		LiveDebugPoint livePoint = DebugFlowManager.getInstance().getLiveDebugPoint(data.getExecutionId());
+		LiveDebugPoint livePoint = debugFlowManager.getLiveDebugPoint(data.getExecutionId());
 		
 		if(livePoint == null)
 		{
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), false, "No live-debug-point found with execution id: " + data.getExecutionId()));
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), false, "No live-debug-point found with execution id: " + data.getExecutionId()));
 			return;
 		}
 		
@@ -54,7 +52,7 @@ public class DebugOpHandler extends AbstractServerDataHandler<ClientMssgDebugOp>
 		
 		if(res)
 		{
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
 		}
 	}
 }

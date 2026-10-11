@@ -446,7 +446,7 @@ public class UiAutomationUtils
 		}
 		else
 		{
-			PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+			PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 			targetLocator = session.newLocator(driverName, selector);
 		}
 

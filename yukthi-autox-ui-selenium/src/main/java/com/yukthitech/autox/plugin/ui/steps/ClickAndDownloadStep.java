@@ -146,7 +146,7 @@ public class ClickAndDownloadStep extends AbstractParentUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		
 		if(!seleniumSession.isDownloadsSupported(driverName))
 		{

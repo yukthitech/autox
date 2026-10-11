@@ -15,24 +15,22 @@
  */
 package com.yukthitech.autox.plugin.mock.steps;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Factor of mock servers.
+ * Factory helpers for mock servers registered on {@link AutomationContext}
+ * as {@link com.yukthitech.autox.context.IDynAutomationService} entries.
  * @author akiran
  */
 public class MockServerFactory
 {
-	/**
-	 * Name to server.
-	 */
-	private static Map<String, MockServer> nameToServer = new HashMap<>();
+	private static String serviceName(String name)
+	{
+		return "mockServer:" + name;
+	}
 	
 	/**
 	 * Starts a server with specified name at specified port.
@@ -42,7 +40,8 @@ public class MockServerFactory
 	 */
 	public static synchronized void startMockServer(AutomationContext context, String name, int port)
 	{
-		MockServer server = nameToServer.get(name);
+		String key = serviceName(name);
+		MockServer server = context.getDynAutomationService(key);
 		IExecutionLogger logger = context.getExecutionLogger();
 		
 		if(server != null)
@@ -58,7 +57,7 @@ public class MockServerFactory
 		}
 		
 		server = new MockServer(port);
-		nameToServer.put(name, server);
+		context.registerDynAutomationService(key, server);
 		
 		logger.debug("Started server with name '{}' at port: {}", name, port);
 	}
@@ -70,7 +69,8 @@ public class MockServerFactory
 	 */
 	public static synchronized void stopMockServer(AutomationContext context, String name)
 	{
-		MockServer server = nameToServer.get(name);
+		String key = serviceName(name);
+		MockServer server = context.getDynAutomationService(key);
 		IExecutionLogger logger = context.getExecutionLogger();
 		
 		if(server == null)
@@ -79,8 +79,8 @@ public class MockServerFactory
 			return;
 		}
 		
-		server.stop();
-		nameToServer.remove(name);
+		server.close();
+		context.unregisterDynAutomationService(key);
 		logger.debug("Server '{}' is stopped successfully", name);
 	}
 	
@@ -91,7 +91,7 @@ public class MockServerFactory
 	 */
 	public static synchronized MockServer getMockServer(String name)
 	{
-		MockServer server = nameToServer.get(name);
+		MockServer server = AutomationContext.getInstance().getDynAutomationService(serviceName(name));
 		
 		if(server == null)
 		{

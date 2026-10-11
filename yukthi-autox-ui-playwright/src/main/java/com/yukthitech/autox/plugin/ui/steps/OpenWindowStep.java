@@ -84,7 +84,7 @@ public class OpenWindowStep extends AbstractUiStep
 	{
 		exeLogger.trace("Opening window '{}' with url: {}", name, url);
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		Page page = session.getPage(driverName);
 		
 		String urlStr = String.valueOf(url);

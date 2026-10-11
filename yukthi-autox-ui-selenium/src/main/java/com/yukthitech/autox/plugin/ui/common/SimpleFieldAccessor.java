@@ -69,7 +69,7 @@ public class SimpleFieldAccessor implements IFieldAccessor
 		{
 			context.getExecutionLogger().debug("Failed to set the field value using sendKeys(). Trying to set the value using JS attrbute. Error: {}", ex);
 			
-			SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+			SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 			WebDriver driver = seleniumSession.getWebDriver(driverName);
 			
 			try

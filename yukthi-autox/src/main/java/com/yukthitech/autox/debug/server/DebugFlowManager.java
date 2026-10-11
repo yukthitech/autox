@@ -16,6 +16,7 @@
 package com.yukthitech.autox.debug.server;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,16 +34,17 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Execution debug manager to control flow execution.
+ * Owns optional {@link DebugServer} socket transport (Prism). That transport will move to
+ * AutoxDebugSession in a later phase; it is intentionally not on {@link AutomationContext}.
  * @author akranthikiran
  */
 public class DebugFlowManager implements IDebugFlowManager
 {
 	private static Logger logger = LogManager.getLogger(DebugFlowManager.class);
-	
-	private static DebugFlowManager instance = new DebugFlowManager();
 	
 	/**
 	 * Currently available debug points.
@@ -54,14 +56,53 @@ public class DebugFlowManager implements IDebugFlowManager
 	 */
 	private Map<String, LiveDebugPoint> livePoints = new HashMap<>();
 	
-	private DebugFlowManager()
+	/**
+	 * Optional Prism socket debug server for this session.
+	 */
+	private DebugServer debugServer;
+	
+	public DebugFlowManager()
 	{}
 	
-	public static DebugFlowManager getInstance()
+	/**
+	 * Starts socket debug server on the given port and waits for Prism client init.
+	 */
+	public synchronized void startDebugServer(int port)
 	{
-		return instance;
+		if(debugServer != null)
+		{
+			throw new InvalidStateException("Debug server is already started for this flow manager.");
+		}
+		
+		DebugServer server = new DebugServer(port);
+		server.start();
+		this.debugServer = server;
 	}
 	
+	public boolean isDebugMode()
+	{
+		return debugServer != null;
+	}
+	
+	public DebugServer getDebugServer()
+	{
+		return debugServer;
+	}
+	
+	/**
+	 * Sends a message to the Prism debug client when a server is active.
+	 */
+	public void sendClientMessage(Serializable data)
+	{
+		if(debugServer == null)
+		{
+			throw new InvalidStateException("Debug server is not started for this session");
+		}
+		
+		debugServer.sendClientMessage(data);
+	}
+	
+	@Override
 	public void reset()
 	{
 		synchronized(livePoints)
@@ -79,6 +120,19 @@ public class DebugFlowManager implements IDebugFlowManager
 		synchronized(debugPoints)
 		{
 			this.debugPoints.clear();
+		}
+		
+		if(debugServer != null)
+		{
+			try
+			{
+				debugServer.reset();
+			}catch(Exception ex)
+			{
+				logger.warn("Error while resetting debug server", ex);
+			}
+			
+			debugServer = null;
 		}
 	}
 	
@@ -126,7 +180,7 @@ public class DebugFlowManager implements IDebugFlowManager
 	 */
 	public void checkForDebugPoint(ILocationBased step)
 	{
-		if(!DebugServer.isRunningInDebugMode())
+		if(!isDebugMode())
 		{
 			return;
 		}
@@ -180,7 +234,7 @@ public class DebugFlowManager implements IDebugFlowManager
 				logger.error("An error occurred while evaluating debug point condition [Debug point: {}:{}, Condition: {}]", 
 						fileName, point.getLineNumber(), point.getCondition(), ex);
 
-				DebugServer.getInstance().sendClientMessage(
+				sendClientMessage(
 						new ServerMssgConfirmation(null, false, 
 								"An error occurred while evaluating debug point condition [Debug point: %s:%s, Condition: %s]\nError: %s", 
 								fileName, point.getLineNumber(), point.getCondition(), ex.getMessage()));
@@ -212,7 +266,7 @@ public class DebugFlowManager implements IDebugFlowManager
 	
 	public void pauseAtErrorPoint(ILocationBased step)
 	{
-		if(!DebugServer.isRunningInDebugMode())
+		if(!isDebugMode())
 		{
 			return;
 		}

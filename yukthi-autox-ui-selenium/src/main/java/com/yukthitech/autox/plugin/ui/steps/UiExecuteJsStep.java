@@ -87,7 +87,7 @@ public class UiExecuteJsStep extends AbstractUiStep
 	{
 		exeLogger.trace("Executing JS script - {}", script);
 		
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		Object res = ((JavascriptExecutor)driver).executeScript(script);

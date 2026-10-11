@@ -86,5 +86,6 @@ public class PluginCache<P extends IPluginSession>
 	public synchronized void close()
 	{
 		freeSessions.forEach(session -> session.close());
+		freeSessions.clear();
 	}
 }

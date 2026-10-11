@@ -37,7 +37,7 @@ public class ResetSessionStep extends AbstractUiStep
 	{
 		exeLogger.debug("Resetting current session");
 		
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		session.resetDriver(driverName);
 	}
 	

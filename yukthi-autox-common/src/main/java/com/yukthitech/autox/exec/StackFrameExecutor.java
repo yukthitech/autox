@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.exec;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -25,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.test.DropToStackFrameException;
 
 public class StackFrameExecutor<E>
@@ -121,7 +122,7 @@ public class StackFrameExecutor<E>
 			return;
 		}
 		
-		ExecutionServices.getDebugFlowManager().addSinglePauseDebugPoint(firstStep.getLocation(), firstStep.getLineNumber());
+		AutomationContext.getInstance().getDebugFlowManager().addSinglePauseDebugPoint(firstStep.getLocation(), firstStep.getLineNumber());
 	}
 	
 	public void execute() throws Exception

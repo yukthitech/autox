@@ -119,7 +119,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 				{
 					exeLogger.trace("Trying to double-click element specified by locator: {}", locator);
 
-					SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+					SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 					WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 					Actions actions = new Actions(driver);

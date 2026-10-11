@@ -109,7 +109,7 @@ public class MoveToStep extends AbstractParentUiStep
 	{
 		exeLogger.trace("Moving to element specified by locator: {}", locator);
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 
 		try
 		{

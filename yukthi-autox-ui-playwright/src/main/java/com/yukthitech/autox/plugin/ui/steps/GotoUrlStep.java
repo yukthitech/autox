@@ -50,7 +50,7 @@ public class GotoUrlStep extends AbstractUiStep
 	{
 		exeLogger.debug("Going to page with url - {}", url);
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		
 		Page page = session.getPage(driverName);
 		page.navigate(String.valueOf(url));

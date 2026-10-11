@@ -35,8 +35,6 @@ public class ExecutionContextManager
 {
 	private static Logger logger = LogManager.getLogger(ExecutionContextManager.class);
 	
-	private static ExecutionContextManager instance = new ExecutionContextManager();
-	
 	private Map<Thread, ExecutionThreadStack> executionThreadLocal = new IdentityHashMap<>();
 	
 	private Map<IExecutor, ExecutionContext> executorContexts = new IdentityHashMap<>();
@@ -46,18 +44,17 @@ public class ExecutionContextManager
 	 */
 	private ExecutionContext globalContext;
 	
-	private ExecutionContextManager()
+	public ExecutionContextManager()
 	{}
 	
-	public static ExecutionContextManager getInstance()
+	/**
+	 * Clears thread and executor context maps for this manager instance.
+	 */
+	public synchronized void reset()
 	{
-		return instance;
-	}
-	
-	public static void reset()
-	{
-		instance.executionThreadLocal.clear();
-		instance.executorContexts.clear();
+		executionThreadLocal.clear();
+		executorContexts.clear();
+		globalContext = null;
 	}
 	
 	/**
@@ -67,12 +64,12 @@ public class ExecutionContextManager
 	 * @param suppier
 	 * @return
 	 */
-	public static <T> T executeInContext(IExecutor executor, Supplier<T> suppier)
+	public <T> T executeInContext(IExecutor executor, Supplier<T> suppier)
 	{
 		Thread currentThread = Thread.currentThread();
 		String actName = currentThread.getName();
 		
-		instance.setExecutor(executor);
+		setExecutor(executor);
 		currentThread.setName(executor.getUniqueId());
 		
 		try
@@ -85,11 +82,11 @@ public class ExecutionContextManager
 		} finally
 		{
 			currentThread.setName(actName);
-			instance.clearExecutor(executor);
+			clearExecutor(executor);
 		}
 	}
 	
-	public static void executeInContext(IExecutor executor, Runnable suppier)
+	public void executeInContext(IExecutor executor, Runnable suppier)
 	{
 		Supplier<Object> adapter = new Supplier<Object>()
 		{
@@ -162,9 +159,9 @@ public class ExecutionContextManager
 		executionContextStack.clearExecutionContext();
 	}
 	
-	public static ExecutionContext getExecutionContext()
+	public ExecutionContext getExecutionContext()
 	{
-		return instance.getCurrentContext();
+		return getExecutionContextStack().getExecutionContext();
 	}
 	
 	public synchronized ExecutionThreadStack getExecutionContextStack()
@@ -177,11 +174,6 @@ public class ExecutionContextManager
 		}
 
 		return executionContextStack;
-	}
-	
-	private ExecutionContext getCurrentContext()
-	{
-		return getExecutionContextStack().getExecutionContext();
 	}
 	
 	public <P, S extends IPluginSession> S getPluginSession(Class<? extends IPlugin<?, S>> pluginType)

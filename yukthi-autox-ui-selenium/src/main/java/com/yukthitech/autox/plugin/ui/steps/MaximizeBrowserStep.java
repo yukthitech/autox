@@ -37,7 +37,7 @@ public class MaximizeBrowserStep extends AbstractUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		Window window = seleniumSession.getWebDriver(driverName).manage().window();
 		
 		exeLogger.debug("Maximizing the browser window. Before maximize browser details are: [Position: {}, Size: {}]",

@@ -48,7 +48,7 @@ public class GotoPageStep extends AbstractUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		String uriStr = String.valueOf(uri);
 		String resUrl = session.getResourceUrl(uriStr);
 		

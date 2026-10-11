@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.ui.steps;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -506,6 +508,6 @@ public abstract class BaseConditions extends AbstractParentUiStep
 	 */
 	protected PlaywrightPluginSession getSession()
 	{
-		return ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		return AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 	}
 }

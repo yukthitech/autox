@@ -31,7 +31,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.debug.common.ClientMessage;
@@ -45,17 +44,17 @@ import com.yukthitech.autox.debug.server.handler.EvalExpressionHandler;
 import com.yukthitech.autox.debug.server.handler.ExecuteStepsHandler;
 import com.yukthitech.autox.debug.server.handler.LoadAppPropHandler;
 import com.yukthitech.autox.debug.server.handler.ReloadFileHandler;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Manager to send manage monitoring information and communicate with monitoring client.
+ * Socket transport for Prism remote debugging. Owned by {@link DebugFlowManager}
+ * (and later by AutoxDebugSession); not registered on AutomationContext.
  * @author akiran
  */
 public class DebugServer
 {
 	private static Logger logger = LogManager.getLogger(DebugServer.class);
-	
-	private static DebugServer instance;
 	
 	/**
 	 * Port on which monitoring manager should run.
@@ -109,8 +108,15 @@ public class DebugServer
 	
 	private boolean stopped = false;
 	
-	private DebugServer(int serverPort)
+	private boolean started = false;
+	
+	public DebugServer(int serverPort)
 	{
+		if(serverPort <= 0)
+		{
+			throw new InvalidArgumentException("Invalid monitor port specified: " + serverPort);
+		}
+		
 		this.serverPort = serverPort;
 		
 		writeThread = new Thread(this::sendDataToClient, "Debug Writer");
@@ -126,16 +132,22 @@ public class DebugServer
 		addAsyncServerDataHandler(new ReloadFileHandler());
 	}
 	
-	public static boolean isRunningInDebugMode()
-	{
-		return (instance != null);
-	}
-	
+	/**
+	 * Stops reader/writer threads and closes sockets. Idempotent.
+	 */
 	public void reset()
 	{
 		stopped = true;
-		writeThread.interrupt();
-		readThread.interrupt();
+		
+		if(writeThread != null)
+		{
+			writeThread.interrupt();
+		}
+		
+		if(readThread != null)
+		{
+			readThread.interrupt();
+		}
 		
 		close(clientOutputStream);
 		close(clientInputStream);
@@ -144,18 +156,30 @@ public class DebugServer
 
 		try
 		{
-			writeThread.join();
-			readThread.join();
+			if(writeThread != null && writeThread.isAlive())
+			{
+				writeThread.join();
+			}
+			
+			if(readThread != null && readThread.isAlive())
+			{
+				readThread.join();
+			}
 		}catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
 		
-		instance = null;
+		started = false;
 	}
 	
 	private void close(Closeable closeable)
 	{
+		if(closeable == null)
+		{
+			return;
+		}
+		
 		try
 		{
 			closeable.close();
@@ -269,8 +293,13 @@ public class DebugServer
 	/**
 	 * Starts the manager and waits for clients to get connected.
 	 */
-	private void start()
+	public synchronized void start()
 	{
+		if(started)
+		{
+			throw new InvalidStateException("Debug server is already started.");
+		}
+		
 		logger.debug("Starting debug-server on port: {}", serverPort);
 		
 		try
@@ -304,39 +333,12 @@ public class DebugServer
 				AutomationUtils.sleep(100);
 			}
 			
+			started = true;
+			
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while waiting for client to connect.", ex);
 		}
-	}
-	
-	/**
-	 * Starts the manager and makes current thread to wait till client connects.
-	 * @param port
-	 * @return
-	 */
-	public static synchronized DebugServer start(int port)
-	{
-		if(port <= 0)
-		{
-			throw new InvalidArgumentException("Invalid monitor port specified: " + port);
-		}
-		
-		if(instance != null)
-		{
-			throw new InvalidStateException("Debug server is already started.");
-		}
-		
-		DebugServer debugServer = new DebugServer(port);
-		instance = debugServer;
-		
-		debugServer.start();
-		return debugServer;
-	}
-	
-	public static DebugServer getInstance()
-	{
-		return instance;
 	}
 	
 	/**

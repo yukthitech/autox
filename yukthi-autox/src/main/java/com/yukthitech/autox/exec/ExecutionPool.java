@@ -38,11 +38,9 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executors thread pool.
  * @author akranthikiran
  */
-public class ExecutionPool
+public class ExecutionPool implements IExecutionPool
 {
 	private static Logger logger = LogManager.getLogger(ExecutionPool.class);
-
-	private static ExecutionPool instance;
 	
 	private static class ExecutorRunnable implements Runnable
 	{
@@ -116,7 +114,7 @@ public class ExecutionPool
 	
 	private ExecutorService threadPool;
 	
-	private ExecutionPool()
+	public ExecutionPool()
 	{
 		String parallelExecutionCountStr = AutomationContext.getInstance().getOverridableProp(IAutomationConstants.AUTOX_PROP_PARALLEL_POOL_SIZE);
 		int parallelExecutionCount = 0;
@@ -149,24 +147,14 @@ public class ExecutionPool
 		}
 	}
 	
-	public synchronized static ExecutionPool getInstance()
+	@Override
+	public synchronized void reset()
 	{
-		if(instance == null)
+		if(threadPool != null)
 		{
-			instance = new ExecutionPool();
+			threadPool.shutdownNow();
+			threadPool = null;
 		}
-		
-		return instance;
-	}
-	
-	public static void reset()
-	{
-		if(instance != null && instance.threadPool != null)
-		{
-			instance.threadPool.shutdownNow();
-		}
-		
-		instance = null;
 	}
 	
 	private void executeSequentially(Executor parent, List<? extends Executor> executors, Setup beforeChild, Cleanup afterChild, AsyncTryCatchBlock parentCallback)

@@ -47,7 +47,7 @@ public class SwitchWindow extends AbstractUiStep
 	{
 		exeLogger.trace("Switching to window: {}", locator);
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		String windowLocator = locator;
 		
 		if(StringUtils.isBlank(windowLocator))

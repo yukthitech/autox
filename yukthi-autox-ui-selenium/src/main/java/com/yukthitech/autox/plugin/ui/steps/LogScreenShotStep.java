@@ -94,7 +94,7 @@ public class LogScreenShotStep extends AbstractUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) 
 	{
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);

@@ -182,7 +182,7 @@ public class TestDataFile
 	
 	public void addEventHandler(EventHandler handler)
 	{
-		EventManager.getInstance().addEventHandler(handler);
+		AutomationContext.getInstance().getEventManager().addEventHandler(handler);
 	}
 
 	public void addCustomUiLocator(CustomPrefixExpression customUiLocator)

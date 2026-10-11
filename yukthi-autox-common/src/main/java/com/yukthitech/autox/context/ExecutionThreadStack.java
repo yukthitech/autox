@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.context;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +80,7 @@ public class ExecutionThreadStack
 		
 		if(session == null)
 		{
-			IPlugin<?, ?> plugin = PluginManager.getInstance().getPlugin(pluginType);
+			IPlugin<?, ?> plugin = AutomationContext.getInstance().getPluginManager().getPlugin(pluginType);
 			
 			if(plugin == null)
 			{

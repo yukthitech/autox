@@ -37,7 +37,7 @@ public class QuitSessionStep extends AbstractUiStep
 	{
 		exeLogger.debug("Closing current session");
 		
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		session.closeDriver(driverName);
 	}
 	

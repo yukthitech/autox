@@ -123,7 +123,7 @@ public class MoveToStep extends AbstractParentUiStep
 					return false;
 				}
 
-				SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+				SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 				WebDriver driver = seleniumSession.getWebDriver(driverName);
 				
 				exeLogger.debug("Aliging element to {}", alignToTop ? "Top" : "Bottom");

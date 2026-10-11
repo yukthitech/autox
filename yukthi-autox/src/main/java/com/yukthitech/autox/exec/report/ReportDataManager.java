@@ -39,6 +39,7 @@ import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.FunctionExecutor;
+import com.yukthitech.autox.exec.IReportDataManager;
 import com.yukthitech.autox.exec.TestCaseExecutor;
 import com.yukthitech.autox.exec.report.FinalReport.FunctionResult;
 import com.yukthitech.autox.logmon.LogMonitorContext;
@@ -51,15 +52,13 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Manages the report generation.
  * @author akranthikiran
  */
-public class ReportDataManager
+public class ReportDataManager implements IReportDataManager
 {
+	private static final String MONITOR_HTML_TEMPLATE;
+	
 	private static Logger logger = LogManager.getLogger(ReportDataManager.ExecutorDetails.class);
 	
-	private static ReportDataManager instance = new ReportDataManager();
-	
 	private static ObjectMapper objectMapper = new ObjectMapper();
-	
-	private static String MONITOR_HTML_TEMPLATE;
 	
 	static
 	{
@@ -143,15 +142,14 @@ public class ReportDataManager
 	
 	private ReportGenerator reportGenerator = new ReportGenerator();
 	
-	public static ReportDataManager getInstance()
-	{
-		return instance;
-	}
+	public ReportDataManager()
+	{}
 	
-	public static void reset()
+	@Override
+	public void reset()
 	{
-		instance.executorDetailsMap.clear();
-		instance.rootExecutorDetails = null;
+		executorDetailsMap.clear();
+		rootExecutorDetails = null;
 	}
 	
 	private ExecutorDetails getExecutorDetails(Executor executor)
@@ -303,7 +301,7 @@ public class ReportDataManager
 		}
 		
 		generateJsonReport();
-		AutomationEventManager.getInstance().executionStarted(executor, executionType);
+		((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).executionStarted(executor, executionType);
 	}
 	
 	private void setEndDetails(ExecutionType executionType, Executor executor, TestStatus status, String mssg)
@@ -352,7 +350,7 @@ public class ReportDataManager
 		}
 		
 		generateJsonReport();
-		AutomationEventManager.getInstance().executionEnded(executor, executionType);
+		((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).executionEnded(executor, executionType);
 	}
 	
 	public FinalReport generateReport()

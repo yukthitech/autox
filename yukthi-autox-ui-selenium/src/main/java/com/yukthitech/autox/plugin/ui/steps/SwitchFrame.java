@@ -72,7 +72,7 @@ public class SwitchFrame extends AbstractUiStep
 			exeLogger.trace("Switching to frame with locator: {}", locator);
 		}
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		if(index != null)

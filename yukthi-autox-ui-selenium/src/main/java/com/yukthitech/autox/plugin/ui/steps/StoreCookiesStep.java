@@ -68,7 +68,7 @@ public class StoreCookiesStep extends AbstractUiStep
 		String pathStr = String.valueOf(path);
 		exeLogger.trace("Stroring current cookies into file: {}", pathStr);
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		Set<Cookie> cookies = driver.manage().getCookies();

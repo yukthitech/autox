@@ -20,8 +20,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.debug.common.ClientMssgEvalExpression;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.debug.server.DebugFlowManager;
-import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.debug.server.LiveDebugPoint;
 
 public class EvalExpressionHandler extends AbstractServerDataHandler<ClientMssgEvalExpression>
@@ -36,12 +34,12 @@ public class EvalExpressionHandler extends AbstractServerDataHandler<ClientMssgE
 	@Override
 	public void processData(ClientMssgEvalExpression evalExpr)
 	{
-		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(evalExpr.getExecutionId());
+		LiveDebugPoint livepoint = debugFlowManager.getLiveDebugPoint(evalExpr.getExecutionId());
 		
 		if(livepoint == null)
 		{
 			logger.warn("Invalid live point id specified: " + evalExpr.getExecutionId());
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(evalExpr.getRequestId(), false, "Invalid live point id specified: %s", evalExpr.getExecutionId()));
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(evalExpr.getRequestId(), false, "Invalid live point id specified: %s", evalExpr.getExecutionId()));
 			return;
 		}
 		

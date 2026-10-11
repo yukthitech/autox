@@ -51,7 +51,7 @@ public class GotoUrlStep extends AbstractUiStep
 	{
 		exeLogger.debug("Going to page with url - {}", url);
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		driver.navigate().to(String.valueOf(url));

@@ -55,7 +55,7 @@ public class MongoQueryUtils
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Map<String, Object> execute(AutomationContext context, String mongoResourceName, Object query, boolean replaceExpressions)
 	{
-		MongoPluginSession mongoSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoPluginSession mongoSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(MongoPlugin.class);
 		MongoResource mongoResource = mongoSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)
@@ -115,7 +115,7 @@ public class MongoQueryUtils
 
 	public static Object executeJs(AutomationContext context, String mongoResourceName, String script)
 	{
-		MongoPluginSession mongoSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoPluginSession mongoSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(MongoPlugin.class);
 		MongoResource mongoResource = mongoSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)

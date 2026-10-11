@@ -96,7 +96,7 @@ public class LoadCookiesStep extends AbstractUiStep
 		
 		exeLogger.debug("Loading {} cookies from file - {}", cookies.size(), pathStr);
 		
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		for(Cookie cookie : cookies)

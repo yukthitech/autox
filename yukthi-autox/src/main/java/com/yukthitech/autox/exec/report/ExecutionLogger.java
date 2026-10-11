@@ -196,7 +196,7 @@ public class ExecutionLogger implements IExecutionLogger
 	 */
 	private String getSourceLocation()
 	{
-		return ExecutionContextManager.getInstance()
+		return AutomationContext.getInstance().getExecutionContextManager()
 				.getExecutionStack()
 				.getCurrentLocation();
 	}

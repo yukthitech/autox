@@ -134,7 +134,7 @@ public class BrowserLogMonitorSession implements ILogMonitorSession
 			return;
 		}
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 
 		if(session == null)
 		{

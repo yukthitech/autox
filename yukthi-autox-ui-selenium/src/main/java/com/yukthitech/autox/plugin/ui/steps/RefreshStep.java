@@ -82,7 +82,7 @@ public class RefreshStep extends AbstractPostCheckStep
 	{
 		exeLogger.trace("Refreshing the current page");
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		UiAutomationUtils.validateWithWait(() -> 

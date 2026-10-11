@@ -17,6 +17,7 @@ package com.yukthitech.autox.context;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,10 +34,19 @@ import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.debug.IDebugFlowManager;
+import com.yukthitech.autox.event.EventManager;
+import com.yukthitech.autox.event.IAutomationEventManager;
+import com.yukthitech.autox.exec.IExecutionPool;
+import com.yukthitech.autox.exec.IReportDataManager;
+import com.yukthitech.autox.exec.IStepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
+import com.yukthitech.autox.logmon.LogMonitorManager;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.IPluginSession;
+import com.yukthitech.autox.plugin.PluginManager;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.Function;
@@ -120,6 +130,61 @@ public class AutomationContext
 	private ExecutionSuite activeExecutionSuite;
 	
 	/**
+	 * Steps executor for this context/session.
+	 */
+	private IStepsExecutor stepsExecutor;
+	
+	/**
+	 * Debug flow manager for this context/session.
+	 */
+	private IDebugFlowManager debugFlowManager;
+	
+	/**
+	 * Execution context manager for this context/session.
+	 */
+	private final ExecutionContextManager executionContextManager = new ExecutionContextManager();
+	
+	/**
+	 * Plugin manager for this context/session.
+	 */
+	private final PluginManager pluginManager = new PluginManager();
+	
+	/**
+	 * Report data manager for this context/session (set by session start).
+	 */
+	private IReportDataManager reportDataManager;
+	
+	/**
+	 * Execution pool for this context/session (set by session start).
+	 */
+	private IExecutionPool executionPool;
+	
+	/**
+	 * Plugin event manager for this context/session.
+	 */
+	private final EventManager eventManager;
+	
+	/**
+	 * Log monitor manager for this context/session.
+	 */
+	private final LogMonitorManager logMonitorManager;
+	
+	/**
+	 * Automation lifecycle event manager (set by session start).
+	 */
+	private IAutomationEventManager automationEventManager;
+	
+	/**
+	 * Dynamically registered session services (e.g. mock servers), keyed by unique name.
+	 */
+	private final Map<String, IDynAutomationService> dynAutomationServices = new HashMap<>();
+	
+	/**
+	 * Prefix expression factory for this session (customs are session-scoped; Java parsers are process-level).
+	 */
+	private final PrefixExpressionFactory prefixExpressionFactory = new PrefixExpressionFactory();
+	
+	/**
 	 * Object currently being loaded (e.g. test-case-data map during dynamic data provider evaluation).
 	 * Accessible via prop: _this.* expressions and FreeMarker ${ _this.* } in templates.
 	 */
@@ -132,6 +197,8 @@ public class AutomationContext
 	public AutomationContext(ApplicationConfiguration appConfiguration)
 	{
 		this.appConfiguration = appConfiguration;
+		this.eventManager = new EventManager(appConfiguration);
+		this.logMonitorManager = new LogMonitorManager(appConfiguration.getLogMonitors());
 		
 		this.workDirectory = new File(appConfiguration.getWorkDirectory());
 		
@@ -158,14 +225,196 @@ public class AutomationContext
 		return testSuiteGroup;
 	}
 
-	public static void reset() throws Exception
+	/**
+	 * Resets all session-scoped managers owned by this context, then clears the global instance
+	 * when this context is the current one.
+	 */
+	public void reset() throws Exception
 	{
-		if(instance != null)
+		try
 		{
-			ApplicationConfiguration.reset();
+			executionContextManager.close();
+			executionContextManager.reset();
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting execution context manager", ex);
 		}
 		
-		instance = null;
+		try
+		{
+			if(appConfiguration != null)
+			{
+				Collection<IPlugin<?, ?>> configured = appConfiguration.getAllPlugins();
+				
+				if(configured != null)
+				{
+					for(IPlugin<?, ?> plugin : configured)
+					{
+						try
+						{
+							plugin.close();
+						}catch(Exception ex)
+						{
+							logger.warn("Error while closing configured plugin: {}", plugin.getClass().getName(), ex);
+						}
+					}
+				}
+			}
+		}catch(Exception ex)
+		{
+			logger.warn("Error while closing configured plugins", ex);
+		}
+		
+		try
+		{
+			pluginManager.reset();
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting plugin manager", ex);
+		}
+		
+		try
+		{
+			if(reportDataManager != null)
+			{
+				reportDataManager.reset();
+			}
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting report data manager", ex);
+		}
+		
+		try
+		{
+			if(executionPool != null)
+			{
+				executionPool.reset();
+			}
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting execution pool", ex);
+		}
+		
+		try
+		{
+			if(debugFlowManager != null)
+			{
+				debugFlowManager.reset();
+			}
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting debug flow manager", ex);
+		}
+		
+		try
+		{
+			eventManager.reset();
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting event manager", ex);
+		}
+		
+		try
+		{
+			logMonitorManager.reset();
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting log monitor manager", ex);
+		}
+		
+		try
+		{
+			if(automationEventManager != null)
+			{
+				automationEventManager.reset();
+			}
+		}catch(Exception ex)
+		{
+			logger.warn("Error while resetting automation event manager", ex);
+		}
+		
+		try
+		{
+			prefixExpressionFactory.clearCustomExpressions();
+		}catch(Exception ex)
+		{
+			logger.warn("Error while clearing custom prefix expressions", ex);
+		}
+		
+		closeDynAutomationServices();
+		
+		try
+		{
+			if(appConfiguration != null)
+			{
+				appConfiguration.close();
+			}
+		}catch(Exception ex)
+		{
+			logger.warn("Error while closing application configuration", ex);
+		}
+		
+		if(instance == this)
+		{
+			instance = null;
+		}
+	}
+	
+	private void closeDynAutomationServices()
+	{
+		for(Map.Entry<String, IDynAutomationService> entry : new HashMap<>(dynAutomationServices).entrySet())
+		{
+			try
+			{
+				entry.getValue().close();
+			}catch(Exception ex)
+			{
+				logger.warn("Error while closing dynamic automation service: {}", entry.getKey(), ex);
+			}
+		}
+		
+		dynAutomationServices.clear();
+	}
+	
+	/**
+	 * Registers a dynamic session service under a unique name.
+	 */
+	public synchronized void registerDynAutomationService(String name, IDynAutomationService service)
+	{
+		if(StringUtils.isBlank(name))
+		{
+			throw new InvalidArgumentException("Dynamic automation service name cannot be blank");
+		}
+		
+		if(service == null)
+		{
+			throw new InvalidArgumentException("Dynamic automation service cannot be null");
+		}
+		
+		if(dynAutomationServices.containsKey(name))
+		{
+			throw new InvalidStateException("Dynamic automation service already registered with name: {}", name);
+		}
+		
+		dynAutomationServices.put(name, service);
+	}
+	
+	/**
+	 * Fetches a dynamic session service by name.
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized <T extends IDynAutomationService> T getDynAutomationService(String name)
+	{
+		return (T) dynAutomationServices.get(name);
+	}
+	
+	/**
+	 * Unregisters a dynamic session service by name without closing it.
+	 * Callers that stop a service themselves should unregister after close.
+	 */
+	public synchronized IDynAutomationService unregisterDynAutomationService(String name)
+	{
+		return dynAutomationServices.remove(name);
 	}
 	
 	/**
@@ -234,17 +483,17 @@ public class AutomationContext
 	 */
 	public void setAttribute(String name, Object value)
 	{
-		ExecutionContextManager.getExecutionContext().setAttribute(name, value);
+		executionContextManager.getExecutionContext().setAttribute(name, value);
 	}
 	
 	public void setGlobalAttribute(String name, Object value)
 	{
-		ExecutionContextManager.getInstance().setGlobalAttribute(name, value);
+		executionContextManager.setGlobalAttribute(name, value);
 	}
 	
 	public Object getGlobalAttribute(String name)
 	{
-		return ExecutionContextManager.getInstance().getGlobalAttribute(name);
+		return executionContextManager.getGlobalAttribute(name);
 	}
 	
 	/**
@@ -254,7 +503,7 @@ public class AutomationContext
 	 */
 	public void setInternalAttribute(String name, Object value)
 	{
-		ExecutionContextManager.getExecutionContext().setInternalAttribute(name, value);
+		executionContextManager.getExecutionContext().setInternalAttribute(name, value);
 	}
 	
 	/**
@@ -264,7 +513,7 @@ public class AutomationContext
 	 */
 	public Object getAttribute(String name)
 	{
-		return ExecutionContextManager.getExecutionContext().getAttribute(name);
+		return executionContextManager.getExecutionContext().getAttribute(name);
 	}
 	
 	/**
@@ -274,7 +523,7 @@ public class AutomationContext
 	 */
 	public Object getInternalAttribute(String name)
 	{
-		return ExecutionContextManager.getExecutionContext().getInternalAttribute(name);
+		return executionContextManager.getExecutionContext().getInternalAttribute(name);
 	}
 	
 	/**
@@ -284,7 +533,7 @@ public class AutomationContext
 	 */
 	public Object removeAttribute(String name)
 	{
-		return ExecutionContextManager.getExecutionContext().removeAttribute(name);
+		return executionContextManager.getExecutionContext().removeAttribute(name);
 	}
 	
 	/**
@@ -293,7 +542,7 @@ public class AutomationContext
 	 */
 	public Map<String, Object> getAttributeMap()
 	{
-		return ExecutionContextManager.getExecutionContext().getAttr();
+		return executionContextManager.getExecutionContext().getAttr();
 	}
 	
 	/**
@@ -302,7 +551,7 @@ public class AutomationContext
 	 */
 	public Map<String, Object> getAttr()
 	{
-		return ExecutionContextManager.getExecutionContext().getAttr();
+		return executionContextManager.getExecutionContext().getAttr();
 	}
 	
 	/**
@@ -313,7 +562,7 @@ public class AutomationContext
 	 */
 	public Map<String, Object> getPluginAttr(String name)
 	{
-		return ExecutionContextManager.getExecutionContext().getPluginAttr(name);
+		return executionContextManager.getExecutionContext().getPluginAttr(name);
 	}
 
 	/**
@@ -323,7 +572,7 @@ public class AutomationContext
 	 */
 	public void pushParameters(Map<String, Object> parameters)
 	{
-		ExecutionContextManager.getInstance().getExecutionContextStack().pushParameters(parameters);
+		executionContextManager.getExecutionContextStack().pushParameters(parameters);
 	}
 	
 	/**
@@ -331,22 +580,22 @@ public class AutomationContext
 	 */
 	public void popParameters()
 	{
-		ExecutionContextManager.getInstance().getExecutionContextStack().popParameters();
+		executionContextManager.getExecutionContextStack().popParameters();
 	}
 	
 	public boolean isParamPresent()
 	{
-		return ExecutionContextManager.getInstance().getExecutionContextStack().isParamPresent();
+		return executionContextManager.getExecutionContextStack().isParamPresent();
 	}
 	
 	public Map<String, Object> getParam()
 	{
-		return ExecutionContextManager.getInstance().getExecutionContextStack().getParam();
+		return executionContextManager.getExecutionContextStack().getParam();
 	}
 	
 	public Object getParameter(String name)
 	{
-		return ExecutionContextManager.getInstance().getExecutionContextStack().getParameter(name);
+		return executionContextManager.getExecutionContextStack().getParameter(name);
 	}
 	
 	/**
@@ -397,7 +646,7 @@ public class AutomationContext
 	
 	public <P, S extends IPluginSession> S newPluginSession(Class<? extends IPlugin<?, S>> pluginType)
 	{
-		return ExecutionContextManager.getInstance().getPluginSession(pluginType);
+		return executionContextManager.getPluginSession(pluginType);
 	}
 
 	/**
@@ -405,7 +654,7 @@ public class AutomationContext
 	 */
 	public void startLogMonitoring()
 	{
-		ExecutionContextManager.getExecutionContext().startLogMonitoring();
+		executionContextManager.getExecutionContext().startLogMonitoring();
 	}
 	
 	/**
@@ -414,7 +663,7 @@ public class AutomationContext
 	 */
 	public Map<String, ReportLogFile> stopLogMonitoring(boolean flowErrored)
 	{
-		return ExecutionContextManager.getExecutionContext().stopMonitoring(flowErrored);
+		return executionContextManager.getExecutionContext().stopMonitoring(flowErrored);
 	}
 	
 	/**
@@ -515,7 +764,7 @@ public class AutomationContext
 	public Function getFunction(String name)
 	{
 		//check if current test suite has the group, if present give that higher preference
-		Function function = ExecutionContextManager.getExecutionContext().getFunction(name);
+		Function function = executionContextManager.getExecutionContext().getFunction(name);
 		
 		if(function != null)
 		{
@@ -569,11 +818,111 @@ public class AutomationContext
 	{
 		try
 		{
-			return ExecutionContextManager.getExecutionContext().getExecutionLogger();
+			return executionContextManager.getExecutionContext().getExecutionLogger();
 		}catch(NonExecutionThreadException ex)
 		{
 			return Log4jExecutionLogger.getInstance();
 		}
+	}
+	
+	public ExecutionContextManager getExecutionContextManager()
+	{
+		return executionContextManager;
+	}
+	
+	public PluginManager getPluginManager()
+	{
+		return pluginManager;
+	}
+	
+	public IReportDataManager getReportDataManager()
+	{
+		if(reportDataManager == null)
+		{
+			throw new InvalidStateException("Report data manager is not registered on automation context");
+		}
+		
+		return reportDataManager;
+	}
+	
+	public void setReportDataManager(IReportDataManager reportDataManager)
+	{
+		this.reportDataManager = reportDataManager;
+	}
+	
+	public IExecutionPool getExecutionPool()
+	{
+		if(executionPool == null)
+		{
+			throw new InvalidStateException("Execution pool is not registered on automation context");
+		}
+		
+		return executionPool;
+	}
+	
+	public void setExecutionPool(IExecutionPool executionPool)
+	{
+		this.executionPool = executionPool;
+	}
+	
+	public IStepsExecutor getStepsExecutor()
+	{
+		if(stepsExecutor == null)
+		{
+			throw new InvalidStateException("Steps executor is not registered on automation context");
+		}
+		
+		return stepsExecutor;
+	}
+	
+	public void setStepsExecutor(IStepsExecutor stepsExecutor)
+	{
+		this.stepsExecutor = stepsExecutor;
+	}
+	
+	public IDebugFlowManager getDebugFlowManager()
+	{
+		if(debugFlowManager == null)
+		{
+			throw new InvalidStateException("Debug flow manager is not registered on automation context");
+		}
+		
+		return debugFlowManager;
+	}
+	
+	public void setDebugFlowManager(IDebugFlowManager debugFlowManager)
+	{
+		this.debugFlowManager = debugFlowManager;
+	}
+	
+	public EventManager getEventManager()
+	{
+		return eventManager;
+	}
+	
+	public LogMonitorManager getLogMonitorManager()
+	{
+		return logMonitorManager;
+	}
+	
+	public IAutomationEventManager getAutomationEventManager()
+	{
+		if(automationEventManager == null)
+		{
+			throw new InvalidStateException("Automation event manager is not registered on automation context");
+		}
+		
+		return automationEventManager;
+	}
+	
+	public void setAutomationEventManager(IAutomationEventManager automationEventManager)
+	{
+		this.automationEventManager = automationEventManager;
+	}
+	
+	public PrefixExpressionFactory getPrefixExpressionFactory()
+	{
+		return prefixExpressionFactory;
 	}
 
 	/**

@@ -95,7 +95,7 @@ public class HandlePromptStep extends AbstractUiStep
 			exeLogger.debug("Handling prompt without validation of message..");
 		}
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		PendingDialog prompt = session.pollDialog(driverName, DIALOG_WAIT_MILLIS);
 		
 		if(prompt == null)

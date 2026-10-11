@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.test;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -353,7 +355,7 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 	 */
 	public void addDataBean(String name, Object bean)
 	{
-		ApplicationConfiguration.getInstance().addDataBean(name, bean);
+		AutomationContext.getInstance().getAppConfiguration().addDataBean(name, bean);
 	}
 
 	/**

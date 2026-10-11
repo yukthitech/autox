@@ -37,7 +37,7 @@ public class QuitSessionStep extends AbstractUiStep
 	{
 		exeLogger.debug("Closing current session");
 		
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		seleniumSession.getWebDriver(driverName).quit();
 	}
 	

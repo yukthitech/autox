@@ -83,7 +83,7 @@ public class OpenWindowStep extends AbstractUiStep
 	{
 		exeLogger.trace("Opening window '{}' with url: {}", name, url);
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		String urlStr = String.valueOf(url);

@@ -85,7 +85,7 @@ public class UiExecuteJsStep extends AbstractUiStep
 	{
 		exeLogger.trace("Executing JS script - {}", script);
 		
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		
 		//script is treated as body of a function (similar to selenium), so that 'return' can be used
 		String functionScript = "() => {\n" + script + "\n}";

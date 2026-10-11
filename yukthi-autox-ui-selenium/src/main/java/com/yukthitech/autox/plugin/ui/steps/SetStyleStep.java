@@ -72,7 +72,7 @@ public class SetStyleStep extends AbstractParentUiStep
 			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		String code = null;
 

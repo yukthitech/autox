@@ -168,7 +168,7 @@ public class BrowserLogMonitorSession implements ILogMonitorSession
 			return;
 		}
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 
 		if(seleniumSession == null)
 		{

@@ -54,7 +54,6 @@ public abstract class Executor implements IExecutor
 	 */
 	protected String uniqueId;
 	
-	private ReportDataManager reportManager = ReportDataManager.getInstance();
 	
 	protected Object executable;
 	
@@ -104,7 +103,12 @@ public abstract class Executor implements IExecutor
 		this.executable = executable;
 		this.childName = childName != null ? childName : "Execution";
 		
-		this.uniqueId = reportManager.getRep(this);
+		this.uniqueId = reportManager().getRep(this);
+	}
+	
+	private ReportDataManager reportManager()
+	{
+		return (ReportDataManager) AutomationContext.getInstance().getReportDataManager();
 	}
 	
 	public boolean hasSetup()
@@ -245,9 +249,9 @@ public abstract class Executor implements IExecutor
 			status = TestStatus.IN_PROGRESS;
 		}
 
-		ExecutionContextManager.executeInContext(this, () -> 
+		AutomationContext.getInstance().getExecutionContextManager().executeInContext(this, () -> 
 		{
-			reportManager.executionStarted(ExecutionType.MAIN, this);
+			reportManager().executionStarted(ExecutionType.MAIN, this);
 		});
 		
 		
@@ -255,7 +259,7 @@ public abstract class Executor implements IExecutor
 			
 		AsyncTryCatchBlock.doTry(uniqueId, mainCallback -> 
 		{
-			boolean exeRes = ExecutionContextManager.executeInContext(Executor.this, () -> 
+			boolean exeRes = AutomationContext.getInstance().getExecutionContextManager().executeInContext(Executor.this, () -> 
 			{
 				if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this, 
 						obj -> {reload(); return beforeChildFromParent;})
@@ -312,7 +316,7 @@ public abstract class Executor implements IExecutor
 				throw ex;
 			}).onFinally(childCallback -> 
 			{
-				ExecutionContextManager.executeInContext(Executor.this, () -> 
+				AutomationContext.getInstance().getExecutionContextManager().executeInContext(Executor.this, () -> 
 				{
 					//Pre cleanup is expected to take care of tasks like data-clean-up
 					preCleanup();
@@ -325,7 +329,7 @@ public abstract class Executor implements IExecutor
 			
 		}).onFinally(mainCallback ->
 		{
-			ExecutionContextManager.executeInContext(Executor.this, () -> 
+			AutomationContext.getInstance().getExecutionContextManager().executeInContext(Executor.this, () -> 
 			{
 				//execute after child even if setup of test case fails
 				// but should not execute if before-child fails
@@ -358,19 +362,19 @@ public abstract class Executor implements IExecutor
 	{
 		if(status == TestStatus.ERRORED)
 		{
-			reportManager.executionErrored(ExecutionType.MAIN, this, statusMessage);
+			reportManager().executionErrored(ExecutionType.MAIN, this, statusMessage);
 		}
 		else if(status == TestStatus.FAILED)
 		{
-			reportManager.executionFailed(ExecutionType.MAIN, this, statusMessage);
+			reportManager().executionFailed(ExecutionType.MAIN, this, statusMessage);
 		}
 		else if(status == TestStatus.SKIPPED)
 		{
-			reportManager.executionSkipped(ExecutionType.MAIN, this, statusMessage);
+			reportManager().executionSkipped(ExecutionType.MAIN, this, statusMessage);
 		}
 		else
 		{
-			reportManager.executionCompleted(ExecutionType.MAIN, this);
+			reportManager().executionCompleted(ExecutionType.MAIN, this);
 		}
 	}
 	
@@ -410,7 +414,7 @@ public abstract class Executor implements IExecutor
 			.newChild(uniqueId + "-subexecutors", callback -> 
 			{
 				//currentThread.setName(uniqueId);
-				ExecutionPool.getInstance().execute(this, childExecutors, beforeChild, afterChild, parallelExecutionEnabled, callback);
+				((ExecutionPool) AutomationContext.getInstance().getExecutionPool()).execute(this, childExecutors, beforeChild, afterChild, parallelExecutionEnabled, callback);
 			}).onComplete(subtaskCallback -> 
 			{
 				StatusTracker statusTracker = new StatusTracker();
@@ -452,9 +456,9 @@ public abstract class Executor implements IExecutor
 	
 	private void executeChildSteps()
 	{
-		ExecutionContextManager.executeInContext(this, () -> 
+		AutomationContext.getInstance().getExecutionContextManager().executeInContext(this, () -> 
 		{
-			activeExecutionLogger = ReportDataManager.getInstance().getExecutionLogger(this);
+			activeExecutionLogger = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).getExecutionLogger(this);
 			ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
 	
 			//NOTE: Even parallel execution is used by test-suites or data-test-cases, final test case
@@ -464,7 +468,7 @@ public abstract class Executor implements IExecutor
 			{
 				StackFrameExecutor.newExecutor(uniqueId, childSteps, (steps, stackFrameId) -> 
 				{
-					StepsExecutor.getDefault().execute(steps, currentStep, stackFrameId);
+					AutomationContext.getInstance().getStepsExecutor().execute(steps, currentStep, stackFrameId);
 					setStatus(TestStatus.SUCCESSFUL, null);
 				}).onReload(steps -> 
 				{

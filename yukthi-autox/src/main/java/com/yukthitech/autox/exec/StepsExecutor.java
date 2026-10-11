@@ -28,7 +28,6 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
-import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.DropToStackFrameException;
 import com.yukthitech.autox.test.IgnoreErrorException;
@@ -43,18 +42,14 @@ import com.yukthitech.utils.event.EventListenerManager;
  */
 public class StepsExecutor implements IStepsExecutor
 {
-	private static final StepsExecutor DEFAULT = new StepsExecutor();
-	
 	private static Logger logger = LogManager.getLogger(StepsExecutor.class);
 	
 	private static ThreadLocal<Boolean> topLevelStep = new ThreadLocal<>();
 	
-	private static EventListenerManager<IStepListener> stepListeners = EventListenerManager.newEventListenerManager(IStepListener.class, false);
+	private final EventListenerManager<IStepListener> stepListeners = EventListenerManager.newEventListenerManager(IStepListener.class, false);
 	
-	public static StepsExecutor getDefault()
-	{
-		return DEFAULT;
-	}
+	public StepsExecutor()
+	{}
 	
 	@Override
 	public void addStepListener(IStepListener listener)
@@ -89,11 +84,10 @@ public class StepsExecutor implements IStepsExecutor
 	/**
 	 * Executes specified step/validation. In case of validations, ensures result is true, in not {@link AutoxValidationException} will 
 	 * be thrown.
-	 * @param context context to be used
-	 * @param exeLogger logger to be used
-	 * @param step step to be executed
+	 * @param sourceStep step to be executed
+	 * @param parentFrameId parent stack frame id
 	 */
-	private static void executeStep(IStep sourceStep, String parentFrameId) throws Exception
+	private void executeStep(IStep sourceStep, String parentFrameId) throws Exception
 	{
 		AutomationContext context = AutomationContext.getInstance();
 		IExecutionLogger exeLogger = context.getExecutionLogger();
@@ -109,13 +103,13 @@ public class StepsExecutor implements IStepsExecutor
 		IStep step = sourceStep.clone();
 		step.setSourceStep(sourceStep);
 
-		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+		ExecutionStack executionStack = AutomationContext.getInstance().getExecutionContextManager().getExecutionStack();
 		
 		executionStack.push(step, parentFrameId);
 
 		try
 		{
-			ExecutionServices.getDebugFlowManager().checkForDebugPoint(step);
+			context.getDebugFlowManager().checkForDebugPoint(step);
 
 			AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
 
@@ -148,7 +142,7 @@ public class StepsExecutor implements IStepsExecutor
 			
 			try
 			{
-				DebugFlowManager.getInstance().pauseAtErrorPoint(step);
+				context.getDebugFlowManager().pauseAtErrorPoint(step);
 			}catch(IgnoreErrorException igEx)
 			{
 				//if debug env and request is raised to ignore current error

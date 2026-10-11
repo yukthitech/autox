@@ -20,8 +20,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
-import com.yukthitech.autox.debug.server.DebugFlowManager;
-import com.yukthitech.autox.debug.server.DebugServer;
 
 /**
  * Used to execute test case fully/partially in interactive environment.
@@ -51,9 +49,9 @@ public class DebuggerInitHandler extends AbstractServerDataHandler<ClientMssgDeb
 	{
 		logger.debug("Executing interactive test case command: {}", data);
 		
-		DebugFlowManager.getInstance().setDebugPoints(data.getDebugPoints());
+		debugFlowManager.setDebugPoints(data.getDebugPoints());
 		initialized = true;
 		
-		DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
+		debugFlowManager.sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
 	}
 }

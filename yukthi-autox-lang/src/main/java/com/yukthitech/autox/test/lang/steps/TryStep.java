@@ -26,7 +26,6 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.HandledException;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
@@ -58,7 +57,7 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 	{
 		try
 		{
-			ExecutionServices.getStepsExecutor().execute(steps, null, null);
+			AutomationContext.getInstance().getStepsExecutor().execute(steps, null, null);
 		}catch(Exception ex)
 		{
 			if(catchStep == null)
@@ -78,15 +77,15 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 
 			exeLogger.warn("Exception occurred while executing try-block. Executing catch block. Exception: {}", ex);
 			
-			ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+			ExecutionStack executionStack = AutomationContext.getInstance().getExecutionContextManager().getExecutionStack();
 			
 			executionStack.push(catchStep);
-			ExecutionServices.getDebugFlowManager().checkForDebugPoint(catchStep);
+			AutomationContext.getInstance().getDebugFlowManager().checkForDebugPoint(catchStep);
 			
 			try
 			{
 				context.setAttribute(catchStep.getErrorAttr(), ex);
-				ExecutionServices.getStepsExecutor().execute(catchStep.getSteps(), null, null);
+				AutomationContext.getInstance().getStepsExecutor().execute(catchStep.getSteps(), null, null);
 			}finally
 			{
 				executionStack.pop(catchStep);

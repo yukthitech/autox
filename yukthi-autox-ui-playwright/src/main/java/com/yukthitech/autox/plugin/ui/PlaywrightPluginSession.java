@@ -230,7 +230,7 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 		super(parentPlugin);
 		this.defaultDriverName = defaultDriverName;
 		
-		EventManager.getInstance().invokePluginEventHandler(this, IUiEvent.EVENT_INIT, null);
+		AutomationContext.getInstance().getEventManager().invokePluginEventHandler(this, IUiEvent.EVENT_INIT, null);
 	}
 	
 	/**

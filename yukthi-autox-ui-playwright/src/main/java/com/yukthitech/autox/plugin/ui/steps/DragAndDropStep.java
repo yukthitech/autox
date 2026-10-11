@@ -97,7 +97,7 @@ public class DragAndDropStep extends AbstractParentUiStep
 			{
 				logger.debug("Drag using drag-to failed, trying to drag using mouse actions. Error: {}", "" + ex);
 				
-				PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+				PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 				Page page = session.getPage(driverName);
 				
 				sourceElement.hover();

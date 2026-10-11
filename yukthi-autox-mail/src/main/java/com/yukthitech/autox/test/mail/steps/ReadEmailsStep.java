@@ -182,7 +182,7 @@ public class ReadEmailsStep extends AbstractStep
 			throw new InvalidArgumentException("Invalid subject pattern specified: " + subjectPattern, ex);
 		}
 
-		MailSession session = ExecutionContextManager.getInstance().getPluginSession(EmailPlugin.class);
+		MailSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(EmailPlugin.class);
 		Store store = session.getStoreForRead(emailServerName);
 
 		Folder mailFolder = store.getFolder(FOLDER_NAME);

@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.logmon;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -74,7 +76,7 @@ public class LogMonitorContext
 		this.status = status;
 		this.description = description;
 		
-		this.executionDateStr = DateFormatUtils.format(new Date(), ApplicationConfiguration.getInstance().getDateFomat());
+		this.executionDateStr = DateFormatUtils.format(new Date(), AutomationContext.getInstance().getAppConfiguration().getDateFomat());
 	}
 
 	/**

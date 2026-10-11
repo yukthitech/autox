@@ -58,7 +58,7 @@ public class MoveMouseStep extends AbstractParentUiStep
 	{
 		exeLogger.trace("Moving mouse by specified offset: [x: {}, y: {}]", xoffset, yoffset);
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		Actions actions = new Actions(driver);

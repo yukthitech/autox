@@ -68,7 +68,7 @@ public class StoreCookiesStep extends AbstractUiStep
 		String pathStr = String.valueOf(path);
 		exeLogger.trace("Stroring current cookies into file: {}", pathStr);
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 
 		List<Cookie> cookies = session.getBrowserContext(driverName).cookies();
 		

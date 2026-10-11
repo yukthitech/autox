@@ -93,7 +93,7 @@ public class DragAndDropStep extends AbstractParentUiStep
 
 		try
 		{
-			SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+			SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 			seleniumSession.getWebDriver(driverName).manage().timeouts().implicitlyWait(Duration.ofMillis(10000));
 			
 			Thread.sleep(2000);

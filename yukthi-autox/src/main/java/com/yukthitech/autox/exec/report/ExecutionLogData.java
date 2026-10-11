@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.exec.report;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -172,7 +174,7 @@ public class ExecutionLogData
 		 */
 		public String getTimeStr()
 		{
-			return ApplicationConfiguration.getInstance().getTimeFormatObject().format(time);
+			return AutomationContext.getInstance().getAppConfiguration().getTimeFormatObject().format(time);
 		}
 	}
 
@@ -355,7 +357,7 @@ public class ExecutionLogData
 
 		public String getStartTimeStr()
 		{
-			return DateFormatUtils.format(startTime, ApplicationConfiguration.getInstance().getDateTimeFomat());
+			return DateFormatUtils.format(startTime, AutomationContext.getInstance().getAppConfiguration().getDateTimeFomat());
 		}
 
 		public String getType()
@@ -415,7 +417,7 @@ public class ExecutionLogData
 
 		public String getEndTimeStr()
 		{
-			return ApplicationConfiguration.getInstance().getTimeFormatObject().format(endTime);
+			return AutomationContext.getInstance().getAppConfiguration().getTimeFormatObject().format(endTime);
 		}
 		
 		public String getTimeTaken()

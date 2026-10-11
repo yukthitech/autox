@@ -30,7 +30,6 @@ import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ReportLogFile;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
@@ -86,7 +85,7 @@ public class CaptureTracingStep extends AbstractUiStep implements IStepContainer
 		exeLogger.debug("Tracing capture started with name: {}", nameStr);
 		
 		ReportLogFile traceFile = exeLogger.createFile(nameStr, ".zip");
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		BrowserContext browserContext = session.getBrowserContext(driverName);
 		
 		boolean tracingStarted = false;
@@ -99,7 +98,7 @@ public class CaptureTracingStep extends AbstractUiStep implements IStepContainer
 					.setSources(true));
 			tracingStarted = true;
 			
-			ExecutionServices.getStepsExecutor().execute(steps, null, null);
+			AutomationContext.getInstance().getStepsExecutor().execute(steps, null, null);
 		}finally
 		{
 			if(tracingStarted)

@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.mongo;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +54,7 @@ public class MongoFreeMarkerMethods
 	
 	private static FindIterable<Document> findDocuments(String mongoResourceName, String collection, Object... conditions)
 	{
-		MongoPluginSession mongoPluginSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoPluginSession mongoPluginSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(MongoPlugin.class);
 		MongoResource mongoResource = mongoPluginSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)
@@ -151,7 +153,7 @@ public class MongoFreeMarkerMethods
 			@FmParam(name = "conditions", description = "Name-value pairs to be used as conditions") Object... conditions
 			)
 	{
-		MongoPluginSession mongoPluginSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoPluginSession mongoPluginSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(MongoPlugin.class);
 		MongoResource mongoResource = mongoPluginSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)

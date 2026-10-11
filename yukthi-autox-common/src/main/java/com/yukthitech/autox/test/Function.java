@@ -26,7 +26,6 @@ import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;
 import com.yukthitech.utils.doc.Doc;
@@ -177,12 +176,12 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	{
 		context.pushParameters(params);
 		
-		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+		ExecutionStack executionStack = AutomationContext.getInstance().getExecutionContextManager().getExecutionStack();
 		executionStack.push(executable);
 		
 		try
 		{
-			ExecutionServices.getStepsExecutor().execute(steps, null, parentRefId);
+			AutomationContext.getInstance().getStepsExecutor().execute(steps, null, parentRefId);
 		} catch(Exception ex)
 		{
 			//occurs during return statement execution

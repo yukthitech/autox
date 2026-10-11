@@ -57,26 +57,31 @@ public class PrefixExpressionFactory
 	private static Logger logger = LogManager.getLogger(PrefixExpressionFactory.class);
 	
 	/**
-	 * Singleton instance.
+	 * Process-level parsers discovered from Java annotations. Shared across sessions.
 	 */
-	private static PrefixExpressionFactory expressionFactory;
+	private static Map<String, PrefixExpressionDetails> prefixExpressions = new HashMap<>();
 	
 	/**
-	 * Available expression parsers.
+	 * Fallback factory used by tooling (docs/IDE) when no {@link AutomationContext} is active.
 	 */
-	private Map<String, PrefixExpressionDetails> prefixExpressions = new HashMap<>();
+	private static PrefixExpressionFactory toolingFactory;
 	
+	/**
+	 * Session-scoped custom prefix expressions loaded from XML / interactive reload.
+	 */
 	private Map<String, CustomPrefixExpression> customPrefixExpressions = new HashMap<>();
 	
+	/**
+	 * Session-scoped custom UI locators loaded from XML / interactive reload.
+	 */
 	private Map<String, CustomPrefixExpression> customUiLocators = new HashMap<>();
 
-	private PrefixExpressionFactory()
+	public PrefixExpressionFactory()
 	{}
 	
 	/**
-	 * Gets the expression factory.
-	 *
-	 * @return the expression factory
+	 * Scans classpath for annotated Java prefix-expression parsers (process-level).
+	 * Does not clear session custom expressions on the current context factory.
 	 */
 	public static void init(ClassLoader classLoader, Set<String> basePackagesAct)
 	{
@@ -94,7 +99,7 @@ public class PrefixExpressionFactory
 		
 		basePackages.add("com.yukthitech");
 		
-		PrefixExpressionFactory factory = new PrefixExpressionFactory();
+		Map<String, PrefixExpressionDetails> scanned = new HashMap<>();
 
 		Reflections reflections = null;
 		Set<Method> parserMethods = null;
@@ -170,7 +175,7 @@ public class PrefixExpressionFactory
 								paramAnnot.defaultValue(), paramAnnot.required(), paramAnnot.description()));
 					}
 					
-					PrefixExpressionDetails existing = factory.prefixExpressions.put(parserDet.getType(), parserDet);
+					PrefixExpressionDetails existing = scanned.put(parserDet.getType(), parserDet);
 
 					if(existing != null)
 					{
@@ -185,13 +190,40 @@ public class PrefixExpressionFactory
 			}
 		}
 		
-		logger.debug("Found expression parsers to be: {}", factory.prefixExpressions);
-		PrefixExpressionFactory.expressionFactory = factory;
+		logger.debug("Found expression parsers to be: {}", scanned);
+		PrefixExpressionFactory.prefixExpressions = scanned;
 	}
 	
+	/**
+	 * Session factory from current {@link AutomationContext}, or a tooling fallback when no context is active.
+	 */
 	public static PrefixExpressionFactory getExpressionFactory()
 	{
-		return expressionFactory;
+		AutomationContext context = AutomationContext.getInstance();
+		
+		if(context != null)
+		{
+			return context.getPrefixExpressionFactory();
+		}
+		
+		synchronized(PrefixExpressionFactory.class)
+		{
+			if(toolingFactory == null)
+			{
+				toolingFactory = new PrefixExpressionFactory();
+			}
+			
+			return toolingFactory;
+		}
+	}
+	
+	/**
+	 * Clears session-scoped custom prefixes and UI locators. Does not touch Java-scanned parsers.
+	 */
+	public void clearCustomExpressions()
+	{
+		customPrefixExpressions.clear();
+		customUiLocators.clear();
 	}
 	
 	public void addCustomPrefixExpression(CustomPrefixExpression expression)

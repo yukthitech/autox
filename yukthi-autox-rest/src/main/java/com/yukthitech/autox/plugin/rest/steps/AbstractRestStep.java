@@ -377,7 +377,7 @@ public abstract class AbstractRestStep extends AbstractStep
 				+ "\n\tForm Fields: {}"
 				+ "\n\tParams: {}", request.getClass().getSimpleName(), uri, headers, pathVariables, formFields, params);
 		
-		RestPluginSession restPluginSession = ExecutionContextManager.getInstance().getPluginSession(RestPlugin.class);
+		RestPluginSession restPluginSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(RestPlugin.class);
 		
 		Map<String, String> defaultHeaders = new HashMap<>( restPluginSession.getDefaultHeaders(connectionName) );
 		Map<String, String> headers = toMap(context, "header", this.headers);
@@ -445,7 +445,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void invoke(AutomationContext context, RestRequest<?> request, IExecutionLogger exeLogger)
 	{
-		RestPluginSession restPluginSession = ExecutionContextManager.getInstance().getPluginSession(RestPlugin.class);
+		RestPluginSession restPluginSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(RestPlugin.class);
 		
 		if(baseUrl != null)
 		{
@@ -493,9 +493,9 @@ public abstract class AbstractRestStep extends AbstractStep
 	
 	public final void execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
-		RestPluginSession restPluginSession = ExecutionContextManager.getInstance().getPluginSession(RestPlugin.class);
+		RestPluginSession restPluginSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(RestPlugin.class);
 		
-		ExecutionContextManager.getExecutionContext().pushActivePlugin(restPluginSession);
+		AutomationContext.getInstance().getExecutionContextManager().getExecutionContext().pushActivePlugin(restPluginSession);
 		
 		try
 		{
@@ -507,7 +507,7 @@ public abstract class AbstractRestStep extends AbstractStep
 			executeRestStep(context, logger);
 		}finally
 		{
-			ExecutionContextManager.getExecutionContext().popActivePlugin();
+			AutomationContext.getInstance().getExecutionContextManager().getExecutionContext().popActivePlugin();
 		}
 	}
 	

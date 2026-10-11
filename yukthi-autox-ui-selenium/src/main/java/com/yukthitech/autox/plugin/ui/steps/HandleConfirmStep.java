@@ -81,7 +81,7 @@ public class HandleConfirmStep extends AbstractUiStep
 			exeLogger.debug("Handling confirm without validation of message..");
 		}
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		Alert alert = driver.switchTo().alert();

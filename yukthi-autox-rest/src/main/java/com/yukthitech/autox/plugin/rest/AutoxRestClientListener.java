@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.rest;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import javax.servlet.http.HttpServletResponse;
 
 import com.yukthitech.autox.event.EventManager;
@@ -47,7 +49,7 @@ public class AutoxRestClientListener implements IRestClientListener
 			return;
 		}
 		
-		Object handlerRes = EventManager.getInstance().invokePluginEventHandler(session, IRestPluginEvent.EVENT_UNAUTHORIZED, 
+		Object handlerRes = AutomationContext.getInstance().getEventManager().invokePluginEventHandler(session, IRestPluginEvent.EVENT_UNAUTHORIZED, 
 				CommonUtils.toMap("request", req, "result", res, "connectionName", connectionName));
 		
 		if("true".equalsIgnoreCase("" + handlerRes))

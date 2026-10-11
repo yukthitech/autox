@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.plugin.rest;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +81,7 @@ public class RestPluginSession extends AbstractPluginSession<RestPluginSession, 
 			this.connectionMap.put(connectionName, det);
 		}
 		
-		EventManager.getInstance().invokePluginEventHandler(this, IRestPluginEvent.EVENT_INIT, 
+		AutomationContext.getInstance().getEventManager().invokePluginEventHandler(this, IRestPluginEvent.EVENT_INIT, 
 				CommonUtils.toMap("connectionName", connectionName));
 
 		return det;

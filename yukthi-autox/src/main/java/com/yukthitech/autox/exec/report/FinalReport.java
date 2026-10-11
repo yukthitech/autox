@@ -15,6 +15,8 @@
  */
 package com.yukthitech.autox.exec.report;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -347,7 +349,7 @@ public class FinalReport
 	
 	public String getExecutionDateStr()
 	{
-		return ApplicationConfiguration.getInstance().getTimeFormatObject().format(executionDate);
+		return AutomationContext.getInstance().getAppConfiguration().getTimeFormatObject().format(executionDate);
 	}
 
 	public Date getExecutionDate()

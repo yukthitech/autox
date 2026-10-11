@@ -73,7 +73,7 @@ public class HandleAlertStep extends AbstractUiStep
 			exeLogger.debug("Handling alert without validation of message..");
 		}
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		PendingDialog alert = session.pollDialog(driverName, DIALOG_WAIT_MILLIS);
 		
 		if(alert == null)

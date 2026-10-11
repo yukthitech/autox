@@ -40,8 +40,6 @@ public class PluginManager
 {
 	private static Logger logger = LogManager.getLogger(PluginManager.class);
 	
-	private static PluginManager instance = new PluginManager();
-	
 	/**
 	 * Maintains list of required plugins required by loaded test suites.
 	 */
@@ -52,12 +50,28 @@ public class PluginManager
 	 */
 	private Set<Class<?>> initializedPlugins = new HashSet<>();
 	
-	private PluginManager()
+	public PluginManager()
 	{}
 	
-	public static PluginManager getInstance()
+	/**
+	 * Closes all registered plugins, then clears required and initialized plugin state
+	 * so a new session can start cleanly.
+	 */
+	public synchronized void reset()
 	{
-		return instance;
+		for(IPlugin<?, ?> plugin : requiredPlugins.values())
+		{
+			try
+			{
+				plugin.close();
+			}catch(Exception ex)
+			{
+				logger.warn("Error while closing plugin during reset: {}", plugin.getClass().getName(), ex);
+			}
+		}
+		
+		requiredPlugins.clear();
+		initializedPlugins.clear();
 	}
 	
 	/**

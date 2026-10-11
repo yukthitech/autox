@@ -81,7 +81,7 @@ public class RefreshStep extends AbstractPostCheckStep
 	{
 		exeLogger.trace("Refreshing the current page");
 
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 		
 		UiAutomationUtils.validateWithWait(() -> 
 		{

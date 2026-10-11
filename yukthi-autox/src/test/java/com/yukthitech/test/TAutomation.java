@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.exec.report.FinalReport.TestSuiteResult;
@@ -52,7 +53,7 @@ public class TAutomation extends BaseTestCases
 			Assert.assertEquals(exeResult.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
 			Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
 			
-			TestAutomationListener listener = (TestAutomationListener) AutomationEventManager.getInstance().getListeners().get(0);
+			TestAutomationListener listener = (TestAutomationListener) ((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).getListeners().get(0);
 			Assert.assertNotNull(listener.getStartTime());
 			Assert.assertNotNull(listener.getEndTime());
 			Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));
@@ -99,7 +100,7 @@ public class TAutomation extends BaseTestCases
 			Assert.assertEquals(report.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
 			Assert.assertEquals(report.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
 			
-			TestAutomationListener listener = (TestAutomationListener) AutomationEventManager.getInstance().getListeners().get(0);
+			TestAutomationListener listener = (TestAutomationListener) ((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).getListeners().get(0);
 			Assert.assertNotNull(listener.getStartTime());
 			Assert.assertNotNull(listener.getEndTime());
 			Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));
@@ -132,7 +133,7 @@ public class TAutomation extends BaseTestCases
 			Assert.assertEquals(report.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
 			Assert.assertEquals(report.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
 			
-			TestAutomationListener listener = (TestAutomationListener) AutomationEventManager.getInstance().getListeners().get(0);
+			TestAutomationListener listener = (TestAutomationListener) ((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).getListeners().get(0);
 			Assert.assertNotNull(listener.getStartTime());
 			Assert.assertNotNull(listener.getEndTime());
 			Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));

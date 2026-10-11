@@ -50,7 +50,7 @@ public class CloseSessionStep extends AbstractUiStep
 	{
 		exeLogger.debug("Closing current session");
 		
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		
 		if(resetDriver)
 		{

@@ -1,0 +1,20 @@
+---
+description: Prefer simple type names via imports; avoid FQN unless conflict
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# Java imports and type names
+
+Prefer an `import` and the simple type name. Do not use fully qualified names (FQN) in type references (`implements`, `extends`, fields, parameters, casts, `new`, etc.) unless there is a name conflict.
+
+```java
+// BAD
+public class ReportDataManager implements com.yukthitech.autox.exec.IReportDataManager
+
+// GOOD
+import com.yukthitech.autox.exec.IReportDataManager;
+public class ReportDataManager implements IReportDataManager
+```
+
+Use FQN only when two types share the same simple name and both are needed in the same file (e.g. `java.util.Date` vs `java.sql.Date`). In that case, import one and FQN the other, or FQN both for clarity.

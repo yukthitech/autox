@@ -145,7 +145,7 @@ public class TestCaseExecutor extends Executor
 			
 			if(dep.status == TestStatus.SKIPPED || dep.status.isErrored())
 			{
-				ReportDataManager.getInstance().executionSkipped(ExecutionType.MAIN, this, 
+				((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).executionSkipped(ExecutionType.MAIN, this, 
 						String.format("Skipped as required dependency test-case '%s' is found with status: %s", 
 								dep.testCase.getName(), dep.status));
 				return false;
@@ -157,7 +157,7 @@ public class TestCaseExecutor extends Executor
 	
 	private List<ITestCaseData> executeDataProvider(IDataProvider dataProvider)
 	{
-		super.activeExecutionLogger = ReportDataManager.getInstance().getSetupExecutionLogger(this);
+		super.activeExecutionLogger = ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).getSetupExecutionLogger(this);
 		super.activeExecutionLogger.setMode("Data-Provider");
 		
 		List<ITestCaseData> data = dataProvider.getStepData();
@@ -245,7 +245,7 @@ public class TestCaseExecutor extends Executor
 	{
 		boolean isErrored = (super.status != null && super.status.isErrored());
 		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(isErrored);
-		ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
+		((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).setMonitoringLogs(this, monitorLogs);
 	}
 
 	/* (non-Javadoc)

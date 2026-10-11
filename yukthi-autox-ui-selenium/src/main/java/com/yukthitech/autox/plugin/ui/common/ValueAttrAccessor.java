@@ -47,7 +47,7 @@ public class ValueAttrAccessor implements IFieldAccessor
 	@Override
 	public void setValue(String driverName, WebElement element, Object value)
 	{
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		try

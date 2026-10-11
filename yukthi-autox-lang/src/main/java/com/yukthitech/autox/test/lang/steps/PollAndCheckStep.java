@@ -32,7 +32,6 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.exec.ExecutionServices;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.Function;
 
@@ -175,10 +174,10 @@ public class PollAndCheckStep extends AbstractValidation
 			//from second time check for debug point for current step
 			if(index > 0)
 			{
-				ExecutionServices.getDebugFlowManager().checkForDebugPoint(this);
+				AutomationContext.getInstance().getDebugFlowManager().checkForDebugPoint(this);
 			}
 			
-			ExecutionServices.getStepsExecutor().execute(poll, null, null);
+			AutomationContext.getInstance().getStepsExecutor().execute(poll, null, null);
 			
 			boolean conditionSuccessful = checkCondition(context, exeLogger);
 			

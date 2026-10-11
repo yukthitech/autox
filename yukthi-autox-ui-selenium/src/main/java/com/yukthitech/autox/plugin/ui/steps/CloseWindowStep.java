@@ -59,7 +59,7 @@ public class CloseWindowStep extends AbstractUiStep
 	{
 		exeLogger.trace("Closing window with name: {}", name);
 		
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		if(StringUtils.isEmpty(name))

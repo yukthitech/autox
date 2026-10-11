@@ -100,7 +100,7 @@ public class RightClickStep extends AbstractParentUiStep
 
 				try
 				{
-					SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+					SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 					WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 					Actions actions = new Actions(driver);

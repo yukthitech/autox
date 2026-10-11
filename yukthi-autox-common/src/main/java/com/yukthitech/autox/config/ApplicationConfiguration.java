@@ -45,11 +45,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class ApplicationConfiguration implements IDynamicNodeAcceptor
 {
 	/**
-	 * Static instance of current application configuration.
-	 */
-	private static ApplicationConfiguration applicationConfiguration;
-	
-	/**
 	 * Name of the report. Length should be less than 30 chars.
 	 */
 	private String reportName = "Automation";
@@ -147,27 +142,18 @@ public class ApplicationConfiguration implements IDynamicNodeAcceptor
 	public ApplicationConfiguration(Properties applicationProperties)
 	{
 		this.setApplicationProperties(applicationProperties);
-		ApplicationConfiguration.applicationConfiguration = this;
 	}
 	
 	/**
-	 * Gets the static instance of current application configuration.
-	 *
-	 * @return the static instance of current application configuration
+	 * Closes session-owned resources (e.g. persistence storage factory).
 	 */
-	public static ApplicationConfiguration getInstance()
+	public void close() throws Exception
 	{
-		return applicationConfiguration;
-	}
-	
-	public static void reset() throws Exception
-	{
-		if(applicationConfiguration != null && applicationConfiguration.storageRepositoryFactory != null)
+		if(storageRepositoryFactory != null)
 		{
-			applicationConfiguration.storageRepositoryFactory.close();
+			storageRepositoryFactory.close();
+			storageRepositoryFactory = null;
 		}
-		
-		applicationConfiguration = null;
 	}
 	
 	/**

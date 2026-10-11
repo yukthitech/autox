@@ -57,7 +57,7 @@ public class CloseWindowStep extends AbstractUiStep
 	{
 		exeLogger.trace("Closing window with name: {}", name);
 		
-		PlaywrightPluginSession session = ExecutionContextManager.getInstance().getPluginSession(PlaywrightPlugin.class);
+		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
 
 		if(StringUtils.isEmpty(name))
 		{

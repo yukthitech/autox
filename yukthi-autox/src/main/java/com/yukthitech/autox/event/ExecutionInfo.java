@@ -1,5 +1,7 @@
 package com.yukthitech.autox.event;
 
+import com.yukthitech.autox.context.AutomationContext;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -155,6 +157,6 @@ public class ExecutionInfo
 	 */
 	public ExecutionStatusReport getStatusReport()
 	{
-		return ReportDataManager.getInstance().getExecutionStatusReport(executor);
+		return ((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).getExecutionStatusReport(executor);
 	}
 }

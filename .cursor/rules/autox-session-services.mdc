@@ -1,0 +1,41 @@
+---
+description: Access session services via AutomationContext; capture fixed instances as final fields
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# AutoX session service access
+
+Session-scoped services (PluginManager, ExecutionContextManager, DebugFlowManager, StepsExecutor, ReportDataManager, ExecutionPool, EventManager, LogMonitorManager, AutomationEventManager, ApplicationConfiguration, PrefixExpressionFactory customs, etc.) must be obtained from `AutomationContext`, not via static helpers on the service class.
+
+`PrefixExpressionFactory`: Java-annotated parsers are process-level (shared). XML/custom prefixes and UI locators are session-scoped on the context factory and cleared via `clearCustomExpressions()` on context reset. Prefer `AutomationContext.getPrefixExpressionFactory()` (or `PrefixExpressionFactory.getExpressionFactory()` which delegates to context).
+
+Dynamic session services (e.g. mock servers) implement `IDynAutomationService` and are registered on the context by unique name (`registerDynAutomationService` / `getDynAutomationService` / `unregisterDynAutomationService`). They are closed on context reset.
+
+```java
+// BAD
+DebugFlowManager.get().sendClientMessage(msg);
+PluginManager.getInstance().getPlugins();
+
+// GOOD
+AutomationContext.getInstance().getDebugFlowManager()...
+AutomationContext.getInstance().getPluginManager()...
+```
+
+## Capture fixed instances in the constructor
+
+When a class's lifetime is bound to one session (e.g. `LiveDebugPoint`, debug server handlers) and `AutomationContext` / managers will not change for that instance, resolve them once in the constructor and store as `final` fields:
+
+```java
+private final AutomationContext automationContext;
+private final DebugFlowManager debugFlowManager;
+
+public LiveDebugPoint(...)
+{
+	this.automationContext = AutomationContext.getInstance();
+	this.debugFlowManager = (DebugFlowManager) automationContext.getDebugFlowManager();
+	// ...
+}
+```
+
+Do not re-call `AutomationContext.getInstance()` repeatedly inside such classes unless the lookup must reflect a possible context change.

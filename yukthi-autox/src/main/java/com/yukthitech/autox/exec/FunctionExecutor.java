@@ -59,6 +59,6 @@ public class FunctionExecutor extends Executor
 	{
 		boolean isErrored = (super.status != null && super.status.isErrored());
 		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(isErrored);
-		ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
+		((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).setMonitoringLogs(this, monitorLogs);
 	}
 }

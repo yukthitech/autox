@@ -47,7 +47,7 @@ public class WaitForConditionsStep extends BaseConditions
 	{
 		exeLogger.debug("Waiting for {} conditions", conditions.size());
 
-		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(SeleniumPlugin.class);
 		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		try
