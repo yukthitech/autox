@@ -15,14 +15,18 @@
  */
 package com.yukthitech.autox;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,13 +36,14 @@ import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.event.AutomationEventType;
-import com.yukthitech.autox.plugin.PluginManager;
+import com.yukthitech.autox.interactive.InteractiveXmlSupport;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.ccg.xml.XMLLoadException;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -99,31 +104,111 @@ public class AutomationFileLoader
 	
 	public static void loadTestFile(File xmlFile, Set<String> errors, boolean forReload)
 	{
-		loadTestFile(xmlFile, new TestSuiteParserHandler(AutomationContext.getInstance()), errors, forReload);
+		loadTestFile(xmlFile, InteractiveXmlSupport.ensureParserHandler(AutomationContext.getInstance()), errors, forReload);
 	}
 
 	private static void loadTestFile(File xmlFile,
+			TestSuiteParserHandler defaultParserHandler, Set<String> errors, boolean forReload)
+	{
+		try(FileInputStream fis = new FileInputStream(xmlFile))
+		{
+			loadTestXml(fis, xmlFile, defaultParserHandler, errors, forReload);
+		}catch(Exception ex)
+		{
+			handleLoadError(xmlFile, errors, ex);
+		}
+	}
+	
+	/**
+	 * Loads suite/function XML from a string. {@code sourceName} is mandatory and used as the
+	 * synthetic {@link File} for location attribution and load-error messages.
+	 *
+	 * @return load errors (empty on success)
+	 */
+	public static Set<String> loadTestXml(String xml, String sourceName, boolean forReload)
+	{
+		if(StringUtils.isBlank(xml))
+		{
+			throw new InvalidArgumentException("XML content cannot be empty");
+		}
+		
+		ByteArrayInputStream bis = new ByteArrayInputStream(xml.getBytes(Charset.defaultCharset()));
+		return loadTestXml(bis, sourceName, forReload);
+	}
+	
+	/**
+	 * Loads suite/function XML from a stream. {@code sourceName} is mandatory and used as the
+	 * synthetic {@link File} for location attribution and load-error messages.
+	 * Does not close {@code xmlStream}.
+	 *
+	 * @return load errors (empty on success)
+	 */
+	public static Set<String> loadTestXml(InputStream xmlStream, String sourceName, boolean forReload)
+	{
+		if(StringUtils.isBlank(sourceName))
+		{
+			throw new InvalidArgumentException("sourceName is required for loadTestXml (used for location / debug attribution)");
+		}
+		
+		if(xmlStream == null)
+		{
+			throw new InvalidArgumentException("XML stream cannot be null");
+		}
+		
+		AutomationContext context = AutomationContext.getInstance();
+		TestSuiteParserHandler parserHandler = InteractiveXmlSupport.ensureParserHandler(context);
+		Set<String> errors = new HashSet<>();
+		loadTestXml(xmlStream, toSourceFile(sourceName), parserHandler, errors, forReload);
+		return errors;
+	}
+	
+	/**
+	 * Builds a {@link File} used for location attribution. Logical names that are not valid
+	 * filesystem paths on the current OS (e.g. {@code host:flow.xml} on Windows) are sanitized
+	 * so {@code File#getCanonicalFile()} used by steps still succeeds; the path string remains
+	 * recognizable in logs.
+	 */
+	static File toSourceFile(String sourceName)
+	{
+		// Drive-letter paths like C:\... are left alone; scheme-like "host:name" is sanitized
+		if(sourceName.length() >= 2 && sourceName.charAt(1) == ':'
+				&& Character.isLetter(sourceName.charAt(0)))
+		{
+			return new File(sourceName);
+		}
+		
+		String sanitized = sourceName
+				.replace(':', '_')
+				.replace('*', '_')
+				.replace('?', '_')
+				.replace('"', '_')
+				.replace('<', '_')
+				.replace('>', '_')
+				.replace('|', '_');
+		
+		return new File(sanitized);
+	}
+	
+	private static void loadTestXml(InputStream xmlStream, File sourceFile,
 			TestSuiteParserHandler defaultParserHandler, Set<String> errors, boolean forReload)
 	{
 		AutomationContext context = AutomationContext.getInstance();
 		TestDataFile testDataFile = new TestDataFile(context, forReload);
 		TestSuiteGroup testSuiteGroup = context.getTestSuiteGroup();
 		
-		defaultParserHandler.setFileBeingParsed(xmlFile);
+		defaultParserHandler.setFileBeingParsed(sourceFile);
 
 		try
 		{
-			String filePath = xmlFile.getPath();
-			FileInputStream fis = new FileInputStream(xmlFile);
+			String sourcePath = sourceFile.getPath();
 
-			logger.debug("Loading test suite file: {}", filePath);
+			logger.debug("Loading test suite xml from source: {}", sourcePath);
 			
-			XMLBeanParser.parse(fis, testDataFile, defaultParserHandler);
-			fis.close();
+			XMLBeanParser.parse(xmlStream, testDataFile, defaultParserHandler);
 			
 			for(TestSuite testSuite : testDataFile.getTestSuites())
 			{
-				logger.debug("Loading test suite '{}' from file: {}", testSuite.getName(), filePath);
+				logger.debug("Loading test suite '{}' from source: {}", testSuite.getName(), sourcePath);
 				
 				testSuiteGroup.addTestSuite(testSuite, forReload);
 			}
@@ -132,12 +217,12 @@ public class AutomationFileLoader
 			{
 				if(testSuiteGroup.getSetup() != null)
 				{
-					throw new InvalidStateException("Duplicate global setups specified. Files: [{}, {}]", testSuiteGroup.getSetup().getLocation().getPath(), xmlFile.getPath());
+					throw new InvalidStateException("Duplicate global setups specified. Files: [{}, {}]", testSuiteGroup.getSetup().getLocation().getPath(), sourcePath);
 				}
 				
 				if(testDataFile.getSetup().getLocation() == null)
 				{
-					testDataFile.getSetup().setLocation(xmlFile, -1);
+					testDataFile.getSetup().setLocation(sourceFile, -1);
 				}
 				
 				testSuiteGroup.setSetup(testDataFile.getSetup());
@@ -147,19 +232,19 @@ public class AutomationFileLoader
 			{
 				if(testSuiteGroup.getCleanup() != null)
 				{
-					throw new InvalidStateException("Duplicate global cleaups specified. Files: [{}, {}]", testSuiteGroup.getCleanup().getLocation().getPath(), xmlFile.getPath());
+					throw new InvalidStateException("Duplicate global cleaups specified. Files: [{}, {}]", testSuiteGroup.getCleanup().getLocation().getPath(), sourcePath);
 				}
 				
 				if(testDataFile.getCleanup().getLocation() == null)
 				{
-					testDataFile.getCleanup().setLocation(xmlFile, -1);
+					testDataFile.getCleanup().setLocation(sourceFile, -1);
 				}
 				
 				testSuiteGroup.setCleanup(testDataFile.getCleanup());
 			}
 		} catch(Exception ex)
 		{
-			handleLoadError(xmlFile, errors, ex);
+			handleLoadError(sourceFile, errors, ex);
 		}
 	}
 

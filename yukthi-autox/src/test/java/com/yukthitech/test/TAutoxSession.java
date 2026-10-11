@@ -24,11 +24,12 @@ import org.testng.annotations.Test;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.session.AutoxSession;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Phase 2 embed API: start → load suites → runFunction (multiple) → close → start again.
+ * Embed session API: start → loadXml / load suites → runFunction / executeSteps → close.
  */
 public class TAutoxSession extends BaseTestCases
 {
@@ -130,6 +131,66 @@ public class TAutoxSession extends BaseTestCases
 		}finally
 		{
 			session.close();
+		}
+	}
+	
+	@Test
+	public void testLoadXmlWithSourceNameAndRunFunction() throws Exception
+	{
+		String xml =
+				"<testData xmlns:s=\"http://autox.yukthitech.com/steps\">\n"
+				+ "  <function name=\"sessionLoadXmlSum\">\n"
+				+ "    <s:set expression=\"sumResult\" value=\"expr: param.a + param.b | int: $\"/>\n"
+				+ "  </function>\n"
+				+ "</testData>";
+		
+		String sourceName = "host:session-load-xml.xml";
+		
+		try (AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-load-xml")))
+		{
+			session.loadXml(xml, sourceName);
+			
+			Function function = session.getAutomationContext().getGlobalFunction("sessionLoadXmlSum");
+			Assert.assertNotNull(function);
+			// Logical names with ':' are sanitized for File location on Windows
+			Assert.assertTrue(function.getLocation().getPath().contains("session-load-xml.xml"));
+			Assert.assertTrue(function.getLocation().getName().contains("session-load-xml.xml"));
+			
+			Map<String, Object> params = new HashMap<>();
+			params.put("a", 3);
+			params.put("b", 4);
+			Assert.assertNull(session.runFunction("sessionLoadXmlSum", params));
+			
+			try
+			{
+				session.loadXml(xml, "  ");
+				Assert.fail("Expected InvalidArgumentException for blank sourceName");
+			}catch(InvalidArgumentException ex)
+			{
+				Assert.assertTrue(ex.getMessage().contains("sourceName"));
+			}
+		}
+	}
+	
+	@Test
+	public void testExecuteStepsDynamicSource() throws Exception
+	{
+		try (AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-execute-steps")))
+		{
+			// Mode 2: no sourceName; locations use generated interactive-steps-N.xml
+			session.executeSteps("<s:log message=\"hello from session executeSteps\"/>");
+			
+			session.executeSteps(
+					"<function name=\"sessionDynFunc\">"
+					+ "<s:return value=\"string: ok\"/>"
+					+ "</function>");
+			
+			Function dynFunc = session.getAutomationContext().getGlobalFunction("sessionDynFunc");
+			Assert.assertNotNull(dynFunc);
+			Assert.assertNotNull(dynFunc.getLocation());
+			Assert.assertTrue(dynFunc.getLocation().getName().startsWith("interactive-steps-"));
+			
+			Assert.assertEquals(session.runFunction("sessionDynFunc"), "ok");
 		}
 	}
 }

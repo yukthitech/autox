@@ -106,6 +106,11 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 		reserveNodeHandler.setFileBeingParsed(fileBeingParsed);
 	}
 	
+	public File getFileBeingParsed()
+	{
+		return reserveNodeHandler.getFileBeingParsed();
+	}
+	
 	@Override
 	public Object createBean(BeanNode node, XMLAttributeMap att, ClassLoader loader)
 	{

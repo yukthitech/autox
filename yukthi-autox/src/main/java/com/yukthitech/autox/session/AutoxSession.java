@@ -16,8 +16,13 @@
 package com.yukthitech.autox.session;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,8 +33,11 @@ import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.ExecutionPool;
 import com.yukthitech.autox.exec.FunctionExecutor;
+import com.yukthitech.autox.exec.InteractiveStepsExecutor;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.ReportDataManager;
+import com.yukthitech.autox.interactive.InteractiveXmlSupport;
+import com.yukthitech.autox.interactive.StepHolder;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -46,16 +54,19 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * is already active.
  * </p>
  * <p>
- * Typical embed usage (Mode 1 — load suites, run multiple functions, same plugins/browser):
+ * Typical embed usage (Mode 1 — load suites / XML, run multiple functions, same plugins/browser):
  * <pre>
  * try (AutoxSession session = AutoxSession.start(appConfigFile, args))
  * {
- *     session.loadTestSuiteFiles();
+ *     session.loadXml(suiteXml, "host:checkout-flow.xml");
  *     session.runFunction("login");
  *     Object result = session.runFunction("checkout", params);
  * }
  * </pre>
- * Dynamic {@code loadXml(..., sourceName)} and {@code executeSteps} are Phase 3.
+ * Mode 2 — dynamic steps (no source name; locations use generated {@code interactive-steps-N.xml}):
+ * <pre>
+ * session.executeSteps("&lt;s:set expression=\"x\" value=\"int: 1\"/&gt;");
+ * </pre>
  * Expression {@code eval} while paused and debug APIs are Phase 4 ({@code AutoxDebugSession}).
  * </p>
  * <p>
@@ -146,6 +157,74 @@ public class AutoxSession implements AutoCloseable
 	}
 	
 	/**
+	 * Loads suite/function XML from a string. {@code sourceName} is required for location
+	 * attribution (logs / debugging of loaded functions).
+	 */
+	public void loadXml(String xml, String sourceName)
+	{
+		ensureOpen();
+		requireSourceName(sourceName);
+		
+		Set<String> errors = AutomationFileLoader.loadTestXml(xml, sourceName, true);
+		throwIfLoadErrors(sourceName, errors);
+	}
+	
+	/**
+	 * Loads suite/function XML from a stream. {@code sourceName} is required for location
+	 * attribution. Does not close {@code xmlStream}.
+	 */
+	public void loadXml(InputStream xmlStream, String sourceName)
+	{
+		ensureOpen();
+		requireSourceName(sourceName);
+		
+		Set<String> errors = AutomationFileLoader.loadTestXml(xmlStream, sourceName, true);
+		throwIfLoadErrors(sourceName, errors);
+	}
+	
+	/**
+	 * Parses and executes dynamic step XML (Mode 2). Locations use a generated
+	 * {@code interactive-steps-N.xml} name (no caller source name). Also applies any
+	 * functions / custom prefix expressions / UI locators present in the snippet.
+	 */
+	public void executeSteps(String stepXml)
+	{
+		ensureOpen();
+		
+		if(StringUtils.isBlank(stepXml))
+		{
+			throw new InvalidArgumentException("Steps XML cannot be empty");
+		}
+		
+		File dynamicSource = InteractiveXmlSupport.nextDynamicSourceFile();
+		StepHolder stepHolder = InteractiveXmlSupport.parseSteps(context, stepXml);
+		// Align locations to one dynamic source name (parse already used a generated name)
+		stepHolder.updateLocations(dynamicSource, 1);
+		boolean reloadingDone = InteractiveXmlSupport.applyReloads(context, stepHolder, null);
+		
+		if(CollectionUtils.isEmpty(stepHolder.getSteps()))
+		{
+			if(reloadingDone)
+			{
+				return;
+			}
+			
+			throw new InvalidArgumentException("No steps found to execute");
+		}
+		
+		InteractiveStepsExecutor executor = new InteractiveStepsExecutor(stepHolder.getSteps());
+		executor.executeSteps();
+		
+		TestStatus status = executor.getStatus();
+		
+		if(status != null && status.isErrored())
+		{
+			throw new InvalidStateException("executeSteps ended with status {}: {}",
+					status, executor.getStatusMessage());
+		}
+	}
+	
+	/**
 	 * Runs a loaded global function with no parameters.
 	 *
 	 * @param name global function name
@@ -220,5 +299,24 @@ public class AutoxSession implements AutoCloseable
 		{
 			throw new InvalidStateException("AutoxSession is already closed");
 		}
+	}
+	
+	private static void requireSourceName(String sourceName)
+	{
+		if(StringUtils.isBlank(sourceName))
+		{
+			throw new InvalidArgumentException("sourceName is required for loadXml (used for location / debug attribution)");
+		}
+	}
+	
+	private static void throwIfLoadErrors(String sourceName, Set<String> errors)
+	{
+		if(errors == null || errors.isEmpty())
+		{
+			return;
+		}
+		
+		String errorStr = errors.stream().collect(Collectors.joining("\n"));
+		throw new InvalidStateException("Failed to load XML from source '{}':\n{}", sourceName, errorStr);
 	}
 }

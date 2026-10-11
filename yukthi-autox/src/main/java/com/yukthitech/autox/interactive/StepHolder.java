@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.autox.debug.server.handler;
+package com.yukthitech.autox.interactive;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,6 +28,9 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.test.CustomPrefixExpression;
 import com.yukthitech.autox.test.Function;
 
+/**
+ * Root bean for interactive / dynamic step XML (step-holder template).
+ */
 public class StepHolder implements IStepContainer
 {
 	/**

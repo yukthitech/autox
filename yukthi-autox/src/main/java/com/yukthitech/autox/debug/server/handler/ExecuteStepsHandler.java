@@ -15,43 +15,23 @@
  */
 package com.yukthitech.autox.debug.server.handler;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
-
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.debug.common.ClientMssgExecuteSteps;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.server.LiveDebugPoint;
-import com.yukthitech.autox.prefix.PrefixExpressionFactory;
-import com.yukthitech.autox.test.CustomPrefixExpression;
-import com.yukthitech.autox.test.Function;
-import com.yukthitech.autox.test.TestSuite;
-import com.yukthitech.autox.test.TestSuiteGroup;
-import com.yukthitech.ccg.xml.XMLBeanParser;
-import com.yukthitech.utils.CommonUtils;
-import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.autox.interactive.InteractiveXmlSupport;
+import com.yukthitech.autox.interactive.StepHolder;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
+/**
+ * Thin adapter: parse/reload via {@link InteractiveXmlSupport}, then run on the live debug point.
+ */
 public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExecuteSteps>
 {
 	private static Logger logger = LogManager.getLogger(ExecuteStepsHandler.class);
-
-	private static String stepHolderTemplate;
-	
-	static
-	{
-		try
-		{
-			stepHolderTemplate = IOUtils.toString(ExecuteStepsHandler.class.getResourceAsStream("/step-holder-template.xml"), Charset.defaultCharset());
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while loading resource: /step-holder-template.xml", ex);
-		}
-	}
 
 	public ExecuteStepsHandler()
 	{
@@ -70,67 +50,25 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 			return;
 		}
 		
-		StepHolder stepHolder = parseSteps(steps.getStepsToExecute());
-		stepHolder.updateLocations(steps.getSourceFile(), steps.getStartLineNumber());
+		StepHolder stepHolder;
+		boolean reloadingDone;
 		
-		boolean reloadingDone = false;
-		
-		if(CollectionUtils.isNotEmpty(stepHolder.getCustomUiLocators()))
+		try
 		{
-			for(CustomPrefixExpression customUiLocator : stepHolder.getCustomUiLocators())
-			{
-				logger.debug("Reloading custom-ui-locator: {}", customUiLocator.getName());
-				PrefixExpressionFactory.getExpressionFactory().addOrReplaceUiLocator(customUiLocator);
-			}
-			
-			reloadingDone = true;
-		}
-		
-		if(CollectionUtils.isNotEmpty(stepHolder.getCustomPrefixExpressions()))
+			stepHolder = InteractiveXmlSupport.parseSteps(automationContext, steps.getStepsToExecute());
+			stepHolder.updateLocations(steps.getSourceFile(), steps.getStartLineNumber());
+			reloadingDone = InteractiveXmlSupport.applyReloads(automationContext, stepHolder, steps.getTargetTestSuite());
+		}catch(InvalidArgumentException ex)
 		{
-			for(CustomPrefixExpression customPrefixExpr : stepHolder.getCustomPrefixExpressions())
-			{
-				logger.debug("Reloading custom-prefix-expression: {}", customPrefixExpr.getName());
-				PrefixExpressionFactory.getExpressionFactory().addOrReplacePrefixExpression(customPrefixExpr);
-			}
-			
-			reloadingDone = true;
-		}
-
-		if(CollectionUtils.isNotEmpty(stepHolder.getFunctions()))
+			logger.warn(ex.getMessage());
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, ex.getMessage()));
+			return;
+		}catch(Exception ex)
 		{
-			String targetTestSuiteName = steps.getTargetTestSuite();
-			TestSuite targetTestSuite = null;
-			
-			if(StringUtils.isNotBlank(targetTestSuiteName))
-			{
-				TestSuiteGroup group = automationContext.getTestSuiteGroup();
-				targetTestSuite = (group != null) ? group.getTestSuite(targetTestSuiteName) : null;
-				
-				if(targetTestSuite == null)
-				{
-					logger.warn("Invalid test suite name specified for function reload: {}", targetTestSuiteName);
-					debugFlowManager.sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, 
-							"Invalid test suite name specified for function reload: %s", targetTestSuiteName));
-					return;
-				}
-			}
-
-			for(Function func : stepHolder.getFunctions())
-			{
-				logger.debug("Reloading function: {}", func.getName());
-				
-				if(targetTestSuite != null)
-				{
-					targetTestSuite.addOrReplaceFunction(func);
-				}
-				else
-				{
-					automationContext.addOrReplaceFunction(func);
-				}
-			}
-			
-			reloadingDone = true;
+			logger.error("Failed to parse/apply interactive step xml", ex);
+			debugFlowManager.sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false,
+					"Failed to parse interactive steps: %s", ex.getMessage()));
+			return;
 		}
 
 		if(CollectionUtils.isEmpty(stepHolder.getSteps()))
@@ -148,26 +86,5 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 		}
 		
 		livepoint.requestExecuteSteps(steps.getRequestId(), stepHolder.getSteps());
-	}
-	
-	private StepHolder parseSteps(String xml)
-	{
-		StepHolder stepHolder = new StepHolder();
-		
-		String stepXml = CommonUtils.replaceExpressions(
-				CommonUtils.toMap("steps", xml), 
-				stepHolderTemplate, null);
-		
-		try
-		{
-			ByteArrayInputStream bis = new ByteArrayInputStream(stepXml.getBytes());
-			XMLBeanParser.parse(bis, stepHolder, automationContext.getTestSuiteParserHandler());
-			
-			return stepHolder;
-		} catch(Exception ex)
-		{
-			logger.error("Failed to parse step list from interactive step xml:\n", xml, ex);
-			return null;
-		}
 	}
 }
