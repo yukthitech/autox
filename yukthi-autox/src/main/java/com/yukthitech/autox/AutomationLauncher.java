@@ -248,9 +248,8 @@ public class AutomationLauncher
 			logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
 			validateCommandLineArguments(context, extendedCommandLineArgs);
 			
-			boolean loadTestSuites = true;
-			// load test suites
-			AutomationFileLoader.loadTestSuites(context, loadTestSuites);
+			// load test suites via session so embed loadTestSuiteFiles() stays idempotent
+			session.loadTestSuiteFiles();
 			
 			// check and set execution suite if any
 			if(StringUtils.isNotBlank(context.getBasicArguments().getExecutionSuite()))

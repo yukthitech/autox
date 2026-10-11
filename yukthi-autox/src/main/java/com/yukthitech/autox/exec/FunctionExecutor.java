@@ -22,6 +22,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.test.FunctionParam;
 import com.yukthitech.autox.test.FunctionRef;
 
 /**
@@ -32,12 +33,30 @@ public class FunctionExecutor extends Executor
 {
 	private static final String RETURN_ATTR = "functionExecutor.returnAttr";
 	
+	/**
+	 * Captured during {@link #postExecute()} while the execution context is still active.
+	 */
+	private Object returnValue;
+	
 	public FunctionExecutor(Function function)
+	{
+		this(function, null);
+	}
+	
+	public FunctionExecutor(Function function, Map<String, Object> params)
 	{
 		super(function, null);
 		
 		FunctionRef funcRef = new FunctionRef(function.getName(), RETURN_ATTR);
 		funcRef.setLocation(function.getLocation(), function.getLineNumber());
+		
+		if(params != null)
+		{
+			for(Map.Entry<String, Object> entry : params.entrySet())
+			{
+				funcRef.addParam(new FunctionParam(entry.getKey(), entry.getValue()));
+			}
+		}
 		
 		super.childSteps = Arrays.asList(funcRef);
 	}
@@ -45,7 +64,7 @@ public class FunctionExecutor extends Executor
 	public Object executeFunction()
 	{
 		super.execute(null, null, null);
-		return AutomationContext.getInstance().getAttribute(RETURN_ATTR);
+		return returnValue;
 	}
 
 	@Override
@@ -57,6 +76,8 @@ public class FunctionExecutor extends Executor
 	@Override
 	protected void postExecute()
 	{
+		returnValue = AutomationContext.getInstance().getAttribute(RETURN_ATTR);
+		
 		boolean isErrored = (super.status != null && super.status.isErrored());
 		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(isErrored);
 		((ReportDataManager) AutomationContext.getInstance().getReportDataManager()).setMonitoringLogs(this, monitorLogs);

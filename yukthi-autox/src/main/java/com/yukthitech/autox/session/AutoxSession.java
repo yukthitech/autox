@@ -16,25 +16,50 @@
 package com.yukthitech.autox.session;
 
 import java.io.File;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.AutomationFileLoader;
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.ExecutionPool;
+import com.yukthitech.autox.exec.FunctionExecutor;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.ReportDataManager;
+import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.test.TestStatus;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Owns {@link AutomationContext} and plugin lifecycle for a single automation run.
  * Plugin sessions may return to the plugin cache when executors finish; browsers and
  * plugins are closed only via {@link #close()}.
  * <p>
- * Callers that create a session are responsible for holding and closing that instance.
- * Phase 1 assumes session work is driven on a single execution thread (CLI main path).
+ * <b>Single active session per classloader:</b> {@link AutomationContext} is a process-level
+ * singleton ({@link AutomationContext#getInstance()}). Only one session should be open at a
+ * time. Call {@link #close()} before {@link #start} again. {@link #start} fails if a context
+ * is already active.
+ * </p>
+ * <p>
+ * Typical embed usage (Mode 1 — load suites, run multiple functions, same plugins/browser):
+ * <pre>
+ * try (AutoxSession session = AutoxSession.start(appConfigFile, args))
+ * {
+ *     session.loadTestSuiteFiles();
+ *     session.runFunction("login");
+ *     Object result = session.runFunction("checkout", params);
+ * }
+ * </pre>
+ * Dynamic {@code loadXml(..., sourceName)} and {@code executeSteps} are Phase 3.
+ * Expression {@code eval} while paused and debug APIs are Phase 4 ({@code AutoxDebugSession}).
+ * </p>
+ * <p>
+ * Phase 1/2 assume session work is driven on a single execution thread (CLI main path).
  * Sequential use from different threads is deferred.
  * </p>
  *
@@ -47,6 +72,8 @@ public class AutoxSession implements AutoCloseable
 	private final AutomationContext context;
 	
 	private boolean closed;
+	
+	private boolean testSuiteFilesLoaded;
 	
 	private AutoxSession(AutomationContext context)
 	{
@@ -70,6 +97,13 @@ public class AutoxSession implements AutoCloseable
 	 */
 	public static AutoxSession start(File appConfigurationFile, String[] extendedCommandLineArgs, AutomationEventManager automationEventManager) throws Exception
 	{
+		if(AutomationContext.getInstance() != null)
+		{
+			throw new InvalidStateException(
+					"An AutomationContext is already active. Close the current AutoxSession before starting another "
+					+ "(one active session per classloader).");
+		}
+		
 		if(extendedCommandLineArgs == null)
 		{
 			extendedCommandLineArgs = new String[0];
@@ -95,6 +129,69 @@ public class AutoxSession implements AutoCloseable
 	}
 	
 	/**
+	 * Loads test suites (and global functions) from suite files under folders configured in the
+	 * application configuration / CLI args. Idempotent for a given session.
+	 */
+	public void loadTestSuiteFiles()
+	{
+		ensureOpen();
+		
+		if(testSuiteFilesLoaded)
+		{
+			return;
+		}
+		
+		AutomationFileLoader.loadTestSuites(context, true);
+		testSuiteFilesLoaded = true;
+	}
+	
+	/**
+	 * Runs a loaded global function with no parameters.
+	 *
+	 * @param name global function name
+	 * @return function return value, or {@code null} if the function does not return
+	 */
+	public Object runFunction(String name)
+	{
+		return runFunction(name, null);
+	}
+	
+	/**
+	 * Runs a loaded global function. Multiple calls without {@link #close()} reuse the same
+	 * session-owned plugins/browsers (Phase 1 ownership). Per-invocation execution attributes
+	 * are not automatically shared across calls; use {@link AutomationContext#setGlobalAttribute}
+	 * when cross-function attribute sharing is required.
+	 *
+	 * @param name global function name
+	 * @param params function parameters (may be {@code null})
+	 * @return function return value, or {@code null} if the function does not return
+	 */
+	public Object runFunction(String name, Map<String, Object> params)
+	{
+		ensureOpen();
+		
+		Function function = context.getGlobalFunction(name);
+		
+		if(function == null)
+		{
+			throw new InvalidArgumentException("No function found with specified name: {}", name);
+		}
+		
+		FunctionExecutor executor = new FunctionExecutor(function, params);
+		Object result = executor.executeFunction();
+		
+		TestStatus status = executor.getStatus();
+		
+		if(status != null && status.isErrored())
+		{
+			throw new InvalidStateException("Function '{}' ended with status {}: {}",
+					name, status, executor.getStatusMessage());
+		}
+		
+		return result;
+	}
+	
+	/**
 	 * Closes session-owned resources via {@link AutomationContext#reset()}. Idempotent.
 	 * Does not call {@code System.exit}.
 	 */
@@ -114,6 +211,14 @@ public class AutoxSession implements AutoCloseable
 		}catch(Exception ex)
 		{
 			logger.warn("Error while resetting automation context", ex);
+		}
+	}
+	
+	private void ensureOpen()
+	{
+		if(closed)
+		{
+			throw new InvalidStateException("AutoxSession is already closed");
 		}
 	}
 }
