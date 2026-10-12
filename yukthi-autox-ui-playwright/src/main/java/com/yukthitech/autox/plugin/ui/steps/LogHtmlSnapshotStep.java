@@ -18,9 +18,6 @@ package com.yukthitech.autox.plugin.ui.steps;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import com.google.gson.JsonObject;
-import com.microsoft.playwright.CDPSession;
-import com.microsoft.playwright.Page;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -94,32 +91,15 @@ public class LogHtmlSnapshotStep extends AbstractUiStep
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) 
 	{
 		PlaywrightPluginSession session = AutomationContext.getInstance().getExecutionContextManager().getPluginSession(PlaywrightPlugin.class);
-		Page page = session.getPage(driverName);
-		
-		String mhtml = null;
-		CDPSession cdpSession = null;
+		String mhtml;
 		
 		try
 		{
-			cdpSession = page.context().newCDPSession(page);
-			JsonObject result = cdpSession.send("Page.captureSnapshot", null);
-			mhtml = result.get("data").getAsString();
+			mhtml = session.captureHtmlSnapshot(driverName);
 		}catch(Exception ex)
 		{
 			exeLogger.warn("Snapshot could not be taken. CDP based MHTML capture is not supported or failed for the current browser. Error: {}", "" + ex);
 			return;
-		}finally
-		{
-			if(cdpSession != null)
-			{
-				try
-				{
-					cdpSession.detach();
-				}catch(Exception ex)
-				{
-					// ignore detach failures
-				}
-			}
 		}
 	
 		String nameStr = String.valueOf(name);

@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import javax.swing.ImageIcon;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -24,8 +26,6 @@ import com.yukthitech.autox.debug.common.KeyValue;
 import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.prism.dialog.XpathSandboxDialog;
 import com.yukthitech.swing.IconButton;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
 
 @Component
 public class ContextAttributesPanel extends JPanel

@@ -24,9 +24,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AbstractLocationBased;
-import com.yukthitech.autox.IStepIntegral;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.IStepIntegral;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;

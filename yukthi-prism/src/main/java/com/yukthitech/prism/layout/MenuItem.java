@@ -19,9 +19,9 @@ import javax.swing.JMenuItem;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.prism.IdeUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.prism.IdeUtils;
 
 /**
  * Represents menu item.

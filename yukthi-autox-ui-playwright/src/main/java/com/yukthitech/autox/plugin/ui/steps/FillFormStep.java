@@ -33,7 +33,6 @@ import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
 import com.yukthitech.autox.plugin.ui.common.UiElement;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Step to fill the target form with specified data.

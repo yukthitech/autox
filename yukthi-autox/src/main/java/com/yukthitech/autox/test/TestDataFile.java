@@ -20,7 +20,6 @@ import java.util.List;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.event.EventHandler;
-import com.yukthitech.autox.event.EventManager;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 

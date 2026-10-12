@@ -157,7 +157,7 @@ public class PrefixExpressionFactory
 					{
 						try
 						{
-							parserObj = method.getDeclaringClass().newInstance();
+							parserObj = method.getDeclaringClass().getConstructor().newInstance();
 						}catch(Exception ex)
 						{
 							throw new InvalidStateException("An error occurred while creating instance of expression parser enclosing object of type: {}", method.getDeclaringClass().getName(), ex);

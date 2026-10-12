@@ -27,7 +27,6 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.test.Cleanup;

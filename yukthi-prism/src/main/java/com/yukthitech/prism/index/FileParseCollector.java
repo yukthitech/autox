@@ -21,13 +21,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.yukthitech.autox.common.IndexRange;
+import com.yukthitech.autox.test.TestDataFile;
+import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.prism.editor.FileParseMessage;
 import com.yukthitech.prism.model.Project;
 import com.yukthitech.prism.xmlfile.Element;
 import com.yukthitech.prism.xmlfile.LocationRange;
 import com.yukthitech.prism.xmlfile.MessageType;
-import com.yukthitech.autox.test.TestDataFile;
-import com.yukthitech.autox.test.TestSuite;
 
 /**
  * Collector to collect the file parsing results.

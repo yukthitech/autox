@@ -24,7 +24,6 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;

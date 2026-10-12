@@ -24,6 +24,8 @@ import org.testng.annotations.Test;
 
 import com.yukthitech.autox.common.ContentStream;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.NonExecutionThreadException;
+import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
 import com.yukthitech.autox.session.AutoxSession;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -192,6 +194,36 @@ public class TAutoxSession extends BaseTestCases
 			Assert.assertTrue(dynFunc.getLocation().getName().startsWith("interactive-steps-"));
 			
 			Assert.assertEquals(session.runFunction("sessionDynFunc"), "ok");
+		}
+	}
+	
+	@Test
+	public void testGetPluginSessionRequiresExecutionThreadAndOpenSession() throws Exception
+	{
+		AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-plugin-session"));
+		
+		try
+		{
+			try
+			{
+				session.getPluginSession(PlaywrightPlugin.class);
+				Assert.fail("Expected NonExecutionThreadException outside executor context");
+			}catch(NonExecutionThreadException ex)
+			{
+				Assert.assertTrue(ex.getMessage().contains("non-executor"));
+			}
+		}finally
+		{
+			session.close();
+		}
+		
+		try
+		{
+			session.getPluginSession(PlaywrightPlugin.class);
+			Assert.fail("Expected InvalidStateException for closed session");
+		}catch(InvalidStateException ex)
+		{
+			Assert.assertTrue(ex.getMessage().contains("closed"));
 		}
 	}
 }

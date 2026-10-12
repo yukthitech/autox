@@ -20,7 +20,6 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
 import com.yukthitech.autox.plugin.ui.PlaywrightPluginSession;

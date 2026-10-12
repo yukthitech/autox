@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -32,9 +32,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import java.util.Objects;
 import com.yukthitech.prism.format.XmlFormatter;
 import com.yukthitech.utils.doc.Doc;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 @Doc("Represents an xml element with attributes and sub-elements")
 public class XmlElement

@@ -32,7 +32,6 @@ import com.microsoft.playwright.ConsoleMessage;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.WebError;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
 import com.yukthitech.autox.plugin.ui.PlaywrightPluginSession;

@@ -1,7 +1,5 @@
 package com.yukthitech.autox.event;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.report.ExecutionStatusReport;
 import com.yukthitech.autox.exec.report.ReportDataManager;

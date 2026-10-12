@@ -22,7 +22,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
 

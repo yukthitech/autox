@@ -26,7 +26,6 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.DropToStackFrameException;

@@ -24,9 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

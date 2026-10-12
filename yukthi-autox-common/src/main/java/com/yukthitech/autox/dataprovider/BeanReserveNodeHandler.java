@@ -16,7 +16,6 @@
 package com.yukthitech.autox.dataprovider;
 
 import org.apache.commons.lang3.StringUtils;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import org.xml.sax.Locator;
 
 import com.yukthitech.autox.context.AutomationContext;
@@ -26,6 +25,7 @@ import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
 import com.yukthitech.ccg.xml.reserved.NodeName;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 @NodeName(namePattern = "registerBean")
 public class BeanReserveNodeHandler implements IReserveNodeHandler

@@ -30,7 +30,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutoxCliArguments;
-import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.ApplicationConfiguration;
@@ -51,6 +50,7 @@ import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.ExecutionSuite;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestSuiteGroup;
+import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;

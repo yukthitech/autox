@@ -20,7 +20,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.PlaywrightException;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
 import com.yukthitech.autox.plugin.ui.PlaywrightPluginSession;
 import com.yukthitech.autox.prefix.PrefixEpression;

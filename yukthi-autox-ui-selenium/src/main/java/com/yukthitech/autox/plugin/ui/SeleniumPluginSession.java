@@ -35,7 +35,6 @@ import org.openqa.selenium.remote.http.ConnectionFailedException;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
-import com.yukthitech.autox.event.EventManager;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.autox.plugin.AbstractPluginSession;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -108,7 +107,7 @@ public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginS
 			newDriver = (WebDriver) configConstr.newInstance(driverConfig);
 		} catch(NoSuchMethodException ex)
 		{
-			newDriver = (WebDriver) driverClass.newInstance();					
+			newDriver = (WebDriver) driverClass.getConstructor().newInstance();					
 		} finally
 		{
 			if(actDownloadFolder != null)

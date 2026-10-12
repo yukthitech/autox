@@ -21,8 +21,8 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Short key for menu action.

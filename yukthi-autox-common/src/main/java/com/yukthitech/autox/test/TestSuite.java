@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.test;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +32,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AbstractLocationBased;
-import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;

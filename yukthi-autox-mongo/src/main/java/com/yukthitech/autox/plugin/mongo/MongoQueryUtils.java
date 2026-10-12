@@ -27,7 +27,6 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.mongojs.IMongoJsCustomizer;
 import com.yukthitech.mongojs.MongoJsEngine;

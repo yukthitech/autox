@@ -16,6 +16,7 @@
 package com.yukthitech.prism.search;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -47,7 +48,6 @@ import com.yukthitech.prism.dialog.RegexSandboxDialog;
 import com.yukthitech.prism.projexplorer.ProjectExplorer;
 import com.yukthitech.prism.search.FileSearchQuery.Scope;
 import com.yukthitech.prism.state.PersistableState;
-import java.awt.Color;
 
 public class TextSearchPanel extends JPanel
 {

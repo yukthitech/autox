@@ -18,7 +18,6 @@ package com.yukthitech.autox.common;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
-
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

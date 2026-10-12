@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.plugin.mongo;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +25,7 @@ import org.bson.types.ObjectId;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidStateException;

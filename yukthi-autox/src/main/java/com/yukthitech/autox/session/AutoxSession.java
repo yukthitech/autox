@@ -38,6 +38,8 @@ import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.interactive.InteractiveXmlSupport;
 import com.yukthitech.autox.interactive.StepHolder;
+import com.yukthitech.autox.plugin.IPlugin;
+import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -160,6 +162,20 @@ public class AutoxSession implements AutoCloseable
 	public AutomationContext getAutomationContext()
 	{
 		return context;
+	}
+	
+	/**
+	 * Returns the live plugin session for the given plugin type (same path steps use).
+	 * Must be called from an execution thread (e.g. during {@link #runFunction} /
+	 * {@link #executeSteps}, or another executor context).
+	 *
+	 * @param pluginType plugin class (e.g. PlaywrightPlugin.class)
+	 * @return active plugin session for the current execution thread
+	 */
+	public <S extends IPluginSession> S getPluginSession(Class<? extends IPlugin<?, S>> pluginType)
+	{
+		ensureOpen();
+		return context.getExecutionContextManager().getPluginSession(pluginType);
 	}
 	
 	public boolean isClosed()

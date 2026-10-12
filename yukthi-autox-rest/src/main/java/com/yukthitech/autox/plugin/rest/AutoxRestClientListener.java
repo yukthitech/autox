@@ -15,11 +15,9 @@
  */
 package com.yukthitech.autox.plugin.rest;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import javax.servlet.http.HttpServletResponse;
 
-import com.yukthitech.autox.event.EventManager;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.rest.IRestClientListener;
 import com.yukthitech.utils.rest.RestRequest;

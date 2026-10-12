@@ -16,7 +16,6 @@
 package com.yukthitech.autox.plugin.sql;
 
 import org.apache.commons.lang3.StringUtils;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.plugin.sql.steps.QueryUtils;
@@ -24,6 +23,7 @@ import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.autox.prefix.PrefixExprParam;
 import com.yukthitech.autox.prefix.PrefixExpressionAnnot;
 import com.yukthitech.autox.prefix.PrefixExpressionContext;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Sql prefix expressions.

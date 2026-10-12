@@ -80,7 +80,7 @@ public class DataSourceWrapper implements DataSource
 	{
 		try
 		{
-			DataSource dataSource = (DataSource) dataSourceType.newInstance();
+			DataSource dataSource = (DataSource) dataSourceType.getConstructor().newInstance();
 			
 			for(Map.Entry<String, String> prop : this.properties.entrySet())
 			{

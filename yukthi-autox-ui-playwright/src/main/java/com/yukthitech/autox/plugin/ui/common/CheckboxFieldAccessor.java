@@ -80,7 +80,6 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 		return builder.toString();
 	}
 
-	@SuppressWarnings({ "rawtypes"})
 	@Override
 	public void setValue(String driverName, List<UiElement> webElements, Object value)
 	{

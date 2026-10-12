@@ -145,7 +145,7 @@ public class PluginInfo implements Comparable<PluginInfo>, Serializable
 	 */
 	private void fetchCliArguments(Class<? extends IPlugin<?, ?>> pluginClass) throws Exception
 	{
-		IPlugin<?, ?> pluginInst = pluginClass.newInstance();
+		IPlugin<?, ?> pluginInst = pluginClass.getConstructor().newInstance();
 		Class<?> cliArgHolderType = pluginInst.getArgumentBeanType();
 		
 		if(cliArgHolderType == null)

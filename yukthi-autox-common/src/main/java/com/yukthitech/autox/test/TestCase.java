@@ -29,7 +29,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import com.yukthitech.autox.AbstractLocationBasedStepContainer;
 import com.yukthitech.autox.IStepContainer;
@@ -43,6 +42,7 @@ import com.yukthitech.autox.dataprovider.dyn.DynamicDataProvider;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.ObjectWrapper;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Test case with validations to be executed.

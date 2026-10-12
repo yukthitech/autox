@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.plugin.rest;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.event.EventManager;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.plugin.AbstractPluginSession;
 import com.yukthitech.autox.plugin.rest.RestPlugin.RestConnection;
 import com.yukthitech.utils.CommonUtils;

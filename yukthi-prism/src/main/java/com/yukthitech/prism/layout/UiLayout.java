@@ -24,8 +24,8 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.prism.PrismLauncher;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.prism.PrismLauncher;
 
 /**
  * Layout details of the ide.

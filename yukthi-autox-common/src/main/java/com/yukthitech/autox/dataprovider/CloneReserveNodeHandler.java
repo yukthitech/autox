@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import org.xml.sax.Locator;
 
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -35,6 +34,7 @@ import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
 import com.yukthitech.ccg.xml.reserved.NodeName;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @NodeName(namePattern = "clone")

@@ -30,7 +30,6 @@ import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.AutoxTestException;

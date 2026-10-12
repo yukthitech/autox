@@ -19,8 +19,6 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.xml.XMLConstants;
-
 import org.apache.commons.beanutils.BeanUtils;
 
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -158,7 +156,7 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 
 			try
 			{
-				Object copy = bean.getClass().newInstance();
+				Object copy = bean.getClass().getConstructor().newInstance();
 				BeanUtils.copyProperties(copy, bean);
 				return copy;
 			}catch(Exception ex)

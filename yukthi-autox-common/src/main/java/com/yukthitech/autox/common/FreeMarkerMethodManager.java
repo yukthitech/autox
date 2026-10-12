@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.common;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +27,7 @@ import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;

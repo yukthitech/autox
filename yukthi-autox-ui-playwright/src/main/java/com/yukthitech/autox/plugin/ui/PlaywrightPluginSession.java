@@ -43,11 +43,11 @@ import com.microsoft.playwright.PlaywrightException;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
-import com.yukthitech.autox.event.EventManager;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.autox.plugin.AbstractPluginSession;
 import com.yukthitech.autox.plugin.ui.common.Dimension;
 import com.yukthitech.autox.plugin.ui.common.Point;
+import com.yukthitech.autox.plugin.ui.common.UiCaptureUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -503,6 +503,15 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 	}
 	
 	/**
+	 * Fetches the active page of the default driver. If the driver is not yet created, it will be created.
+	 * @return active page
+	 */
+	public Page getPage()
+	{
+		return getPage(null);
+	}
+	
+	/**
 	 * Fetches the active page of the specified driver. If driver is not yet created, it will be created.
 	 * @param name name of the driver. If null, default driver will be used.
 	 * @return active page.
@@ -696,6 +705,7 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 		
 		do
 		{
+			logger.debug("Waiting for browser dialog to appear..");
 			PendingDialog dialog = driverCtx.dialogs.poll();
 			
 			if(dialog != null)
@@ -820,12 +830,41 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 	}
 	
 	/**
+	 * Takes screen shot of the active page of the default driver.
+	 * @return png image content
+	 */
+	public byte[] takeScreenshot()
+	{
+		return takeScreenshot(null);
+	}
+	
+	/**
 	 * Takes screen shot of the active page of the driver.
+	 * @param name driver name; if null, default driver is used
 	 * @return png image content
 	 */
 	public byte[] takeScreenshot(String name)
 	{
-		return getPage(name).screenshot();
+		return UiCaptureUtils.takeScreenshot(getPage(name));
+	}
+	
+	/**
+	 * Captures an MHTML snapshot of the active page of the default driver.
+	 * @return MHTML content
+	 */
+	public String captureHtmlSnapshot()
+	{
+		return captureHtmlSnapshot(null);
+	}
+	
+	/**
+	 * Captures an MHTML snapshot of the active page of the driver.
+	 * @param name driver name; if null, default driver is used
+	 * @return MHTML content
+	 */
+	public String captureHtmlSnapshot(String name)
+	{
+		return UiCaptureUtils.captureHtmlSnapshot(getPage(name));
 	}
 	
 	/**
@@ -923,7 +962,7 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 			{
 				Page activePage = getActivePage(driverEntry.getValue());
 				
-				byte[] screenshot = activePage.screenshot();
+				byte[] screenshot = UiCaptureUtils.takeScreenshot(activePage);
 				ReportLogFile reportLogFile = context.newLogFile("error-screenshot", "png");
 				FileUtils.writeByteArrayToFile(reportLogFile.getFile(), screenshot);
 				

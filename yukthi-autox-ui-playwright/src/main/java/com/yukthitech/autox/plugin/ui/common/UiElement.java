@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.plugin.ui.common;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +28,7 @@ import com.microsoft.playwright.options.BoundingBox;
 import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.SelectOption;
 import com.microsoft.playwright.options.WaitForSelectorState;
-import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
 import com.yukthitech.autox.plugin.ui.PlaywrightPluginSession;
 
@@ -53,7 +51,7 @@ public class UiElement
 	 * Timeout in millis used for actions like click, fill, etc. This is intentionally smaller than
 	 * playwright default (30 sec), as the callers (steps) have their own retry mechanism.
 	 */
-	public static final double DEFAULT_ACTION_TIMEOUT_MS = 10000;
+	public static final double DEFAULT_ACTION_TIMEOUT_MS = 3000;
 
 	/**
 	 * Name of the driver to which this element belongs.
@@ -145,17 +143,20 @@ public class UiElement
 
 	public void click()
 	{
-		performAction("click", () -> locator.click(new Locator.ClickOptions().setTimeout(DEFAULT_ACTION_TIMEOUT_MS)));
+		performAction("click", 
+			() -> locator.click(new Locator.ClickOptions().setTimeout(DEFAULT_ACTION_TIMEOUT_MS)));
 	}
 
 	public void dblClick()
 	{
-		performAction("dblclick", () -> locator.dblclick(new Locator.DblclickOptions().setTimeout(DEFAULT_ACTION_TIMEOUT_MS)));
+		performAction("dblclick", 
+			() -> locator.dblclick(new Locator.DblclickOptions().setTimeout(DEFAULT_ACTION_TIMEOUT_MS)));
 	}
 
 	public void rightClick()
 	{
-		performAction("rightclick", () -> locator.click(new Locator.ClickOptions().setButton(MouseButton.RIGHT).setTimeout(DEFAULT_ACTION_TIMEOUT_MS)));
+		performAction("rightclick", 
+			() -> locator.click(new Locator.ClickOptions().setButton(MouseButton.RIGHT).setTimeout(DEFAULT_ACTION_TIMEOUT_MS)));
 	}
 
 	/**

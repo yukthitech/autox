@@ -32,7 +32,6 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.sql.DbPlugin;
 import com.yukthitech.autox.plugin.sql.DbPluginSession;

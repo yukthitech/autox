@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.exec.report;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -25,7 +23,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.test.TestStatus;
 

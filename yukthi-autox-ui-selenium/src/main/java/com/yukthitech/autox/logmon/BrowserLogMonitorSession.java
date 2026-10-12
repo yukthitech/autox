@@ -37,7 +37,6 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.Logs;
 
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
@@ -267,7 +266,6 @@ public class BrowserLogMonitorSession implements ILogMonitorSession
 		return stopClassicMonitoring();
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<ReportLogFile> stopJsHookMonitoring()
 	{
 		if(!(currentWebDriver instanceof JavascriptExecutor))

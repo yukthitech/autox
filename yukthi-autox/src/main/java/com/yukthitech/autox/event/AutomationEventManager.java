@@ -39,7 +39,7 @@ public class AutomationEventManager implements IAutomationEventManager
 			try
 			{
 				Class<?> cls = Class.forName(name);
-				listener = cls.newInstance();
+				listener = cls.getConstructor().newInstance();
 			}catch(Exception ex)
 			{
 				logger.error("An error occurred while initializing automation listener of type: " + name, ex);

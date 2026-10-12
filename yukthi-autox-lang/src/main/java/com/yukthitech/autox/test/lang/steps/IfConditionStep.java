@@ -32,7 +32,6 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.Function;

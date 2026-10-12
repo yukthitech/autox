@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.plugin.ui.steps;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -27,7 +25,7 @@ import com.microsoft.playwright.PlaywrightException;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
-import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
 import com.yukthitech.autox.plugin.ui.PlaywrightPluginSession;
 import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;

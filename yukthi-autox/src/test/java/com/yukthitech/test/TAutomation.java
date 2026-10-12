@@ -53,7 +53,7 @@ public class TAutomation extends BaseTestCases
 					"-rf", "./output/success", 
 					"-prop", "./src/test/resources/app.properties", 
 					//"-ts", "ui-test-suites"
-					//"-tc", "fillForm"
+					//"-tc", "alert_test"
 					//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 				});
 			

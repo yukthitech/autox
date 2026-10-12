@@ -16,7 +16,6 @@
 package com.yukthitech.autox.plugin.ui.steps;
 
 import org.apache.commons.lang3.StringUtils;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -24,11 +23,11 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.ui.SeleniumPlugin;
 import com.yukthitech.autox.plugin.ui.SeleniumPluginSession;
 import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Can be used to execute js code.

@@ -35,7 +35,6 @@ import javax.mail.Store;
 import javax.mail.internet.MimeBodyPart;
 
 import org.apache.commons.io.IOUtils;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.Executable;
@@ -43,12 +42,12 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.plugin.mail.EmailPlugin;
 import com.yukthitech.autox.plugin.mail.MailSession;
 import com.yukthitech.autox.test.mail.steps.MailMessage.Attachment;
 import com.yukthitech.autox.test.mail.steps.MailMessage.NameAndMailId;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Step to read mails.

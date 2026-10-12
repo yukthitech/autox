@@ -343,7 +343,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	{
 		try
 		{
-			return (IStep) stepType.newInstance();
+			return (IStep) stepType.getConstructor().newInstance();
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating step of type - {}", stepType.getName(), ex);

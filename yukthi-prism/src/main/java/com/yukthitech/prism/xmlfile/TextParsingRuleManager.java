@@ -27,9 +27,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.prism.editor.FileParseMessage;
 import com.yukthitech.prism.index.FileParseCollector;
-import com.yukthitech.ccg.xml.XMLBeanParser;
 
 /**
  * Manages rules related to text parsing.

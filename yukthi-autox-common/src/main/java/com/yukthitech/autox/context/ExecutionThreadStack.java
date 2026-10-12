@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.context;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +23,6 @@ import java.util.Stack;
 
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.IPluginSession;
-import com.yukthitech.autox.plugin.PluginManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

@@ -88,7 +88,7 @@ public class ObjectCopy implements Serializable
 	{
 		try
 		{
-			Object copy = baseObject.getClass().newInstance();
+			Object copy = baseObject.getClass().getConstructor().newInstance();
 			BeanUtils.copyProperties(copy, baseObject);
 			
 			for(Property prop : this.properties)

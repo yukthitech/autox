@@ -29,6 +29,7 @@ import org.fife.ui.rsyntaxtextarea.TokenImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.prism.AbstractIdeFileManager;
 import com.yukthitech.prism.IdeNotificationPanel;
 import com.yukthitech.prism.common.CodeSnippet;
@@ -38,7 +39,6 @@ import com.yukthitech.prism.editor.FileParseMessage;
 import com.yukthitech.prism.editor.IIdeCompletionProvider;
 import com.yukthitech.prism.index.FileParseCollector;
 import com.yukthitech.prism.model.Project;
-import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ObjectWrapper;
 

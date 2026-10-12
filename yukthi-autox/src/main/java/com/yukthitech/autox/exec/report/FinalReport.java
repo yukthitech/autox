@@ -15,8 +15,6 @@
  */
 package com.yukthitech.autox.exec.report;
 
-import com.yukthitech.autox.context.AutomationContext;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -26,7 +24,7 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.TestStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

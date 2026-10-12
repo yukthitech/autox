@@ -30,7 +30,6 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitorSession;
-import com.yukthitech.autox.logmon.LogMonitorManager;
 import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestSuite;

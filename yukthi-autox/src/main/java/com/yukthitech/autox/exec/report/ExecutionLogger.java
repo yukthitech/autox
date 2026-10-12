@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
