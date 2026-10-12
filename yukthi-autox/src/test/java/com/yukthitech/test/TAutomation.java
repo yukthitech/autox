@@ -24,8 +24,6 @@ import org.testng.annotations.Test;
 
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.common.IAutomationConstants;
-import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.exec.report.FinalReport.TestSuiteResult;
 import com.yukthitech.autox.test.TestStatus;
@@ -33,18 +31,29 @@ import com.yukthitech.test.beans.ExecutionResult;
 
 public class TAutomation extends BaseTestCases
 {
+	private void assertListenerFired()
+	{
+		TestAutomationListener listener = TestAutomationListener.getLastInstance();
+		Assert.assertNotNull(listener, "Expected TestAutomationListener to have been registered");
+		Assert.assertNotNull(listener.getStartTime());
+		Assert.assertNotNull(listener.getEndTime());
+		Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));
+		listener.print();
+	}
+	
 	@Test
 	public void testSuccessCases() throws Exception
 	{
+		AutomationLauncher.systemExitEnabled = false;
 		System.setProperty(IAutomationConstants.AUTOX_SYS_PROP_LISTENERS, TestAutomationListener.class.getName());
 		
 		try
 		{
 			AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 					"-rf", "./output/success", 
-					"-prop", "./src/test/resources/app.properties",
-					//"-ts", "mongoTestSuite"
-					"-tc", "captureTracing"
+					"-prop", "./src/test/resources/app.properties", 
+					//"-ts", "ui-test-suites"
+					//"-tc", "fillForm"
 					//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 				});
 			
@@ -53,12 +62,7 @@ public class TAutomation extends BaseTestCases
 			Assert.assertEquals(exeResult.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
 			Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
 			
-			TestAutomationListener listener = (TestAutomationListener) ((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).getListeners().get(0);
-			Assert.assertNotNull(listener.getStartTime());
-			Assert.assertNotNull(listener.getEndTime());
-			Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));
-			
-			listener.print();
+			assertListenerFired();
 		}finally
 		{
 			System.setProperty(IAutomationConstants.AUTOX_SYS_PROP_LISTENERS, "");
@@ -100,12 +104,7 @@ public class TAutomation extends BaseTestCases
 			Assert.assertEquals(report.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
 			Assert.assertEquals(report.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
 			
-			TestAutomationListener listener = (TestAutomationListener) ((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).getListeners().get(0);
-			Assert.assertNotNull(listener.getStartTime());
-			Assert.assertNotNull(listener.getEndTime());
-			Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));
-			
-			listener.print();
+			assertListenerFired();
 		}finally
 		{
 			System.setProperty(IAutomationConstants.AUTOX_SYS_PROP_LISTENERS, "");
@@ -133,12 +132,7 @@ public class TAutomation extends BaseTestCases
 			Assert.assertEquals(report.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
 			Assert.assertEquals(report.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
 			
-			TestAutomationListener listener = (TestAutomationListener) ((AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager()).getListeners().get(0);
-			Assert.assertNotNull(listener.getStartTime());
-			Assert.assertNotNull(listener.getEndTime());
-			Assert.assertTrue(CollectionUtils.isNotEmpty(listener.getMessages()));
-			
-			listener.print();
+			assertListenerFired();
 		}finally
 		{
 			System.setProperty(IAutomationConstants.AUTOX_SYS_PROP_LISTENERS, "");

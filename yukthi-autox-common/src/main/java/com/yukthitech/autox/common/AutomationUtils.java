@@ -1092,17 +1092,88 @@ public class AutomationUtils
 	
 	public static boolean equals(Object val1, Object val2)
 	{
+		if(val1 == val2)
+		{
+			return true;
+		}
+		
+		if(val1 == null || val2 == null)
+		{
+			return false;
+		}
+		
 		//when two numbers of different data types has to be compared
 		// like long and BigDecimal
-		if(val1 != null && val2 != null && !val1.getClass().equals(val2.getClass()) 
+		if(!val1.getClass().equals(val2.getClass()) 
 				&& (val1 instanceof Number) && (val2 instanceof Number))
 		{
 			//compare them with their long value
 			return ((Number) val1).longValue() == ((Number) val2).longValue();
 		}
 		
+		// Date subclasses (e.g. Timestamp) have asymmetric equals; compare by epoch millis
+		if(val1 instanceof Date && val2 instanceof Date)
+		{
+			return ((Date) val1).getTime() == ((Date) val2).getTime();
+		}
+		
+		// Deep-compare maps so nested Dates/Numbers use the rules above (Map.equals uses Objects.equals)
+		if(val1 instanceof Map && val2 instanceof Map)
+		{
+			return mapsEqual((Map<?, ?>) val1, (Map<?, ?>) val2);
+		}
+		
+		// Ordered lists only — Sets stay on Objects.equals (order-independent)
+		if(val1 instanceof List && val2 instanceof List)
+		{
+			return listsEqual((List<?>) val1, (List<?>) val2);
+		}
+		
 		//in all other cases follow standard comparison
 		return Objects.equals(val1, val2);
+	}
+	
+	private static boolean mapsEqual(Map<?, ?> map1, Map<?, ?> map2)
+	{
+		if(map1.size() != map2.size())
+		{
+			return false;
+		}
+		
+		for(Map.Entry<?, ?> entry : map1.entrySet())
+		{
+			Object key = entry.getKey();
+			
+			if(!map2.containsKey(key))
+			{
+				return false;
+			}
+			
+			if(!equals(entry.getValue(), map2.get(key)))
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	private static boolean listsEqual(List<?> list1, List<?> list2)
+	{
+		if(list1.size() != list2.size())
+		{
+			return false;
+		}
+		
+		for(int i = 0; i < list1.size(); i++)
+		{
+			if(!equals(list1.get(i), list2.get(i)))
+			{
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	public static String getStringValue(PrefixExpressionContext parserContext, String expression) throws Exception

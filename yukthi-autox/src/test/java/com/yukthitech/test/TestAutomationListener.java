@@ -17,6 +17,12 @@ public class TestAutomationListener implements IAutomationListener
 {
 	private static SimpleDateFormat TIME_FORMAT = new SimpleDateFormat();
 	
+	/**
+	 * Last constructed listener. Kept so tests can assert after {@link com.yukthitech.autox.session.AutoxSession#close()}
+	 * clears {@link com.yukthitech.autox.context.AutomationContext#getInstance()}.
+	 */
+	private static volatile TestAutomationListener lastInstance;
+	
 	private Date startTime;
 	
 	private Date endTime;
@@ -24,6 +30,16 @@ public class TestAutomationListener implements IAutomationListener
 	private List<String> messages = new LinkedList<>();
 	
 	private Map<String, Set<String>> testSuites = new TreeMap<>();
+	
+	public TestAutomationListener()
+	{
+		lastInstance = this;
+	}
+	
+	public static TestAutomationListener getLastInstance()
+	{
+		return lastInstance;
+	}
 	
 	@SuppressWarnings("incomplete-switch")
 	@Override
