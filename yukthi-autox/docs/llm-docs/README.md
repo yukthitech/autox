@@ -5,7 +5,7 @@ This folder contains documentation for LLMs (Cursor, Claude, etc.) to author Aut
 ## How to use these docs
 
 1. **Start here** when creating a new AutoX project or writing test XML.
-2. Read the numbered guides (`01`–`15`) for concepts and patterns.
+2. Read the numbered guides (`01`–`16`) for concepts and patterns.
 3. Look up step/validation details in `reference/` — split by [`Group`](../../src/main/java/com/yukthitech/autox/Group.java) enum (see [`reference/README.md`](reference/README.md)).
 4. Use `doc-information.json` for programmatic lookup when you need the full schema.
 
@@ -28,6 +28,7 @@ This folder contains documentation for LLMs (Cursor, Claude, etc.) to author Aut
 | [13-mongo-automation.md](13-mongo-automation.md) | MongoDB steps (`Group.Mongodb`) |
 | [14-mock-server.md](14-mock-server.md) | HTTP mock server (`Group.Mock`) |
 | [15-module-structure.md](15-module-structure.md) | Maven modules, Playwright vs Selenium, consumer dependency choices |
+| [16-local-process-session.md](16-local-process-session.md) | Embed AutoX in-process: `AutoxSession` / `AutoxDebugSession`, functions, steps, debug ops, screenshot, dumps |
 
 ## Reference index (auto-generated)
 

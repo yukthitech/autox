@@ -33,6 +33,7 @@ Before creating or modifying test suite XML, read:
 | Expressions / `${...}` | `06-expressions.md` | `reference/prefix-expressions.md`, `reference/freemarker-methods.md` | — |
 | UI locators | `08-ui-automation.md` | `reference/ui-locators.md` | — |
 | Plugin config | `02-app-configuration.md` | `reference/plugins.md` | — |
+| Embed in local process (session API, debug, screenshot) | `16-local-process-session.md` | — | — |
 | File I/O | — | `reference/steps-io.md` | `reference/validations-io.md` |
 | Email | — | `reference/steps-mail.md` | `reference/validations-mail.md` |
 | Common utilities | — | `reference/steps-common.md` | `reference/validations-common.md` |

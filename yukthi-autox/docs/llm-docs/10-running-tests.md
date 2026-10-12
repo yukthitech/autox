@@ -93,7 +93,9 @@ Run with: `mvn exec:java`
 
 ## Debugging
 
-Use Prism IDE for breakpoints and step-through debugging. For CLI-only workflows, add logging steps:
+Use Prism IDE for breakpoints and step-through debugging. To embed AutoX in a host process with in-process pause / step / eval / screenshot, see [16-local-process-session.md](16-local-process-session.md).
+
+For CLI-only workflows, add logging steps:
 
 ```xml
 <s:log message="Current emp id: ${attr.emp1_id}"/>
