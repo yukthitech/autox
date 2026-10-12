@@ -29,7 +29,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ILocationBased;
+import com.yukthitech.autox.debug.IDebugEventSink;
 import com.yukthitech.autox.debug.IDebugFlowManager;
+import com.yukthitech.autox.debug.SocketDebugEventSink;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
@@ -38,8 +40,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Execution debug manager to control flow execution.
- * Owns optional {@link DebugServer} socket transport (Prism). That transport will move to
- * AutoxDebugSession in a later phase; it is intentionally not on {@link AutomationContext}.
+ * Debug mode is active when an {@link IDebugEventSink} is registered (socket for Prism
+ * via {@link #startDebugServer(int)}, or in-process via {@link #enableDebug(IDebugEventSink)}).
  * @author akranthikiran
  */
 public class DebugFlowManager implements IDebugFlowManager
@@ -57,7 +59,12 @@ public class DebugFlowManager implements IDebugFlowManager
 	private Map<String, LiveDebugPoint> livePoints = new HashMap<>();
 	
 	/**
-	 * Optional Prism socket debug server for this session.
+	 * Active outbound event sink. Non-null means debug mode is enabled.
+	 */
+	private IDebugEventSink eventSink;
+	
+	/**
+	 * Optional Prism socket debug server (when sink is {@link SocketDebugEventSink}).
 	 */
 	private DebugServer debugServer;
 	
@@ -65,23 +72,51 @@ public class DebugFlowManager implements IDebugFlowManager
 	{}
 	
 	/**
-	 * Starts socket debug server on the given port and waits for Prism client init.
+	 * Enables debug mode with the given sink (typically {@code InProcessDebugEventSink} for embed).
+	 */
+	public synchronized void enableDebug(IDebugEventSink sink)
+	{
+		if(eventSink != null)
+		{
+			throw new InvalidStateException("Debug mode is already enabled for this flow manager.");
+		}
+		
+		if(sink == null)
+		{
+			throw new InvalidStateException("Debug event sink cannot be null");
+		}
+		
+		this.eventSink = sink;
+	}
+	
+	/**
+	 * Starts socket debug server on the given port, waits for Prism client init, and
+	 * registers a {@link SocketDebugEventSink}.
 	 */
 	public synchronized void startDebugServer(int port)
 	{
-		if(debugServer != null)
+		if(eventSink != null)
 		{
-			throw new InvalidStateException("Debug server is already started for this flow manager.");
+			throw new InvalidStateException("Debug mode is already enabled for this flow manager.");
 		}
 		
 		DebugServer server = new DebugServer(port);
 		server.start();
 		this.debugServer = server;
+		this.eventSink = new SocketDebugEventSink(server);
 	}
 	
+	/**
+	 * Debug mode is active when a sink is registered (not merely when a socket server exists).
+	 */
 	public boolean isDebugMode()
 	{
-		return debugServer != null;
+		return eventSink != null;
+	}
+	
+	public IDebugEventSink getEventSink()
+	{
+		return eventSink;
 	}
 	
 	public DebugServer getDebugServer()
@@ -90,16 +125,18 @@ public class DebugFlowManager implements IDebugFlowManager
 	}
 	
 	/**
-	 * Sends a message to the Prism debug client when a server is active.
+	 * Sends a message to the active debug sink.
 	 */
 	public void sendClientMessage(Serializable data)
 	{
-		if(debugServer == null)
+		IDebugEventSink sink = eventSink;
+		
+		if(sink == null)
 		{
-			throw new InvalidStateException("Debug server is not started for this session");
+			throw new InvalidStateException("Debug mode is not enabled for this session");
 		}
 		
-		debugServer.sendClientMessage(data);
+		sink.onEvent(data);
 	}
 	
 	@Override
@@ -122,17 +159,19 @@ public class DebugFlowManager implements IDebugFlowManager
 			this.debugPoints.clear();
 		}
 		
-		if(debugServer != null)
+		IDebugEventSink sink = eventSink;
+		eventSink = null;
+		debugServer = null;
+		
+		if(sink != null)
 		{
 			try
 			{
-				debugServer.reset();
+				sink.close();
 			}catch(Exception ex)
 			{
-				logger.warn("Error while resetting debug server", ex);
+				logger.warn("Error while closing debug event sink", ex);
 			}
-			
-			debugServer = null;
 		}
 	}
 	
@@ -144,11 +183,50 @@ public class DebugFlowManager implements IDebugFlowManager
 			
 			if(CollectionUtils.isNotEmpty(points))
 			{
-				points.forEach(point -> debugPoints.put(point.getFilePath() + ":" + point.getLineNumber(), point));
+				points.forEach(point -> debugPoints.put(pointKey(point), point));
 			}
 		}
 		
 		return this;
+	}
+	
+	public void addDebugPoint(DebugPoint point)
+	{
+		if(point == null)
+		{
+			throw new InvalidStateException("Debug point cannot be null");
+		}
+		
+		synchronized(debugPoints)
+		{
+			debugPoints.put(pointKey(point), point);
+		}
+	}
+	
+	public void removeDebugPoint(String filePath, int lineNumber)
+	{
+		synchronized(debugPoints)
+		{
+			debugPoints.remove(filePath + ":" + lineNumber);
+		}
+	}
+	
+	public void removeDebugPoint(DebugPoint point)
+	{
+		if(point == null)
+		{
+			return;
+		}
+		
+		removeDebugPoint(point.getFilePath(), point.getLineNumber());
+	}
+	
+	public Collection<DebugPoint> getDebugPoints()
+	{
+		synchronized(debugPoints)
+		{
+			return new ArrayList<>(debugPoints.values());
+		}
 	}
 	
 	public void addSinglePauseDebugPoint(File sourceFile, int lineNumber)
@@ -319,5 +397,10 @@ public class DebugFlowManager implements IDebugFlowManager
 		{
 			livePoints.remove(id);
 		}
+	}
+	
+	private static String pointKey(DebugPoint point)
+	{
+		return point.getFilePath() + ":" + point.getLineNumber();
 	}
 }

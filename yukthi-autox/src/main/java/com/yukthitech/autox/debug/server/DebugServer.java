@@ -48,8 +48,8 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Socket transport for Prism remote debugging. Owned by {@link DebugFlowManager}
- * (and later by AutoxDebugSession); not registered on AutomationContext.
+ * Socket transport for Prism remote debugging. Used via {@link com.yukthitech.autox.debug.SocketDebugEventSink}
+ * owned by {@link DebugFlowManager}; not registered on AutomationContext.
  * @author akiran
  */
 public class DebugServer

@@ -22,6 +22,8 @@ AutomationContext.getInstance().getDebugFlowManager()...
 AutomationContext.getInstance().getPluginManager()...
 ```
 
+Debug outbound events go through `IDebugEventSink` on `DebugFlowManager` (`sendClientMessage` → sink). Debug mode = sink registered (socket via `startDebugServer`, or in-process via `enableDebug` / `AutoxDebugSession`).
+
 ## Capture fixed instances in the constructor
 
 When a class's lifetime is bound to one session (e.g. `LiveDebugPoint`, debug server handlers) and `AutomationContext` / managers will not change for that instance, resolve them once in the constructor and store as `final` fields:

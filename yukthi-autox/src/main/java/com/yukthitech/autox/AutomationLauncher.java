@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.ContentStream;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
@@ -125,12 +126,12 @@ public class AutomationLauncher
 		return (AutomationEventManager) AutomationContext.getInstance().getAutomationEventManager();
 	}
 	
-	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[]) throws Exception
+	public static AutomationContext loadAutomationContext(ContentStream appConfiguration, String extendedCommandLineArgs[]) throws Exception
 	{
-		return loadAutomationContext(appConfigurationFile, extendedCommandLineArgs, null);
+		return loadAutomationContext(appConfiguration, extendedCommandLineArgs, null);
 	}
 	
-	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[], AutomationEventManager eventManager) throws Exception
+	public static AutomationContext loadAutomationContext(ContentStream appConfiguration, String extendedCommandLineArgs[], AutomationEventManager eventManager) throws Exception
 	{
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(AutoxCliArguments.class);
 		AutoxCliArguments basicArguments = null;
@@ -180,8 +181,8 @@ public class AutomationLauncher
 			AutomationUtils.deleteFolder(reportFolder);
 		}
 		
-		// load the configuration file
-		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfigurationFile, basicArguments);
+		// load the configuration
+		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfiguration, basicArguments);
 		AutomationContext context = new AutomationContext(appConfig);
 		
 		PrefixExpressionFactory.init(null, appConfig.getBasePackages());
@@ -239,7 +240,7 @@ public class AutomationLauncher
 			extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
 		}
 		
-		AutoxSession session = AutoxSession.start(appConfigurationFile, extendedCommandLineArgs, eventManager);
+		AutoxSession session = AutoxSession.start(ContentStream.fromFile(appConfigurationFile), extendedCommandLineArgs, eventManager);
 		
 		try
 		{

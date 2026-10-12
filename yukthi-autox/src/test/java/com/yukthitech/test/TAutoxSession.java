@@ -22,6 +22,7 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.yukthitech.autox.common.ContentStream;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.session.AutoxSession;
 import com.yukthitech.autox.test.Function;
@@ -52,7 +53,7 @@ public class TAutoxSession extends BaseTestCases
 		params.put("a", 10);
 		params.put("b", 20);
 		
-		try (AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-api-1")))
+		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-1")))
 		{
 			session.loadTestSuiteFiles();
 			
@@ -72,7 +73,7 @@ public class TAutoxSession extends BaseTestCases
 		
 		Assert.assertNull(AutomationContext.getInstance());
 		
-		try (AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-api-2")))
+		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-2")))
 		{
 			session.loadTestSuiteFiles();
 			Assert.assertNull(session.runFunction("sumWithoutReturn", params));
@@ -84,7 +85,7 @@ public class TAutoxSession extends BaseTestCases
 	@Test
 	public void testUnknownFunctionAndClosedSession() throws Exception
 	{
-		AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-api-err"));
+		AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-err"));
 		
 		try
 		{
@@ -116,13 +117,13 @@ public class TAutoxSession extends BaseTestCases
 	@Test
 	public void testSingleActiveSessionGuard() throws Exception
 	{
-		AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-api-guard"));
+		AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-guard"));
 		
 		try
 		{
 			try
 			{
-				AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-api-guard-2"));
+				AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-guard-2"));
 				Assert.fail("Expected InvalidStateException for second start");
 			}catch(InvalidStateException ex)
 			{
@@ -146,9 +147,9 @@ public class TAutoxSession extends BaseTestCases
 		
 		String sourceName = "host:session-load-xml.xml";
 		
-		try (AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-load-xml")))
+		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-load-xml")))
 		{
-			session.loadXml(xml, sourceName);
+			session.loadXml(ContentStream.fromString(xml, sourceName));
 			
 			Function function = session.getAutomationContext().getGlobalFunction("sessionLoadXmlSum");
 			Assert.assertNotNull(function);
@@ -163,7 +164,7 @@ public class TAutoxSession extends BaseTestCases
 			
 			try
 			{
-				session.loadXml(xml, "  ");
+				ContentStream.fromString(xml, "  ");
 				Assert.fail("Expected InvalidArgumentException for blank sourceName");
 			}catch(InvalidArgumentException ex)
 			{
@@ -175,7 +176,7 @@ public class TAutoxSession extends BaseTestCases
 	@Test
 	public void testExecuteStepsDynamicSource() throws Exception
 	{
-		try (AutoxSession session = AutoxSession.start(APP_CONFIG, sessionArgs("./output/session-execute-steps")))
+		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-execute-steps")))
 		{
 			// Mode 2: no sourceName; locations use generated interactive-steps-N.xml
 			session.executeSteps("<s:log message=\"hello from session executeSteps\"/>");

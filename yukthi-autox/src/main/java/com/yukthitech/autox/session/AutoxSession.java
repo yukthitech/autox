@@ -16,7 +16,6 @@
 package com.yukthitech.autox.session;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationFileLoader;
 import com.yukthitech.autox.AutomationLauncher;
+import com.yukthitech.autox.common.ContentStream;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.event.AutomationEventManager;
@@ -56,9 +56,9 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * <p>
  * Typical embed usage (Mode 1 — load suites / XML, run multiple functions, same plugins/browser):
  * <pre>
- * try (AutoxSession session = AutoxSession.start(appConfigFile, args))
+ * try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(appConfigFile), args))
  * {
- *     session.loadXml(suiteXml, "host:checkout-flow.xml");
+ *     session.loadXml(ContentStream.fromString(suiteXml, "host:checkout-flow.xml"));
  *     session.runFunction("login");
  *     Object result = session.runFunction("checkout", params);
  * }
@@ -67,10 +67,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * <pre>
  * session.executeSteps("&lt;s:set expression=\"x\" value=\"int: 1\"/&gt;");
  * </pre>
- * Expression {@code eval} while paused and debug APIs are Phase 4 ({@code AutoxDebugSession}).
+ * For breakpoints / pause / step / paused {@code eval}, use {@link AutoxDebugSession}.
  * </p>
  * <p>
- * Phase 1/2 assume session work is driven on a single execution thread (CLI main path).
+ * Session work is driven on a single execution thread (CLI main path).
  * Sequential use from different threads is deferred.
  * </p>
  *
@@ -86,27 +86,37 @@ public class AutoxSession implements AutoCloseable
 	
 	private boolean testSuiteFilesLoaded;
 	
-	private AutoxSession(AutomationContext context)
+	protected AutoxSession(AutomationContext context)
 	{
 		this.context = context;
 	}
 	
 	/**
-	 * Starts a new session for the given app configuration.
+	 * Starts a new session for the given app configuration content (file, string, or stream).
 	 *
-	 * @param appConfigurationFile application configuration file
+	 * @param appConfiguration application configuration content
 	 * @param extendedCommandLineArgs extended CLI args (may be empty, not null)
 	 * @return the new session (caller must {@link #close()} it)
 	 */
-	public static AutoxSession start(File appConfigurationFile, String[] extendedCommandLineArgs) throws Exception
+	public static AutoxSession start(ContentStream appConfiguration, String[] extendedCommandLineArgs) throws Exception
 	{
-		return start(appConfigurationFile, extendedCommandLineArgs, new AutomationEventManager());
+		return start(appConfiguration, extendedCommandLineArgs, new AutomationEventManager());
 	}
 	
 	/**
 	 * Starts a new session, attaching the given automation event manager.
 	 */
-	public static AutoxSession start(File appConfigurationFile, String[] extendedCommandLineArgs, AutomationEventManager automationEventManager) throws Exception
+	public static AutoxSession start(ContentStream appConfiguration, String[] extendedCommandLineArgs, AutomationEventManager automationEventManager) throws Exception
+	{
+		return new AutoxSession(createContext(appConfiguration, extendedCommandLineArgs, automationEventManager));
+	}
+	
+	/**
+	 * Creates and wires a new {@link AutomationContext} for a session. Used by
+	 * {@link #start} and {@link AutoxDebugSession}.
+	 */
+	protected static AutomationContext createContext(ContentStream appConfiguration, String[] extendedCommandLineArgs,
+			AutomationEventManager automationEventManager) throws Exception
 	{
 		if(AutomationContext.getInstance() != null)
 		{
@@ -115,18 +125,36 @@ public class AutoxSession implements AutoCloseable
 					+ "(one active session per classloader).");
 		}
 		
+		if(appConfiguration == null)
+		{
+			throw new InvalidArgumentException("Application configuration content cannot be null");
+		}
+		
 		if(extendedCommandLineArgs == null)
 		{
 			extendedCommandLineArgs = new String[0];
 		}
 		
-		AutomationContext context = AutomationLauncher.loadAutomationContext(appConfigurationFile, extendedCommandLineArgs, automationEventManager);
+		if(automationEventManager == null)
+		{
+			automationEventManager = new AutomationEventManager();
+		}
+		
+		AutomationContext context = AutomationLauncher.loadAutomationContext(appConfiguration, extendedCommandLineArgs, automationEventManager);
 		context.setAutomationEventManager(automationEventManager);
 		context.setStepsExecutor(new StepsExecutor());
 		context.setDebugFlowManager(new DebugFlowManager());
 		context.setReportDataManager(new ReportDataManager());
 		context.setExecutionPool(new ExecutionPool());
-		return new AutoxSession(context);
+		return context;
+	}
+	
+	protected void ensureOpen()
+	{
+		if(closed)
+		{
+			throw new InvalidStateException("AutoxSession is already closed");
+		}
 	}
 	
 	public AutomationContext getAutomationContext()
@@ -157,29 +185,20 @@ public class AutoxSession implements AutoCloseable
 	}
 	
 	/**
-	 * Loads suite/function XML from a string. {@code sourceName} is required for location
-	 * attribution (logs / debugging of loaded functions).
+	 * Loads suite/function XML from a {@link ContentStream}. The stream's source name is used
+	 * for location attribution (logs / debugging of loaded functions).
 	 */
-	public void loadXml(String xml, String sourceName)
+	public void loadXml(ContentStream content)
 	{
 		ensureOpen();
-		requireSourceName(sourceName);
 		
-		Set<String> errors = AutomationFileLoader.loadTestXml(xml, sourceName, true);
-		throwIfLoadErrors(sourceName, errors);
-	}
-	
-	/**
-	 * Loads suite/function XML from a stream. {@code sourceName} is required for location
-	 * attribution. Does not close {@code xmlStream}.
-	 */
-	public void loadXml(InputStream xmlStream, String sourceName)
-	{
-		ensureOpen();
-		requireSourceName(sourceName);
+		if(content == null)
+		{
+			throw new InvalidArgumentException("Content stream cannot be null");
+		}
 		
-		Set<String> errors = AutomationFileLoader.loadTestXml(xmlStream, sourceName, true);
-		throwIfLoadErrors(sourceName, errors);
+		Set<String> errors = AutomationFileLoader.loadTestXml(content, true);
+		throwIfLoadErrors(content.getSourceName(), errors);
 	}
 	
 	/**
@@ -290,22 +309,6 @@ public class AutoxSession implements AutoCloseable
 		}catch(Exception ex)
 		{
 			logger.warn("Error while resetting automation context", ex);
-		}
-	}
-	
-	private void ensureOpen()
-	{
-		if(closed)
-		{
-			throw new InvalidStateException("AutoxSession is already closed");
-		}
-	}
-	
-	private static void requireSourceName(String sourceName)
-	{
-		if(StringUtils.isBlank(sourceName))
-		{
-			throw new InvalidArgumentException("sourceName is required for loadXml (used for location / debug attribution)");
 		}
 	}
 	

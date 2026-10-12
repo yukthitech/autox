@@ -17,6 +17,7 @@ package com.yukthitech.autox.config;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,12 +32,14 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutoxCliArguments;
+import com.yukthitech.autox.common.ContentStream;
 import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.ccg.xml.IDynamicNodeAcceptor;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.persistence.repository.RepositoryFactory;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -157,35 +160,47 @@ public class ApplicationConfiguration implements IDynamicNodeAcceptor
 	}
 	
 	/**
-	 * Loads application configuration from sepcified file.
-	 * 
-	 * @param appConfigurationFile
-	 *            Application config file to load.
-	 * @return Loaded application config.
+	 * Loads application configuration from the specified file.
 	 */
 	public static ApplicationConfiguration loadApplicationConfiguration(File appConfigurationFile, AutoxCliArguments basicArguments) throws Exception
 	{
+		return loadApplicationConfiguration(ContentStream.fromFile(appConfigurationFile), basicArguments);
+	}
+	
+	/**
+	 * Loads application configuration from a {@link ContentStream} (file, string, or stream).
+	 *
+	 * @param appConfiguration application config content
+	 * @param basicArguments CLI / session args (may supply properties file and test-suite folders)
+	 * @return loaded application config
+	 */
+	public static ApplicationConfiguration loadApplicationConfiguration(ContentStream appConfiguration, AutoxCliArguments basicArguments) throws Exception
+	{
+		if(appConfiguration == null)
+		{
+			throw new InvalidArgumentException("Application configuration content cannot be null");
+		}
+		
 		Properties appProperties = new Properties();
 		
 		if(basicArguments.getPropertiesFile() != null)
 		{
-			FileInputStream propInputStream = new FileInputStream(basicArguments.getPropertiesFile());
-			appProperties.load(propInputStream);
+			try (FileInputStream propInputStream = new FileInputStream(basicArguments.getPropertiesFile()))
+			{
+				appProperties.load(propInputStream);
+			}
 		}
-		
-		FileInputStream fis = new FileInputStream(appConfigurationFile);
 		
 		ApplicationConfiguration appConfig = new ApplicationConfiguration(appProperties);
 		
-		try
+		try (InputStream in = appConfiguration.openStream())
 		{
-			XMLBeanParser.parse(fis, appConfig, new AppConfigParserHandler(appProperties));
+			XMLBeanParser.parse(in, appConfig, new AppConfigParserHandler(appProperties));
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("Failed to load application configuration file: {}", appConfigurationFile.getPath(), ex);
+			throw new InvalidStateException("Failed to load application configuration from source: {}",
+					appConfiguration.getSourceName(), ex);
 		}
-		
-		fis.close();
 		
 		if(StringUtils.isNotBlank(basicArguments.getTestSuiteFolders()))
 		{

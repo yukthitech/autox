@@ -1,0 +1,70 @@
+/**
+ * Copyright (c) 2022 "Yukthi Techsoft Pvt. Ltd." (http://yukthitech.com)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.yukthitech.autox.debug;
+
+import java.io.Serializable;
+
+import com.yukthitech.autox.debug.server.DebugServer;
+
+/**
+ * Prism default sink: queues events onto {@link DebugServer}'s async writer thread.
+ *
+ * @author akranthikiran
+ */
+public class SocketDebugEventSink implements IDebugEventSink
+{
+	private final DebugServer debugServer;
+	
+	private boolean closed;
+	
+	public SocketDebugEventSink(DebugServer debugServer)
+	{
+		if(debugServer == null)
+		{
+			throw new NullPointerException("debugServer cannot be null");
+		}
+		
+		this.debugServer = debugServer;
+	}
+	
+	public DebugServer getDebugServer()
+	{
+		return debugServer;
+	}
+	
+	@Override
+	public void onEvent(Serializable event)
+	{
+		if(closed)
+		{
+			return;
+		}
+		
+		debugServer.sendClientMessage(event);
+	}
+	
+	@Override
+	public synchronized void close()
+	{
+		if(closed)
+		{
+			return;
+		}
+		
+		closed = true;
+		debugServer.reset();
+	}
+}

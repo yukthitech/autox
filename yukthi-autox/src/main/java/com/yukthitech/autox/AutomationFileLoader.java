@@ -15,23 +15,21 @@
  */
 package com.yukthitech.autox;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.AutoxInfoException;
+import com.yukthitech.autox.common.ContentStream;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.event.AutomationEventManager;
@@ -120,45 +118,30 @@ public class AutomationFileLoader
 	}
 	
 	/**
-	 * Loads suite/function XML from a string. {@code sourceName} is mandatory and used as the
-	 * synthetic {@link File} for location attribution and load-error messages.
+	 * Loads suite/function XML from a {@link ContentStream}. Source name on the stream is used
+	 * for location attribution and load-error messages.
 	 *
 	 * @return load errors (empty on success)
 	 */
-	public static Set<String> loadTestXml(String xml, String sourceName, boolean forReload)
+	public static Set<String> loadTestXml(ContentStream content, boolean forReload)
 	{
-		if(StringUtils.isBlank(xml))
+		if(content == null)
 		{
-			throw new InvalidArgumentException("XML content cannot be empty");
-		}
-		
-		ByteArrayInputStream bis = new ByteArrayInputStream(xml.getBytes(Charset.defaultCharset()));
-		return loadTestXml(bis, sourceName, forReload);
-	}
-	
-	/**
-	 * Loads suite/function XML from a stream. {@code sourceName} is mandatory and used as the
-	 * synthetic {@link File} for location attribution and load-error messages.
-	 * Does not close {@code xmlStream}.
-	 *
-	 * @return load errors (empty on success)
-	 */
-	public static Set<String> loadTestXml(InputStream xmlStream, String sourceName, boolean forReload)
-	{
-		if(StringUtils.isBlank(sourceName))
-		{
-			throw new InvalidArgumentException("sourceName is required for loadTestXml (used for location / debug attribution)");
-		}
-		
-		if(xmlStream == null)
-		{
-			throw new InvalidArgumentException("XML stream cannot be null");
+			throw new InvalidArgumentException("Content stream cannot be null");
 		}
 		
 		AutomationContext context = AutomationContext.getInstance();
 		TestSuiteParserHandler parserHandler = InteractiveXmlSupport.ensureParserHandler(context);
 		Set<String> errors = new HashSet<>();
-		loadTestXml(xmlStream, toSourceFile(sourceName), parserHandler, errors, forReload);
+		
+		try (InputStream xmlStream = content.openStream())
+		{
+			loadTestXml(xmlStream, toSourceFile(content.getSourceName()), parserHandler, errors, forReload);
+		}catch(Exception ex)
+		{
+			handleLoadError(toSourceFile(content.getSourceName()), errors, ex);
+		}
+		
 		return errors;
 	}
 	
