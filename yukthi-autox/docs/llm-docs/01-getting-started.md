@@ -34,7 +34,7 @@ Add the Yukthi repository, the launcher, and the batteries-included aggregator t
 
 `yukthi-autox-all` pulls in language, REST, SQL, MongoDB, mail, SSH, mock, webutils, and **Playwright UI** modules.
 
-For a slimmer classpath, keep `yukthi-automation` and add only the feature modules you need (for example `yukthi-autox-lang` + `yukthi-autox-rest`). For UI, add **either** `yukthi-autox-ui-playwright` **or** `yukthi-autox-ui-selenium` — never both (duplicate `ui-*` step names).
+For a slimmer classpath, keep `yukthi-automation` (which already includes language/control-flow via `yukthi-autox-lang`) and add only the feature modules you need (for example `yukthi-autox-rest`). For UI, add **either** `yukthi-autox-ui-playwright` **or** `yukthi-autox-ui-selenium` — never both (duplicate `ui-*` step names).
 
 See the root [README.md](https://github.com/yukthitech/autox/blob/main/README.md#maven-dependencies-for-applications) and [15-module-structure.md](15-module-structure.md) for purpose-specific POM examples.
 

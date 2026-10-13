@@ -551,7 +551,28 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 	{
 		return new NetworkMonitor(getBrowserContext(driverName));
 	}
-	
+
+	/**
+	 * Starts Playwright tracing on the default driver's browser context.
+	 * Call {@link TraceCapture#stop()} when finished to write the trace zip.
+	 */
+	public TraceCapture startTracing()
+	{
+		return startTracing(null);
+	}
+
+	/**
+	 * Starts Playwright tracing on the specified driver's browser context
+	 * (screenshots, DOM snapshots, sources). Only one active trace per context.
+	 *
+	 * @param driverName driver name; null uses the default driver
+	 * @return capture handle; call {@link TraceCapture#stop()} to finalize the temp zip
+	 */
+	public TraceCapture startTracing(String driverName)
+	{
+		return new TraceCapture(getBrowserContext(driverName));
+	}
+
 	/**
 	 * Fetches the handle of the main window.
 	 *

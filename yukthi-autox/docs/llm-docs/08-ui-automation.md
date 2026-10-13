@@ -236,6 +236,39 @@ try(NetworkMonitor monitor = ui.startNetworkMonitor()) // or startNetworkMonitor
 
 In-process / host embedding: call only from an **execution thread** — see [16-local-process-session.md](16-local-process-session.md).
 
+## Trace capture (Java API)
+
+For a **consumer-owned** Playwright trace zip (screenshots + DOM snapshots + sources), use `PlaywrightPluginSession.startTracing()` — not an XML step.
+
+- Prefer **`s:ui-capture-tracing`** when the zip should be attached to the AutoX execution log by name.
+- Prefer **`startTracing()`** when Java code should get a temp `.zip` (`TraceCapture.stop()` / `getTraceFile()`) and decide what to do with it (host process, upload, Trace Viewer, etc.).
+
+Only **one** active Playwright trace per browser context — do not overlap `startTracing()` with another `startTracing()` or `s:ui-capture-tracing` on the same driver.
+
+```java
+PlaywrightPluginSession ui = AutomationContext.getInstance()
+		.getExecutionContextManager()
+		.getPluginSession(PlaywrightPlugin.class);
+
+TraceCapture capture = ui.startTracing(); // or startTracing(driverName)
+try
+{
+	// perform UI work while tracing is active
+}
+finally
+{
+	File zip = capture.stop(); // temp file: autox-trace-*.zip
+	// use zip / capture.getTraceFile() as needed
+}
+```
+
+| Method | Meaning |
+|--------|---------|
+| `stop()` | Idempotent; writes temp `.zip`, returns `File` |
+| `getTraceFile()` | Same file after successful `stop()`; `null` before stop |
+
+Open the zip with the [Playwright Trace Viewer](https://playwright.dev/docs/trace-viewer). Call from an **execution thread** when used in-process — see [16-local-process-session.md](16-local-process-session.md).
+
 ## Download
 
 ```xml

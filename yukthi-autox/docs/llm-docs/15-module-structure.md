@@ -54,12 +54,13 @@ flowchart TB
   all --> rest
   all --> pw
   auto --> common
+  auto --> lang
 ```
 
 | Artifact | Role |
 |----------|------|
 | **yukthi-autox-all** | Recommended consumer dependency (`type=pom`). Includes Playwright UI + lang/sql/mongo/rest/mail/ssh/mock/webutils. |
-| **yukthi-automation** | Core launcher jar (`AutomationLauncher`). Depends on `yukthi-autox-common`; use with `yukthi-autox-all` (or selected modules) for plugins/steps. |
+| **yukthi-automation** | Core launcher jar (`AutomationLauncher`). Depends on `yukthi-autox-common` and **`yukthi-autox-lang`** (control-flow steps by default); use with `yukthi-autox-all` (or selected feature modules) for other plugins/steps. |
 | **yukthi-autox-ui-playwright** | Default UI stack: `<playwright-plugin>`, Playwright-backed `ui-*` steps. |
 | **yukthi-autox-ui-selenium** | Legacy/opt-in UI stack: `<selenium-plugin>`, Selenium-backed `ui-*` steps. |
 
@@ -106,6 +107,7 @@ Test XML locators (`id:`, `xpath:`, `css:`, …) and shared step tags (`ui-click
 | API | Description |
 |-----|-------------|
 | `PlaywrightPluginSession.startNetworkMonitor()` | BrowserContext network monitor (`NetworkMonitor`) for request/response / API call analysis |
+| `PlaywrightPluginSession.startTracing()` | Playwright tracing handle (`TraceCapture`); `stop()` writes a temp zip for the consumer |
 
 Details and examples: [08-ui-automation.md](08-ui-automation.md).
 
@@ -146,5 +148,5 @@ Details and examples: [08-ui-automation.md](08-ui-automation.md).
 1. Depend on `yukthi-autox-all` **4.0.0-SNAPSHOT** (`type=pom`) unless you need a custom module set.
 2. Configure `<playwright-plugin>` for UI (not `<selenium-plugin>`, unless you opted into Selenium).
 3. Keep suite cleanup with `<s:ui-quit-session/>`.
-4. Use Playwright-only steps when you need MHTML or tracing; use `startNetworkMonitor()` when you need lightweight network/API capture from Java.
+4. Use Playwright-only steps when you need MHTML or report-attached tracing; use `startNetworkMonitor()` / `startTracing()` for Java-owned network or temp-file tracing.
 5. Never combine both UI modules on the classpath.
