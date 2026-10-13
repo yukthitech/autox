@@ -101,6 +101,12 @@ Test XML locators (`id:`, `xpath:`, `css:`, …) and shared step tags (`ui-click
 | `s:ui-log-html-snapshot` | MHTML snapshot via CDP (typically Chromium) |
 | `s:ui-capture-tracing` | Playwright tracing zip for nested steps |
 
+### Playwright-only Java API
+
+| API | Description |
+|-----|-------------|
+| `PlaywrightPluginSession.startNetworkMonitor()` | BrowserContext network monitor (`NetworkMonitor`) for request/response / API call analysis |
+
 Details and examples: [08-ui-automation.md](08-ui-automation.md).
 
 ---
@@ -140,5 +146,5 @@ Details and examples: [08-ui-automation.md](08-ui-automation.md).
 1. Depend on `yukthi-autox-all` **4.0.0-SNAPSHOT** (`type=pom`) unless you need a custom module set.
 2. Configure `<playwright-plugin>` for UI (not `<selenium-plugin>`, unless you opted into Selenium).
 3. Keep suite cleanup with `<s:ui-quit-session/>`.
-4. Use Playwright-only steps when you need MHTML or tracing.
+4. Use Playwright-only steps when you need MHTML or tracing; use `startNetworkMonitor()` when you need lightweight network/API capture from Java.
 5. Never combine both UI modules on the classpath.

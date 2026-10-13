@@ -155,6 +155,21 @@ For **raw bytes / MHTML string** in the host process, call the Playwright plugin
 |--------|---------|
 | `takeScreenshot()` / `takeScreenshot(driverName)` | PNG `byte[]` |
 | `captureHtmlSnapshot()` / `captureHtmlSnapshot(driverName)` | MHTML `String` |
+| `startNetworkMonitor()` / `startNetworkMonitor(driverName)` | `NetworkMonitor` (context-scoped request/response capture; close when done) |
+
+Network monitoring must also run on an **execution thread**. Example:
+
+```java
+PlaywrightPluginSession ui = session.getPluginSession(PlaywrightPlugin.class);
+
+try(NetworkMonitor monitor = ui.startNetworkMonitor())
+{
+	// UI work on this execution thread...
+	List<NetworkMonitor.NetworkCall> apis = monitor.getApiCalls();
+}
+```
+
+See [08-ui-automation.md](08-ui-automation.md#network-monitor-java-api) for filters, success/fail rules, and idle-polling patterns.
 
 Example pattern — capture PNG during a function and store it on a global attribute for the host to read after `runFunction` returns:
 

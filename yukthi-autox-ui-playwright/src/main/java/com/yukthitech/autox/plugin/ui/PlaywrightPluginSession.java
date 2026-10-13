@@ -530,6 +530,27 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 	{
 		return getDriverContext(name).context;
 	}
+
+	/**
+	 * Starts network monitoring on the default driver's browser context.
+	 * Caller must {@link NetworkMonitor#close()} when finished.
+	 */
+	public NetworkMonitor startNetworkMonitor()
+	{
+		return startNetworkMonitor(null);
+	}
+
+	/**
+	 * Starts network monitoring on the specified driver's browser context.
+	 * Captures request/response traffic across all pages of that context until {@link NetworkMonitor#close()}.
+	 *
+	 * @param driverName driver name; null uses the default driver
+	 * @return active monitor (AutoCloseable)
+	 */
+	public NetworkMonitor startNetworkMonitor(String driverName)
+	{
+		return new NetworkMonitor(getBrowserContext(driverName));
+	}
 	
 	/**
 	 * Fetches the handle of the main window.

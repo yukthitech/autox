@@ -177,6 +177,65 @@ Open a tracing zip with the [Playwright Trace Viewer](https://playwright.dev/doc
 | `s:ui-log-html-snapshot` | Save current page as MHTML in the log (`name`, optional `message`, `level`) |
 | `s:ui-capture-tracing` | Wrap child steps; write a Playwright `.zip` trace to the log (`name`) |
 
+## Network monitor (Java API)
+
+For lightweight **network-only** capture (APIs during a click/navigation, crawl idle detection), use `PlaywrightPluginSession.startNetworkMonitor()` — not an XML step. Prefer this over `s:ui-capture-tracing` when you only need request/response analysis, not a full Trace Viewer zip.
+
+Listeners are registered on the **browser context** (all pages/tabs of that driver).
+
+```java
+PlaywrightPluginSession ui = AutomationContext.getInstance()
+		.getExecutionContextManager()
+		.getPluginSession(PlaywrightPlugin.class);
+
+try(NetworkMonitor monitor = ui.startNetworkMonitor()) // or startNetworkMonitor(driverName)
+{
+	// perform UI action (click, navigate, nested steps, etc.)
+
+	// Optional: wait until traffic quiets (unknown sites / SPA)
+	long deadline = System.currentTimeMillis() + 15_000;
+	while(System.currentTimeMillis() < deadline)
+	{
+		Thread.sleep(500);
+		if(monitor.getInProgressCount() == 0)
+		{
+			break;
+		}
+	}
+
+	System.out.println("requests=" + monitor.getRequestCount()
+			+ " responses=" + monitor.getResponseCount()
+			+ " inFlight=" + monitor.getInProgressCount()
+			+ " failed=" + monitor.getFailedRequestCount());
+
+	for(NetworkMonitor.NetworkCall call : monitor.getApiCalls()) // xhr + fetch only
+	{
+		System.out.println(call.getMethod() + " " + call.getUrl()
+				+ " status=" + call.getStatusCode()
+				+ " ok=" + call.isSuccessful());
+
+		// Live Playwright objects — read headers/body while context is alive
+		Map<String, String> reqHeaders = call.getRequest().headers();
+		if(call.getResponse() != null)
+		{
+			String body = call.getResponse().text();
+		}
+	}
+} // close() unregisters listeners; does not clear NetworkCall refs
+```
+
+| Method | Meaning |
+|--------|---------|
+| `getInProgressCount()` | Requests not yet finished/failed |
+| `getRequestCount()` / `getResponseCount()` | Totals since monitor start |
+| `getFailedRequestCount()` | Request failed event, or HTTP status `>= 400` |
+| `getApiCalls()` | `xhr` / `fetch` only; each `NetworkCall` has `getRequest()` / `getResponse()` |
+| `close()` | Unregister listeners (idempotent) |
+
+**Success** = response status in `200–399`. Inspect live `Request`/`Response` **before** driver reset/quit.
+
+In-process / host embedding: call only from an **execution thread** — see [16-local-process-session.md](16-local-process-session.md).
+
 ## Download
 
 ```xml
