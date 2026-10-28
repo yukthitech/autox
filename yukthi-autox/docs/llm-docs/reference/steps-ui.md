@@ -33,7 +33,7 @@ Auto-generated reference for `Group.Ui` steps. Use step tags with the `s:` names
 - `name` (mandatory) — Name of the trace zip file to be created. .zip extension is appended if needed. Type: `java.lang.Object`
 - `steps` (mandatory) — Group of steps/validations to be executed while tracing is active. Type: `java.util.List<com.yukthitech.autox.IStep>`
 
-**Examples:**
+**Example:**
 
 *Capturing Playwright tracing for ui steps execution*
 
@@ -49,22 +49,6 @@ Auto-generated reference for `Group.Ui` steps. Use step tags with the `s:` names
 						</data>
 					</s:ui-fill-form>
 				</s:ui-capture-tracing>
-```
-
-*Capturing Playwright tracing for ui steps execution*
-
-```xml
-<s:capture-tracing name="filledForm-1.zip">
-					<s:ui-goto-page uri="/form.html" />
-					<s:ui-fill-form locator="id:sampleForm">
-						<data>
-							{
-								"name": "kranthi",
-								"id:genderDropDown": "male"
-							}
-						</data>
-					</s:ui-fill-form>
-				</s:capture-tracing>
 ```
 
 
@@ -362,13 +346,7 @@ Auto-generated reference for `Group.Ui` steps. Use step tags with the `s:` names
 - `message` — Message to be logged along with the snapshot Type: `java.lang.Object`
 - `name` (mandatory) — Name of the MHTML snapshot file to be created Type: `java.lang.Object`
 
-**Examples:**
-
-*Taking MHTML snapshot of the page*
-
-```xml
-<s:ui-log-html-snapshot name="page-snapshot.mhtml" />
-```
+**Example:**
 
 *Taking MHTML snapshot of the page*
 

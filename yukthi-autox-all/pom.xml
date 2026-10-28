@@ -15,6 +15,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-automation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-autox-lang</artifactId>
 		</dependency>
 		<dependency>
