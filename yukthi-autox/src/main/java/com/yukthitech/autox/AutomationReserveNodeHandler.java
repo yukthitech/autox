@@ -205,12 +205,12 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			//if locator is specified throw exception with location details
 			if(locator != null)
 			{
-				throw new InvalidStateException("[Line: {}, Column: {}] No step/validator found with name: {}.\nAvailable Steps/Validators: {}",
+				throw new InvalidStateException("[Line: {}, Column: {}] No step/validator found with name: {}",
 						locator.getLineNumber(), locator.getColumnNumber(),
-						beanNode.getName(), nameToStepType.keySet());
+						beanNode.getName());
 			}
 			
-			throw new InvalidStateException("No step/validator found with name: {}.\nAvailable Steps/Validators: {}", beanNode.getName(), nameToStepType.keySet());
+			throw new InvalidStateException("No step/validator found with name: {}", beanNode.getName());
 		}
 
 		//if locator is specified throw exception with location details

@@ -47,7 +47,10 @@ import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.autox.plugin.AbstractPluginSession;
 import com.yukthitech.autox.plugin.ui.common.Dimension;
 import com.yukthitech.autox.plugin.ui.common.Point;
+import com.yukthitech.autox.plugin.ui.common.UiAutomationUtils;
 import com.yukthitech.autox.plugin.ui.common.UiCaptureUtils;
+import com.yukthitech.autox.plugin.ui.common.UiElement;
+import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -732,6 +735,76 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 	public Locator newLocator(String name, String selector)
 	{
 		return getCurrentFrame(name).locator(selector);
+	}
+	
+	/**
+	 * Finds elements for an AutoX locator on the current page or frame. Does not click or wait.
+	 * An optional parent is evaluated as a prefix expression, the same way
+	 * {@code AbstractParentUiStep.parentElement} is resolved, then used to scope the search.
+	 *
+	 * @param locator AutoX locator ({@code xpath: //button}, {@code id: ok}, or a bare name)
+	 * @param parentElement optional parent. {@code null} or blank searches from the page or frame root.
+	 *        A string is evaluated as a prefix expression. The result may be a {@link UiElement},
+	 *        a ui-locator string, or a context attribute name holding a {@link UiElement}.
+	 * @param driverName driver name; {@code null} or blank uses the default driver
+	 * @return total match count and the visible matches
+	 */
+	public ElementMatches findVisibleElements(String locator, Object parentElement, String driverName)
+	{
+		if(StringUtils.isBlank(locator))
+		{
+			throw new InvalidArgumentException("Locator cannot be empty");
+		}
+		
+		String resolvedDriver = resolveName(driverName);
+		Object resolvedParent = resolveParentElement(parentElement);
+		List<UiElement> matches = UiAutomationUtils.findElements(resolvedDriver, resolvedParent, locator);
+		List<UiElement> visibleElements = new ArrayList<>();
+		
+		for(UiElement element : matches)
+		{
+			if(isReportedVisible(element))
+			{
+				visibleElements.add(element);
+			}
+		}
+		
+		return new ElementMatches(matches.size(), visibleElements);
+	}
+	
+	/**
+	 * Evaluates an optional parent the same way a step with {@code SourceType.EXPRESSION} does.
+	 * A blank string is treated as no parent.
+	 */
+	private Object resolveParentElement(Object parentElement)
+	{
+		if(parentElement == null)
+		{
+			return null;
+		}
+		
+		if((parentElement instanceof String) && StringUtils.isBlank((String) parentElement))
+		{
+			return null;
+		}
+		
+		return PrefixExpressionFactory.getExpressionFactory().getValueByExpression(
+				AutomationContext.getInstance(), parentElement);
+	}
+	
+	/**
+	 * Visible elements are kept. A Playwright failure (detached or not available) is treated as not visible.
+	 */
+	private static boolean isReportedVisible(UiElement element)
+	{
+		try
+		{
+			return element.isVisible();
+		}catch(PlaywrightException ex)
+		{
+			logger.debug("Discarding matched element that is not available. Error: {}", String.valueOf(ex));
+			return false;
+		}
 	}
 	
 	/**

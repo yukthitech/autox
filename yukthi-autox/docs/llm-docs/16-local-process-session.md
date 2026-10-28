@@ -140,7 +140,7 @@ PlaywrightPluginSession ui =
 
 ## Screenshots and HTML dump (UI)
 
-Prefer AutoX steps when you only need artifacts in the execution log:
+Prefer AutoX steps when you only need artifacts in the **execution log**:
 
 ```java
 session.executeSteps(
@@ -149,16 +149,64 @@ session.executeSteps(
   + "<s:ui-log-html-snapshot name=\"page.mhtml\"/>");
 ```
 
-For **raw bytes / MHTML string** in the host process, call the Playwright plugin session **from an execution thread** (inside a running function/steps, or via paused `executeStepsWhilePaused` that uses a helper function). On `PlaywrightPluginSession`:
+For **raw PNG bytes / MHTML string** in the host process, call `PlaywrightPluginSession` **from an execution thread** (`runFunction` / `executeSteps`, or paused `executeStepsWhilePaused`).
 
-| Method | Returns |
+### Direct capture via plugin session
+
+`takeScreenshot` / `captureHtmlSnapshot` (and all other `PlaywrightPluginSession` methods below) must run on an **AutoX execution thread**. Calling `session.getPluginSession(...)` from the host after `runFunction` / `executeSteps` returns throws `NonExecutionThreadException`.
+
+Valid call sites:
+
+- Inside a Java `@Executable` step’s `execute(...)`
+- During `runFunction` / `executeSteps` / `executeStepsWhilePaused` when your code is invoked on that same stack (custom step, step listener, etc.)
+- Paused debug helpers that run on the paused execution thread
+
+```java
+// From an execution-thread call site:
+PlaywrightPluginSession ui = AutomationContext.getInstance()
+		.getExecutionContextManager()
+		.getPluginSession(PlaywrightPlugin.class);
+// or: session.getPluginSession(PlaywrightPlugin.class) when AutoxSession is in scope
+
+byte[] png = ui.takeScreenshot();              // active page, default driver
+String mhtml = ui.captureHtmlSnapshot();       // MHTML of active page
+
+byte[] png2 = ui.takeScreenshot("autoxChrome"); // named driver
+String mhtml2 = ui.captureHtmlSnapshot("autoxChrome");
+
+Page page = ui.getPage(); // live Playwright Page for further host logic
+String url = page.url();
+
+context.setGlobalAttribute("lastScreenshotPng", png);
+context.setGlobalAttribute("lastPageMhtml", mhtml);
+```
+
+After the function/steps finish, the **host** can read those globals via `session.getAutomationContext().getGlobalAttribute(...)` (or `getAttribute` if still in scope).
+
+For report-only artifacts without Java, keep using `s:ui-log-screen-shot` / `s:ui-log-html-snapshot` (including via `executeStepsWhilePaused` while debugging).
+
+### Other `PlaywrightPluginSession` APIs (execution thread)
+
+| Method | Purpose |
 |--------|---------|
-| `takeScreenshot()` / `takeScreenshot(driverName)` | PNG `byte[]` |
-| `captureHtmlSnapshot()` / `captureHtmlSnapshot(driverName)` | MHTML `String` |
-| `startNetworkMonitor()` / `startNetworkMonitor(driverName)` | `NetworkMonitor` (context-scoped request/response capture; close when done) |
-| `startTracing()` / `startTracing(driverName)` | `TraceCapture` (context tracing; `stop()` → temp `.zip`) |
+| `takeScreenshot()` / `(driverName)` | PNG `byte[]` of the active page |
+| `captureHtmlSnapshot()` / `(driverName)` | MHTML `String` of the active page (CDP; best on Chromium) |
+| `getPage()` / `getPage(driverName)` | Live Playwright `Page` (active window) |
+| `getBrowserContext(driverName)` | Live `BrowserContext` (all pages/tabs for that driver) |
+| `getWindows(driverName)` | Handle → `Page` map |
+| `getCurrentWindowHandle` / `getMainWindowHandle` | Window handles |
+| `findWindow` / `switchToWindow` / `closeWindow` | Multi-window control |
+| `getCurrentFrame` / `setCurrentFrame` | Frame focus used by UI steps |
+| `newLocator(driverName, selector)` | Playwright `Locator` under current page/frame |
+| `findVisibleElements(locator, parentElement, driverName)` | All matches for an AutoX locator; returns `ElementMatches` (total count, visible count, visible `UiElement` list). Optional parent is a prefix expression. `driverName` null uses the default driver |
+| `startNetworkMonitor()` / `(driverName)` | `NetworkMonitor` — request/response / API calls; `close()` when done |
+| `startTracing()` / `(driverName)` | `TraceCapture` — `stop()` writes a temp trace `.zip` |
+| `getDownloadFolder` / `cleanDownloadFolder` / `isDownloadsSupported` | Download directory helpers |
+| `resetDriver` / `closeDriver` / `close` | Reset or tear down browser state |
+| `getResourceUrl(path)` | Resolve path against plugin `base-url` |
+| Dialog helpers (`pollDialog`, `hasPendingDialog`, …) | Alert/confirm/prompt queue (same model as `ui-handle-*` steps) |
 
-Network monitoring and tracing must also run on an **execution thread**. Examples:
+Network / tracing examples:
 
 ```java
 PlaywrightPluginSession ui = session.getPluginSession(PlaywrightPlugin.class);
@@ -176,27 +224,11 @@ try
 }
 finally
 {
-	File zip = capture.stop();
+	File zip = capture.stop(); // consumer-owned temp zip
 }
 ```
 
-See [08-ui-automation.md](08-ui-automation.md#network-monitor-java-api) and [08-ui-automation.md](08-ui-automation.md#trace-capture-java-api).
-
-Example pattern — capture PNG during a function and store it on a global attribute for the host to read after `runFunction` returns:
-
-```xml
-<function name="capturePage">
-    <s:ui-goto-page uri="/form.html"/>
-    <!-- Prefer s:ui-log-screen-shot / s:ui-log-html-snapshot for report files.
-         For PNG byte[] in Java, call PlaywrightPluginSession.takeScreenshot()
-         only from an execution thread (during runFunction / executeSteps /
-         or executeStepsWhilePaused). -->
-</function>
-```
-
-While **paused** in a debug session, use `executeStepsWhilePaused` (below) with `s:ui-log-screen-shot` / `s:ui-log-html-snapshot` so capture runs on the paused execution thread.
-
-See [08-ui-automation.md](08-ui-automation.md) for step details.
+Details: [08-ui-automation.md](08-ui-automation.md) (steps), [network monitor](08-ui-automation.md#network-monitor-java-api), [trace capture](08-ui-automation.md#trace-capture-java-api).
 
 ## Context attribute dump
 

@@ -218,6 +218,25 @@ public class AutoxSession implements AutoCloseable
 	}
 	
 	/**
+	 * Parses and validates dynamic step XML without executing it. Checks step and
+	 * attribute names, required parameters, and related structure. Does not run steps,
+	 * and does not register functions, prefix expressions, or UI locators from the snippet.
+	 *
+	 * @param stepXml step XML snippet (same form as {@link #executeSteps})
+	 */
+	public void compileSteps(String stepXml)
+	{
+		ensureOpen();
+		
+		if(StringUtils.isBlank(stepXml))
+		{
+			throw new InvalidArgumentException("Steps XML cannot be empty");
+		}
+		
+		InteractiveXmlSupport.parseSteps(context, stepXml);
+	}
+	
+	/**
 	 * Parses and executes dynamic step XML (Mode 2). Locations use a generated
 	 * {@code interactive-steps-N.xml} name (no caller source name). Also applies any
 	 * functions / custom prefix expressions / UI locators present in the snippet.
