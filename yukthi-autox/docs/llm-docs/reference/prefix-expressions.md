@@ -6,7 +6,8 @@ Includes parsers from `DefaultPrefixExpressions` and plugin-specific parsers (SQ
 
 ### attr:
 
-- **Description**: Parses specified expression as context attribute.
+- **Description**: Parses specified expression as context attribute. Note: Unlike `prop:`, the expression is the full attribute name (dots are part of the name). `attr: student.name` looks up attribute literally named `student.name`, not property `name` under `student`. To access properties of an attribute object use `prop: attr.student.name`.
+- **Operations**: read, set, delete
 - **Content type**: ATTRIBUTE
 
 **Parameters:**
@@ -39,6 +40,7 @@ attr: attrName
 ### bfile:
 
 - **Description**: Parses specified expression as file path and loads it as binary data (byte array).As part of 'set' the value is expected to be byte[] which will be written to specified file.
+- **Operations**: read, set
 - **Content type**: NONE
 
 **Examples:**
@@ -53,6 +55,7 @@ bfile: /tmp/data
 ### boolean:
 
 - **Description**: Parses specified expression into boolean. If expression value is true (case insensitive), then result will be true.  In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -73,6 +76,7 @@ boolean: True
 ### bres:
 
 - **Description**: Parses specified expression as resource path and loads it as binary data (byte array).
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -87,6 +91,7 @@ bres: /tmp/data.png
 ### condition:
 
 - **Description**: Evaluates specified expression as condition and resultant boolean value will be returned
+- **Operations**: read only
 - **Content type**: FM_EXPRESSION
 
 **Examples:**
@@ -107,6 +112,7 @@ condition: (attr.flag == true)
 ### date:
 
 - **Description**: Parses specified expression into date. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -121,6 +127,7 @@ date: 21/3/2018, date(format=MM/dd/yyy): 3/21/2018
 ### double:
 
 - **Description**: Parses specified expression into double. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -135,6 +142,7 @@ double: 10.2
 ### expr:
 
 - **Description**: Evaluates specified expression as freemarker expression and resultant value will be returned
+- **Operations**: read only
 - **Content type**: FM_EXPRESSION
 
 **Examples:**
@@ -149,6 +157,7 @@ expr: today()
 ### file:
 
 - **Description**: Parses specified expression as file path and loads it as object. As part of 'set', the specified content will be converted to string and will be writtern to file. Supported object file types: xml, json, properties, csv. For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.
+- **Operations**: read, set
 - **Content type**: NONE
 
 **Parameters:**
@@ -184,6 +193,7 @@ file: /tmp/data.json
 ### float:
 
 - **Description**: Parses specified expression into float. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -198,6 +208,7 @@ float: 10.2
 ### int:
 
 - **Description**: Parses specified expression into int. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -212,6 +223,7 @@ int: 10
 ### json:
 
 - **Description**: Parses specified expression as json string and loads it as object. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Parameters:**
@@ -247,6 +259,7 @@ json: {"a": 2, "b": 3}
 ### jsonWithType:
 
 - **Description**: Parses specified expression as json (with types) string and loads it as object. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Parameters:**
@@ -288,6 +301,7 @@ jsonWithType: {"a": 2, "b": 3}
 ### list:
 
 - **Description**: Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type. In case of '$', current value's string value will be parsed. If current value is collection, it will converted to list directly.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -315,6 +329,7 @@ list: val1, val2, val3
 ### long:
 
 - **Description**: Parses specified expression into long. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -329,6 +344,7 @@ long: 10
 ### map:
 
 - **Description**: Parses specified expression into map of strings (using comma as delimiter and = as delimiter for key and value). If types specified, strings will be converted to specified type. In case of '$', current value's string value will be parsed.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -381,6 +397,7 @@ mongoJs: db.ENVIRONMENT.find({})
 ### param:
 
 - **Description**: Parses specified expression as parameter.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -394,7 +411,8 @@ param: paramName
 
 ### prop:
 
-- **Description**: Parses specified expression as bean property on effective-context (context or current object in case of piping).
+- **Description**: Parses specified expression as bean property on effective-context (context or current object in case of piping). Note: Unlike `attr:`, dots navigate nested properties (e.g. `prop: attr.student.name` reads property `name` of attribute `student`). `attr: student.name` looks up a single attribute literally named `student.name`.
+- **Operations**: read, set, delete
 - **Content type**: NONE
 
 **Parameters:**
@@ -453,9 +471,55 @@ prop: attr.bean.value1
 ```
 
 
+### push:
+
+- **Description**: Appends/merges a value into a bean property on effective-context (same path semantics as `prop:`).<br>Supports: set only.<br>If the current property is a list/set, a new collection is created with existing values plus the pushed value (if input is a collection, all its elements are appended).<br>If the current property is a map, input must be a map and a new map is created with old then new entries (new keys overwrite).<br>If no value exists: map input creates a new map; collection/object input creates a new list (or set when `unique=true`).<br>If an existing non-list/set/map value is present, an error is thrown.
+- **Operations**: set only
+- **Content type**: NONE
+
+**Parameters:**
+
+- `unique` — When no existing value: if true create a Set, otherwise a List. Ignored when an existing list/set is present. Default: `false`
+
+**Examples:**
+
+*Default*
+
+```
+push: attr.items
+```
+
+*Push a single value into a list attribute (creates list when absent)*
+
+```
+<s:set expression="push: attr.items" value="string: a"/>
+<s:set expression="push: attr.items" value="string: b"/>
+```
+
+*Push all elements from a list*
+
+```
+<s:set expression="push: attr.items" value="list: c, d"/>
+```
+
+*Create a set when no existing value*
+
+```
+<s:set expression="push(unique=true): attr.tags" value="string: red"/>
+```
+
+*Merge maps*
+
+```
+<s:set expression="push: attr.config" value="map: a=1, b=2"/>
+<s:set expression="push: attr.config" value="map: b=3, c=4"/>
+```
+
+
 ### res:
 
 - **Description**: Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties, csv. For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Parameters:**
@@ -491,6 +555,7 @@ res: /tmp/data.json
 ### set:
 
 - **Description**: Parses specified expression into set of strings (using comma as delimiter). If type specified, strings will be converted to specified type. In case of '$', current value's string value will be parsed. If current value is collection, it will converted to set directly.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -505,6 +570,7 @@ set: val1, val2, val3
 ### sort:
 
 - **Description**: Sorts the input collection and returns the result as list. As the input is expected to be collection this filtercan be used only with $. If no property/propertyExpr is specified, ordering will be done in natural order. Note if both property & propertyExpr is specified property only will be considered.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Parameters:**
@@ -636,6 +702,7 @@ sqlVal(dataSource=default): select count(*) from emp
 ### store:
 
 - **Description**: Parses specified expression as value on/from store.
+- **Operations**: read, set, delete
 - **Content type**: NONE
 
 **Examples:**
@@ -662,6 +729,7 @@ store: key1
 ### string:
 
 - **Description**: Returns specified expression as stirng value after triming. In case of '$', current value will be converted to string. In case input object Blob/Clob, string value will be extracted from it.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -682,6 +750,7 @@ string: str
 ### template:
 
 - **Description**: Parses specified value for free marker expressions and returns the result.
+- **Operations**: read only
 - **Content type**: NONE
 
 **Examples:**
@@ -717,6 +786,7 @@ uiVal(driver=default): xpath: //input[@name='statusFld']
 ### xpath:
 
 - **Description**: Parses specified expression as xpath on effective-context (context or current object in case of piping).
+- **Operations**: read, set, delete
 - **Content type**: NONE
 
 **Parameters:**

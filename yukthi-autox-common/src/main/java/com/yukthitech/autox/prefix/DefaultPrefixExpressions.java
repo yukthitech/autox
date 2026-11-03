@@ -51,6 +51,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ContextMap;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.ccg.xml.util.StringUtil;
+import com.yukthitech.persistence.UnsupportedOperationException;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -62,7 +63,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class DefaultPrefixExpressions
 {
-	@PrefixExpressionAnnot(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", 
+	@PrefixExpressionAnnot(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping). "
+			+ "Supports: read, set, delete. "
+			+ "Note: Unlike attr:, dots navigate nested properties (e.g. prop: attr.student.name reads property 'name' of attribute 'student'). "
+			+ "attr: student.name looks up a single attribute literally named 'student.name'.", 
 			example = "prop: attr.bean.value1",
 			params = {
 					@PrefixExprParam(name = "add", type = "boolean", defaultValue = "false", 
@@ -91,8 +95,89 @@ public class DefaultPrefixExpressions
 			}
 		};
 	}
+
+	@PrefixExpressionAnnot(type = "push", description = "Appends/merges a value into a bean property on effective-context (same path semantics as prop:).<br>"
+			+ "Supports: set only.<br>"
+			+ "If the current property is a list/set, a new collection is created with existing values plus the pushed value "
+			+ "(if input is a collection, all its elements are appended).<br>"
+			+ "If the current property is a map, input must be a map and a new map is created with old then new entries (new keys overwrite).<br>"
+			+ "If no value exists: map input creates a new map; collection/object input creates a new list (or set when unique=true).<br>"
+			+ "If an existing non-list/set/map value is present, an error is thrown.",
+			example = "push: attr.items",
+			params = {
+					@PrefixExprParam(name = "unique", type = "boolean", defaultValue = "false",
+							description = "When no existing value: if true create a Set, otherwise a List. Ignored when an existing list/set is present.")
+				})
+	public PrefixEpression pushParser(PrefixExpressionContext parserContext, String expression)
+	{
+		return new PrefixEpression()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				throw new UnsupportedOperationException("Read is not supported with this expression type");
+			}
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
+			public void setValue(Object value) throws Exception
+			{
+				Object context = parserContext.getEffectiveContext();
+				Object current = PropertyAccessor.getProperty(context, expression);
+
+				if(current instanceof List)
+				{
+					List<Object> newList = new ArrayList<>((List) current);
+					appendPushValue(newList, value);
+					PropertyAccessor.setProperty(context, expression, newList);
+					return;
+				}
+
+				if(current instanceof Set)
+				{
+					Set<Object> newSet = new HashSet<>((Set) current);
+					appendPushValue(newSet, value);
+					PropertyAccessor.setProperty(context, expression, newSet);
+					return;
+				}
+
+				if(current instanceof Map)
+				{
+					if(!(value instanceof Map))
+					{
+						throw new InvalidArgumentException(
+								"When existing property value is a map, push value must also be a map. Got: {}",
+								value == null ? null : value.getClass().getName());
+					}
+
+					Map<Object, Object> newMap = new HashMap<>((Map) current);
+					newMap.putAll((Map) value);
+					PropertyAccessor.setProperty(context, expression, newMap);
+					return;
+				}
+
+				if(current != null)
+				{
+					throw new InvalidArgumentException(
+							"Push is supported only when existing value is list, set, map or absent. Got: {}",
+							current.getClass().getName());
+				}
+
+				if(value instanceof Map)
+				{
+					PropertyAccessor.setProperty(context, expression, new HashMap<>((Map) value));
+					return;
+				}
+
+				boolean unique = "true".equalsIgnoreCase(parserContext.getParameter("unique"));
+				Collection<Object> newColl = unique ? new HashSet<>() : new ArrayList<>();
+				appendPushValue(newColl, value);
+				PropertyAccessor.setProperty(context, expression, newColl);
+			}
+		};
+	}
 	
-	@PrefixExpressionAnnot(type = "store", description = "Parses specified expression as value on/from store.", example = "store: key1")
+	@PrefixExpressionAnnot(type = "store", description = "Parses specified expression as value on/from store. Supports: read, set, delete.", example = "store: key1")
 	public PrefixEpression storeParser(PrefixExpressionContext parserContext, String expression)
 	{
 		return new PrefixEpression()
@@ -117,7 +202,10 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName", contentType = PrefixExpressionContentType.ATTRIBUTE,
+	@PrefixExpressionAnnot(type = "attr", description = "Parses specified expression as context attribute. Supports: read, set, delete. "
+			+ "Note: Unlike prop:, the expression is the full attribute name (dots are part of the name). "
+			+ "attr: student.name looks up attribute literally named 'student.name', not property 'name' under 'student'. "
+			+ "To access properties of an attribute object use prop: attr.student.name.", example = "attr: attrName", contentType = PrefixExpressionContentType.ATTRIBUTE,
 			params = {
 					@PrefixExprParam(name = "plugin", type = "boolean", defaultValue = "false", description = "If true, plugin session attributes will be accessed"),
 					@PrefixExprParam(name = "pluginName", type = "String", defaultValue = "null", description = "When plugin attributes are being accessed this will be used. This is connection/driver/datasource name based on plugin"),
@@ -169,7 +257,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "param", description = "Parses specified expression as parameter.", example = "param: paramName")
+	@PrefixExpressionAnnot(type = "param", description = "Parses specified expression as parameter. Supports: read only.", example = "param: paramName")
 	public PrefixEpression paramParser(PrefixExpressionContext parserContext, String expression)
 	{
 		return new PrefixEpression()
@@ -182,7 +270,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "xpath", description = "Parses specified expression as xpath on effective-context (context or current object in case of piping).", example = "xpath: /attr/bean/value1",
+	@PrefixExpressionAnnot(type = "xpath", description = "Parses specified expression as xpath on effective-context (context or current object in case of piping). Supports: read, set, delete.", example = "xpath: /attr/bean/value1",
 			params = {
 					@PrefixExprParam(name = "multi", type = "boolean", defaultValue = "false", description = "If true, list of matches will be returned"),
 				})
@@ -241,7 +329,7 @@ public class DefaultPrefixExpressions
 	}
 	
 	@PrefixExpressionAnnot(type = "string", description = "Returns specified expression as stirng value after triming. In case of '$', current value will be converted to string. "
-			+ "In case input object Blob/Clob, string value will be extracted from it.", 
+			+ "In case input object Blob/Clob, string value will be extracted from it. Supports: read only.", 
 			example = "string: str")
 	public PrefixEpression strParser(PrefixExpressionContext parserContext, String expression)
 	{
@@ -255,7 +343,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "int", description = "Parses specified expression into int. In case of '$', current value's string value will be parsed.", example = "int: 10")
+	@PrefixExpressionAnnot(type = "int", description = "Parses specified expression into int. In case of '$', current value's string value will be parsed. Supports: read only.", example = "int: 10")
 	public PrefixEpression intParser(PrefixExpressionContext parserContext, String expression)
 	{
 		return new PrefixEpression()
@@ -269,7 +357,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "long", description = "Parses specified expression into long. In case of '$', current value's string value will be parsed.", example = "long: 10")
+	@PrefixExpressionAnnot(type = "long", description = "Parses specified expression into long. In case of '$', current value's string value will be parsed. Supports: read only.", example = "long: 10")
 	public PrefixEpression longParser(PrefixExpressionContext parserContext, String expression)
 	{
 		return new PrefixEpression()
@@ -282,7 +370,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "float", description = "Parses specified expression into float. In case of '$', current value's string value will be parsed.", example = "float: 10.2")
+	@PrefixExpressionAnnot(type = "float", description = "Parses specified expression into float. In case of '$', current value's string value will be parsed. Supports: read only.", example = "float: 10.2")
 	public PrefixEpression floatParser(PrefixExpressionContext parserContext, String expression)
 	{
 		return new PrefixEpression()
@@ -295,7 +383,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "double", description = "Parses specified expression into double. In case of '$', current value's string value will be parsed.", example = "double: 10.2")
+	@PrefixExpressionAnnot(type = "double", description = "Parses specified expression into double. In case of '$', current value's string value will be parsed. Supports: read only.", example = "double: 10.2")
 	public PrefixEpression doubleParser(PrefixExpressionContext parserContext, String expression)
 	{
 		return new PrefixEpression()
@@ -309,7 +397,7 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "boolean", description = "Parses specified expression into boolean. If expression value is true (case insensitive), then result will be true.  "
-			+ "In case of '$', current value's string value will be parsed.", 
+			+ "In case of '$', current value's string value will be parsed. Supports: read only.", 
 			example = "boolean: True")
 	public PrefixEpression booleanParser(PrefixExpressionContext parserContext, String expression)
 	{
@@ -324,7 +412,7 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "date", description = "Parses specified expression into date. "
-			+ "In case of '$', current value's string value will be parsed.", 
+			+ "In case of '$', current value's string value will be parsed. Supports: read only.", 
 			example = "date: 21/3/2018, date(format=MM/dd/yyy): 3/21/2018")
 	public PrefixEpression dateParser(PrefixExpressionContext parserContext, String expression)
 	{
@@ -362,7 +450,7 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "list", description = "Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
-			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to list directly.", 
+			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to list directly. Supports: read only.", 
 			example = "list: val1, val2, val3")
 	public PrefixEpression listParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
@@ -405,7 +493,7 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "set", description = "Parses specified expression into set of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
-			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to set directly.", 
+			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to set directly. Supports: read only.", 
 			example = "set: val1, val2, val3")
 	public PrefixEpression setParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
@@ -449,7 +537,7 @@ public class DefaultPrefixExpressions
 
 	@PrefixExpressionAnnot(type = "sort", description = "Sorts the input collection and returns the result as list. As the input is expected to be collection this filter"
 			+ "can be used only with $. If no property/propertyExpr is specified, ordering will be done in natural order. Note if both property & propertyExpr is specified"
-			+ " property only will be considered.", 
+			+ " property only will be considered. Supports: read only.", 
 			example = "attr: lstAttr | sort(propertyExpr=name): $",
 			params = {
 					@PrefixExprParam(name = "propertyExpr", type = "String", defaultValue = "natural-ordering", 
@@ -579,7 +667,7 @@ public class DefaultPrefixExpressions
 
 	@PrefixExpressionAnnot(type = "map", description = "Parses specified expression into map of strings (using comma as delimiter and = as delimiter for key and value). "
 			+ "If types specified, strings will be converted to specified type. "
-			+ "In case of '$', current value's string value will be parsed.", 
+			+ "In case of '$', current value's string value will be parsed. Supports: read only.", 
 			example = "map: key1 = val1, key2=val2, key3=val3")
 	public PrefixEpression mapParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
@@ -627,7 +715,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "condition", description = "Evaluates specified expression as condition and resultant boolean value will be returned", 
+	@PrefixExpressionAnnot(type = "condition", description = "Evaluates specified expression as condition and resultant boolean value will be returned. Supports: read only.", 
 			example = "condition: (attr.flag == true)", contentType = PrefixExpressionContentType.FM_EXPRESSION)
 	public PrefixEpression conditionParser(PrefixExpressionContext parserContext, String expression)
 	{
@@ -641,7 +729,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 	
-	@PrefixExpressionAnnot(type = "expr", description = "Evaluates specified expression as freemarker expression and resultant value will be returned", 
+	@PrefixExpressionAnnot(type = "expr", description = "Evaluates specified expression as freemarker expression and resultant value will be returned. Supports: read only.", 
 			example = "expr: today()", contentType = PrefixExpressionContentType.FM_EXPRESSION)
 	public PrefixEpression expressionParser(PrefixExpressionContext parserContext, String expression)
 	{
@@ -772,7 +860,7 @@ public class DefaultPrefixExpressions
 	@PrefixExpressionAnnot(type = "file", description = "Parses specified expression as file path and loads it as object. "
 			+ "As part of 'set', the specified content will be converted to string and will be writtern to file. "
 			+ "Supported object file types: xml, json, properties, csv. "
-			+ "For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.", 
+			+ "For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean. Supports: read, set.", 
 			example = "file: /tmp/data.json",
 			params = {
 				@PrefixExprParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
@@ -807,7 +895,7 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "bfile", description = "Parses specified expression as file path and loads it as binary data (byte array)."
-			+ "As part of 'set' the value is expected to be byte[] which will be written to specified file.", 
+			+ "As part of 'set' the value is expected to be byte[] which will be written to specified file. Supports: read, set.", 
 			example = "bfile: /tmp/data")
 	public PrefixEpression bfileParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
@@ -840,7 +928,7 @@ public class DefaultPrefixExpressions
 
 	@PrefixExpressionAnnot(type = "res", description = "Parses specified expression as resource path and loads it as object. "
 			+ "Supported file types: xml, json, properties, csv. "
-			+ "For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean.",
+			+ "For csv, row-0 becomes property names/keys and each remaining row becomes a map/bean. Supports: read only.",
 			example = "res: /tmp/data.json",
 			params = {
 				@PrefixExprParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
@@ -897,7 +985,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array).", 
+	@PrefixExpressionAnnot(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array). Supports: read only.", 
 			example = "bres: /tmp/data.png")
 	public PrefixEpression bresParser(PrefixExpressionContext parserContext, String expression, String exprType[])
 	{
@@ -953,7 +1041,7 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "json", description = "Parses specified expression as json string and loads it as object. "
-			+ "In case of '$', current value's string value will be parsed.", 
+			+ "In case of '$', current value's string value will be parsed. Supports: read only.", 
 			example = "json: {\"a\": 2, \"b\": 3}",
 			params = {
 					@PrefixExprParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
@@ -986,7 +1074,7 @@ public class DefaultPrefixExpressions
 	}
 
 	@PrefixExpressionAnnot(type = "jsonWithType", description = "Parses specified expression as json (with types) string and loads it as object. "
-			+ "In case of '$', current value's string value will be parsed.", 
+			+ "In case of '$', current value's string value will be parsed. Supports: read only.", 
 			example = "jsonWithType: {\"a\": 2, \"b\": 3}",
 			params = {
 					@PrefixExprParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
@@ -1009,7 +1097,7 @@ public class DefaultPrefixExpressions
 		};
 	}
 
-	@PrefixExpressionAnnot(type = "template", description = "Parses specified value for free marker expressions and returns the result.",
+	@PrefixExpressionAnnot(type = "template", description = "Parses specified value for free marker expressions and returns the result. Supports: read only.",
 			example = "template: Value=${someAttr}"
 	)
 	public PrefixEpression templateParser(PrefixExpressionContext parserContext, String expression, String exprType[])
@@ -1023,6 +1111,19 @@ public class DefaultPrefixExpressions
 				return AutomationUtils.replaceExpressionsInString("template", parserContext.getAutomationContext(), data);
 			}
 		};
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void appendPushValue(Collection<Object> target, Object value)
+	{
+		if(value instanceof Collection)
+		{
+			target.addAll((Collection) value);
+		}
+		else
+		{
+			target.add(value);
+		}
 	}
 }
 

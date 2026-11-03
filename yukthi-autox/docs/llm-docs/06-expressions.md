@@ -15,20 +15,23 @@ Common prefixes:
 
 | Prefix | Example | Description |
 |--------|---------|-------------|
-| `attr:` | `attr: response` | Context attribute value |
-| `prop:` | `prop: attr.result.statusCode` | Java bean property access |
+| `attr:` | `attr: response` | Context attribute value (read/set/delete) |
+| `prop:` | `prop: attr.result.statusCode` | Java bean property access (read/set/delete) |
 | `prop:` | `prop: _this.useValidCaptcha` | Current object being loaded (dynamic data provider) |
-| `xpath:` | `xpath: //id` | XPath on XML/string |
-| `json:` | `json: ${attr.data}` | Parse as JSON |
-| `int:` | `int: 200` | Parse as integer |
-| `string:` | `string: hello` | String value |
-| `expr:` | `expr: param.a + param.b \| int: $` | Evaluate expression |
-| `condition:` | `condition: attr.flag == 1` | Boolean condition |
-| `file:` | `file:./path/to/file.txt` | Load file content |
+| `push:` | `push: attr.items` | Append/merge into list, set, or map property (set only) |
+| `xpath:` | `xpath: //id` | XPath on XML/string (read/set/delete) |
+| `json:` | `json: ${attr.data}` | Parse as JSON (read only) |
+| `int:` | `int: 200` | Parse as integer (read only) |
+| `string:` | `string: hello` | String value (read only) |
+| `expr:` | `expr: param.a + param.b \| int: $` | Evaluate expression (read only) |
+| `condition:` | `condition: attr.flag == 1` | Boolean condition (read only) |
+| `file:` | `file:./path/to/file.txt` | Load file content (read/set) |
 | `file(text=true):` | `file(text=true): ${attr.response}` | Load file as text |
-| `res:` | `res:/data/test.json` | Classpath resource |
+| `res:` | `res:/data/test.json` | Classpath resource (read only) |
 | `uiVal:` | `uiVal: xpath: //input[@name='statusFld']` | UI element value |
 | `bean:` | `bean: myBean` | Bean reference |
+
+**`attr:` vs `prop:`:** `attr: student.name` looks up a single attribute whose name is literally `student.name` (dots are part of the name). To access nested fields on an attribute object, use `prop: attr.student.name`.
 
 Prefix `raw-` variants skip expression parsing inside content (e.g. `raw-file:`, `raw-res:`).
 

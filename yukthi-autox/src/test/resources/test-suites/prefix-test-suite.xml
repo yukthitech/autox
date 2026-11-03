@@ -52,6 +52,36 @@
 			<s:ui-assert-value locator="xpath: //input[@name='name']" value="attr: expectedName"/>
 		</testCase>
 
+		<test-case name="pushPrefixTest">
+			<description>
+				Tests push: prefix for appending to list/set and merging maps.
+			</description>
+
+			<!-- Missing prop + scalar => new list -->
+			<s:set expression="push: attr.items" value="a"/>
+			<s:assert-equals actual="attr: items" expected="list: a"/>
+
+			<!-- Existing list + scalar => append -->
+			<s:set expression="push: attr.items" value="b"/>
+			<s:assert-equals actual="attr: items" expected="list: a, b"/>
+
+			<!-- Existing list + list => append all elements -->
+			<s:set expression="push: attr.items" value="list: c, d"/>
+			<s:assert-equals actual="attr: items" expected="list: a, b, c, d"/>
+
+			<!-- Missing prop + unique=true => new set -->
+			<s:set expression="push(unique=true): attr.tags" value="red"/>
+			<s:set expression="push: attr.tags" value="list: blue, green"/>
+			<s:assert-equals actual="attr: tags" expected="set: red, blue, green"/>
+
+			<!-- Missing prop + map => new map; then merge (overwrite overlapping keys) -->
+			<s:set expression="push: attr.config" value="map: a=1, b=2"/>
+			<s:assert-equals actual="attr: config" expected="map: a=1, b=2"/>
+
+			<s:set expression="push: attr.config" value="map: b=3, c=4"/>
+			<s:assert-equals actual="attr: config" expected="map: a=1, b=3, c=4"/>
+		</test-case>
+
 	</test-suite>
 
 </test-file>
