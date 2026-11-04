@@ -40,6 +40,8 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
+import com.microsoft.playwright.TimeoutError;
+import com.microsoft.playwright.options.LoadState;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
@@ -553,6 +555,27 @@ public class PlaywrightPluginSession extends AbstractPluginSession<PlaywrightPlu
 	public NetworkMonitor startNetworkMonitor(String driverName)
 	{
 		return new NetworkMonitor(getBrowserContext(driverName));
+	}
+
+	/**
+	 * Waits for the network on the active page to become idle.
+	 * Expected to be called after clicks or other actions that load a new page or content.
+	 *
+	 * @param timeoutMillis max time to wait for network idle
+	 * @return {@code true} if network became idle within the timeout; {@code false} if timed out
+	 */
+	public boolean waitForNetworkIdle(long timeoutMillis)
+	{
+		try
+		{
+			getPage().waitForLoadState(LoadState.NETWORKIDLE,
+					new Page.WaitForLoadStateOptions().setTimeout(timeoutMillis));
+			return true;
+		}catch(TimeoutError ex)
+		{
+			logger.debug("Timed out waiting for network idle after {} ms. Error: {}", timeoutMillis, String.valueOf(ex));
+			return false;
+		}
 	}
 
 	/**

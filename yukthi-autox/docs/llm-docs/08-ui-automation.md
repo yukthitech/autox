@@ -177,9 +177,32 @@ Open a tracing zip with the [Playwright Trace Viewer](https://playwright.dev/doc
 | `s:ui-log-html-snapshot` | Save current page as MHTML in the log (`name`, optional `message`, `level`) |
 | `s:ui-capture-tracing` | Wrap child steps; write a Playwright `.zip` trace to the log (`name`) |
 
+## Wait for network idle (Java API)
+
+After clicks or other actions that load a new page or content, wait for the active page's network to settle with `PlaywrightPluginSession.waitForNetworkIdle(timeoutMillis)` — not an XML step.
+
+Uses Playwright `page.waitForLoadState(LoadState.NETWORKIDLE)`. Returns `true` when the network becomes idle within the timeout; returns `false` on timeout (does not throw).
+
+```java
+PlaywrightPluginSession ui = AutomationContext.getInstance()
+		.getExecutionContextManager()
+		.getPluginSession(PlaywrightPlugin.class);
+
+// e.g. after a click / navigation that loads new content
+boolean idle = ui.waitForNetworkIdle(15_000);
+if(!idle)
+{
+	// timed out — decide whether to continue, retry, or fail
+}
+```
+
+Prefer this over a manual poll loop when you only need to wait for quiet network before the next assertion or action. For inspecting request/response traffic, use `startNetworkMonitor()` below.
+
+In-process / host embedding: call only from an **execution thread** — see [16-local-process-session.md](16-local-process-session.md).
+
 ## Network monitor (Java API)
 
-For lightweight **network-only** capture (APIs during a click/navigation, crawl idle detection), use `PlaywrightPluginSession.startNetworkMonitor()` — not an XML step. Prefer this over `s:ui-capture-tracing` when you only need request/response analysis, not a full Trace Viewer zip.
+For lightweight **network-only** capture (APIs during a click/navigation), use `PlaywrightPluginSession.startNetworkMonitor()` — not an XML step. Prefer this over `s:ui-capture-tracing` when you only need request/response analysis, not a full Trace Viewer zip. For a simple idle wait after an action, prefer `waitForNetworkIdle(timeoutMillis)` above.
 
 Listeners are registered on the **browser context** (all pages/tabs of that driver).
 
@@ -191,17 +214,7 @@ PlaywrightPluginSession ui = AutomationContext.getInstance()
 try(NetworkMonitor monitor = ui.startNetworkMonitor()) // or startNetworkMonitor(driverName)
 {
 	// perform UI action (click, navigate, nested steps, etc.)
-
-	// Optional: wait until traffic quiets (unknown sites / SPA)
-	long deadline = System.currentTimeMillis() + 15_000;
-	while(System.currentTimeMillis() < deadline)
-	{
-		Thread.sleep(500);
-		if(monitor.getInProgressCount() == 0)
-		{
-			break;
-		}
-	}
+	ui.waitForNetworkIdle(15_000);
 
 	System.out.println("requests=" + monitor.getRequestCount()
 			+ " responses=" + monitor.getResponseCount()

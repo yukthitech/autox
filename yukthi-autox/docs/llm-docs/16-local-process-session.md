@@ -102,7 +102,25 @@ Notes:
 
 ## Executing dynamic step XML
 
-Mode 2 — no caller source name; locations use a generated `interactive-steps-N.xml`:
+Mode 2 — no caller source name; locations use a generated `interactive-steps-N.xml`.
+
+### Validate without running (`compileSteps`)
+
+Parses and validates dynamic step XML **without executing** it. Same snippet form as `executeSteps`. Checks step and attribute names, required parameters, and related structure.
+
+Does **not** run steps, and does **not** register functions, custom prefix expressions, or UI locators from the snippet (unlike `executeSteps`).
+
+Use this when the host wants to reject bad XML early (editor / agent / preview) before committing to a run:
+
+```java
+session.compileSteps(
+    "<s:set expression=\"x\" value=\"int: 1\"/>"
+  + "<s:assert-equals actual=\"attr: x\" expected=\"int: 1\"/>");
+```
+
+Empty step XML → `InvalidArgumentException`. Invalid step/attribute names or missing required parameters → parse/validation failure from the XML loader.
+
+### Execute (`executeSteps`)
 
 ```java
 session.executeSteps("<s:log message=\"hello from host\"/>");
@@ -201,6 +219,7 @@ For report-only artifacts without Java, keep using `s:ui-log-screen-shot` / `s:u
 | `newLocator(driverName, selector)` | Playwright `Locator` under current page/frame |
 | `findVisibleElements(locator, parentElement, driverName)` | All matches for an AutoX locator; returns `ElementMatches` (total count, visible count, visible `UiElement` list). Optional parent is a prefix expression. `driverName` null uses the default driver |
 | `startNetworkMonitor()` / `(driverName)` | `NetworkMonitor` — request/response / API calls; `close()` when done |
+| `waitForNetworkIdle(timeoutMillis)` | Wait until the active page's network is idle (`LoadState.NETWORKIDLE`); returns `true` on success, `false` on timeout. Call after clicks / navigations that load a page or content |
 | `startTracing()` / `(driverName)` | `TraceCapture` — `stop()` writes a temp trace `.zip` |
 | `getDownloadFolder` / `cleanDownloadFolder` / `isDownloadsSupported` | Download directory helpers |
 | `resetDriver` / `closeDriver` / `close` | Reset or tear down browser state |
@@ -211,6 +230,9 @@ Network / tracing examples:
 
 ```java
 PlaywrightPluginSession ui = session.getPluginSession(PlaywrightPlugin.class);
+
+// After a click / navigation that loads content:
+boolean idle = ui.waitForNetworkIdle(15_000);
 
 try(NetworkMonitor monitor = ui.startNetworkMonitor())
 {
@@ -383,6 +405,9 @@ try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(appConfig)
 ### Mode 2 — ad-hoc steps from the host
 
 ```java
+// Optional: validate first (no side effects / no reload registration)
+session.compileSteps("<s:rest-invoke-get uri=\"/health\"/>");
+
 session.executeSteps("<s:rest-invoke-get uri=\"/health\"/>");
 session.executeSteps("<s:assert-equals actual=\"prop: attr.result.statusCode\" expected=\"int: 200\"/>");
 ```
@@ -400,6 +425,7 @@ Use `AutoxDebugSession` + sink: set breakpoints → `runFunction` → on pause d
 | `getPluginSession` off execution thread | `NonExecutionThreadException` |
 | Function / steps errored | `InvalidStateException` with status message |
 | Unknown function | `InvalidArgumentException` |
+| Empty step XML (`compileSteps` / `executeSteps`) | `InvalidArgumentException` |
 
 After close, `AutomationContext.getInstance()` is cleared so another session can start.
 

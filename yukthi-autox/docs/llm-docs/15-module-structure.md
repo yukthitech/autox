@@ -107,6 +107,7 @@ Test XML locators (`id:`, `xpath:`, `css:`, …) and shared step tags (`ui-click
 | API | Description |
 |-----|-------------|
 | `PlaywrightPluginSession.startNetworkMonitor()` | BrowserContext network monitor (`NetworkMonitor`) for request/response / API call analysis |
+| `PlaywrightPluginSession.waitForNetworkIdle(timeoutMillis)` | Wait for active page network idle (`LoadState.NETWORKIDLE`); returns `true` / `false` (timeout). Use after clicks or other actions that load a page or content |
 | `PlaywrightPluginSession.startTracing()` | Playwright tracing handle (`TraceCapture`); `stop()` writes a temp zip for the consumer |
 
 Details and examples: [08-ui-automation.md](08-ui-automation.md).
@@ -148,5 +149,5 @@ Details and examples: [08-ui-automation.md](08-ui-automation.md).
 1. Depend on `yukthi-autox-all` **4.0.0-SNAPSHOT** (`type=pom`) unless you need a custom module set.
 2. Configure `<playwright-plugin>` for UI (not `<selenium-plugin>`, unless you opted into Selenium).
 3. Keep suite cleanup with `<s:ui-quit-session/>`.
-4. Use Playwright-only steps when you need MHTML or report-attached tracing; use `startNetworkMonitor()` / `startTracing()` for Java-owned network or temp-file tracing.
+4. Use Playwright-only steps when you need MHTML or report-attached tracing; use `waitForNetworkIdle()` / `startNetworkMonitor()` / `startTracing()` for Java-owned network wait, capture, or temp-file tracing.
 5. Never combine both UI modules on the classpath.
