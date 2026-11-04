@@ -49,6 +49,11 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	private String description;
 	
 	/**
+	 * Meta info about the function.
+	 */
+	private List<ElementMetaData> metaData;
+	
+	/**
 	 * Description of the return value. This should be omitted for functions which dont return any value.
 	 */
 	@Doc(value = "Return description of the function. If not specified, function is assumed will not return any value")
@@ -148,6 +153,21 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	public void setParent(String parent)
 	{
 		this.parent = parent;
+	}
+	
+	public void addMetaData(ElementMetaData meta)
+	{
+		if(this.metaData == null)
+		{
+			this.metaData = new ArrayList<ElementMetaData>();
+		}
+		
+		this.metaData.add(meta);
+	}
+	
+	public List<ElementMetaData> getMetaData()
+	{
+		return metaData;
 	}
 	
 	@Override

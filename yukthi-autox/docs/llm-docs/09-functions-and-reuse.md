@@ -62,6 +62,62 @@ Function parameters are passed as attributes. Access them inside the function as
 
 Use `return-attr` on the call to capture the return value into a context attribute.
 
+### Function meta-data
+
+Functions can carry documentation / tooling meta-data. AutoX does **not** use this data during execution — it has no effect on how the function runs. Host apps and IDEs can read it from the loaded `Function` object.
+
+#### Predefined meta-data
+
+| Element / field | Purpose |
+|-----------------|---------|
+| `<description>` | Human-readable description of the function |
+| `<return-description>` | Describes the return value; omit for functions that do not return |
+| `<param-def>` | Documents each parameter (name, description, optional `required`) |
+
+```xml
+<function name="factorialGroup1">
+    <description>Computes factorial recursively</description>
+    <return-description>Factorial result stored in attr.result</return-description>
+    <param-def name="value" description="value to be evaluated" required="true"/>
+
+    <s:log message="Got param: ${param.value?c}"/>
+    <!-- steps ... -->
+</function>
+```
+
+`<param-def>` fields:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Parameter name (matches the attribute used on `<f:functionName .../>`) |
+| `description` | Yes | What the parameter means |
+| `required` | No | Whether the parameter is mandatory (default: `false`) |
+
+Parameters are still passed as attributes on the call (`<f:factorialGroup1 value="int: 4"/>`) and accessed as `param.{name}` inside the function. `<param-def>` documents those parameters; it does not change call syntax.
+
+#### Custom meta-data
+
+Optional `<meta-data>` children attach arbitrary name/value pairs (for classification, ownership, or other tooling tags):
+
+```xml
+<function name="login">
+    <description>Logs into the application</description>
+    <meta-data name="category" value="auth"/>
+    <meta-data name="owner" value="platform-team"/>
+
+    <s:rest-invoke-post uri="/auth/login">
+        <body><![CDATA[{"user":"test","password":"secret"}]]></body>
+    </s:rest-invoke-post>
+</function>
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Meta info key |
+| `value` | Yes | Meta info value |
+
+You can add multiple `<meta-data>` elements. From an in-process host (`AutoxSession`), after resolving the function (e.g. `getGlobalFunction(...)`), read predefined fields via getters such as `getDescription()` and custom pairs via `getMetaData()`.
+
 ## Data beans
 
 ### App-level beans

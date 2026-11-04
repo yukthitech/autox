@@ -98,6 +98,7 @@ Notes:
 - Per-invocation execution attributes are **not** automatically shared across calls. Use `session.getAutomationContext().setGlobalAttribute(name, value)` when you need cross-function sharing.
 - If the function ends in an error status, `runFunction` throws `InvalidStateException`.
 - Unknown function name → `InvalidArgumentException`.
+- Function meta-data (`<description>`, `<return-description>`, `<param-def>`, and custom `<meta-data>`) is ignored at runtime; inspect it on the loaded `Function` (e.g. `getGlobalFunction(name).getDescription()`, `getMetaData()`) when the host needs docs or classification. See [09-functions-and-reuse.md](09-functions-and-reuse.md#function-meta-data).
 
 ## Executing dynamic step XML
 
