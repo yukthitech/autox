@@ -8,18 +8,19 @@ Use AutoX as an in-process library (not only via `AutomationLauncher` CLI). A ho
 
 | Goal | API |
 |------|-----|
-| Run reusable flows from Java (same plugins/browser across calls) | `AutoxSession` |
-| Breakpoints, step/resume, paused eval / steps | `AutoxDebugSession` |
-| Full suite run + HTML report + `System.exit` | `AutomationLauncher` CLI ([10-running-tests.md](10-running-tests.md)) |
+| Embed host: run functions / steps / UI capture (same browser) | `AutoxSession.startInteractive(...)` |
+| Breakpoints, step/resume, paused eval / steps | `AutoxDebugSession` (interactive under the hood) |
+| Full suite run + HTML report + `System.exit` | `AutomationLauncher` CLI via `AutoxSession.start(..., eventManager)` ([10-running-tests.md](10-running-tests.md)) |
 
 ## Core rules
 
-- **One active session per classloader.** `AutomationContext` is a process-level singleton. Close the current session before `start` again; a second `start` throws if a context is already active.
+- **One active session per classloader.** `AutomationContext` is a process-level singleton. Close the current session before starting again; a second start throws if a context is already active.
 - Always **`close()`** the session (prefer try-with-resources). Closing resets plugins/browsers; it does **not** call `System.exit`.
-- Session work is driven on a **single execution thread**. Do not call `runFunction` / `executeSteps` concurrently from multiple threads.
-- `getPluginSession(...)` is only valid **on an execution thread** (during `runFunction` / `executeSteps`, or while paused steps run on that thread). Calling it from the host UI thread throws `NonExecutionThreadException`.
+- **Interactive** (`startInteractive`): a dedicated worker keeps a **live executor**; plugin/browser sessions stay checked out until `close()` (not returned to the pool between calls). Host threads may call `runFunction` / `executeSteps` / `getPluginSession`; work is serialized onto that worker.
+- **Normal / CLI** (`start(..., eventManager)`): suite executors use the plugin **pool**. `runFunction`, `executeSteps`, and `getPluginSession` are **not** available (throw `InvalidStateException`).
+- Use `getPluginSession(...).execute(ui -> ...)` for Playwright APIs from any host thread (marshaled onto the interactive worker).
 
-## Starting a session
+## Starting an interactive session
 
 ```java
 import com.yukthitech.autox.common.ContentStream;
@@ -33,7 +34,7 @@ String[] args = {
     "-flmt", "./src/test/resources/test-suites" // optional folder limit
 };
 
-try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(appConfig), args))
+try (AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(appConfig), args))
 {
     // load + run (see below)
 }
@@ -152,9 +153,9 @@ AutomationContext ctx = session.getAutomationContext();
 Object attr = ctx.getAttribute("sumResult");
 ctx.setGlobalAttribute("sharedFlag", true);
 
-// Only from an execution thread:
-PlaywrightPluginSession ui =
-    session.getPluginSession(PlaywrightPlugin.class);
+// Interactive only — handle marshals onto the live worker:
+String mhtml = session.getPluginSession(PlaywrightPlugin.class)
+        .execute(ui -> ui.captureHtmlSnapshot());
 ```
 
 ## Screenshots and HTML dump (UI)
@@ -168,43 +169,23 @@ session.executeSteps(
   + "<s:ui-log-html-snapshot name=\"page.mhtml\"/>");
 ```
 
-For **raw PNG bytes / MHTML string** in the host process, call `PlaywrightPluginSession` **from an execution thread** (`runFunction` / `executeSteps`, or paused `executeStepsWhilePaused`).
-
-### Direct capture via plugin session
-
-`takeScreenshot` / `captureHtmlSnapshot` (and all other `PlaywrightPluginSession` methods below) must run on an **AutoX execution thread**. Calling `session.getPluginSession(...)` from the host after `runFunction` / `executeSteps` returns throws `NonExecutionThreadException`.
-
-Valid call sites:
-
-- Inside a Java `@Executable` step’s `execute(...)`
-- During `runFunction` / `executeSteps` / `executeStepsWhilePaused` when your code is invoked on that same stack (custom step, step listener, etc.)
-- Paused debug helpers that run on the paused execution thread
+For **raw PNG bytes / MHTML string** from any host thread, use the interactive plugin-session handle:
 
 ```java
-// From an execution-thread call site:
-PlaywrightPluginSession ui = AutomationContext.getInstance()
-		.getExecutionContextManager()
-		.getPluginSession(PlaywrightPlugin.class);
-// or: session.getPluginSession(PlaywrightPlugin.class) when AutoxSession is in scope
+byte[] png = session.getPluginSession(PlaywrightPlugin.class)
+		.execute(ui -> ui.takeScreenshot());
+String mhtml = session.getPluginSession(PlaywrightPlugin.class)
+		.execute(ui -> ui.captureHtmlSnapshot());
 
-byte[] png = ui.takeScreenshot();              // active page, default driver
-String mhtml = ui.captureHtmlSnapshot();       // MHTML of active page
-
-byte[] png2 = ui.takeScreenshot("autoxChrome"); // named driver
-String mhtml2 = ui.captureHtmlSnapshot("autoxChrome");
-
-Page page = ui.getPage(); // live Playwright Page for further host logic
-String url = page.url();
-
-context.setGlobalAttribute("lastScreenshotPng", png);
-context.setGlobalAttribute("lastPageMhtml", mhtml);
+String url = session.getPluginSession(PlaywrightPlugin.class)
+		.execute(ui -> ui.getPage().url());
 ```
 
-After the function/steps finish, the **host** can read those globals via `session.getAutomationContext().getGlobalAttribute(...)` (or `getAttribute` if still in scope).
+Do **not** call Playwright APIs on a raw session object from a foreign thread — keep work inside `IPluginSessionHandle.execute(...)`.
 
 For report-only artifacts without Java, keep using `s:ui-log-screen-shot` / `s:ui-log-html-snapshot` (including via `executeStepsWhilePaused` while debugging).
 
-### Other `PlaywrightPluginSession` APIs (execution thread)
+### Other `PlaywrightPluginSession` APIs (via handle.execute)
 
 | Method | Purpose |
 |--------|---------|
@@ -226,29 +207,21 @@ For report-only artifacts without Java, keep using `s:ui-log-screen-shot` / `s:u
 | `getResourceUrl(path)` | Resolve path against plugin `base-url` |
 | Dialog helpers (`pollDialog`, `hasPendingDialog`, …) | Alert/confirm/prompt queue (same model as `ui-handle-*` steps) |
 
-Network / tracing examples:
+Network / tracing examples (keep Playwright work inside `execute`):
 
 ```java
-PlaywrightPluginSession ui = session.getPluginSession(PlaywrightPlugin.class);
+boolean idle = session.getPluginSession(PlaywrightPlugin.class)
+		.execute(ui -> ui.waitForNetworkIdle(15_000));
 
-// After a click / navigation that loads content:
-boolean idle = ui.waitForNetworkIdle(15_000);
-
-try(NetworkMonitor monitor = ui.startNetworkMonitor())
+session.getPluginSession(PlaywrightPlugin.class).execute(ui ->
 {
-	// UI work on this execution thread...
-	List<NetworkMonitor.NetworkCall> apis = monitor.getApiCalls();
-}
-
-TraceCapture capture = ui.startTracing();
-try
-{
-	// UI work...
-}
-finally
-{
-	File zip = capture.stop(); // consumer-owned temp zip
-}
+	try(NetworkMonitor monitor = ui.startNetworkMonitor())
+	{
+		// UI work on interactive worker...
+		List<NetworkMonitor.NetworkCall> apis = monitor.getApiCalls();
+	}
+	return null;
+});
 ```
 
 Details: [08-ui-automation.md](08-ui-automation.md) (steps), [network monitor](08-ui-automation.md#network-monitor-java-api), [trace capture](08-ui-automation.md#trace-capture-java-api).
@@ -394,7 +367,7 @@ Returns `null` when the snippet only reloaded definitions (no steps).
 ### Mode 1 — load once, run many functions
 
 ```java
-try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(appConfig), args))
+try (AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(appConfig), args))
 {
     session.loadXml(ContentStream.fromString(suiteXml, "host:checkout-flow.xml"));
     session.runFunction("login");
@@ -420,9 +393,9 @@ Use `AutoxDebugSession` + sink: set breakpoints → `runFunction` → on pause d
 
 | Situation | Behavior |
 |-----------|----------|
-| Second `AutoxSession.start` without close | `InvalidStateException` (context already active) |
+| Second session start without close | `InvalidStateException` (context already active) |
 | Call after `close()` | `InvalidStateException` (session closed) |
-| `getPluginSession` off execution thread | `NonExecutionThreadException` |
+| `runFunction` / `executeSteps` / `getPluginSession` on Default session | `InvalidStateException` (interactive only) |
 | Function / steps errored | `InvalidStateException` with status message |
 | Unknown function | `InvalidArgumentException` |
 | Empty step XML (`compileSteps` / `executeSteps`) | `InvalidArgumentException` |
@@ -433,7 +406,7 @@ After close, `AutomationContext.getInstance()` is cleared so another session can
 
 | Type | Package |
 |------|---------|
-| `AutoxSession`, `AutoxDebugSession` | `com.yukthitech.autox.session` |
+| `AutoxSession`, `AutoxDebugSession`, `IPluginSessionHandle` | `com.yukthitech.autox.session` |
 | `ContentStream` | `com.yukthitech.autox.common` |
 | `InProcessDebugEventSink` | `com.yukthitech.autox.debug` |
 | `DebugPoint`, `DebugOp`, pause/eval messages | `com.yukthitech.autox.debug.common` |
@@ -443,5 +416,5 @@ After close, `AutomationContext.getInstance()` is cleared so another session can
 
 In the AutoX repo:
 
-- `TAutoxSession` — start, `loadXml`, `runFunction`, `executeSteps`, single-session guard
+- `TAutoxSession` — `startInteractive`, child-thread UI/snapshot/`runFunction`, Default rejects interactive APIs
 - `TAutoxDebugSession` — in-process pause/resume and `evalWhilePaused`

@@ -18,21 +18,27 @@ package com.yukthitech.test;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.yukthitech.autox.common.ContentStream;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.context.NonExecutionThreadException;
+import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.plugin.ui.PlaywrightPlugin;
+import com.yukthitech.autox.plugin.ui.PlaywrightPluginSession;
 import com.yukthitech.autox.session.AutoxSession;
+import com.yukthitech.autox.session.IPluginSessionHandle;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Embed session API: start → loadXml / load suites → runFunction / executeSteps → close.
+ * Embed session API: interactive start → loadXml / runFunction / executeSteps / plugin handle.
  */
 public class TAutoxSession extends BaseTestCases
 {
@@ -55,7 +61,7 @@ public class TAutoxSession extends BaseTestCases
 		params.put("a", 10);
 		params.put("b", 20);
 		
-		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-1")))
+		try (AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-1")))
 		{
 			session.loadTestSuiteFiles();
 			
@@ -65,17 +71,17 @@ public class TAutoxSession extends BaseTestCases
 			params.put("b", 7);
 			Assert.assertNull(session.runFunction("sumWithoutReturn", params));
 			
-			// second load is idempotent
 			session.loadTestSuiteFiles();
 			
 			Assert.assertNotNull(session.getAutomationContext());
 			Assert.assertSame(session.getAutomationContext(), AutomationContext.getInstance());
 			Assert.assertNotNull(session.getAutomationContext().getGlobalFunction("sumWithoutReturn"));
+			Assert.assertTrue(session.isInteractive());
 		}
 		
 		Assert.assertNull(AutomationContext.getInstance());
 		
-		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-2")))
+		try (AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-2")))
 		{
 			session.loadTestSuiteFiles();
 			Assert.assertNull(session.runFunction("sumWithoutReturn", params));
@@ -87,7 +93,7 @@ public class TAutoxSession extends BaseTestCases
 	@Test
 	public void testUnknownFunctionAndClosedSession() throws Exception
 	{
-		AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-err"));
+		AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-err"));
 		
 		try
 		{
@@ -119,13 +125,13 @@ public class TAutoxSession extends BaseTestCases
 	@Test
 	public void testSingleActiveSessionGuard() throws Exception
 	{
-		AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-guard"));
+		AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-guard"));
 		
 		try
 		{
 			try
 			{
-				AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-guard-2"));
+				AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-api-guard-2"));
 				Assert.fail("Expected InvalidStateException for second start");
 			}catch(InvalidStateException ex)
 			{
@@ -149,13 +155,12 @@ public class TAutoxSession extends BaseTestCases
 		
 		String sourceName = "host:session-load-xml.xml";
 		
-		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-load-xml")))
+		try (AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-load-xml")))
 		{
 			session.loadXml(ContentStream.fromString(xml, sourceName));
 			
 			Function function = session.getAutomationContext().getGlobalFunction("sessionLoadXmlSum");
 			Assert.assertNotNull(function);
-			// Logical names with ':' are sanitized for File location on Windows
 			Assert.assertTrue(function.getLocation().getPath().contains("session-load-xml.xml"));
 			Assert.assertTrue(function.getLocation().getName().contains("session-load-xml.xml"));
 			
@@ -178,9 +183,8 @@ public class TAutoxSession extends BaseTestCases
 	@Test
 	public void testExecuteStepsDynamicSource() throws Exception
 	{
-		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-execute-steps")))
+		try (AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-execute-steps")))
 		{
-			// Mode 2: no sourceName; locations use generated interactive-steps-N.xml
 			session.executeSteps("<s:log message=\"hello from session executeSteps\"/>");
 			
 			session.executeSteps(
@@ -198,24 +202,48 @@ public class TAutoxSession extends BaseTestCases
 	}
 	
 	@Test
-	public void testGetPluginSessionRequiresExecutionThreadAndOpenSession() throws Exception
+	public void testDefaultSessionRejectsInteractiveApis() throws Exception
 	{
-		AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG), sessionArgs("./output/session-plugin-session"));
-		
-		try
+		try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(APP_CONFIG),
+				sessionArgs("./output/session-default-guard"), new AutomationEventManager()))
 		{
+			Assert.assertFalse(session.isInteractive());
+			
+			try
+			{
+				session.executeSteps("<s:log message=\"nope\"/>");
+				Assert.fail("Expected InvalidStateException");
+			}catch(InvalidStateException ex)
+			{
+				Assert.assertTrue(ex.getMessage().contains("interactive"));
+			}
+			
+			try
+			{
+				session.runFunction("anything");
+				Assert.fail("Expected InvalidStateException");
+			}catch(InvalidStateException ex)
+			{
+				Assert.assertTrue(ex.getMessage().contains("interactive"));
+			}
+			
 			try
 			{
 				session.getPluginSession(PlaywrightPlugin.class);
-				Assert.fail("Expected NonExecutionThreadException outside executor context");
-			}catch(NonExecutionThreadException ex)
+				Assert.fail("Expected InvalidStateException");
+			}catch(InvalidStateException ex)
 			{
-				Assert.assertTrue(ex.getMessage().contains("non-executor"));
+				Assert.assertTrue(ex.getMessage().contains("interactive"));
 			}
-		}finally
-		{
-			session.close();
 		}
+	}
+	
+	@Test
+	public void testGetPluginSessionClosedInteractiveSession() throws Exception
+	{
+		AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG),
+				sessionArgs("./output/session-plugin-session"));
+		session.close();
 		
 		try
 		{
@@ -225,5 +253,104 @@ public class TAutoxSession extends BaseTestCases
 		{
 			Assert.assertTrue(ex.getMessage().contains("closed"));
 		}
+	}
+	
+	/**
+	 * Interactive APIs from child threads: navigate, HTML snapshot via handle, UI click, runFunction.
+	 */
+	@Test
+	public void testCrossThreadUiSnapshotAndOperations() throws Exception
+	{
+		AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(APP_CONFIG),
+				sessionArgs("./output/session-cross-thread-ui"));
+		
+		try
+		{
+			runOnChild("goto-index", () ->
+			{
+				session.executeSteps("<s:ui-goto-page uri=\"/index.html\"/>");
+			});
+			
+			AtomicReference<String> mhtmlRef = new AtomicReference<>();
+			runOnChild("html-snapshot", () ->
+			{
+				IPluginSessionHandle<PlaywrightPluginSession> handle = session.getPluginSession(PlaywrightPlugin.class);
+				String mhtml = handle.execute(PlaywrightPluginSession::captureHtmlSnapshot);
+				Assert.assertTrue(StringUtils.isNotBlank(mhtml), "Expected non-blank MHTML snapshot");
+				mhtmlRef.set(mhtml);
+			});
+			Assert.assertTrue(StringUtils.isNotBlank(mhtmlRef.get()));
+			
+			runOnChild("button-click", () ->
+			{
+				session.executeSteps(
+						"<s:ui-click locator=\"id: button\"/>"
+						+ "<s:sleep time=\"1000\"/>"
+						+ "<s:ui-assert-value locator=\"xpath: //input[@name='statusFld']\" value=\"button Clicked\"/>");
+			});
+			
+			runOnChild("snapshot-after-click", () ->
+			{
+				String mhtml = session.getPluginSession(PlaywrightPlugin.class)
+						.execute(PlaywrightPluginSession::captureHtmlSnapshot);
+				Assert.assertTrue(StringUtils.isNotBlank(mhtml));
+			});
+			
+			runOnChild("run-function", () ->
+			{
+				session.executeSteps(
+						"<function name=\"crossThreadFn\">"
+						+ "<s:return value=\"string: from-child\"/>"
+						+ "</function>");
+				Assert.assertEquals(session.runFunction("crossThreadFn"), "from-child");
+			});
+		}finally
+		{
+			session.close();
+		}
+	}
+	
+	private static void runOnChild(String name, ChildWork work) throws Exception
+	{
+		CountDownLatch done = new CountDownLatch(1);
+		AtomicReference<Throwable> error = new AtomicReference<>();
+		
+		Thread thread = new Thread(() ->
+		{
+			try
+			{
+				work.run();
+			}catch(Throwable ex)
+			{
+				error.set(ex);
+			}finally
+			{
+				done.countDown();
+			}
+		}, "t-autox-session-" + name);
+		
+		thread.start();
+		Assert.assertTrue(done.await(120, TimeUnit.SECONDS), "Child thread timed out: " + name);
+		
+		if(error.get() != null)
+		{
+			if(error.get() instanceof Exception)
+			{
+				throw (Exception) error.get();
+			}
+			
+			if(error.get() instanceof Error)
+			{
+				throw (Error) error.get();
+			}
+			
+			throw new RuntimeException(error.get());
+		}
+	}
+	
+	@FunctionalInterface
+	private interface ChildWork
+	{
+		void run() throws Exception;
 	}
 }

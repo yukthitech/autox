@@ -23,7 +23,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.common.ContentStream;
-import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.IDebugEventSink;
 import com.yukthitech.autox.debug.InProcessDebugEventSink;
 import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
@@ -39,7 +38,8 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Debug-capable {@link AutoxSession}. Enables debug mode with an {@link IDebugEventSink}
+ * Debug-capable interactive {@link AutoxSession}. Starts with {@link InteractiveContextWrapper}
+ * (live executor) and enables debug mode with an {@link IDebugEventSink}
  * (default: {@link InProcessDebugEventSink}) so pause / step / resume work in-process.
  * <p>
  * Pause events are delivered asynchronously via the sink — call {@link #resume(String)} /
@@ -52,7 +52,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * {
  *     session.loadXml(ContentStream.fromString(xml, "host:flow.xml"));
  *     session.addDebugPoint(new DebugPoint(filePath, line, null));
- *     // runFunction on a worker thread; on pause, resume from listener / UI thread
+ *     // runFunction (marshaled to interactive worker); on pause, resume from listener / UI thread
  *     session.resume(executionId);
  * }
  * </pre>
@@ -65,11 +65,11 @@ public class AutoxDebugSession extends AutoxSession
 	
 	private final DebugFlowManager debugFlowManager;
 	
-	private AutoxDebugSession(AutomationContext context, IDebugEventSink eventSink)
+	private AutoxDebugSession(IContextWrapper contextWrapper, IDebugEventSink eventSink)
 	{
-		super(context);
+		super(contextWrapper);
 		this.eventSink = eventSink;
-		this.debugFlowManager = (DebugFlowManager) context.getDebugFlowManager();
+		this.debugFlowManager = (DebugFlowManager) getAutomationContext().getDebugFlowManager();
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class AutoxDebugSession extends AutoxSession
 	}
 	
 	/**
-	 * Starts a debug session with a custom event manager and sink.
+	 * Starts an interactive debug session with a custom event manager and sink.
 	 */
 	public static AutoxDebugSession start(ContentStream appConfiguration, String[] extendedCommandLineArgs,
 			AutomationEventManager automationEventManager, IDebugEventSink eventSink) throws Exception
@@ -100,10 +100,14 @@ public class AutoxDebugSession extends AutoxSession
 			throw new InvalidArgumentException("Debug event sink cannot be null");
 		}
 		
-		AutomationContext context = createContext(appConfiguration, extendedCommandLineArgs, automationEventManager);
-		DebugFlowManager flowManager = (DebugFlowManager) context.getDebugFlowManager();
-		flowManager.enableDebug(eventSink);
-		return new AutoxDebugSession(context, eventSink);
+		IContextWrapper wrapper = InteractiveContextWrapper.create(appConfiguration, extendedCommandLineArgs,
+				automationEventManager);
+		wrapper.execute(ctx ->
+		{
+			((DebugFlowManager) ctx.getDebugFlowManager()).enableDebug(eventSink);
+			return null;
+		});
+		return new AutoxDebugSession(wrapper, eventSink);
 	}
 	
 	public IDebugEventSink getEventSink()

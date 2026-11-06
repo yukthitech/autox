@@ -116,6 +116,23 @@ public class ExecutionContextManager
 		return context;
 	}
 	
+	/**
+	 * Binds a long-lived executor on the current thread (interactive session).
+	 * Caller must {@link #unbindLiveExecutor} on the same thread before reset/close.
+	 */
+	public synchronized void bindLiveExecutor(IExecutor executor)
+	{
+		setExecutor(executor);
+	}
+	
+	/**
+	 * Clears a previously {@link #bindLiveExecutor bound} executor and releases plugin sessions.
+	 */
+	public synchronized void unbindLiveExecutor(IExecutor executor)
+	{
+		clearExecutor(executor);
+	}
+	
 	private synchronized void setExecutor(IExecutor executor)
 	{
 		ExecutionThreadStack executionContextStack = executionThreadLocal.get(Thread.currentThread());

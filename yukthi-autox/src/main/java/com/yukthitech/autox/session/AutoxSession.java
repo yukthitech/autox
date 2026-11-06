@@ -16,6 +16,7 @@
 package com.yukthitech.autox.session;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,8 +33,6 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.event.AutomationEventManager;
 import com.yukthitech.autox.exec.ExecutionPool;
-import com.yukthitech.autox.exec.FunctionExecutor;
-import com.yukthitech.autox.exec.InteractiveStepsExecutor;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.interactive.InteractiveXmlSupport;
@@ -41,40 +40,39 @@ import com.yukthitech.autox.interactive.StepHolder;
 import com.yukthitech.autox.plugin.IPlugin;
 import com.yukthitech.autox.plugin.IPluginSession;
 import com.yukthitech.autox.test.Function;
-import com.yukthitech.autox.test.TestStatus;
+import com.yukthitech.autox.test.FunctionParam;
+import com.yukthitech.autox.test.FunctionRef;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Owns {@link AutomationContext} and plugin lifecycle for a single automation run.
- * Plugin sessions may return to the plugin cache when executors finish; browsers and
- * plugins are closed only via {@link #close()}.
+ * <p>
+ * <b>Normal / CLI</b> ({@link #start}): {@link DefaultContextWrapper} — suite executors use the
+ * plugin session pool. {@link #executeSteps}, {@link #runFunction}, and {@link #getPluginSession}
+ * are not available.
+ * </p>
+ * <p>
+ * <b>Interactive embed</b> ({@link #startInteractive}): {@link InteractiveContextWrapper} keeps a
+ * live executor on one worker thread so the same plugin/browser session stays checked out until
+ * {@link #close()} (debug-style). Host threads may call interactive APIs; work is marshaled onto
+ * that worker. Use {@link IPluginSessionHandle#execute} for Playwright capture/ops.
+ * </p>
  * <p>
  * <b>Single active session per classloader:</b> {@link AutomationContext} is a process-level
  * singleton ({@link AutomationContext#getInstance()}). Only one session should be open at a
- * time. Call {@link #close()} before {@link #start} again. {@link #start} fails if a context
- * is already active.
+ * time. Call {@link #close()} before starting another.
  * </p>
- * <p>
- * Typical embed usage (Mode 1 — load suites / XML, run multiple functions, same plugins/browser):
  * <pre>
- * try (AutoxSession session = AutoxSession.start(ContentStream.fromFile(appConfigFile), args))
+ * try (AutoxSession session = AutoxSession.startInteractive(ContentStream.fromFile(appConfigFile), args))
  * {
  *     session.loadXml(ContentStream.fromString(suiteXml, "host:checkout-flow.xml"));
  *     session.runFunction("login");
- *     Object result = session.runFunction("checkout", params);
+ *     String mhtml = session.getPluginSession(PlaywrightPlugin.class)
+ *             .execute(ui -&gt; ui.captureHtmlSnapshot());
  * }
  * </pre>
- * Mode 2 — dynamic steps (no source name; locations use generated {@code interactive-steps-N.xml}):
- * <pre>
- * session.executeSteps("&lt;s:set expression=\"x\" value=\"int: 1\"/&gt;");
- * </pre>
  * For breakpoints / pause / step / paused {@code eval}, use {@link AutoxDebugSession}.
- * </p>
- * <p>
- * Session work is driven on a single execution thread (CLI main path).
- * Sequential use from different threads is deferred.
- * </p>
  *
  * @author akranthikiran
  */
@@ -82,40 +80,49 @@ public class AutoxSession implements AutoCloseable
 {
 	private static final Logger logger = LogManager.getLogger(AutoxSession.class);
 	
-	private final AutomationContext context;
+	private static final String FUNCTION_RETURN_ATTR = "autoxSession.functionReturn";
+	
+	final IContextWrapper contextWrapper;
 	
 	private boolean closed;
 	
 	private boolean testSuiteFilesLoaded;
 	
-	protected AutoxSession(AutomationContext context)
+	protected AutoxSession(IContextWrapper contextWrapper)
 	{
-		this.context = context;
+		this.contextWrapper = contextWrapper;
 	}
 	
 	/**
-	 * Starts a new session for the given app configuration content (file, string, or stream).
-	 *
-	 * @param appConfiguration application configuration content
-	 * @param extendedCommandLineArgs extended CLI args (may be empty, not null)
-	 * @return the new session (caller must {@link #close()} it)
+	 * Starts an interactive session: dedicated worker, live executor, same browser across calls.
+	 * Supports {@link #executeSteps}, {@link #runFunction}, and {@link #getPluginSession}.
 	 */
-	public static AutoxSession start(ContentStream appConfiguration, String[] extendedCommandLineArgs) throws Exception
+	public static AutoxSession startInteractive(ContentStream appConfiguration, String[] extendedCommandLineArgs) throws Exception
 	{
-		return start(appConfiguration, extendedCommandLineArgs, new AutomationEventManager());
+		return startInteractive(appConfiguration, extendedCommandLineArgs, new AutomationEventManager());
 	}
 	
 	/**
-	 * Starts a new session, attaching the given automation event manager.
+	 * Starts an interactive session with a custom event manager.
 	 */
-	public static AutoxSession start(ContentStream appConfiguration, String[] extendedCommandLineArgs, AutomationEventManager automationEventManager) throws Exception
+	public static AutoxSession startInteractive(ContentStream appConfiguration, String[] extendedCommandLineArgs,
+			AutomationEventManager automationEventManager) throws Exception
 	{
-		return new AutoxSession(createContext(appConfiguration, extendedCommandLineArgs, automationEventManager));
+		return new AutoxSession(InteractiveContextWrapper.create(appConfiguration, extendedCommandLineArgs, automationEventManager));
 	}
 	
 	/**
-	 * Creates and wires a new {@link AutomationContext} for a session. Used by
-	 * {@link #start} and {@link AutoxDebugSession}.
+	 * Starts a normal / CLI session (plugin pool; no interactive APIs).
+	 */
+	public static AutoxSession start(ContentStream appConfiguration, String[] extendedCommandLineArgs,
+			AutomationEventManager automationEventManager) throws Exception
+	{
+		return new AutoxSession(new DefaultContextWrapper(
+				createContext(appConfiguration, extendedCommandLineArgs, automationEventManager)));
+	}
+	
+	/**
+	 * Creates and wires a new {@link AutomationContext} for a session.
 	 */
 	protected static AutomationContext createContext(ContentStream appConfiguration, String[] extendedCommandLineArgs,
 			AutomationEventManager automationEventManager) throws Exception
@@ -159,28 +166,48 @@ public class AutoxSession implements AutoCloseable
 		}
 	}
 	
+	void ensureInteractive()
+	{
+		if(!contextWrapper.isInteractive())
+		{
+			throw new InvalidStateException(
+					"This operation is only available on an interactive AutoxSession (use startInteractive)");
+		}
+	}
+	
 	public AutomationContext getAutomationContext()
 	{
-		return context;
+		ensureOpen();
+		return contextWrapper.execute(ctx -> ctx);
 	}
 	
 	/**
-	 * Returns the live plugin session for the given plugin type (same path steps use).
-	 * Must be called from an execution thread (e.g. during {@link #runFunction} /
-	 * {@link #executeSteps}, or another executor context).
+	 * Returns a handle that runs plugin-session work on the interactive live-executor thread.
+	 * Interactive sessions only.
 	 *
 	 * @param pluginType plugin class (e.g. PlaywrightPlugin.class)
-	 * @return active plugin session for the current execution thread
 	 */
-	public <S extends IPluginSession> S getPluginSession(Class<? extends IPlugin<?, S>> pluginType)
+	public <S extends IPluginSession> IPluginSessionHandle<S> getPluginSession(Class<? extends IPlugin<?, S>> pluginType)
 	{
 		ensureOpen();
-		return context.getExecutionContextManager().getPluginSession(pluginType);
+		ensureInteractive();
+		
+		if(pluginType == null)
+		{
+			throw new InvalidArgumentException("Plugin type cannot be null");
+		}
+		
+		return new PluginSessionHandle<>(this, pluginType);
 	}
 	
 	public boolean isClosed()
 	{
 		return closed;
+	}
+	
+	public boolean isInteractive()
+	{
+		return contextWrapper.isInteractive();
 	}
 	
 	/**
@@ -196,7 +223,11 @@ public class AutoxSession implements AutoCloseable
 			return;
 		}
 		
-		AutomationFileLoader.loadTestSuites(context, true);
+		contextWrapper.execute(ctx ->
+		{
+			AutomationFileLoader.loadTestSuites(ctx, true);
+			return null;
+		});
 		testSuiteFilesLoaded = true;
 	}
 	
@@ -213,14 +244,12 @@ public class AutoxSession implements AutoCloseable
 			throw new InvalidArgumentException("Content stream cannot be null");
 		}
 		
-		Set<String> errors = AutomationFileLoader.loadTestXml(content, true);
+		Set<String> errors = contextWrapper.execute(ctx -> AutomationFileLoader.loadTestXml(content, true));
 		throwIfLoadErrors(content.getSourceName(), errors);
 	}
 	
 	/**
-	 * Parses and validates dynamic step XML without executing it. Checks step and
-	 * attribute names, required parameters, and related structure. Does not run steps,
-	 * and does not register functions, prefix expressions, or UI locators from the snippet.
+	 * Parses and validates dynamic step XML without executing it.
 	 *
 	 * @param stepXml step XML snippet (same form as {@link #executeSteps})
 	 */
@@ -233,56 +262,61 @@ public class AutoxSession implements AutoCloseable
 			throw new InvalidArgumentException("Steps XML cannot be empty");
 		}
 		
-		InteractiveXmlSupport.parseSteps(context, stepXml);
+		contextWrapper.execute(ctx ->
+		{
+			InteractiveXmlSupport.parseSteps(ctx, stepXml);
+			return null;
+		});
 	}
 	
 	/**
-	 * Parses and executes dynamic step XML (Mode 2). Locations use a generated
-	 * {@code interactive-steps-N.xml} name (no caller source name). Also applies any
-	 * functions / custom prefix expressions / UI locators present in the snippet.
+	 * Parses and executes dynamic step XML under the live interactive executor.
+	 * Interactive sessions only.
 	 */
 	public void executeSteps(String stepXml)
 	{
 		ensureOpen();
+		ensureInteractive();
 		
 		if(StringUtils.isBlank(stepXml))
 		{
 			throw new InvalidArgumentException("Steps XML cannot be empty");
 		}
 		
-		File dynamicSource = InteractiveXmlSupport.nextDynamicSourceFile();
-		StepHolder stepHolder = InteractiveXmlSupport.parseSteps(context, stepXml);
-		// Align locations to one dynamic source name (parse already used a generated name)
-		stepHolder.updateLocations(dynamicSource, 1);
-		boolean reloadingDone = InteractiveXmlSupport.applyReloads(context, stepHolder, null);
-		
-		if(CollectionUtils.isEmpty(stepHolder.getSteps()))
+		contextWrapper.execute(ctx ->
 		{
-			if(reloadingDone)
+			File dynamicSource = InteractiveXmlSupport.nextDynamicSourceFile();
+			StepHolder stepHolder = InteractiveXmlSupport.parseSteps(ctx, stepXml);
+			stepHolder.updateLocations(dynamicSource, 1);
+			boolean reloadingDone = InteractiveXmlSupport.applyReloads(ctx, stepHolder, null);
+			
+			if(CollectionUtils.isEmpty(stepHolder.getSteps()))
 			{
-				return;
+				if(reloadingDone)
+				{
+					return null;
+				}
+				
+				throw new InvalidArgumentException("No steps found to execute");
 			}
 			
-			throw new InvalidArgumentException("No steps found to execute");
-		}
-		
-		InteractiveStepsExecutor executor = new InteractiveStepsExecutor(stepHolder.getSteps());
-		executor.executeSteps();
-		
-		TestStatus status = executor.getStatus();
-		
-		if(status != null && status.isErrored())
-		{
-			throw new InvalidStateException("executeSteps ended with status {}: {}",
-					status, executor.getStatusMessage());
-		}
+			try
+			{
+				ctx.getStepsExecutor().execute(stepHolder.getSteps(), null, null);
+			}catch(RuntimeException ex)
+			{
+				throw ex;
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("executeSteps failed: {}", ex.getMessage(), ex);
+			}
+			
+			return null;
+		});
 	}
 	
 	/**
-	 * Runs a loaded global function with no parameters.
-	 *
-	 * @param name global function name
-	 * @return function return value, or {@code null} if the function does not return
+	 * Runs a loaded global function with no parameters. Interactive sessions only.
 	 */
 	public Object runFunction(String name)
 	{
@@ -290,43 +324,53 @@ public class AutoxSession implements AutoCloseable
 	}
 	
 	/**
-	 * Runs a loaded global function. Multiple calls without {@link #close()} reuse the same
-	 * session-owned plugins/browsers (Phase 1 ownership). Per-invocation execution attributes
-	 * are not automatically shared across calls; use {@link AutomationContext#setGlobalAttribute}
-	 * when cross-function attribute sharing is required.
-	 *
-	 * @param name global function name
-	 * @param params function parameters (may be {@code null})
-	 * @return function return value, or {@code null} if the function does not return
+	 * Runs a loaded global function under the live interactive executor (same browser across calls).
+	 * Interactive sessions only.
 	 */
 	public Object runFunction(String name, Map<String, Object> params)
 	{
 		ensureOpen();
+		ensureInteractive();
 		
-		Function function = context.getGlobalFunction(name);
-		
-		if(function == null)
+		return contextWrapper.execute(ctx ->
 		{
-			throw new InvalidArgumentException("No function found with specified name: {}", name);
-		}
-		
-		FunctionExecutor executor = new FunctionExecutor(function, params);
-		Object result = executor.executeFunction();
-		
-		TestStatus status = executor.getStatus();
-		
-		if(status != null && status.isErrored())
-		{
-			throw new InvalidStateException("Function '{}' ended with status {}: {}",
-					name, status, executor.getStatusMessage());
-		}
-		
-		return result;
+			Function function = ctx.getGlobalFunction(name);
+			
+			if(function == null)
+			{
+				throw new InvalidArgumentException("No function found with specified name: {}", name);
+			}
+			
+			FunctionRef funcRef = new FunctionRef(function.getName(), FUNCTION_RETURN_ATTR);
+			funcRef.setLocation(function.getLocation(), function.getLineNumber());
+			
+			if(params != null)
+			{
+				for(Map.Entry<String, Object> entry : params.entrySet())
+				{
+					funcRef.addParam(new FunctionParam(entry.getKey(), entry.getValue()));
+				}
+			}
+			
+			try
+			{
+				ctx.getStepsExecutor().execute(Arrays.asList(funcRef), null, null);
+			}catch(RuntimeException ex)
+			{
+				throw ex;
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("Function '{}' failed: {}", name, ex.getMessage(), ex);
+			}
+			
+			Object result = ctx.getAttribute(FUNCTION_RETURN_ATTR);
+			ctx.removeAttribute(FUNCTION_RETURN_ATTR);
+			return result;
+		});
 	}
 	
 	/**
-	 * Closes session-owned resources via {@link AutomationContext#reset()}. Idempotent.
-	 * Does not call {@code System.exit}.
+	 * Closes session-owned resources. Idempotent. Does not call {@code System.exit}.
 	 */
 	@Override
 	public synchronized void close()
@@ -340,10 +384,10 @@ public class AutoxSession implements AutoCloseable
 		
 		try
 		{
-			context.reset();
+			contextWrapper.close();
 		}catch(Exception ex)
 		{
-			logger.warn("Error while resetting automation context", ex);
+			logger.warn("Error while closing context wrapper", ex);
 		}
 	}
 	
