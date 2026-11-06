@@ -42,6 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.common.JsonExprProcessor;
 import com.yukthitech.autox.common.PropertyAccessor;
 import com.yukthitech.autox.common.ResourceNotFoundException;
 import com.yukthitech.autox.common.ResourceNotFoundException.ResourceType;
@@ -802,11 +803,11 @@ public class DefaultPrefixExpressions
 			//if no further conversion is required, use JEL to convert to final object
 			if(exprType == null && !textResExpected)
 			{
-				return IAutomationConstants.JSON_EXPR_ENGINE.processJsonAsObject(data, context);
+				return JsonExprProcessor.processJsonAsObject(data, context);
 			}
 				
 			//if further conversion is required, then generate json string using JEL 
-			data = IAutomationConstants.JSON_EXPR_ENGINE.processJson(data, context);
+			data = JsonExprProcessor.processJson(data, context);
 		}
 
 		//if input stream has to be loaded as simple text, simply return the current data string

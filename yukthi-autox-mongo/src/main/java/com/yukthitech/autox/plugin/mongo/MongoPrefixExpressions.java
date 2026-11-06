@@ -18,7 +18,7 @@ package com.yukthitech.autox.plugin.mongo;
 import java.util.Map;
 
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.common.JsonExprProcessor;
 import com.yukthitech.autox.context.ContextMap;
 import com.yukthitech.autox.prefix.PrefixEpression;
 import com.yukthitech.autox.prefix.PrefixExprParam;
@@ -55,7 +55,7 @@ public class MongoPrefixExpressions
 				if("true".equalsIgnoreCase(parserContext.getParameter("jel")))
 				{
 					Map<String, Object> context = new ContextMap(parserContext.getAutomationContext());
-					query = IAutomationConstants.JSON_EXPR_ENGINE.processJsonAsObject(expression, context);
+					query = JsonExprProcessor.processJsonAsObject(expression, context);
 				}
 				
 				return MongoQueryUtils.execute(parserContext.getAutomationContext(), parserContext.getParameter("resource"), query, replaceExpressions);

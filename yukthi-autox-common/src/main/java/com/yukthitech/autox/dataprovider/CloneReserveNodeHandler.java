@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Locator;
 
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.common.JsonExprProcessor;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.prefix.PrefixExpressionFactory;
 import com.yukthitech.ccg.xml.BeanNode;
@@ -214,7 +215,7 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 			}
 			
 			context.put("context", AutomationContext.getInstance());
-			bean = IAutomationConstants.JSON_EXPR_ENGINE.processObject(bean, context);
+			bean = JsonExprProcessor.processObject(bean, context);
 		}
 		
 		node.replaceBean(bean);

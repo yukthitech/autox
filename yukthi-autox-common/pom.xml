@@ -19,13 +19,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.yukthitech</groupId>
-			<artifactId>yukthi-json-expr</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-jxpath</groupId>
-					<artifactId>commons-jxpath</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>yukthi-transform</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.yukthitech</groupId>

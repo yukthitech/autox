@@ -222,7 +222,7 @@ public class CommonFreeMarkerMethods
 		
 		String templateStr = (template instanceof String) ? (String) template : IAutomationConstants.OBJECT_MAPPER.writeValueAsString(template);
 
-		String resJson = IAutomationConstants.JSON_EXPR_ENGINE.processJson(templateStr, localContext);
+		String resJson = JsonExprProcessor.processJson(templateStr, localContext);
 		return resJson;
 	}
 	
